@@ -14,7 +14,7 @@ export const createDrizzleConfig = (libPath: string, driver: DBType) => {
     `import type { Config } from "drizzle-kit";
 
 export default {
-  schema: "./${libPath}/db/schema.ts",
+  schema: "./${libPath}/db/schema",
   out: "./${libPath}/db/migrations",
   driver: "${driver}",
   //connection string
@@ -128,7 +128,7 @@ export const addScriptsToPackageJson = (libPath: string) => {
   // Update the scripts property
   packageJson.scripts = {
     ...packageJson.scripts,
-    migrate: `tsx /${libPath}/db/migrate.ts`,
+    migrate: `tsx ${libPath}/db/migrate.ts`,
     generate: "drizzle-kit generate:pg",
   };
 
