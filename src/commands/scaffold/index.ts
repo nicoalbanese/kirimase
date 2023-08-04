@@ -1,29 +1,66 @@
-export function scaffoldResource(tableName: string, fields: string[]) {
-  const properties = parseFields(fields);
-  createModel(tableName, properties);
-  createAPIRoutes(tableName, properties);
-  // Other scaffolding logic here (e.g., views, tests, etc.)
-}
+import { confirm, input, select } from "@inquirer/prompts";
+import { DBField } from "../../utils.js";
+import { scaffoldResource } from "./generators.js";
 
-function parseFields(fields: string[]) {
-  return fields.map((field) => {
-    const [name, type] = field.split(":");
-    return { name, type };
+async function askForTable() {
+  const tableName = await input({
+    message: "Please enter the table name (plural and in snake_case):",
+    validate: (input) =>
+      input.match(/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/)
+        ? true
+        : "Table name must be in snake_case if more than one word, and plural.",
   });
+  return tableName;
 }
 
-function createModel(
-  tableName: string,
-  properties: { name: string; type: string }[]
-) {
-  // Logic to create the model file
-  console.log(tableName, properties);
+async function askForFields() {
+  const fields: DBField[] = [];
+  let addMore = true;
+
+  while (addMore) {
+    const fieldName = await input({
+      message: "Please enter the field name (in snake_case):",
+      validate: (input) =>
+        input.match(/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/)
+          ? true
+          : "Field name must be in snake_case if more than one word.",
+    });
+
+    const fieldType = await select({
+      message: "Please select the type of this field:",
+      choices: [
+        { name: "string", value: "string" },
+        { name: "number", value: "number" },
+        { name: "boolean", value: "boolean" },
+        { name: "relation (references)", value: "references" },
+        { name: "timestamp", value: "timestamp" },
+        { name: "date", value: "date" },
+      ],
+    });
+
+    fields.push({ name: fieldName, type: fieldType });
+
+    const continueAdding = await confirm({
+      message: "Would you like to add another field?",
+      default: true,
+    });
+
+    addMore = continueAdding;
+  }
+
+  return fields;
 }
 
-function createAPIRoutes(
-  tableName: string,
-  properties: { name: string; type: string }[]
-) {
-  // Logic to create the controller file
-  console.log(tableName, properties);
+export async function buildSchema() {
+  const tableName = await askForTable();
+  const fields = await askForFields();
+
+  const schema = {
+    tableName,
+    fields,
+  };
+
+  console.log("Schema:", schema);
+  scaffoldResource(schema);
+  // You can now pass this schema object to the scaffoldResource function
 }

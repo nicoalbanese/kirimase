@@ -19,11 +19,7 @@ import {
   createMigrateTs,
   installDependencies,
   updateTsConfigTarget,
-} from "./templates.js";
-import { consola } from "consola";
-
-import fs from "fs";
-import path from "path";
+} from "./generators.js";
 
 export async function initProject() {
   let libPath = "";

@@ -145,23 +145,20 @@ export const installDependencies = async (
   preferredPackageManager: PMType
 ) => {
   const packages = {
-    pg: {
-      regular: "drizzle-orm postgres",
-      dev: "drizzle-kit tsx dotenv",
-    },
-    mysql: {
-      regular: "drizzle-orm mysql2",
-      dev: "drizzle-kit tsx dotenv",
-    },
-    sqlite: {
-      regular: "drizzle-orm better-sqlite3",
-      dev: "drizzle-kit tsx dotenv",
-    },
+    pg: "postgres",
+    mysql: "mysql2",
+    sqlite: "better-sqlite3",
   };
-  // install dotenv for all
-  switch (dbType) {
-    case "pg":
-      installPackages(packages.pg, preferredPackageManager);
+  // note this change hasnt been tested yet
+  const dbSpecificPackage = packages[dbType];
+  if (dbSpecificPackage) {
+    installPackages(
+      {
+        regular: `drizzle-orm drizzle-zod ${dbSpecificPackage}`,
+        dev: "drizzle-kit tsx dotenv",
+      },
+      preferredPackageManager
+    );
   }
 };
 
