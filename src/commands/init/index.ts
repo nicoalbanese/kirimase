@@ -53,8 +53,16 @@ export async function initProject() {
     choices: [
       { name: "Postgres", value: "pg" },
       new Separator(),
-      { name: "SQLite", value: "sqlite", disabled: true },
-      { name: "MySQL", value: "MySQL", disabled: true },
+      {
+        name: "SQLite",
+        value: "sqlite",
+        disabled: "SQLite is not yet supported",
+      },
+      {
+        name: "MySQL",
+        value: "MySQL",
+        disabled: "SQLite is not yet supported",
+      },
     ],
   })) as DBType;
 

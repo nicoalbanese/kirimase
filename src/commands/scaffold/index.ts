@@ -1,6 +1,7 @@
 import { confirm, input, select } from "@inquirer/prompts";
 import { DBField } from "../../utils.js";
 import { scaffoldResource } from "./generators.js";
+import { Choice } from "@inquirer/checkbox";
 
 async function askForTable() {
   const tableName = await input({
@@ -38,7 +39,20 @@ async function askForFields() {
       ],
     });
 
-    fields.push({ name: fieldName, type: fieldType });
+    if (fieldType === "references") {
+      const referencesTable = await input({
+        message:
+          "Which table does it reference? (in snake_case if more than one word)",
+      });
+
+      fields.push({
+        name: fieldName,
+        type: fieldType,
+        references: referencesTable,
+      });
+    } else {
+      fields.push({ name: fieldName, type: fieldType });
+    }
 
     const continueAdding = await confirm({
       message: "Would you like to add another field?",
@@ -51,13 +65,38 @@ async function askForFields() {
   return fields;
 }
 
+async function askForIndex(fields: DBField[]) {
+  const useIndex = await confirm({
+    message: "Would you like to set up an index?",
+    default: false,
+  });
+
+  if (useIndex) {
+    const fieldToIndex = await select({
+      message: "Which field would you like to index?",
+      choices: fields.map((field) => {
+        return {
+          name: field.name,
+          value: field.name,
+        } as Choice<string>;
+      }),
+    });
+    return fieldToIndex;
+  } else {
+    return null;
+  }
+}
+
 export async function buildSchema() {
   const tableName = await askForTable();
   const fields = await askForFields();
+  const indexedField = await askForIndex(fields);
+  console.log(indexedField);
 
   const schema = {
     tableName,
     fields,
+    index: indexedField,
   };
 
   console.log("Schema:", schema);

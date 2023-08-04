@@ -1,3 +1,5 @@
+import { DBField, DBType } from "../../utils.js";
+
 export function toCamelCase(input: string): string {
   return input
     .split("_")
@@ -10,8 +12,9 @@ export function toCamelCase(input: string): string {
 
 export function generateModelContent(
   tableName: string,
-  fields: { name: string; type: string }[],
-  driver: string
+  fields: DBField[],
+  driver: DBType,
+  index?: string
 ) {
   const config = {
     pg: {
@@ -21,16 +24,21 @@ export function generateModelContent(
         string: (name: string) => `varchar("${name}", { length: 256 })`,
         text: (name: string) => `text("${name}")`,
         number: (name: string) => `integer('${name}')`,
-        references: (name: string, referencedTable: string) =>
+        references: (name: string, referencedTable: string = "REFERENCE") =>
           `integer('${name}').references(() => ${referencedTable}.id)`,
         // Add more types here as needed
+        boolean: (name: string) => `boolean('${name}')`,
       },
     },
-    mysql2: {
+    mysql: {
       tableFunc: "mysqlTable",
       typeMappings: {
-        varchar: (name: string) => `varchar("${name}", { length: 256 })`,
+        id: (name: string) => `serial('${name}').primaryKey()`,
+        string: (name: string) => `varchar("${name}", { length: 256 })`,
         number: (name: string) => `int('${name}')`,
+        references: (name: string, referencedTable: string = "REFERENCE") =>
+          `int('${name}').references(() => ${toCamelCase(referencedTable)}.id)`,
+        boolean: (name: string) => `boolean('${name}')`,
       },
     },
     sqlite: {
@@ -53,24 +61,34 @@ export function generateModelContent(
   const uniqueTypes = Array.from(new Set(usedTypes));
   const importStatement = `import {${uniqueTypes.join(
     ", "
-  )}} from 'drizzle-orm/${driver}';`;
+  )}} from 'drizzle-orm/${driver}-core';`;
 
   const schemaFields = fields
     .map(
       (field) =>
         `  ${toCamelCase(field.name)}: ${config.typeMappings[field.type](
           field.name,
-          tableName
+          field.references
         )}`
     )
     .join(",\n");
+
+  const indexFormatted = index
+    ? `, (${toCamelCase(tableName)}) => {
+  return {
+    ${toCamelCase(index)}Index: uniqueIndex('${index}_idx').on(${toCamelCase(
+        tableName
+      )}.${toCamelCase(index)}),
+  }
+}`
+    : "";
 
   const schema = `export const ${toCamelCase(tableName)} = ${
     config.tableFunc
   }('${tableName}', {
   id: ${config.typeMappings["id"]("id")},
 ${schemaFields}
-});`;
+}${indexFormatted});`;
 
   return `${importStatement}\n\n${schema}`;
 }

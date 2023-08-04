@@ -19,7 +19,7 @@ export function createFolder(relativePath: string) {
 
 export type DBType = "pg" | "mysql" | "sqlite";
 export type PMType = "npm" | "yarn" | "pnpm";
-export type DBField = { name: string; type: string };
+export type DBField = { name: string; type: string; references?: string };
 
 export function installPackages(
   packages: { regular: string; dev: string },
