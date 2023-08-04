@@ -171,3 +171,41 @@ export const createDotEnv = (databaseUrl?: string) => {
 
   createFile(".env", `DATABASE_URL=${dburl}`);
 };
+
+export function updateTsConfigTarget() {
+  // Define the path to the tsconfig.json file
+  const tsConfigPath = path.join(process.cwd(), "tsconfig.json");
+
+  // Read the file
+  fs.readFile(tsConfigPath, "utf8", (err, data) => {
+    if (err) {
+      console.error(
+        `An error occurred while reading the tsconfig.json file: ${err}`
+      );
+      return;
+    }
+
+    // Parse the content as JSON
+    const tsConfig = JSON.parse(data);
+
+    // Modify the target property
+    tsConfig.compilerOptions.target = "esnext";
+
+    // Convert the modified object back to a JSON string
+    const updatedContent = JSON.stringify(tsConfig, null, 2); // 2 spaces indentation
+
+    // Write the updated content back to the file
+    fs.writeFile(tsConfigPath, updatedContent, "utf8", (writeErr) => {
+      if (writeErr) {
+        console.error(
+          `An error occurred while writing the updated tsconfig.json file: ${writeErr}`
+        );
+        return;
+      }
+
+      consola.info(
+        "Updated tsconfig.json target to esnext to support Drizzle-Kit."
+      );
+    });
+  });
+}

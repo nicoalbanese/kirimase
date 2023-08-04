@@ -18,8 +18,12 @@ import {
   createInitSchema,
   createMigrateTs,
   installDependencies,
+  updateTsConfigTarget,
 } from "./templates.js";
 import { consola } from "consola";
+
+import fs from "fs";
+import path from "path";
 
 export async function initProject() {
   let libPath = "";
@@ -46,7 +50,6 @@ export async function initProject() {
     });
 
     createFolder(libPath);
-    consola.log("Creating lib folder");
   }
 
   const dbType = (await select({
@@ -71,6 +74,7 @@ export async function initProject() {
   createDrizzleConfig(libPath, dbType);
   addScriptsToPackageJson(libPath);
   createDotEnv(databaseUrl);
+  updateTsConfigTarget();
 
   const preferredPackageManager = (await select({
     message: "Please pick your preferred packaged manager",

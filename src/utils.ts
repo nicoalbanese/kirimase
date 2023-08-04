@@ -25,7 +25,7 @@ export function installPackages(
   pmType: PMType
 ) {
   const packagesListString = packages.regular.concat(" ").concat(packages.dev);
-  consola.info(`Installing packages: ${packagesListString}...`);
+  consola.start(`Installing packages: ${packagesListString}...`);
 
   exec(
     `${pmType} install -D ${packages.dev}
@@ -36,8 +36,8 @@ ${pmType} install ${packages.regular}`,
         return;
       }
 
-      consola.info(stdout);
-      consola.error(stderr);
+      if (stdout) consola.info(stdout);
+      if (stderr) consola.error(stderr);
 
       consola.success(`Packages installed: ${packagesListString}`);
     }
