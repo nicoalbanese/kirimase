@@ -162,8 +162,7 @@ export const installDependencies = async (
   // install dotenv for all
   switch (dbType) {
     case "pg":
-      installPackages(packages.pg.regular, preferredPackageManager, false);
-      installPackages(packages.pg.dev, preferredPackageManager, true);
+      installPackages(packages.pg, preferredPackageManager);
   }
 };
 

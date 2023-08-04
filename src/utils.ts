@@ -20,14 +20,15 @@ export type DBType = "pg" | "mysql" | "sqlite";
 export type PMType = "npm" | "yarn" | "pnpm";
 
 export function installPackages(
-  packages: string,
-  pmType: PMType,
-  dev: boolean = false
+  packages: { regular: string; dev: string },
+  pmType: PMType
 ) {
-  console.log(`Installing packages: ${packages}...`);
+  const packagesListString = packages.regular.concat(" ").concat(packages.dev);
+  console.log(`Installing packages: ${packagesListString}...`);
 
   exec(
-    `${pmType} install ${dev ? "-D" : ""} ${packages}`,
+    `${pmType} install -D ${packages.dev}
+${pmType} install ${packages.regular}`,
     (error, stdout, stderr) => {
       if (error) {
         console.error(`An error occurred: ${error}`);
@@ -37,7 +38,7 @@ export function installPackages(
       console.log(stdout);
       console.error(stderr);
 
-      console.log(`Packages installed: ${packages}`);
+      console.log(`Packages installed: ${packagesListString}`);
     }
   );
 }

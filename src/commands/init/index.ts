@@ -34,12 +34,14 @@ export async function initProject() {
     libPath = await input({
       message:
         "Where is your 'lib' directory located? (relative to root - eg. src/lib or lib )",
+      default: "src/lib",
     });
   } else {
     // create lib folder
     libPath = await input({
       message:
-        "Please specify the relative path where you would like to create the 'lib' directory within your project. (For example, you can enter 'src/lib' to create it inside the 'src' folder, or just 'lib' to create it at the root level.)",
+        "Please specify the relative path where you would like to create the 'lib' directory within your project.",
+      default: "src/lib",
     });
 
     createFolder(libPath);
@@ -58,6 +60,7 @@ export async function initProject() {
 
   const databaseUrl = await input({
     message: "What is the database url?",
+    default: "postgresql://postgres:postgres@localhost:5432/{DB_NAME}",
   });
 
   // create all the files here
