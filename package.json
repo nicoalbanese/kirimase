@@ -1,17 +1,22 @@
 {
   "name": "kirimase",
-  "version": "1.0.0",
-  "author": "albanese",
+  "version": "0.0.1",
   "description": "A Rails-like CLI for Nextjs and Drizzle ORM",
   "main": "index.js",
   "type": "module",
+  "bin": {
+    "kirimase": "./dist/index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
     "dev": "node dist/index.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "cli",
+    "nextjs"
+  ],
+  "author": "Nico Albanese",
   "license": "ISC",
   "dependencies": {
     "@inquirer/checkbox": "^1.3.6",
