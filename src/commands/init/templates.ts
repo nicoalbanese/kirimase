@@ -1,3 +1,4 @@
+import { consola } from "consola";
 import {
   type PMType,
   type DBType,
@@ -93,11 +94,9 @@ runMigrate().catch((err) => {
 };
 
 export const createInitSchema = (libPath: string, dbType: DBType) => {
-  console.log("path is ", libPath);
   switch (dbType) {
     case "pg":
       // create db/schema folder
-
       createFolder(`${libPath}/db/schema`);
 
       // create model in schema folder
@@ -138,7 +137,7 @@ export const addScriptsToPackageJson = (libPath: string) => {
   // Write the updated content back to package.json
   fs.writeFileSync(packageJsonPath, updatedPackageJsonData);
 
-  console.log("Scripts added to package.json");
+  consola.success("Scripts added to package.json");
 };
 
 export const installDependencies = async (

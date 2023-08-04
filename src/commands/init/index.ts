@@ -19,6 +19,7 @@ import {
   createMigrateTs,
   installDependencies,
 } from "./templates.js";
+import { consola } from "consola";
 
 export async function initProject() {
   let libPath = "";
@@ -45,7 +46,7 @@ export async function initProject() {
     });
 
     createFolder(libPath);
-    console.log("Creating lib folder");
+    consola.log("Creating lib folder");
   }
 
   const dbType = (await select({
@@ -79,6 +80,6 @@ export async function initProject() {
       { name: "PNPM", value: "pnpm" },
     ],
   })) as PMType;
-  console.log("installing dependencies with", preferredPackageManager);
+  // console.log("installing dependencies with", preferredPackageManager);
   installDependencies(dbType, preferredPackageManager);
 }
