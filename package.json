@@ -1,7 +1,8 @@
 {
   "name": "kirimase",
   "version": "1.0.0",
-  "description": "",
+  "author": "albanese",
+  "description": "A Rails-like CLI for Nextjs and Drizzle ORM",
   "main": "index.js",
   "type": "module",
   "scripts": {
