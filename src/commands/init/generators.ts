@@ -1,13 +1,8 @@
 import { consola } from "consola";
-import {
-  type PMType,
-  type DBType,
-  createFile,
-  createFolder,
-  installPackages,
-} from "../../utils.js";
+import { createFile, createFolder, installPackages } from "../../utils.js";
 import fs from "fs";
 import path from "path";
+import { DBType, PMType } from "../../types.js";
 
 export const createDrizzleConfig = (libPath: string, driver: DBType) => {
   createFile(

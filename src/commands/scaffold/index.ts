@@ -1,7 +1,7 @@
 import { confirm, input, select } from "@inquirer/prompts";
-import { DBField } from "../../utils.js";
 import { scaffoldResource } from "./generators.js";
 import { Choice } from "@inquirer/checkbox";
+import { DBField } from "../../types.js";
 
 async function askForTable() {
   const tableName = await input({

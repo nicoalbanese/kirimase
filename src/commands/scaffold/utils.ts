@@ -1,4 +1,4 @@
-import { DBField, DBType } from "../../utils.js";
+import { DBField, DBType } from "../../types.js";
 
 export function toCamelCase(input: string): string {
   return input

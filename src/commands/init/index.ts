@@ -9,7 +9,7 @@
 // 8. Add .env with database_url
 
 import { select, input, Separator } from "@inquirer/prompts";
-import { DBType, PMType, createFolder } from "../../utils.js";
+import { createConfigFile, createFolder } from "../../utils.js";
 import {
   addScriptsToPackageJson,
   createDotEnv,
@@ -20,6 +20,7 @@ import {
   installDependencies,
   updateTsConfigTarget,
 } from "./generators.js";
+import { DBType, PMType } from "../../types.js";
 
 export async function initProject() {
   let libPath = "";
@@ -81,7 +82,7 @@ export async function initProject() {
   updateTsConfigTarget();
 
   const preferredPackageManager = (await select({
-    message: "Please pick your preferred packaged manager",
+    message: "Please pick your preferred package manager",
     choices: [
       { name: "NPM", value: "npm" },
       { name: "Yarn", value: "yarn" },
@@ -89,5 +90,7 @@ export async function initProject() {
     ],
   })) as PMType;
   // console.log("installing dependencies with", preferredPackageManager);
+  createConfigFile({ driver: dbType, libPath, preferredPackageManager });
+
   installDependencies(dbType, preferredPackageManager);
 }

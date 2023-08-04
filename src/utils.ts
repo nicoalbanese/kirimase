@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import { consola } from "consola";
+import { Config, PMType } from "./types.js";
 
 export const delay = (ms = 2000) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -16,10 +17,6 @@ export function createFolder(relativePath: string) {
   fs.mkdirSync(fullPath, { recursive: true });
   consola.success(`Folder created at ${fullPath}`);
 }
-
-export type DBType = "pg" | "mysql" | "sqlite";
-export type PMType = "npm" | "yarn" | "pnpm";
-export type DBField = { name: string; type: string; references?: string };
 
 export function installPackages(
   packages: { regular: string; dev: string },
@@ -44,3 +41,21 @@ ${pmType} install ${packages.regular}`,
     }
   );
 }
+
+export const createConfigFile = (options: Config) => {
+  createFile("./kirimase.json", JSON.stringify(options));
+};
+
+export const readConfigFile = () => {
+  // Define the path to package.json
+  const configPath = path.join(process.cwd(), "kirimase.json");
+
+  // Read package.json
+  const configJsonData = fs.readFileSync(configPath, "utf-8");
+
+  // Parse package.json content
+  let config = JSON.parse(configJsonData);
+
+  // Update the scripts property
+  return config;
+};
