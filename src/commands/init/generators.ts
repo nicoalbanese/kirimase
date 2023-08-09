@@ -68,7 +68,7 @@ const runMigrate = async () => {
 
   const end = Date.now();
 
-  console.log("✅ Migrations completed in ", end - start, "ms");
+  console.log("✅ Migrations completed in", end - start, "ms");
 
   process.exit(0);
 };
@@ -92,7 +92,7 @@ export const createInitSchema = (libPath: string, dbType: DBType) => {
   switch (dbType) {
     case "pg":
       // create db/schema folder
-      createFolder(`${libPath}/db/schema`);
+      // createFolder(`${libPath}/db/schema`);
 
       // create model in schema folder
       createFile(
@@ -149,7 +149,7 @@ export const installDependencies = async (
   if (dbSpecificPackage) {
     installPackages(
       {
-        regular: `drizzle-orm drizzle-zod ${dbSpecificPackage}`,
+        regular: `drizzle-orm drizzle-zod zod ${dbSpecificPackage}`,
         dev: "drizzle-kit tsx dotenv",
       },
       preferredPackageManager

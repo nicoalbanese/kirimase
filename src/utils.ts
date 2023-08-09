@@ -8,7 +8,17 @@ export const delay = (ms = 2000) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 export function createFile(filePath: string, content: string) {
-  fs.writeFileSync(path.resolve(filePath), content);
+  const resolvedPath = path.resolve(filePath);
+  const dirName = path.dirname(resolvedPath);
+
+  // Check if the directory exists
+  if (!fs.existsSync(dirName)) {
+    // If not, create the directory and any nested directories that might be needed
+    fs.mkdirSync(dirName, { recursive: true });
+    consola.success(`Directory ${dirName} created.`);
+  }
+
+  fs.writeFileSync(resolvedPath, content);
   consola.success(`File created at ${filePath}`);
 }
 

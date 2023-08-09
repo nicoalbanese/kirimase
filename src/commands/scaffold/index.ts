@@ -1,7 +1,14 @@
 import { confirm, input, select } from "@inquirer/prompts";
-import { scaffoldResource } from "./generators.js";
 import { Choice } from "@inquirer/checkbox";
 import { DBField } from "../../types.js";
+import { consola } from "consola";
+import { scaffoldResource } from "./generatorRouter.js";
+
+function provideInstructions() {
+  consola.info(
+    "Use Kirimase scaffold to quickly generate your Model (drizzle-schema), View (React components), and Controllers (API Routes)"
+  );
+}
 
 async function askForTable() {
   const tableName = await input({
@@ -88,6 +95,7 @@ async function askForIndex(fields: DBField[]) {
 }
 
 export async function buildSchema() {
+  provideInstructions();
   const tableName = await askForTable();
   const fields = await askForFields();
   const indexedField = await askForIndex(fields);
