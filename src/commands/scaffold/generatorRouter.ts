@@ -1,37 +1,37 @@
-import { consola } from "consola";
 import { createFile, createFolder } from "../../utils.js";
-import { DBField } from "../../types.js";
+import { DBField, ScaffoldSchema } from "../../types.js";
 import { generateModelContent } from "./model/generators.js";
-import { generateAPIRoute } from "./controller/generators.js";
+import { generateAPIRoute as generateAPIRouteContent } from "./controller/generators.js";
 import { snakeToKebab, toCamelCase } from "./utils.js";
+import { createViewsAndComponents } from "./views/index.js";
 
-export function scaffoldResource(schema: {
-  tableName: string;
-  fields: DBField[];
-  index?: string;
-}) {
-  const { tableName, fields, index } = schema;
+// move createfile logic to the index of each file
 
-  createModel(tableName, fields, index);
-  createAPIRoutes(tableName, fields);
-  // createViews
+export function scaffoldResource(schema: ScaffoldSchema) {
+  createModel(schema);
+  createAPIRoutes(schema);
+  createViews(schema);
   // Other scaffolding logic here (e.g., views, tests, etc.)
 }
 
-function createModel(tableName: string, fields: DBField[], index?: string) {
+function createModel(schema: ScaffoldSchema) {
+  const { tableName, fields, index } = schema;
+
   createFile(
     `src/lib/db/schema/${snakeToKebab(tableName)}.ts`,
     generateModelContent(tableName, fields, "pg", index)
   );
-  consola.success("Model created successfully!");
 }
 
-function createAPIRoutes(tableName: string, fields: DBField[]) {
-  // Logic to create the controller file
-  // createFolder(`src/app/api/${toCamelCase(tableName)}`);
+function createAPIRoutes(schema: ScaffoldSchema) {
+  const { tableName, fields } = schema;
+
   createFile(
     `src/app/api/${toCamelCase(tableName)}/route.ts`,
-    generateAPIRoute(tableName, fields)
+    generateAPIRouteContent(tableName, fields)
   );
-  consola.success("API route created successfully!");
+}
+
+function createViews(schema: ScaffoldSchema) {
+  createViewsAndComponents(schema);
 }

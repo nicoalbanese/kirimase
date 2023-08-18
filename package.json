@@ -23,7 +23,8 @@
     "@inquirer/prompts": "^3.0.1",
     "commander": "^11.0.0",
     "consola": "^3.2.3",
-    "figlet": "^1.6.0"
+    "figlet": "^1.6.0",
+    "handlebars": "^4.7.8"
   },
   "devDependencies": {
     "@types/node": "^20.4.5",

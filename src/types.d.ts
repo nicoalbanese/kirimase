@@ -7,3 +7,9 @@ export type Config = {
   driver: DBType;
   preferredPackageManager: PMType;
 };
+
+export type ScaffoldSchema = {
+  tableName: string;
+  fields: DBField[];
+  index?: string;
+};
