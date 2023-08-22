@@ -2,7 +2,7 @@
 
 import { Command } from "commander";
 import { initProject } from "./commands/init/index.js";
-import { buildSchema } from "./commands/scaffold/index.js";
+import { buildSchema } from "./commands/generate/index.js";
 
 const program = new Command();
 program.name("kirimase").description("Kirimase CLI").version("0.0.1");
@@ -12,9 +12,14 @@ program
   .description("init drizzle config with desired db type (pg, mysql, sqlite))")
   .action(initProject);
 
+// program
+//   .command("scaffold")
+//   .description("Scaffold a new resource")
+//   .action(buildSchema);
+
 program
-  .command("scaffold")
-  .description("Scaffold a new resource")
+  .command("generate")
+  .description("Generate a new resource")
   .action(buildSchema);
 
 program.parse(process.argv);
