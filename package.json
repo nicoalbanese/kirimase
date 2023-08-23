@@ -10,7 +10,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
-    "dev": "node dist/index.js"
+    "dev2": "node dist/index.js",
+    "dev": "tsc -w"
   },
   "keywords": [
     "cli",

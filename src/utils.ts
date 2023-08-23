@@ -69,3 +69,7 @@ export const readConfigFile = () => {
   // Update the scripts property
   return config;
 };
+
+export const wrapInParenthesis = (string: string) => {
+  return "(" + string + ")";
+};

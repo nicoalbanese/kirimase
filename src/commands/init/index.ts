@@ -9,7 +9,7 @@
 // 8. Add .env with database_url
 
 import { select, input, Separator } from "@inquirer/prompts";
-import { createConfigFile, createFolder } from "../../utils.js";
+import { createConfigFile, wrapInParenthesis } from "../../utils.js";
 import {
   addScriptsToPackageJson,
   createDotEnv,
@@ -20,34 +20,19 @@ import {
   installDependencies,
   updateTsConfigTarget,
 } from "./generators.js";
-import { DBType, PMType } from "../../types.js";
+import { DBProvider, DBType, PMType } from "../../types.js";
+import { DBProviders } from "./utils.js";
 
 export async function initProject() {
   let libPath = "";
-  const libExists = await select({
-    message: "Do you have a 'lib' folder?",
+  const srcExists = await select({
+    message: "Are you using a 'src' folder?",
     choices: [
       { name: "Yes", value: true },
       { name: "No", value: false },
     ],
   });
-  if (libExists) {
-    // ask for location
-    libPath = await input({
-      message:
-        "Where is your 'lib' directory located? (relative to root - eg. src/lib or lib )",
-      default: "src/lib",
-    });
-  } else {
-    // create lib folder
-    libPath = await input({
-      message:
-        "Please specify the relative path where you would like to create the 'lib' directory within your project.",
-      default: "src/lib",
-    });
-
-    createFolder(libPath);
-  }
+  srcExists ? (libPath = "src/lib") : (libPath = "lib");
 
   const dbType = (await select({
     message: "Please choose your DB type",
@@ -57,15 +42,20 @@ export async function initProject() {
       {
         name: "SQLite",
         value: "sqlite",
-        disabled: "SQLite is not yet supported",
+        disabled: wrapInParenthesis("SQLite is not yet supported"),
       },
       {
         name: "MySQL",
         value: "MySQL",
-        disabled: "SQLite is not yet supported",
+        disabled: wrapInParenthesis("MySQL is not yet supported"),
       },
     ],
   })) as DBType;
+
+  const dbProvider = (await select({
+    message: "Please choose your DB Provider",
+    choices: DBProviders[dbType],
+  })) as DBProvider;
 
   const databaseUrl = await input({
     message: "What is the database url?",
@@ -74,10 +64,14 @@ export async function initProject() {
 
   // create all the files here
   createInitSchema(libPath, dbType);
-  createIndexTs(libPath, dbType);
-  createMigrateTs(libPath, dbType);
+
+  // dependent on dbtype and driver, create
+  createIndexTs(libPath, dbType, dbProvider);
+  createMigrateTs(libPath, dbType, dbProvider);
   createDrizzleConfig(libPath, dbType);
-  addScriptsToPackageJson(libPath);
+
+  // perhaps using push rather than migrate for sqlite?
+  addScriptsToPackageJson(libPath, dbType);
   createDotEnv(databaseUrl);
   updateTsConfigTarget();
 
@@ -92,5 +86,5 @@ export async function initProject() {
   // console.log("installing dependencies with", preferredPackageManager);
   createConfigFile({ driver: dbType, libPath, preferredPackageManager });
 
-  installDependencies(dbType, preferredPackageManager);
+  installDependencies(dbProvider, preferredPackageManager);
 }
