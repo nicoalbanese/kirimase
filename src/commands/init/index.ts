@@ -96,7 +96,12 @@ export async function initProject() {
     ],
   })) as PMType;
   // console.log("installing dependencies with", preferredPackageManager);
-  createConfigFile({ driver: dbType, libPath, preferredPackageManager });
+  createConfigFile({
+    driver: dbType,
+    hasSrc: srcExists,
+    provider: dbProvider,
+    preferredPackageManager,
+  });
 
   installDependencies(dbProvider, preferredPackageManager);
 }

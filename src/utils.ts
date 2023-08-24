@@ -68,21 +68,21 @@ ${pmType} install ${packages.regular}`,
 }
 
 export const createConfigFile = (options: Config) => {
-  createFile("./kirimase.json", JSON.stringify(options));
+  createFile("./kirimase.config.json", JSON.stringify(options));
 };
 
 export const readConfigFile = () => {
   // Define the path to package.json
-  const configPath = path.join(process.cwd(), "kirimase.json");
+  const configPath = path.join(process.cwd(), "kirimase.config.json");
 
   // Read package.json
   const configJsonData = fs.readFileSync(configPath, "utf-8");
 
   // Parse package.json content
-  let config = JSON.parse(configJsonData);
+  let config: Config = JSON.parse(configJsonData);
 
   // Update the scripts property
-  return config;
+  return config as Config;
 };
 
 export const wrapInParenthesis = (string: string) => {

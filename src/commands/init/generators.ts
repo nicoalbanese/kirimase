@@ -71,7 +71,7 @@ import "dotenv/config";
 
 neonConfig.fetchConnectionCache = true;
  
-const sql = neon(process.env.DRIZZLE_DATABASE_URL!);
+const sql = neon(process.env.DATABASE_URL!);
 export const db = drizzle(sql);
 `;
       break;
@@ -196,7 +196,7 @@ import { neon, neonConfig } from '@neondatabase/serverless';
       connectionLogic = `
 neonConfig.fetchConnectionCache = true;
  
-const sql = neon(process.env.DRIZZLE_DATABASE_URL!);
+const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql);
 `;
       break;
@@ -352,7 +352,7 @@ export const users = sqliteTable("users", {
     default:
       break;
   }
-  createFile(`./${libPath}/db/schema/user.ts`, userSchema);
+  createFile(`./${libPath}/db/schema/users.ts`, userSchema);
 };
 
 export const addScriptsToPackageJson = (libPath: string, driver: DBType) => {
@@ -461,4 +461,9 @@ export function updateTsConfigTarget() {
       );
     });
   });
+}
+
+export function createQueriesAndMutationsFolders() {
+  // create users queries
+  // create users mutations
 }
