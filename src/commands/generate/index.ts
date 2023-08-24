@@ -41,14 +41,6 @@ async function askForFields() {
   let addMore = true;
 
   while (addMore) {
-    const fieldName = await input({
-      message: "Please enter the field name (in snake_case):",
-      validate: (input) =>
-        input.match(/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/)
-          ? true
-          : "Field name must be in snake_case if more than one word.",
-    });
-
     const fieldType = (await select({
       message: "Please select the type of this field:",
       choices: [
@@ -67,13 +59,29 @@ async function askForFields() {
           "Which table does it reference? (in snake_case if more than one word)",
       });
 
+      const fieldName = `${referencesTable.slice(0, -1)}_id`;
+
       fields.push({
         name: fieldName,
         type: fieldType,
         references: referencesTable,
+        notNull: true,
       });
     } else {
-      fields.push({ name: fieldName, type: fieldType });
+      const fieldName = await input({
+        message: "Please enter the field name (in snake_case):",
+        validate: (input) =>
+          input.match(/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/)
+            ? true
+            : "Field name must be in snake_case if more than one word.",
+      });
+
+      const notNull = await confirm({
+        message: "Is this field required?",
+        default: false,
+      });
+
+      fields.push({ name: fieldName.toLowerCase(), type: fieldType, notNull });
     }
 
     const continueAdding = await confirm({

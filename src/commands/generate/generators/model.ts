@@ -95,7 +95,7 @@ function generateModelContent(schema: Schema, dbType: DBType) {
         `  ${toCamelCase(field.name)}: ${config.typeMappings[field.type](
           field.name,
           field.references
-        )}`
+        )}${field.notNull ? ".notNull()" : ""}`
     )
     .join(",\n");
 
@@ -163,7 +163,7 @@ export const get${tableNameSingularCapitalised}s = async () => {
     relations.length > 0
       ? relations.map(
           (relation) =>
-            `.fullJoin(${
+            `.leftJoin(${
               relation.references
             }, eq(${tableNameCamelCase}.${toCamelCase(
               relation.name
@@ -180,7 +180,7 @@ export const get${tableNameSingularCapitalised}ById = async (id: number) => {
     relations.length > 0
       ? relations.map(
           (relation) =>
-            `.fullJoin(${
+            `.leftJoin(${
               relation.references
             }, eq(${tableNameCamelCase}.${toCamelCase(
               relation.name

@@ -1,5 +1,6 @@
 export function toCamelCase(input: string): string {
   return input
+    .toLowerCase()
     .split("_")
     .map((word, index) => {
       if (index === 0) return word; // Return the first word as is

@@ -24,7 +24,12 @@ export type PMType = "npm" | "yarn" | "pnpm";
 
 export type FieldType = "id" | "text" | "number" | "references" | "boolean";
 
-export type DBField = { name: string; type: FieldType; references?: string };
+export type DBField = {
+  name: string;
+  type: FieldType;
+  references?: string;
+  notNull?: boolean; // change to required later
+};
 
 export type Config = {
   hasSrc: boolean;
