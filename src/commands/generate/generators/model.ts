@@ -5,10 +5,18 @@ import { capitaliseForZodSchema, toCamelCase } from "../utils.js";
 
 export function scaffoldModel(schema: Schema, dbType: DBType, hasSrc: boolean) {
   const { tableName } = schema;
-  const path = `${hasSrc ? "src/" : ""}lib/db/schema/${toCamelCase(
+
+  // create model file
+  const modelPath = `${hasSrc ? "src/" : ""}lib/db/schema/${toCamelCase(
     tableName
   )}.ts`;
-  createFile(path, generateModelContent(schema, dbType));
+  createFile(modelPath, generateModelContent(schema, dbType));
+
+  // create queryFile
+  const queryPath = `${hasSrc ? "src/" : ""}lib/api/${toCamelCase(
+    tableName
+  )}/queries.ts`;
+  createFile(queryPath, generateQueryContent(schema));
 }
 
 function generateModelContent(schema: Schema, dbType: DBType) {
@@ -115,3 +123,32 @@ export type ${tableNameSingularCapitalised} = z.infer<typeof select${tableNameSi
 
   return `${importStatement}\n\n${schemaContent}`;
 }
+
+// create queries and mutations folders
+
+const generateQueryContent = (schema: Schema) => {
+  const { tableName } = schema;
+  const tableNameCamelCase = toCamelCase(tableName);
+  const tableNameSingularCapitalised =
+    capitaliseForZodSchema(tableNameCamelCase);
+  const tableNameFirstChar = tableNameCamelCase.charAt(0);
+  const tableNameSingular = tableNameCamelCase.slice(0, -1);
+
+  const template = `import { db } from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { select${tableNameSingularCapitalised}Schema, ${tableNameCamelCase} } from "@/lib/db/schema/${tableNameCamelCase}";
+
+
+export const get${tableNameSingularCapitalised}s = async () => {
+  const ${tableNameFirstChar} = await db.select().from(${tableNameCamelCase});
+  return { ${tableNameCamelCase}: ${tableNameFirstChar} };
+};
+
+export const get${tableNameSingularCapitalised}ById = async (id: number) => {
+  const { id: ${tableNameSingular}Id } = select${tableNameSingularCapitalised}Schema.parse({ id });
+  const [${tableNameFirstChar}] = await db.select().from(${tableNameCamelCase}).where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id));
+  return { ${tableNameSingular}: ${tableNameFirstChar} };
+};
+`;
+  return template;
+};
