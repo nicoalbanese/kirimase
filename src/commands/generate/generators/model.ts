@@ -30,6 +30,11 @@ function generateModelContent(schema: Schema, dbType: DBType) {
   const tableNameCamelCase = toCamelCase(tableName);
   const tableNameSingularCapitalised =
     capitaliseForZodSchema(tableNameCamelCase);
+  const tableNameSingular = tableNameCamelCase.slice(0, -1);
+  const relations = schema.fields.filter(
+    (field) => field.type === "references"
+  );
+
   const config = {
     pg: {
       tableFunc: "pgTable",
@@ -119,12 +124,23 @@ ${schemaFields}
 }${indexFormatted});\n 
 
 // Schema for inserting ${tableNameCamelCase} - can be used to validate API requests
-export const insert${tableNameSingularCapitalised}Schema = createInsertSchema(${tableNameCamelCase});
+export const insert${tableNameSingularCapitalised}Schema = createInsertSchema(${tableNameCamelCase}${
+    relations.length > 0
+      ? `, {\n  ${relations
+          .map((relation) => `${toCamelCase(relation.name)}: z.coerce.number()`)
+          .join(",\n")}\n}`
+      : ""
+  });
 export type New${tableNameSingularCapitalised} = z.infer<typeof insert${tableNameSingularCapitalised}Schema>;
 
 // Schema for selecting ${tableNameCamelCase} - can be used to validate API responses
-export const select${tableNameSingularCapitalised}Schema = createSelectSchema(${tableNameCamelCase});
+export const select${tableNameSingularCapitalised}Schema = createSelectSchema(${tableNameCamelCase}, { 
+  id: z.coerce.number()
+});
 export type ${tableNameSingularCapitalised} = z.infer<typeof select${tableNameSingularCapitalised}Schema>;
+
+export const ${tableNameSingular}IdSchema = select${tableNameSingularCapitalised}Schema.pick({ id: true });
+
 `;
 
   return `${importStatement}\n\n${schemaContent}`;
