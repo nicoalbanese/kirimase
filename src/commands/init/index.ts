@@ -38,16 +38,16 @@ export async function initProject() {
     message: "Please choose your DB type",
     choices: [
       { name: "Postgres", value: "pg" },
-      new Separator(),
-      {
-        name: "SQLite",
-        value: "sqlite",
-        disabled: wrapInParenthesis("SQLite is not yet supported"),
-      },
+      // new Separator(),
       {
         name: "MySQL",
         value: "MySQL",
-        disabled: wrapInParenthesis("MySQL is not yet supported"),
+        // disabled: wrapInParenthesis("MySQL is not yet supported"),
+      },
+      {
+        name: "SQLite",
+        value: "sqlite",
+        // disabled: wrapInParenthesis("SQLite is not yet supported"),
       },
     ],
   })) as DBType;
@@ -57,10 +57,19 @@ export async function initProject() {
     choices: DBProviders[dbType],
   })) as DBProvider;
 
-  const databaseUrl = await input({
-    message: "What is the database url?",
-    default: "postgresql://postgres:postgres@localhost:5432/{DB_NAME}",
-  });
+  let databaseUrl = "";
+
+  if (dbType === "sqlite") {
+    databaseUrl = "sqlite.db";
+  } else {
+    databaseUrl = await input({
+      message: "What is the database url?",
+      default:
+        dbType === "pg"
+          ? "postgresql://postgres:postgres@localhost:5432/{DB_NAME}"
+          : "mysql://root:root@localhost:3306/{DB_NAME}",
+    });
+  }
 
   // create all the files here
   createInitSchema(libPath, dbType);
@@ -68,7 +77,7 @@ export async function initProject() {
   // dependent on dbtype and driver, create
   createIndexTs(libPath, dbType, dbProvider);
   createMigrateTs(libPath, dbType, dbProvider);
-  createDrizzleConfig(libPath, dbType);
+  createDrizzleConfig(libPath, dbProvider);
 
   // perhaps using push rather than migrate for sqlite?
   addScriptsToPackageJson(libPath, dbType);

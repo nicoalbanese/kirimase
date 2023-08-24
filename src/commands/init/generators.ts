@@ -4,7 +4,21 @@ import fs from "fs";
 import path from "path";
 import { DBProvider, DBType, PMType } from "../../types.js";
 
-export const createDrizzleConfig = (libPath: string, driver: DBType) => {
+type ConfigDriver = "pg" | "turso" | "libsql" | "mysql" | "better-sqlite";
+
+const configDriverMappings = {
+  postgresjs: "pg",
+  "node-postgres": "pg",
+  "vercel-pg": "pg",
+  neon: "pg",
+  supabase: "pg",
+  aws: "pg",
+  planetscale: "mysql",
+  "mysql-2": "mysql",
+  "better-sqlite3": "better-sqlite",
+};
+
+export const createDrizzleConfig = (libPath: string, provider: DBProvider) => {
   createFile(
     "drizzle.config.ts",
     `import type { Config } from "drizzle-kit";
@@ -13,9 +27,9 @@ import "dotenv/config";
 export default {
   schema: "./${libPath}/db/schema",
   out: "./${libPath}/db/migrations",
-  driver: "${driver}",
+  driver: "${configDriverMappings[provider]}",
   dbCredentials: {
-    connectionString: process.env.DATABASE_URL!,
+    url: process.env.DATABASE_URL!,
   }
 } satisfies Config;`
   );
@@ -47,8 +61,7 @@ const pool = new Pool({
 export const db = drizzle(pool);`;
       break;
     case "neon":
-      indexTS = `
-import { neon, neonConfig } from '@neondatabase/serverless';
+      indexTS = `import { neon, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import "dotenv/config";
 
@@ -59,8 +72,7 @@ export const db = drizzle(sql);
 `;
       break;
     case "vercel-pg":
-      indexTS = `
-import { sql } from '@vercel/postgres';
+      indexTS = `import { sql } from '@vercel/postgres';
 import { drizzle } from 'drizzle-orm/vercel-postgres';
 import "dotenv/config";
  
@@ -68,8 +80,7 @@ export const db = drizzle(sql)
 `;
       break;
     case "supabase":
-      indexTS = `
-import { drizzle } from 'drizzle-orm/postgres-js'
+      indexTS = `import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import "dotenv/config";
  
@@ -79,8 +90,7 @@ export const db = drizzle(client);
 `;
       break;
     case "aws":
-      indexTS = `
-import { drizzle } from 'drizzle-orm/aws-data-api/pg';
+      indexTS = `import { drizzle } from 'drizzle-orm/aws-data-api/pg';
 import { RDSDataClient } from '@aws-sdk/client-rds-data';
 import { fromIni } from '@aws-sdk/credential-providers';
 import "dotenv/config";
@@ -99,8 +109,7 @@ export const db = drizzle(rdsClient, {
 `;
       break;
     case "planetscale":
-      indexTS = `
-import { drizzle } from "drizzle-orm/planetscale-serverless";
+      indexTS = `import { drizzle } from "drizzle-orm/planetscale-serverless";
 import { connect } from "@planetscale/database";
 import "dotenv/config";
  
@@ -113,8 +122,7 @@ export const db = drizzle(connection);
 `;
       break;
     case "mysql-2":
-      indexTS = `
-import { drizzle } from "drizzle-orm/mysql2";
+      indexTS = `import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import "dotenv/config";
  
@@ -123,8 +131,7 @@ const poolConnection = mysql.createPool(process.env.DATABASE_URL!);
 export const db = drizzle(poolConnection);
 `;
     case "better-sqlite3":
-      indexTS = `
-import { drizzle, BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
+      indexTS = `import { drizzle, BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
  
 const sqlite = new Database('sqlite.db');
@@ -362,6 +369,7 @@ export const addScriptsToPackageJson = (libPath: string, driver: DBType) => {
     migrate: `tsx ${libPath}/db/migrate.ts`,
     generate: `drizzle-kit generate:${driver}`,
     push: driver !== "pg" ? `drizzle-kit push:${driver}` : null,
+    studio: "drizzle-kit studio",
   };
   packageJson.scripts = {
     ...packageJson.scripts,
@@ -382,15 +390,18 @@ export const installDependencies = async (
   preferredPackageManager: PMType
 ) => {
   const packages: { [key in DBProvider]: { regular: string; dev: string } } = {
-    postgresjs: { regular: "postgres", dev: "" },
+    postgresjs: { regular: "postgres", dev: "pg" },
     "node-postgres": { regular: "pg", dev: "@types/pg" },
-    neon: { regular: "@neondatabase/serverless", dev: "" },
-    "vercel-pg": { regular: "@vercel/postgres", dev: "" },
-    supabase: { regular: "postgres", dev: "" },
+    neon: { regular: "@neondatabase/serverless", dev: "pg" },
+    "vercel-pg": { regular: "@vercel/postgres", dev: "pg" },
+    supabase: { regular: "postgres", dev: "pg" },
     aws: { regular: "", dev: "" }, // disabled
-    planetscale: { regular: "@planetscale/database", dev: "" },
+    planetscale: { regular: "@planetscale/database", dev: "mysql2" },
     "mysql-2": { regular: "mysql2", dev: "" },
-    "better-sqlite3": { regular: "better-sqlite3", dev: "" },
+    "better-sqlite3": {
+      regular: "better-sqlite3",
+      dev: "@types/better-sqlite3 @opentelemetry/api",
+    },
   };
   // note this change hasnt been tested yet
   const dbSpecificPackage = packages[dbType];
@@ -437,13 +448,13 @@ export function updateTsConfigTarget() {
     // Write the updated content back to the file
     fs.writeFile(tsConfigPath, updatedContent, "utf8", (writeErr) => {
       if (writeErr) {
-        console.error(
+        consola.error(
           `An error occurred while writing the updated tsconfig.json file: ${writeErr}`
         );
         return;
       }
 
-      consola.info(
+      consola.success(
         "Updated tsconfig.json target to esnext to support Drizzle-Kit."
       );
     });
