@@ -1,6 +1,6 @@
 import { confirm, input, select } from "@inquirer/prompts";
 import { Choice } from "@inquirer/checkbox";
-import { DBField } from "../../types.js";
+import { DBField, FieldType } from "../../types.js";
 import { consola } from "consola";
 import { scaffoldResource } from "./generatorRouter.js";
 
@@ -34,7 +34,7 @@ async function askForFields() {
           : "Field name must be in snake_case if more than one word.",
     });
 
-    const fieldType = await select({
+    const fieldType = (await select({
       message: "Please select the type of this field:",
       choices: [
         { name: "string", value: "string" },
@@ -44,7 +44,7 @@ async function askForFields() {
         { name: "timestamp", value: "timestamp" },
         { name: "date", value: "date" },
       ],
-    });
+    })) as FieldType;
 
     if (fieldType === "references") {
       const referencesTable = await input({

@@ -14,13 +14,17 @@ export type DBProvider =
   | "planetscale"
   | "mysql-2"
   | "better-sqlite3";
+
 export type DBProviderOptions = {
   pg: DBProviderItem[];
   mysql: DBProviderItem[];
   sqlite: DBProviderItem[];
 };
 export type PMType = "npm" | "yarn" | "pnpm";
-export type DBField = { name: string; type: string; references?: string };
+
+export type FieldType = "id" | "text" | "number" | "references" | "boolean";
+
+export type DBField = { name: string; type: FieldType; references?: string };
 
 export type Config = {
   hasSrc: boolean;

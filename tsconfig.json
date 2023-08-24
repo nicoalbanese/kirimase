@@ -3,6 +3,7 @@
     "outDir": "dist",
     "target": "ES2020",
     "module": "NodeNext",
+    // "strict": true,
     "sourceMap": true,
     "moduleResolution": "NodeNext"
   },

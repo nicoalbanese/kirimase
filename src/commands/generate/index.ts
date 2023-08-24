@@ -1,8 +1,11 @@
 import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { consola } from "consola";
-import { DBField } from "../../types.js";
+import { DBField, FieldType } from "../../types.js";
 import { Choice } from "@inquirer/checkbox";
-import { scaffoldResource } from "../scaffold/generatorRouter.js";
+// import { scaffoldResource } from "../scaffold/generatorRouter.js";
+import { scaffoldModel } from "./generators/model.js";
+import { scaffoldController } from "./generators/controller.js";
+import { readConfigFile } from "../../utils.js";
 
 function provideInstructions() {
   consola.info(
@@ -46,7 +49,7 @@ async function askForFields() {
           : "Field name must be in snake_case if more than one word.",
     });
 
-    const fieldType = await select({
+    const fieldType = (await select({
       message: "Please select the type of this field:",
       choices: [
         { name: "string", value: "string" },
@@ -56,7 +59,7 @@ async function askForFields() {
         { name: "timestamp", value: "timestamp" },
         { name: "date", value: "date" },
       ],
-    });
+    })) as FieldType;
 
     if (fieldType === "references") {
       const referencesTable = await input({
@@ -107,12 +110,13 @@ async function askForIndex(fields: DBField[]) {
 }
 
 export async function buildSchema() {
+  const { driver, hasSrc } = readConfigFile();
   provideInstructions();
   const resourceType = await askForResourceType();
   const tableName = await askForTable();
   const fields = await askForFields();
   const indexedField = await askForIndex(fields);
-  console.log(indexedField);
+  // console.log(indexedField);
 
   const schema = {
     tableName,
@@ -120,7 +124,10 @@ export async function buildSchema() {
     index: indexedField,
   };
 
-  console.log("Schema:", schema);
-  scaffoldResource(schema);
+  if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
+  if (resourceType.includes("controller")) scaffoldController(schema);
+  // if (resourceType.includes("views")) scaffoldModel()
+
+  // console.log("Schema:", schema);
   // You can now pass this schema object to the scaffoldResource function
 }
