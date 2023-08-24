@@ -1,3 +1,5 @@
+import { Schema } from "./types.js";
+
 export function toCamelCase(input: string): string {
   return input
     .toLowerCase()
@@ -16,3 +18,18 @@ export function snakeToKebab(snakeString: string): string {
 export function capitaliseForZodSchema(input: string): string {
   return input.charAt(0).toUpperCase() + input.slice(1, -1);
 }
+
+export const formatTableName = (tableName: string) => {
+  const tableNameCamelCase = toCamelCase(tableName);
+  const tableNameSingularCapitalised =
+    capitaliseForZodSchema(tableNameCamelCase);
+  const tableNameSingular = tableNameCamelCase.slice(0, -1);
+  const tableNameFirstChar = tableNameCamelCase.charAt(0);
+
+  return {
+    tableNameCamelCase,
+    tableNameSingular,
+    tableNameSingularCapitalised,
+    tableNameFirstChar,
+  };
+};

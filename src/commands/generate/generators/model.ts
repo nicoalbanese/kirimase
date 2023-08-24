@@ -1,7 +1,11 @@
 import { DBType } from "../../../types.js";
 import { createFile } from "../../../utils.js";
 import { Schema } from "../types.js";
-import { capitaliseForZodSchema, toCamelCase } from "../utils.js";
+import {
+  capitaliseForZodSchema,
+  formatTableName,
+  toCamelCase,
+} from "../utils.js";
 
 export function scaffoldModel(schema: Schema, dbType: DBType, hasSrc: boolean) {
   const { tableName } = schema;
@@ -27,10 +31,11 @@ export function scaffoldModel(schema: Schema, dbType: DBType, hasSrc: boolean) {
 
 function generateModelContent(schema: Schema, dbType: DBType) {
   const { index, fields, tableName } = schema;
-  const tableNameCamelCase = toCamelCase(tableName);
-  const tableNameSingularCapitalised =
-    capitaliseForZodSchema(tableNameCamelCase);
-  const tableNameSingular = tableNameCamelCase.slice(0, -1);
+  const {
+    tableNameCamelCase,
+    tableNameSingular,
+    tableNameSingularCapitalised,
+  } = formatTableName(tableName);
   const relations = schema.fields.filter(
     (field) => field.type === "references"
   );
@@ -150,11 +155,12 @@ export const ${tableNameSingular}IdSchema = select${tableNameSingularCapitalised
 
 const generateQueryContent = (schema: Schema) => {
   const { tableName } = schema;
-  const tableNameCamelCase = toCamelCase(tableName);
-  const tableNameSingularCapitalised =
-    capitaliseForZodSchema(tableNameCamelCase);
-  const tableNameFirstChar = tableNameCamelCase.charAt(0);
-  const tableNameSingular = tableNameCamelCase.slice(0, -1);
+  const {
+    tableNameCamelCase,
+    tableNameSingular,
+    tableNameSingularCapitalised,
+    tableNameFirstChar,
+  } = formatTableName(tableName);
   const relations = schema.fields.filter(
     (field) => field.type === "references"
   );
@@ -213,11 +219,12 @@ export const get${tableNameSingularCapitalised}ById = async (id: number) => {
 
 const generateMutationContent = (schema: Schema) => {
   const { tableName } = schema;
-  const tableNameCamelCase = toCamelCase(tableName);
-  const tableNameSingularCapitalised =
-    capitaliseForZodSchema(tableNameCamelCase);
-  const tableNameFirstChar = tableNameCamelCase.charAt(0);
-  const tableNameSingular = tableNameCamelCase.slice(0, -1);
+  const {
+    tableNameCamelCase,
+    tableNameSingular,
+    tableNameSingularCapitalised,
+    tableNameFirstChar,
+  } = formatTableName(tableName);
 
   const template = `import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
