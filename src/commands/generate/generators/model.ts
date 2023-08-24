@@ -17,6 +17,12 @@ export function scaffoldModel(schema: Schema, dbType: DBType, hasSrc: boolean) {
     tableName
   )}/queries.ts`;
   createFile(queryPath, generateQueryContent(schema));
+
+  // create mutationFile
+  const mutationPath = `${hasSrc ? "src/" : ""}lib/api/${toCamelCase(
+    tableName
+  )}/mutations.ts`;
+  createFile(mutationPath, generateMutationContent(schema));
 }
 
 function generateModelContent(schema: Schema, dbType: DBType) {
@@ -149,6 +155,45 @@ export const get${tableNameSingularCapitalised}ById = async (id: number) => {
   const [${tableNameFirstChar}] = await db.select().from(${tableNameCamelCase}).where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id));
   return { ${tableNameSingular}: ${tableNameFirstChar} };
 };
+`;
+  return template;
+};
+
+const generateMutationContent = (schema: Schema) => {
+  const { tableName } = schema;
+  const tableNameCamelCase = toCamelCase(tableName);
+  const tableNameSingularCapitalised =
+    capitaliseForZodSchema(tableNameCamelCase);
+  const tableNameFirstChar = tableNameCamelCase.charAt(0);
+  const tableNameSingular = tableNameCamelCase.slice(0, -1);
+
+  const template = `import { db } from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { New${tableNameSingularCapitalised}, insert${tableNameSingularCapitalised}Schema, ${tableNameCamelCase} } from "@/lib/db/schema/${tableNameCamelCase}";
+
+export const create${tableNameSingularCapitalised} = async (${tableNameSingular}: New${tableNameSingularCapitalised}) => {
+  const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${tableNameSingular});
+  const [${tableNameFirstChar}] = await db.insert(${tableNameCamelCase}).values(new${tableNameSingularCapitalised}).returning();
+  return { ${tableNameSingular}: ${tableNameFirstChar} };
+};
+
+export const update${tableNameSingularCapitalised} = async (id: number, ${tableNameSingular}: New${tableNameSingularCapitalised}) => {
+  const { id: ${tableNameSingular}Id } = insert${tableNameSingularCapitalised}Schema.parse({ id });
+  const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${tableNameSingular});
+  const [${tableNameFirstChar}] = await db
+    .update(${tableNameCamelCase})
+    .set(new${tableNameSingularCapitalised})
+    .where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!))
+    .returning();
+  return { ${tableNameSingular}: ${tableNameFirstChar} };
+};
+
+export const delete${tableNameSingularCapitalised} = async (id: number) => {
+  const { id: ${tableNameSingular}Id } = insert${tableNameSingularCapitalised}Schema.parse({ id });
+  const [${tableNameFirstChar}] = await db.delete(${tableNameCamelCase}).where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!)).returning();
+  return { ${tableNameSingular}: ${tableNameFirstChar} };
+};
+
 `;
   return template;
 };
