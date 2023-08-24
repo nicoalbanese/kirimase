@@ -22,6 +22,21 @@ export function createFile(filePath: string, content: string) {
   consola.success(`File created at ${filePath}`);
 }
 
+export function replaceFile(filePath: string, content: string) {
+  const resolvedPath = path.resolve(filePath);
+  const dirName = path.dirname(resolvedPath);
+
+  // Check if the directory exists
+  if (!fs.existsSync(dirName)) {
+    // If not, create the directory and any nested directories that might be needed
+    fs.mkdirSync(dirName, { recursive: true });
+    consola.success(`Directory ${dirName} created.`);
+  }
+
+  fs.writeFileSync(resolvedPath, content);
+  consola.success(`File replaced at ${filePath}`);
+}
+
 export function createFolder(relativePath: string) {
   const fullPath = path.join(process.cwd(), relativePath);
   fs.mkdirSync(fullPath, { recursive: true });

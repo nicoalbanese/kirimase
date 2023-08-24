@@ -13,8 +13,8 @@ const configDriverMappings = {
   neon: "pg",
   supabase: "pg",
   aws: "pg",
-  planetscale: "mysql",
-  "mysql-2": "mysql",
+  planetscale: "mysql2",
+  "mysql-2": "mysql2",
   "better-sqlite3": "better-sqlite",
 };
 
@@ -29,7 +29,11 @@ export default {
   out: "./${libPath}/db/migrations",
   driver: "${configDriverMappings[provider]}",
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    ${
+      provider == "better-sqlite3"
+        ? "url: process.env.DATABASE_URL!"
+        : "connectionString: process.env.DATABASE_URL!"
+    },
   }
 } satisfies Config;`
   );
@@ -348,8 +352,6 @@ export const users = sqliteTable("users", {
     default:
       break;
   }
-  consola.debug(userSchema);
-  consola.log(userSchema);
   createFile(`./${libPath}/db/schema/user.ts`, userSchema);
 };
 
@@ -366,9 +368,9 @@ export const addScriptsToPackageJson = (libPath: string, driver: DBType) => {
   // Update the scripts property
   // TODO: ADD PUSH and STUDIO command
   const newItems = {
-    migrate: `tsx ${libPath}/db/migrate.ts`,
     generate: `drizzle-kit generate:${driver}`,
-    push: driver !== "pg" ? `drizzle-kit push:${driver}` : null,
+    migrate: `tsx ${libPath}/db/migrate.ts`,
+    ...(driver !== "pg" ? { push: `drizzle-kit push:${driver}` } : {}),
     studio: "drizzle-kit studio",
   };
   packageJson.scripts = {
@@ -400,7 +402,7 @@ export const installDependencies = async (
     "mysql-2": { regular: "mysql2", dev: "" },
     "better-sqlite3": {
       regular: "better-sqlite3",
-      dev: "@types/better-sqlite3 @opentelemetry/api",
+      dev: "@types/better-sqlite3",
     },
   };
   // note this change hasnt been tested yet

@@ -41,7 +41,7 @@ export async function initProject() {
       // new Separator(),
       {
         name: "MySQL",
-        value: "MySQL",
+        value: "mysql",
         // disabled: wrapInParenthesis("MySQL is not yet supported"),
       },
       {
@@ -70,6 +70,9 @@ export async function initProject() {
           : "mysql://root:root@localhost:3306/{DB_NAME}",
     });
   }
+
+  if (dbProvider === "neon")
+    databaseUrl = databaseUrl.concat("?sslmode=require");
 
   // create all the files here
   createInitSchema(libPath, dbType);
