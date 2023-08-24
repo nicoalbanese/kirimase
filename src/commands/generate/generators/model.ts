@@ -197,7 +197,7 @@ export const get${tableNameSingularCapitalised}s = async () => {
 };
 
 export const get${tableNameSingularCapitalised}ById = async (id: number) => {
-  const { id: ${tableNameSingular}Id } = select${tableNameSingularCapitalised}Schema.parse({ id });
+  const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   const [${tableNameFirstChar}] = await db.select().from(${tableNameCamelCase}).where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id))${
     relations.length > 0
       ? relations.map(
@@ -241,7 +241,7 @@ export const create${tableNameSingularCapitalised} = async (${tableNameSingular}
 };
 
 export const update${tableNameSingularCapitalised} = async (id: number, ${tableNameSingular}: New${tableNameSingularCapitalised}) => {
-  const { id: ${tableNameSingular}Id } = insert${tableNameSingularCapitalised}Schema.parse({ id });
+  const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${tableNameSingular});
   try {
     const [${tableNameFirstChar}] = await db
@@ -256,7 +256,7 @@ export const update${tableNameSingularCapitalised} = async (id: number, ${tableN
 };
 
 export const delete${tableNameSingularCapitalised} = async (id: number) => {
-  const { id: ${tableNameSingular}Id } = insert${tableNameSingularCapitalised}Schema.parse({ id });
+  const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   try {
     const [${tableNameFirstChar}] = await db.delete(${tableNameCamelCase}).where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!)).returning();
     return { ${tableNameSingular}: ${tableNameFirstChar} };
