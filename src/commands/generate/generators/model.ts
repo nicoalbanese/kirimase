@@ -225,25 +225,37 @@ import { New${tableNameSingularCapitalised}, insert${tableNameSingularCapitalise
 
 export const create${tableNameSingularCapitalised} = async (${tableNameSingular}: New${tableNameSingularCapitalised}) => {
   const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${tableNameSingular});
-  const [${tableNameFirstChar}] = await db.insert(${tableNameCamelCase}).values(new${tableNameSingularCapitalised}).returning();
-  return { ${tableNameSingular}: ${tableNameFirstChar} };
+  try {
+    const [${tableNameFirstChar}] = await db.insert(${tableNameCamelCase}).values(new${tableNameSingularCapitalised}).returning();
+    return { ${tableNameSingular}: ${tableNameFirstChar} };
+  } catch (err) {
+    return { error: (err as Error).message ?? "Error, please try again" };
+  }
 };
 
 export const update${tableNameSingularCapitalised} = async (id: number, ${tableNameSingular}: New${tableNameSingularCapitalised}) => {
   const { id: ${tableNameSingular}Id } = insert${tableNameSingularCapitalised}Schema.parse({ id });
   const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${tableNameSingular});
-  const [${tableNameFirstChar}] = await db
-    .update(${tableNameCamelCase})
-    .set(new${tableNameSingularCapitalised})
-    .where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!))
-    .returning();
-  return { ${tableNameSingular}: ${tableNameFirstChar} };
+  try {
+    const [${tableNameFirstChar}] = await db
+     .update(${tableNameCamelCase})
+     .set(new${tableNameSingularCapitalised})
+     .where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!))
+     .returning();
+    return { ${tableNameSingular}: ${tableNameFirstChar} };
+  } catch (err) {
+    return { error: (err as Error).message ?? "Error, please try again" };
+  }
 };
 
 export const delete${tableNameSingularCapitalised} = async (id: number) => {
   const { id: ${tableNameSingular}Id } = insert${tableNameSingularCapitalised}Schema.parse({ id });
-  const [${tableNameFirstChar}] = await db.delete(${tableNameCamelCase}).where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!)).returning();
-  return { ${tableNameSingular}: ${tableNameFirstChar} };
+  try {
+    const [${tableNameFirstChar}] = await db.delete(${tableNameCamelCase}).where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!)).returning();
+    return { ${tableNameSingular}: ${tableNameFirstChar} };
+  } catch (err) {
+    return { error: (err as Error).message ?? "Error, please try again" };
+  }
 };
 
 `;
