@@ -139,20 +139,56 @@ const generateQueryContent = (schema: Schema) => {
     capitaliseForZodSchema(tableNameCamelCase);
   const tableNameFirstChar = tableNameCamelCase.charAt(0);
   const tableNameSingular = tableNameCamelCase.slice(0, -1);
+  const relations = schema.fields.filter(
+    (field) => field.type === "references"
+  );
 
   const template = `import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { select${tableNameSingularCapitalised}Schema, ${tableNameCamelCase} } from "@/lib/db/schema/${tableNameCamelCase}";
+${
+  relations.length > 0
+    ? relations.map(
+        (relation) =>
+          `import { ${toCamelCase(
+            relation.references
+          )} } from "@/lib/db/schema/${toCamelCase(relation.references)}";`
+      )
+    : ""
+}
 
 
 export const get${tableNameSingularCapitalised}s = async () => {
-  const ${tableNameFirstChar} = await db.select().from(${tableNameCamelCase});
+  const ${tableNameFirstChar} = await db.select().from(${tableNameCamelCase})${
+    relations.length > 0
+      ? relations.map(
+          (relation) =>
+            `.fullJoin(${
+              relation.references
+            }, eq(${tableNameCamelCase}.${toCamelCase(
+              relation.name
+            )}, ${toCamelCase(relation.references)}.id))`
+        )
+      : ""
+  };
   return { ${tableNameCamelCase}: ${tableNameFirstChar} };
 };
 
 export const get${tableNameSingularCapitalised}ById = async (id: number) => {
   const { id: ${tableNameSingular}Id } = select${tableNameSingularCapitalised}Schema.parse({ id });
-  const [${tableNameFirstChar}] = await db.select().from(${tableNameCamelCase}).where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id));
+  const [${tableNameFirstChar}] = await db.select().from(${tableNameCamelCase}).where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id))${
+    relations.length > 0
+      ? relations.map(
+          (relation) =>
+            `.fullJoin(${
+              relation.references
+            }, eq(${tableNameCamelCase}.${toCamelCase(
+              relation.name
+            )}, ${toCamelCase(relation.references)}.id))`
+        )
+      : ""
+  };
+
   return { ${tableNameSingular}: ${tableNameFirstChar} };
 };
 `;
