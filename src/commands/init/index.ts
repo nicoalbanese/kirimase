@@ -8,23 +8,13 @@
 // 7. Update package.json (add scripts)
 // 8. Add .env with database_url
 
-import { select, input, Separator } from "@inquirer/prompts";
-import { createConfigFile, wrapInParenthesis } from "../../utils.js";
-import {
-  addScriptsToPackageJson,
-  createDotEnv,
-  createDrizzleConfig,
-  createIndexTs,
-  createInitSchema,
-  createMigrateTs,
-  installDependencies,
-  updateTsConfigTarget,
-} from "./generators.js";
-import { DBProvider, DBType, PMType } from "../../types.js";
-import { DBProviders } from "./utils.js";
+import { select } from "@inquirer/prompts";
+import { createConfigFile } from "../../utils.js";
+import { PMType } from "../../types.js";
+import { consola } from "consola";
+import { addPackage } from "../add/index.js";
 
 export async function initProject() {
-  let libPath = "";
   const srcExists = await select({
     message: "Are you using a 'src' folder?",
     choices: [
@@ -32,60 +22,6 @@ export async function initProject() {
       { name: "No", value: false },
     ],
   });
-  srcExists ? (libPath = "src/lib") : (libPath = "lib");
-
-  const dbType = (await select({
-    message: "Please choose your DB type",
-    choices: [
-      { name: "Postgres", value: "pg" },
-      // new Separator(),
-      {
-        name: "MySQL",
-        value: "mysql",
-        // disabled: wrapInParenthesis("MySQL is not yet supported"),
-      },
-      {
-        name: "SQLite",
-        value: "sqlite",
-        // disabled: wrapInParenthesis("SQLite is not yet supported"),
-      },
-    ],
-  })) as DBType;
-
-  const dbProvider = (await select({
-    message: "Please choose your DB Provider",
-    choices: DBProviders[dbType],
-  })) as DBProvider;
-
-  let databaseUrl = "";
-
-  if (dbType === "sqlite") {
-    databaseUrl = "sqlite.db";
-  } else {
-    databaseUrl = await input({
-      message: "What is the database url?",
-      default:
-        dbType === "pg"
-          ? "postgresql://postgres:postgres@localhost:5432/{DB_NAME}"
-          : "mysql://root:root@localhost:3306/{DB_NAME}",
-    });
-  }
-
-  if (dbProvider === "neon")
-    databaseUrl = databaseUrl.concat("?sslmode=require");
-
-  // create all the files here
-  createInitSchema(libPath, dbType);
-
-  // dependent on dbtype and driver, create
-  createIndexTs(libPath, dbType, dbProvider);
-  createMigrateTs(libPath, dbType, dbProvider);
-  createDrizzleConfig(libPath, dbProvider);
-
-  // perhaps using push rather than migrate for sqlite?
-  addScriptsToPackageJson(libPath, dbType);
-  createDotEnv(databaseUrl);
-  updateTsConfigTarget();
 
   const preferredPackageManager = (await select({
     message: "Please pick your preferred package manager",
@@ -97,11 +33,13 @@ export async function initProject() {
   })) as PMType;
   // console.log("installing dependencies with", preferredPackageManager);
   createConfigFile({
-    driver: dbType,
+    driver: null,
     hasSrc: srcExists,
-    provider: dbProvider,
+    provider: null,
+    packages: [],
     preferredPackageManager,
   });
-
-  installDependencies(dbProvider, preferredPackageManager);
+  consola.success("Kirimase initialized!");
+  consola.info("You can now add packages.");
+  addPackage();
 }

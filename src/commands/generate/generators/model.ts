@@ -181,8 +181,6 @@ ${
       )
     : ""
 }
-
-
 export const get${tableNameSingularCapitalised}s = async () => {
   const ${tableNameFirstChar} = await db.select().from(${tableNameCamelCase})${
     relations.length > 0

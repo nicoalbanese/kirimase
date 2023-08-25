@@ -1,5 +1,10 @@
 import { consola } from "consola";
-import { createFile, installPackages, readConfigFile } from "../../../utils.js";
+import {
+  addPackageToConfig,
+  createFile,
+  installPackages,
+  readConfigFile,
+} from "../../../utils.js";
 import {
   apiTrpcRouteTs,
   libTrpcClientTs,
@@ -36,6 +41,7 @@ export const addTrpc = async () => {
     },
     preferredPackageManager
   );
+  addPackageToConfig("trpc");
   // 9. Instruct user to add the <Provider /> to their root layout.
   consola.success("Successfully added trpc to your project!");
   consola.info(

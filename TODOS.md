@@ -16,4 +16,6 @@
 - [] add controller for trpc
 
 - [] add logic to move root-domain thats in provider to .env
-- [] add update_Schema to the model
+- [x] add update_Schema to the model
+
+- [] change init to only initialise config file -> then add drizzle to add ->

@@ -6,6 +6,8 @@ import { scaffoldModel } from "./generators/model.js";
 import { scaffoldAPIRoute } from "./generators/apiRoute.js";
 import { readConfigFile } from "../../utils.js";
 import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
+import { addPackage } from "../add/index.js";
+import { initProject } from "../init/index.js";
 
 function provideInstructions() {
   consola.info(
@@ -119,25 +121,40 @@ async function askForIndex(fields: DBField[]) {
 }
 
 export async function buildSchema() {
-  const { driver, hasSrc } = readConfigFile();
-  provideInstructions();
-  const resourceType = await askForResourceType();
-  const tableName = await askForTable();
-  const fields = await askForFields();
-  const indexedField = await askForIndex(fields);
-  // console.log(indexedField);
+  const config = readConfigFile();
 
-  const schema = {
-    tableName,
-    fields,
-    index: indexedField,
-  };
+  if (config) {
+    const { driver, hasSrc, packages } = config;
 
-  if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
-  if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
-  if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
-  // if (resourceType.includes("views")) scaffoldModel()
+    if (packages.includes("drizzle")) {
+      provideInstructions();
+      const resourceType = await askForResourceType();
+      const tableName = await askForTable();
+      const fields = await askForFields();
+      const indexedField = await askForIndex(fields);
+      // console.log(indexedField);
 
-  // console.log("Schema:", schema);
-  // You can now pass this schema object to the scaffoldResource function
+      const schema = {
+        tableName,
+        fields,
+        index: indexedField,
+      };
+
+      if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
+      if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
+      if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
+      // if (resourceType.includes("views")) scaffoldModel()
+
+      // console.log("Schema:", schema);
+      // You can now pass this schema object to the scaffoldResource function
+    } else {
+      consola.warn(
+        "You need to have drizzle installed in order to use the scaffold command."
+      );
+      addPackage();
+    }
+  } else {
+    consola.warn("You need to have a config file in order to use generate.");
+    initProject();
+  }
 }

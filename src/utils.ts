@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 import { consola } from "consola";
-import { Config, PMType } from "./types.js";
+import { AvailablePackage, Config, PMType, UpdateConfig } from "./types.js";
 
 export const delay = (ms = 2000) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -71,10 +71,19 @@ export const createConfigFile = (options: Config) => {
   createFile("./kirimase.config.json", JSON.stringify(options));
 };
 
-export const readConfigFile = () => {
+export const updateConfigFile = (options: UpdateConfig) => {
+  const config = readConfigFile();
+  const newConfig = { ...config, ...options };
+  createFile("./kirimase.config.json", JSON.stringify(newConfig));
+};
+
+export const readConfigFile = (): Config | null => {
   // Define the path to package.json
   const configPath = path.join(process.cwd(), "kirimase.config.json");
 
+  if (!fs.existsSync(configPath)) {
+    return null;
+  }
   // Read package.json
   const configJsonData = fs.readFileSync(configPath, "utf-8");
 
@@ -83,6 +92,11 @@ export const readConfigFile = () => {
 
   // Update the scripts property
   return config as Config;
+};
+
+export const addPackageToConfig = (packageName: AvailablePackage) => {
+  const config = readConfigFile();
+  updateConfigFile({ packages: [...config?.packages, packageName] });
 };
 
 export const wrapInParenthesis = (string: string) => {

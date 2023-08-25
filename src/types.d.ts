@@ -31,11 +31,22 @@ export type DBField = {
   notNull?: boolean; // change to required later
 };
 
+export type AvailablePackage = "drizzle" | "trpc" | "next-auth";
+
 export type Config = {
   hasSrc: boolean;
-  driver: DBType;
-  provider: DBProvider;
+  driver?: DBType;
+  provider?: DBProvider;
   preferredPackageManager: PMType;
+  packages?: AvailablePackage[];
+};
+
+export type UpdateConfig = {
+  hasSrc?: boolean;
+  driver?: DBType;
+  provider?: DBProvider;
+  preferredPackageManager?: PMType;
+  packages?: AvailablePackage[];
 };
 
 export type ScaffoldSchema = {

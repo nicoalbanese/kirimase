@@ -1,8 +1,8 @@
 import { consola } from "consola";
-import { createFile, createFolder, installPackages } from "../../utils.js";
 import fs from "fs";
 import path from "path";
-import { DBProvider, DBType, PMType } from "../../types.js";
+import { createFile, installPackages } from "../../../utils.js";
+import { DBProvider, DBType, PMType } from "../../../types.js";
 
 type ConfigDriver = "pg" | "turso" | "libsql" | "mysql" | "better-sqlite";
 
