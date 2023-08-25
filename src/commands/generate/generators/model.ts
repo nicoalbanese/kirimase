@@ -68,6 +68,7 @@ function generateModelContent(schema: Schema, dbType: DBType) {
     sqlite: {
       tableFunc: "sqliteTable",
       typeMappings: {
+        id: (name: string) => `integer('${name}').primaryKey()`,
         string: (name: string) => `text('${name}')`,
         number: (name: string) => `integer('${name}')`,
       },
@@ -164,10 +165,10 @@ const generateQueryContent = (schema: Schema) => {
   const relations = schema.fields.filter(
     (field) => field.type === "references"
   );
-
+  // TODO: UPDATE IMPORTS to _IdSchema
   const template = `import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { select${tableNameSingularCapitalised}Schema, ${tableNameCamelCase} } from "@/lib/db/schema/${tableNameCamelCase}";
+import { ${tableNameSingular}IdSchema, ${tableNameCamelCase} } from "@/lib/db/schema/${tableNameCamelCase}";
 ${
   relations.length > 0
     ? relations.map(
@@ -228,7 +229,7 @@ const generateMutationContent = (schema: Schema) => {
 
   const template = `import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
-import { New${tableNameSingularCapitalised}, insert${tableNameSingularCapitalised}Schema, ${tableNameCamelCase} } from "@/lib/db/schema/${tableNameCamelCase}";
+import { New${tableNameSingularCapitalised}, insert${tableNameSingularCapitalised}Schema, ${tableNameCamelCase}, ${tableNameSingular}IdSchema } from "@/lib/db/schema/${tableNameCamelCase}";
 
 export const create${tableNameSingularCapitalised} = async (${tableNameSingular}: New${tableNameSingularCapitalised}) => {
   const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${tableNameSingular});
