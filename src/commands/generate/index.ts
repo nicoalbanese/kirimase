@@ -2,7 +2,6 @@ import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { consola } from "consola";
 import { DBField, FieldType } from "../../types.js";
 import { Choice } from "@inquirer/checkbox";
-// import { scaffoldResource } from "../scaffold/generatorRouter.js";
 import { scaffoldModel } from "./generators/model.js";
 import { scaffoldController } from "./generators/controller.js";
 import { readConfigFile } from "../../utils.js";
