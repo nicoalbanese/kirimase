@@ -3,12 +3,13 @@ import { consola } from "consola";
 import { DBField, FieldType } from "../../types.js";
 import { Choice } from "@inquirer/checkbox";
 import { scaffoldModel } from "./generators/model.js";
-import { scaffoldController } from "./generators/controller.js";
+import { scaffoldAPIRoute } from "./generators/apiRoute.js";
 import { readConfigFile } from "../../utils.js";
+import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
 
 function provideInstructions() {
   consola.info(
-    "Use Kirimase scaffold to quickly generate your Model (drizzle-schema), View (React components), and Controllers (API Routes)"
+    "Use Kirimase scaffold to quickly generate your Model (drizzle-schema), View (React components), and Controllers (API Routes and TRPC Routes)"
   );
 }
 
@@ -17,7 +18,8 @@ async function askForResourceType() {
     message: "Please select the resources you would like to generate:",
     choices: [
       { name: "Model", value: "model" },
-      { name: "API Route", value: "controller" },
+      { name: "API Route", value: "api_route" },
+      { name: "TRPC Route", value: "trpc_route" },
       { name: "Views", value: "views", disabled: "Coming soon!" },
     ],
   });
@@ -132,7 +134,8 @@ export async function buildSchema() {
   };
 
   if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
-  if (resourceType.includes("controller")) scaffoldController(schema);
+  if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
+  if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
   // if (resourceType.includes("views")) scaffoldModel()
 
   // console.log("Schema:", schema);

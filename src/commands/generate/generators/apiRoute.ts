@@ -2,7 +2,7 @@ import { createFile, readConfigFile } from "../../../utils.js";
 import { Schema } from "../types.js";
 import { formatTableName, toCamelCase } from "../utils.js";
 
-export const scaffoldController = (schema: Schema) => {
+export const scaffoldAPIRoute = (schema: Schema) => {
   const { hasSrc } = readConfigFile();
   const { tableName } = schema;
   const path = `${hasSrc ? "src/" : ""}app/api/${toCamelCase(

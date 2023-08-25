@@ -143,6 +143,8 @@ export type New${tableNameSingularCapitalised} = z.infer<typeof insert${tableNam
 export const select${tableNameSingularCapitalised}Schema = createSelectSchema(${tableNameCamelCase}, { 
   id: z.coerce.number()
 });
+export const update${tableNameSingularCapitalised}Schema = select${tableNameSingularCapitalised}Schema;
+
 export type ${tableNameSingularCapitalised} = z.infer<typeof select${tableNameSingularCapitalised}Schema>;
 
 export const ${tableNameSingular}IdSchema = select${tableNameSingularCapitalised}Schema.pick({ id: true });

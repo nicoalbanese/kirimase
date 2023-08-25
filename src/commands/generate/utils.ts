@@ -21,6 +21,8 @@ export function capitaliseForZodSchema(input: string): string {
 
 export const formatTableName = (tableName: string) => {
   const tableNameCamelCase = toCamelCase(tableName);
+  const tableNameCapitalised =
+    tableNameCamelCase.charAt(0).toUpperCase() + tableNameCamelCase.slice(1);
   const tableNameSingularCapitalised =
     capitaliseForZodSchema(tableNameCamelCase);
   const tableNameSingular = tableNameCamelCase.slice(0, -1);
@@ -31,5 +33,6 @@ export const formatTableName = (tableName: string) => {
     tableNameSingular,
     tableNameSingularCapitalised,
     tableNameFirstChar,
+    tableNameCapitalised,
   };
 };
