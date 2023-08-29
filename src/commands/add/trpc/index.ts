@@ -50,7 +50,7 @@ export const addTrpc = async () => {
   addPackageToConfig("trpc");
   // 9. Instruct user to add the <Provider /> to their root layout.
   consola.success("Successfully added trpc to your project!");
-  consola.info(
+  consola.warn(
     "Please add the <Provider> to your root layout, by wrapping it around your children"
   );
 };

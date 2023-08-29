@@ -43,7 +43,7 @@ export function createFolder(relativePath: string) {
   consola.success(`Folder created at ${fullPath}`);
 }
 
-export function installPackages(
+export async function installPackages(
   packages: { regular: string; dev: string },
   pmType: PMType
 ) {

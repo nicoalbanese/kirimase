@@ -24,3 +24,14 @@
 - [] update script needs to stringify with null, 2
 - [] add provider automatically?
 - [] change queries and mutations to find items based on typeof id rather than on a fixed type (number)
+
+- [] add all remaining columns for drivers
+
+## Relations
+
+- [] add relation builder
+
+# Next Auth
+
+- [] add next auth
+- [] add (is owned by user) to generate
