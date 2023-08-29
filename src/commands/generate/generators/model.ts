@@ -1,4 +1,9 @@
-import { DBType } from "../../../types.js";
+import {
+  DBType,
+  mysqlColumnType,
+  pgColumnType,
+  sqliteColumnType,
+} from "../../../types.js";
 import { createFile } from "../../../utils.js";
 import { Schema } from "../types.js";
 import {
@@ -29,18 +34,8 @@ export function scaffoldModel(schema: Schema, dbType: DBType, hasSrc: boolean) {
   createFile(mutationPath, generateMutationContent(schema));
 }
 
-function generateModelContent(schema: Schema, dbType: DBType) {
-  const { index, fields, tableName } = schema;
-  const {
-    tableNameCamelCase,
-    tableNameSingular,
-    tableNameSingularCapitalised,
-  } = formatTableName(tableName);
-  const relations = schema.fields.filter(
-    (field) => field.type === "references"
-  );
-
-  const config = {
+export const createConfig = () => {
+  return {
     pg: {
       tableFunc: "pgTable",
       typeMappings: {
@@ -52,18 +47,25 @@ function generateModelContent(schema: Schema, dbType: DBType) {
           `integer('${name}').references(() => ${referencedTable}.id)`,
         // Add more types here as needed
         boolean: (name: string) => `boolean('${name}')`,
-      },
+      } as Record<
+        pgColumnType,
+        (name: string, referencedTable?: string) => string
+      >,
     },
     mysql: {
       tableFunc: "mysqlTable",
       typeMappings: {
         id: (name: string) => `serial('${name}').primaryKey()`,
         string: (name: string) => `varchar("${name}", { length: 256 })`,
+        text: (name: string) => `text("${name}")`,
         number: (name: string) => `int('${name}')`,
         references: (name: string, referencedTable: string = "REFERENCE") =>
           `int('${name}').references(() => ${toCamelCase(referencedTable)}.id)`,
         boolean: (name: string) => `boolean('${name}')`,
-      },
+      } as Record<
+        mysqlColumnType,
+        (name: string, referencedTable?: string) => string
+      >,
     },
     sqlite: {
       tableFunc: "sqliteTable",
@@ -71,9 +73,23 @@ function generateModelContent(schema: Schema, dbType: DBType) {
         id: (name: string) => `integer('${name}').primaryKey()`,
         string: (name: string) => `text('${name}')`,
         number: (name: string) => `integer('${name}')`,
-      },
+      } as Record<sqliteColumnType, (name: string) => string>,
     },
-  }[dbType];
+  };
+};
+
+function generateModelContent(schema: Schema, dbType: DBType) {
+  const { index, fields, tableName } = schema;
+  const {
+    tableNameCamelCase,
+    tableNameSingular,
+    tableNameSingularCapitalised,
+  } = formatTableName(tableName);
+  const relations = schema.fields.filter(
+    (field) => field.type === "references"
+  );
+
+  const config = createConfig()[dbType];
 
   const usedTypes: string[] = fields
     .map((field) => {

@@ -1,8 +1,8 @@
 import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { consola } from "consola";
-import { DBField, FieldType } from "../../types.js";
+import { DBField, DBType, FieldType } from "../../types.js";
 import { Choice } from "@inquirer/checkbox";
-import { scaffoldModel } from "./generators/model.js";
+import { createConfig, scaffoldModel } from "./generators/model.js";
 import { scaffoldAPIRoute } from "./generators/apiRoute.js";
 import { readConfigFile } from "../../utils.js";
 import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
@@ -39,21 +39,18 @@ async function askForTable() {
   return tableName;
 }
 
-async function askForFields() {
+async function askForFields(dbType: DBType) {
   const fields: DBField[] = [];
   let addMore = true;
 
   while (addMore) {
     const fieldType = (await select({
       message: "Please select the type of this field:",
-      choices: [
-        { name: "string", value: "string" },
-        { name: "number", value: "number" },
-        { name: "boolean", value: "boolean" },
-        { name: "relation (references)", value: "references" },
-        { name: "timestamp", value: "timestamp" },
-        { name: "date", value: "date" },
-      ],
+      choices: Object.keys(createConfig()[dbType].typeMappings)
+        .filter((field) => field !== "id")
+        .map((field) => {
+          return { name: field, value: field };
+        }),
     })) as FieldType;
 
     if (fieldType === "references") {
@@ -130,7 +127,7 @@ export async function buildSchema() {
       provideInstructions();
       const resourceType = await askForResourceType();
       const tableName = await askForTable();
-      const fields = await askForFields();
+      const fields = await askForFields(driver);
       const indexedField = await askForIndex(fields);
       // console.log(indexedField);
 

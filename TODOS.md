@@ -19,3 +19,8 @@
 - [x] add update_Schema to the model
 
 - [] change init to only initialise config file -> then add drizzle to add ->
+
+- [] add seed script
+- [] update script needs to stringify with null, 2
+- [] add provider automatically?
+- [] change queries and mutations to find items based on typeof id rather than on a fixed type (number)

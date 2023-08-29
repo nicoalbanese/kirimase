@@ -22,7 +22,13 @@ export type DBProviderOptions = {
 };
 export type PMType = "npm" | "yarn" | "pnpm";
 
-export type FieldType = "id" | "text" | "number" | "references" | "boolean";
+export type FieldType =
+  | "id"
+  | "string"
+  | "text"
+  | "number"
+  | "references"
+  | "boolean";
 
 export type DBField = {
   name: string;
@@ -54,3 +60,7 @@ export type ScaffoldSchema = {
   fields: DBField[];
   index?: string;
 };
+
+export type pgColumnType = "string" | "number" | "boolean" | "references";
+export type mysqlColumnType = "string" | "number" | "boolean" | "references";
+export type sqliteColumnType = "string" | "number";

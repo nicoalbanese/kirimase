@@ -68,13 +68,13 @@ ${pmType} install ${packages.regular}`,
 }
 
 export const createConfigFile = (options: Config) => {
-  createFile("./kirimase.config.json", JSON.stringify(options));
+  createFile("./kirimase.config.json", JSON.stringify(options, null, 2));
 };
 
 export const updateConfigFile = (options: UpdateConfig) => {
   const config = readConfigFile();
   const newConfig = { ...config, ...options };
-  createFile("./kirimase.config.json", JSON.stringify(newConfig));
+  createFile("./kirimase.config.json", JSON.stringify(newConfig, null, 2));
 };
 
 export const readConfigFile = (): Config | null => {

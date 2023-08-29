@@ -9,6 +9,6 @@ export const addPackage = async () => {
     choices: Packages,
   });
 
-  if (packageToInstall.includes("drizzle")) addDrizzle();
-  if (packageToInstall.includes("trpc")) addTrpc();
+  if (packageToInstall.includes("drizzle")) await addDrizzle();
+  if (packageToInstall.includes("trpc")) await addTrpc();
 };
