@@ -8,6 +8,7 @@ import {
 import {
   apiTrpcRouteTs,
   libTrpcClientTs,
+  libTrpcContextTs,
   libTrpcProviderTsx,
   libTrpcServerClientTs,
   rootRouterTs,
@@ -35,6 +36,7 @@ export const addTrpc = async () => {
   createFile(`${rootPath}/lib/trpc/serverClient.ts`, libTrpcServerClientTs());
 
   // 7.5. create context file and update to include context file above
+  createFile(`${rootPath}/lib/trpc/context.ts`, libTrpcContextTs());
 
   // 8. Install Packages: @tanstack/react-query, @trpc/client, @trpc/react-query, @trpc/server
   installPackages(

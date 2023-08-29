@@ -14,11 +14,13 @@ export type AppRouter = typeof appRouter;
 // 2. create server/trpc.ts
 export const serverTrpcTs = () => {
   return `import { initTRPC } from "@trpc/server";
+import { Context } from "./context";
+
 /**
  * Initialization of tRPC backend
  * Should be done only once per backend!
  */
-const t = initTRPC.create();
+const t = initTRPC.context<Context>().create();
 /**
  * Export reusable router and procedure helpers
  * that can be used throughout the router
@@ -43,13 +45,14 @@ export const apiTrpcRouteTs = () => {
   return `import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 import { appRouter } from "@/lib/server/routers/_app";
+import { createContext } from "@/lib/server/context";
 
 const handler = (req: Request) =>
   fetchRequestHandler({
     endpoint: "/api/trpc",
     req,
     router: appRouter,
-    createContext: () => ({}),
+    createContext,
   });
 
 export { handler as GET, handler as POST };`;
@@ -105,5 +108,23 @@ export const serverClient = appRouter.createCaller({
     }),
   ],
 });
+`;
+};
+
+// 8. create lib/trpc/context.ts
+export const libTrpcContextTs = (withSession: boolean = false) => {
+  return `import { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+${withSession ? "" : " // "}import { getUserAuth } from "../auth/utils";
+
+export async function createContext(opts?: FetchCreateContextFnOptions) {
+${withSession ? "" : " // "}const { session } = await getUserAuth();
+
+  return {
+    ${withSession ? "" : "// "} session: session,
+    headers: opts && Object.fromEntries(opts.req.headers),
+  };
+}
+
+export type Context = Awaited<ReturnType<typeof createContext>>;
 `;
 };
