@@ -14,7 +14,7 @@ export type AppRouter = typeof appRouter;
 // 2. create server/trpc.ts
 export const serverTrpcTs = () => {
   return `import { initTRPC } from "@trpc/server";
-import { Context } from "./context";
+import { Context } from "../trpc/context";
 
 /**
  * Initialization of tRPC backend
