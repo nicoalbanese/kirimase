@@ -1,7 +1,7 @@
-// 1. Create server/index.ts
-export const serverIndexTs = () => {
-  return `import { usersRouter } from "./routers/users";
-import { router } from "./trpc";
+// 1. Create server/index.ts moved to root router position
+export const rootRouterTs = () => {
+  return `import { usersRouter } from "./users";
+import { router } from "../trpc";
 
 export const appRouter = router({
   users: usersRouter,
@@ -42,7 +42,7 @@ export const usersRouter = router({
 export const apiTrpcRouteTs = () => {
   return `import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-import { appRouter } from "@/lib/server";
+import { appRouter } from "@/lib/server/routers/_app";
 
 const handler = (req: Request) =>
   fetchRequestHandler({
@@ -59,7 +59,7 @@ export { handler as GET, handler as POST };`;
 export const libTrpcClientTs = () => {
   return `import { createTRPCReact } from "@trpc/react-query";
 
-import { type AppRouter } from "@/lib/server";
+import { type AppRouter } from "@/lib/server/routers/_app";
 
 export const trpc = createTRPCReact<AppRouter>({});`;
 };
@@ -96,7 +96,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
 export const libTrpcServerClientTs = () => {
   return `import { httpBatchLink } from "@trpc/client";
 
-import { appRouter } from "@/lib/server";
+import { appRouter } from "@/lib/server/routers/_app";
 
 export const serverClient = appRouter.createCaller({
   links: [

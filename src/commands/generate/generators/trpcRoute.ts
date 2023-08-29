@@ -1,15 +1,46 @@
+import { consola } from "consola";
 import { createFile, readConfigFile } from "../../../utils.js";
 import { Schema } from "../types.js";
 import { formatTableName, toCamelCase } from "../utils.js";
+import fs from "fs";
 
 export const scaffoldTRPCRoute = async (schema: Schema) => {
   const { hasSrc } = readConfigFile();
   const { tableName } = schema;
-  const path = `${hasSrc ? "src/" : ""}lib/server/routers/${toCamelCase(
-    tableName
-  )}.ts`;
+  const { tableNameCamelCase } = formatTableName(tableName);
+  const path = `${
+    hasSrc ? "src/" : ""
+  }lib/server/routers/${tableNameCamelCase}.ts`;
   createFile(path, generateRouteContent(schema));
+
+  updateTRPCRouter(tableNameCamelCase);
 };
+
+function updateTRPCRouter(routerName: string): void {
+  const { hasSrc } = readConfigFile();
+  const filePath = `${hasSrc ? "src/" : ""}lib/server/routers/_app.ts`;
+
+  const fileContent = fs.readFileSync(filePath, "utf-8");
+
+  // Add import statement after the last import
+  const importInsertionPoint = fileContent.lastIndexOf("import");
+  const nextLineAfterLastImport =
+    fileContent.indexOf("\n", importInsertionPoint) + 1;
+  const beforeImport = fileContent.slice(0, nextLineAfterLastImport);
+  const afterImport = fileContent.slice(nextLineAfterLastImport);
+  const modifiedImportContent = `${beforeImport}import { ${routerName}Router } from "./${routerName}";\n${afterImport}`;
+
+  // Add router initialization before the last line in the router block
+  const routerBlockEnd = modifiedImportContent.indexOf("});");
+  const beforeRouterBlockEnd =
+    modifiedImportContent.lastIndexOf(",", routerBlockEnd) + 1;
+  const beforeRouter = modifiedImportContent.slice(0, beforeRouterBlockEnd);
+  const afterRouter = modifiedImportContent.slice(beforeRouterBlockEnd);
+  const modifiedRouterContent = `${beforeRouter}\n  ${routerName}: ${routerName}Router,${afterRouter}`;
+  fs.writeFileSync(filePath, modifiedRouterContent);
+
+  console.log("File updated successfully.");
+}
 
 const generateRouteContent = (schema: Schema) => {
   const { tableName } = schema;

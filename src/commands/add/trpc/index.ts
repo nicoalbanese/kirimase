@@ -10,7 +10,7 @@ import {
   libTrpcClientTs,
   libTrpcProviderTsx,
   libTrpcServerClientTs,
-  serverIndexTs,
+  rootRouterTs,
   serverRouterUsersTs,
   serverTrpcTs,
 } from "./generators.js";
@@ -19,7 +19,8 @@ export const addTrpc = async () => {
   const { hasSrc, preferredPackageManager } = readConfigFile();
   const rootPath = `${hasSrc ? "src" : ""}`;
   // 1. Create lib/server/index.ts
-  createFile(`${rootPath}/lib/server/index.ts`, serverIndexTs());
+  createFile(`${rootPath}/lib/server/routers/_app.ts`, rootRouterTs());
+
   // 2. create lib/server/trpc.ts
   createFile(`${rootPath}/lib/server/trpc.ts`, serverTrpcTs());
   // 3. create lib/server/router/ directory and maybe a users file
@@ -32,6 +33,9 @@ export const addTrpc = async () => {
   createFile(`${rootPath}/lib/trpc/Provider.tsx`, libTrpcProviderTsx());
   // 7. create lib/trpc/serverClient.ts
   createFile(`${rootPath}/lib/trpc/serverClient.ts`, libTrpcServerClientTs());
+
+  // 7.5. create context file and update to include context file above
+
   // 8. Install Packages: @tanstack/react-query, @trpc/client, @trpc/react-query, @trpc/server
   installPackages(
     {
