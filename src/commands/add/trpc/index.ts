@@ -15,9 +15,10 @@ import {
   serverRouterUsersTs,
   serverTrpcTs,
 } from "./generators.js";
+import { addContextProviderToLayout } from "../utils.js";
 
 export const addTrpc = async () => {
-  const { hasSrc, preferredPackageManager } = readConfigFile();
+  const { hasSrc, preferredPackageManager, packages } = readConfigFile();
   const rootPath = `${hasSrc ? "src" : ""}`;
   // 1. Create lib/server/index.ts
   createFile(`${rootPath}/lib/server/routers/_app.ts`, rootRouterTs());
@@ -36,7 +37,10 @@ export const addTrpc = async () => {
   createFile(`${rootPath}/lib/trpc/serverClient.ts`, libTrpcServerClientTs());
 
   // 7.5. create context file and update to include context file above
-  createFile(`${rootPath}/lib/trpc/context.ts`, libTrpcContextTs());
+  createFile(
+    `${rootPath}/lib/trpc/context.ts`,
+    libTrpcContextTs(packages.includes("next-auth"))
+  );
 
   // 8. Install Packages: @tanstack/react-query, @trpc/client, @trpc/react-query, @trpc/server
   await installPackages(
@@ -49,8 +53,9 @@ export const addTrpc = async () => {
   );
   addPackageToConfig("trpc");
   // 9. Instruct user to add the <Provider /> to their root layout.
+  addContextProviderToLayout("TrpcProvider");
   consola.success("Successfully added trpc to your project!");
-  consola.warn(
-    "Please add the <Provider> to your root layout, by wrapping it around your children"
-  );
+  // consola.warn(
+  //   "Please add the <Provider> to your root layout, by wrapping it around your children"
+  // );
 };

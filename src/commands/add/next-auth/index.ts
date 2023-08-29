@@ -17,6 +17,7 @@ import {
 import { AuthProvider, AuthProviders } from "./utils.js";
 import { checkbox } from "@inquirer/prompts";
 import { addToDotEnv } from "../drizzle/generators.js";
+import { addContextProviderToLayout } from "../utils.js";
 
 export const addNextAuth = async () => {
   const providers = (await checkbox({
@@ -80,8 +81,10 @@ export const addNextAuth = async () => {
   );
   addPackageToConfig("next-auth");
   // 9. Instruct user to add the <Provider /> to their root layout.
+  addContextProviderToLayout("NextAuthProvider");
   consola.success("Successfully added Next Auth to your project!");
-  consola.warn(
-    "Please add the <NextAuthProvider> to your root layout, by wrapping it around your children"
-  );
+  // consola.warn(
+  //   "Please add the <NextAuthProvider> to your root layout, by wrapping it around your children"
+  // );
+  //
 };

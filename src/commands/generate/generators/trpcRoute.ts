@@ -1,5 +1,5 @@
 import { consola } from "consola";
-import { createFile, readConfigFile } from "../../../utils.js";
+import { createFile, readConfigFile, replaceFile } from "../../../utils.js";
 import { Schema } from "../types.js";
 import { formatTableName, toCamelCase } from "../utils.js";
 import fs from "fs";
@@ -37,9 +37,9 @@ function updateTRPCRouter(routerName: string): void {
   const beforeRouter = modifiedImportContent.slice(0, beforeRouterBlockEnd);
   const afterRouter = modifiedImportContent.slice(beforeRouterBlockEnd);
   const modifiedRouterContent = `${beforeRouter}\n  ${routerName}: ${routerName}Router,${afterRouter}`;
-  fs.writeFileSync(filePath, modifiedRouterContent);
+  replaceFile(filePath, modifiedRouterContent);
 
-  console.log("File updated successfully.");
+  consola.success("Added ${routerName} router to root router successfully.");
 }
 
 const generateRouteContent = (schema: Schema) => {

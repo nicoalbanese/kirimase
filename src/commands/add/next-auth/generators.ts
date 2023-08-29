@@ -53,7 +53,7 @@ type Props = {
   children?: React.ReactNode;
 };
 
-export const NextAuthProvider = ({ children }: Props) => {
+export default function NextAuthProvider({ children }: Props) {
   return <SessionProvider>{children}</SessionProvider>;
 };`;
 };

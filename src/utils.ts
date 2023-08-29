@@ -1,12 +1,8 @@
 import fs from "fs";
 import path from "path";
-// import { exec } from "child_process";
 import { consola } from "consola";
 import { AvailablePackage, Config, PMType, UpdateConfig } from "./types.js";
-import { promisify } from "util";
-import { exec as execCb, spawn } from "child_process";
-
-const exec = promisify(execCb);
+import { spawn } from "child_process";
 
 export const delay = (ms = 2000) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -46,30 +42,6 @@ export function createFolder(relativePath: string) {
   fs.mkdirSync(fullPath, { recursive: true });
   consola.success(`Folder created at ${fullPath}`);
 }
-
-// export async function installPackages(
-//   packages: { regular: string; dev: string },
-//   pmType: PMType
-// ) {
-//   const packagesListString = packages.regular.concat(" ").concat(packages.dev);
-//   consola.start(`Installing packages: ${packagesListString}...`);
-//
-//   try {
-//     if (packages.dev) {
-//       const devStdout = await exec(`${pmType} install -D ${packages.dev}`);
-//       if (devStdout) consola.info(devStdout.stdout);
-//     }
-//
-//     if (packages.regular) {
-//       const regularStdout = await exec(`${pmType} install ${packages.regular}`);
-//       if (regularStdout) consola.info(regularStdout.stdout);
-//     }
-//
-//     consola.success(`Packages installed: ${packagesListString}`);
-//   } catch (error) {
-//     consola.error(`An error occurred: ${error}`);
-//   }
-// }
 
 export async function installPackages(
   packages: { regular: string; dev: string },
@@ -121,7 +93,7 @@ export const createConfigFile = (options: Config) => {
 export const updateConfigFile = (options: UpdateConfig) => {
   const config = readConfigFile();
   const newConfig = { ...config, ...options };
-  createFile("./kirimase.config.json", JSON.stringify(newConfig, null, 2));
+  replaceFile("./kirimase.config.json", JSON.stringify(newConfig, null, 2));
 };
 
 export const readConfigFile = (): Config | null => {
@@ -149,27 +121,3 @@ export const addPackageToConfig = (packageName: AvailablePackage) => {
 export const wrapInParenthesis = (string: string) => {
   return "(" + string + ")";
 };
-
-// export async function installPackages(
-//   packages: { regular: string; dev: string },
-//   pmType: PMType
-// ) {
-//   const packagesListString = packages.regular.concat(" ").concat(packages.dev);
-//   consola.start(`Installing packages: ${packagesListString}...`);
-//
-//   exec(
-//     `${pmType} install -D ${packages.dev}
-// ${pmType} install ${packages.regular}`,
-//     (error, stdout, stderr) => {
-//       if (error) {
-//         console.error(`An error occurred: ${error}`);
-//         return;
-//       }
-//
-//       if (stdout) consola.info(stdout);
-//       if (stderr) consola.error(stderr);
-//
-//       consola.success(`Packages installed: ${packagesListString}`);
-//     }
-//   );
-// }
