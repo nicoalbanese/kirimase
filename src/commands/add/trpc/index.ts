@@ -39,7 +39,7 @@ export const addTrpc = async () => {
   createFile(`${rootPath}/lib/trpc/context.ts`, libTrpcContextTs());
 
   // 8. Install Packages: @tanstack/react-query, @trpc/client, @trpc/react-query, @trpc/server
-  installPackages(
+  await installPackages(
     {
       regular:
         "@tanstack/react-query @trpc/client @trpc/react-query @trpc/server",

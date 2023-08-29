@@ -15,6 +15,7 @@ import {
 } from "./generators.js";
 import { AuthProvider, AuthProviders } from "./utils.js";
 import { checkbox } from "@inquirer/prompts";
+import { addToDotEnv } from "../drizzle/generators.js";
 
 export const addNextAuth = async () => {
   const providers = (await checkbox({
@@ -27,7 +28,7 @@ export const addNextAuth = async () => {
   const rootPath = `${hasSrc ? "src" : ""}`;
   // 1. Create app/api/auth/[...nextauth].ts
   createFile(
-    rootPath.concat("/app/api/auth/[...nextauth].ts"),
+    rootPath.concat("/app/api/auth/[...nextauth]/route.ts"),
     apiAuthNextAuthTs(providers)
   );
 
@@ -51,6 +52,22 @@ export const addNextAuth = async () => {
 
   // 6. If trpc installed, add protectedProcedure
   updateTrpcTs();
+
+  // add to env
+  addToDotEnv([
+    { key: "NEXTAUTH_SECRET", value: "your_super_secret_key_here" },
+    ...providers.map(
+      (p) => {
+        return { key: p.toUpperCase().concat("_ID"), value: "your_id_here" };
+      },
+      ...providers.map((p) => {
+        return {
+          key: p.toUpperCase().concat("_SECRET"),
+          value: "your_secret_here",
+        };
+      })
+    ),
+  ]);
 
   // 7. Install Packages: @auth/core @auth/drizzle-adapter next-auth
   await installPackages(

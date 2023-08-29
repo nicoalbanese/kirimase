@@ -408,7 +408,7 @@ export const installDependencies = async (
   // note this change hasnt been tested yet
   const dbSpecificPackage = packages[dbType];
   if (dbSpecificPackage) {
-    installPackages(
+    await installPackages(
       {
         regular: `drizzle-orm drizzle-zod zod ${dbSpecificPackage.regular}`,
         dev: `drizzle-kit tsx dotenv ${dbSpecificPackage.dev}`,
@@ -425,6 +425,15 @@ export const createDotEnv = (databaseUrl?: string) => {
   createFile(".env", `DATABASE_URL=${dburl}`);
 };
 
+export const addToDotEnv = (items: { key: string; value: string }[]) => {
+  const envPath = path.resolve(".env");
+  const envData = fs.readFileSync(envPath, "utf-8");
+
+  const newData = items.map((item) => `${item.key}=${item.value}`).join("\n");
+  const updatedEnvData = `${envData}\n${newData}`;
+
+  fs.writeFileSync(envPath, updatedEnvData);
+};
 export function updateTsConfigTarget() {
   // Define the path to the tsconfig.json file
   const tsConfigPath = path.join(process.cwd(), "tsconfig.json");

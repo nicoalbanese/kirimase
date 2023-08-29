@@ -264,7 +264,7 @@ export const createSignInComponent = () => {
   return `"use client";
 import { useSession, signIn, signOut } from "next-auth/react";
 
-export default function Login() {
+export default function SignIn() {
   const { data: session, status } = useSession();
 
   if (status === "loading") return <div>Loading...</div>;
