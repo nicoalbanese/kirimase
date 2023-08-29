@@ -77,6 +77,6 @@ export const addDrizzle = async () => {
   updateTsConfigTarget();
 
   updateConfigFile({ driver: dbType, provider: dbProvider });
-  installDependencies(dbProvider, preferredPackageManager);
+  await installDependencies(dbProvider, preferredPackageManager);
   addPackageToConfig("drizzle");
 };

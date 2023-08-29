@@ -9,6 +9,7 @@ import {
   apiAuthNextAuthTs,
   createAuthSchema,
   createSignInComponent,
+  enableSessionInContext,
   libAuthProviderTsx,
   libAuthUtilsTs,
   updateTrpcTs,
@@ -24,7 +25,8 @@ export const addNextAuth = async () => {
       return { name: p, value: p };
     }),
   })) as AuthProvider[];
-  const { hasSrc, preferredPackageManager, driver } = readConfigFile();
+  const { hasSrc, preferredPackageManager, driver, packages } =
+    readConfigFile();
   const rootPath = `${hasSrc ? "src" : ""}`;
   // 1. Create app/api/auth/[...nextauth].ts
   createFile(
@@ -51,22 +53,21 @@ export const addNextAuth = async () => {
   );
 
   // 6. If trpc installed, add protectedProcedure
-  updateTrpcTs();
+  if (packages.includes("trpc")) {
+    updateTrpcTs();
+    enableSessionInContext();
+  }
 
   // add to env
   addToDotEnv([
     { key: "NEXTAUTH_SECRET", value: "your_super_secret_key_here" },
-    ...providers.map(
-      (p) => {
-        return { key: p.toUpperCase().concat("_ID"), value: "your_id_here" };
+    ...providers.flatMap((p) => [
+      { key: p.toUpperCase().concat("_CLIENT_ID"), value: `your_${p}_id_here` },
+      {
+        key: p.toUpperCase().concat("_CLIENT_SECRET"),
+        value: `your_${p}_secret_here`,
       },
-      ...providers.map((p) => {
-        return {
-          key: p.toUpperCase().concat("_SECRET"),
-          value: "your_secret_here",
-        };
-      })
-    ),
+    ]),
   ]);
 
   // 7. Install Packages: @auth/core @auth/drizzle-adapter next-auth

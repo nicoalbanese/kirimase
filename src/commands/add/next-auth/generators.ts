@@ -1,3 +1,4 @@
+import { consola } from "consola";
 import { DBType } from "../../../types.js";
 import { readConfigFile } from "../../../utils.js";
 import { AuthProvider, AuthProviders, capitalised } from "./utils.js";
@@ -290,11 +291,11 @@ export default function SignIn() {
 // 6. updateTrpcTs
 export const updateTrpcTs = () => {
   const { hasSrc } = readConfigFile();
-  const filePath = `${hasSrc ? "src/" : ""}lib/server/routers/_app.ts`;
+  const filePath = `${hasSrc ? "src/" : ""}lib/server/trpc.ts`;
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
 
-  const protectedProcedureContent = `\nconst isAuthed = t.middleware((opts) => {
+  const protectedProcedureContent = `\n\nconst isAuthed = t.middleware((opts) => {
   const { ctx } = opts;
   if (!ctx.session) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
@@ -312,5 +313,19 @@ export const protectedProcedure = t.procedure.use(isAuthed);
 
   fs.writeFileSync(filePath, modifiedRouterContent);
 
-  console.log("File updated successfully.");
+  consola.success(
+    "TRPC Router updated successfully to add protectedProcedure."
+  );
+};
+
+export const enableSessionInContext = () => {
+  const { hasSrc } = readConfigFile();
+  const filePath = `${hasSrc ? "src/" : ""}lib/trpc/context.ts`;
+
+  const fileContent = fs.readFileSync(filePath, "utf-8");
+  const updatedContent = fileContent.replace(/\/\//g, "");
+
+  fs.writeFileSync(filePath, updatedContent);
+
+  consola.success("TRPC Context updated successfully to add Session data.");
 };
