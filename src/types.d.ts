@@ -61,6 +61,30 @@ export type ScaffoldSchema = {
   index?: string;
 };
 
-export type pgColumnType = "string" | "number" | "boolean" | "references";
-export type mysqlColumnType = "string" | "number" | "boolean" | "references";
-export type sqliteColumnType = "string" | "number";
+export type pgColumnType =
+  | "string"
+  | "number"
+  | "float"
+  | "boolean"
+  | "references"
+  | "timestamp"
+  | "date"
+  | "json";
+
+export type mysqlColumnType =
+  | "string"
+  | "number"
+  | "float"
+  | "boolean"
+  | "references"
+  | "date"
+  | "timestamp"
+  | "json";
+
+export type sqliteColumnType =
+  | "string"
+  | "number"
+  | "boolean"
+  | "date"
+  | "timestamp"
+  | "blob";

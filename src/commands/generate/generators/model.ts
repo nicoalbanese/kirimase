@@ -43,10 +43,14 @@ export const createConfig = () => {
         string: (name: string) => `varchar("${name}", { length: 256 })`,
         text: (name: string) => `text("${name}")`,
         number: (name: string) => `integer('${name}')`,
+        float: (name: string) => `real('${name}')`,
+        boolean: (name: string) => `boolean('${name}')`,
         references: (name: string, referencedTable: string = "REFERENCE") =>
           `integer('${name}').references(() => ${referencedTable}.id)`,
         // Add more types here as needed
-        boolean: (name: string) => `boolean('${name}')`,
+        timestamp: (name: string) => `timestamp('${name}')`,
+        date: (name: string) => `date('${name}')`,
+        json: (name: string) => `json('${name}')`,
       } as Record<
         pgColumnType,
         (name: string, referencedTable?: string) => string
@@ -59,9 +63,13 @@ export const createConfig = () => {
         string: (name: string) => `varchar("${name}", { length: 256 })`,
         text: (name: string) => `text("${name}")`,
         number: (name: string) => `int('${name}')`,
+        float: (name: string) => `real('${name}')`,
+        boolean: (name: string) => `boolean('${name}')`,
         references: (name: string, referencedTable: string = "REFERENCE") =>
           `int('${name}').references(() => ${toCamelCase(referencedTable)}.id)`,
-        boolean: (name: string) => `boolean('${name}')`,
+        date: (name: string) => `date('${name}')`,
+        timestamp: (name: string) => `timestamp('${name}')`,
+        json: (name: string) => `json('${name}')`,
       } as Record<
         mysqlColumnType,
         (name: string, referencedTable?: string) => string
@@ -73,6 +81,13 @@ export const createConfig = () => {
         id: (name: string) => `integer('${name}').primaryKey()`,
         string: (name: string) => `text('${name}')`,
         number: (name: string) => `integer('${name}')`,
+        boolean: (name: string) => `integer('${name}', { mode: boolean })`,
+        references: (name: string, referencedTable: string = "REFERENCE") =>
+          `int('${name}').references(() => ${toCamelCase(referencedTable)}.id)`,
+        date: (name: string) => `integer('${name}', { mode: timestamp })`,
+        timestamp: (name: string) =>
+          `integer('${name}', { mode: timestamp_ms })`,
+        blob: (name: string) => `blob('${name}')`,
       } as Record<sqliteColumnType, (name: string) => string>,
     },
   };
