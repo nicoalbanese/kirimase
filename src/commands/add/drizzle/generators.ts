@@ -365,13 +365,14 @@ export const addScriptsToPackageJson = (libPath: string, driver: DBType) => {
   // Parse package.json content
   let packageJson = JSON.parse(packageJsonData);
 
-  // Update the scripts property
-  // TODO: ADD PUSH and STUDIO command
   const newItems = {
-    generate: `drizzle-kit generate:${driver}`,
-    migrate: `tsx ${libPath}/db/migrate.ts`,
+    "db:generate": `drizzle-kit generate:${driver}`,
+    "db:migrate": `tsx ${libPath}/db/migrate.ts`,
+    "db:drop": `drizzle-kit drop`,
+    "db:pull": `drizzle-kit introspect:${driver}`,
     ...(driver !== "pg" ? { push: `drizzle-kit push:${driver}` } : {}),
-    studio: "drizzle-kit studio",
+    "db:studio": "drizzle-kit studio",
+    "db:check": `drizzle-kit check:${driver}`,
   };
   packageJson.scripts = {
     ...packageJson.scripts,
