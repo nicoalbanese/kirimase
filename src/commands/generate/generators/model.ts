@@ -319,7 +319,7 @@ import { New${tableNameSingularCapitalised}, insert${tableNameSingularCapitalise
 export const create${tableNameSingularCapitalised} = async (${tableNameSingular}: New${tableNameSingularCapitalised}) => {${getAuth}
   const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${
     belongsToUser
-      ? `{ ${tableNameSingular}, userId: session?.user.id! }`
+      ? `{ ...${tableNameSingular}, userId: session?.user.id! }`
       : `${tableNameSingular}`
   });
   try {
