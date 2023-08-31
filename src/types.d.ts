@@ -22,19 +22,22 @@ export type DBProviderOptions = {
 };
 export type PMType = "npm" | "yarn" | "pnpm";
 
-export type FieldType =
-  | "id"
-  | "string"
-  | "text"
-  | "number"
-  | "references"
-  | "boolean";
+// export type FieldType =
+//   | "id"
+//   | "string"
+//   | "text"
+//   | "number"
+//   | "references"
+//   | "boolean";
+
+export type FieldType = pgColumnType | mysqlColumnType | sqliteColumnType;
 
 export type DBField = {
   name: string;
   type: FieldType;
   references?: string;
   notNull?: boolean; // change to required later
+  cascade?: boolean;
 };
 
 export type AvailablePackage = "drizzle" | "trpc" | "next-auth";

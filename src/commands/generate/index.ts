@@ -60,12 +60,17 @@ async function askForFields(dbType: DBType) {
       });
 
       const fieldName = `${referencesTable.slice(0, -1)}_id`;
+      const cascade = await confirm({
+        message: "Would you like to cascade on delete?",
+        default: false,
+      });
 
       fields.push({
         name: fieldName,
         type: fieldType,
         references: referencesTable,
         notNull: true,
+        cascade,
       });
     } else {
       const fieldName = await input({

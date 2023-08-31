@@ -45,15 +45,21 @@ export const createConfig = () => {
         number: (name: string) => `integer('${name}')`,
         float: (name: string) => `real('${name}')`,
         boolean: (name: string) => `boolean('${name}')`,
-        references: (name: string, referencedTable: string = "REFERENCE") =>
-          `integer('${name}').references(() => ${referencedTable}.id)`,
+        references: (
+          name: string,
+          referencedTable: string = "REFERENCE",
+          cascade: boolean
+        ) =>
+          `integer('${name}').references(() => ${referencedTable}.id${
+            cascade ? ', { onDelete: "cascade" }' : ""
+          })`,
         // Add more types here as needed
         timestamp: (name: string) => `timestamp('${name}')`,
         date: (name: string) => `date('${name}')`,
         json: (name: string) => `json('${name}')`,
       } as Record<
         pgColumnType,
-        (name: string, referencedTable?: string) => string
+        (name: string, referencedTable?: string, cascade?: boolean) => string
       >,
     },
     mysql: {
@@ -65,14 +71,20 @@ export const createConfig = () => {
         number: (name: string) => `int('${name}')`,
         float: (name: string) => `real('${name}')`,
         boolean: (name: string) => `boolean('${name}')`,
-        references: (name: string, referencedTable: string = "REFERENCE") =>
-          `int('${name}').references(() => ${toCamelCase(referencedTable)}.id)`,
+        references: (
+          name: string,
+          referencedTable: string = "REFERENCE",
+          cascade: boolean
+        ) =>
+          `int('${name}').references(() => ${toCamelCase(referencedTable)}.id${
+            cascade ? ', { onDelete: "cascade" }' : ""
+          })`,
         date: (name: string) => `date('${name}')`,
         timestamp: (name: string) => `timestamp('${name}')`,
         json: (name: string) => `json('${name}')`,
       } as Record<
         mysqlColumnType,
-        (name: string, referencedTable?: string) => string
+        (name: string, referencedTable?: string, cascade?: boolean) => string
       >,
     },
     sqlite: {
@@ -82,13 +94,22 @@ export const createConfig = () => {
         string: (name: string) => `text('${name}')`,
         number: (name: string) => `integer('${name}')`,
         boolean: (name: string) => `integer('${name}', { mode: boolean })`,
-        references: (name: string, referencedTable: string = "REFERENCE") =>
-          `int('${name}').references(() => ${toCamelCase(referencedTable)}.id)`,
+        references: (
+          name: string,
+          referencedTable: string = "REFERENCE",
+          cascade: boolean
+        ) =>
+          `int('${name}').references(() => ${toCamelCase(referencedTable)}.id${
+            cascade ? ', { onDelete: "cascade" }' : ""
+          })`,
         date: (name: string) => `integer('${name}', { mode: timestamp })`,
         timestamp: (name: string) =>
           `integer('${name}', { mode: timestamp_ms })`,
         blob: (name: string) => `blob('${name}')`,
-      } as Record<sqliteColumnType, (name: string) => string>,
+      } as Record<
+        sqliteColumnType,
+        (name: string, referencedTable?: string, cascade?: boolean) => string
+      >,
     },
   };
 };
@@ -136,7 +157,8 @@ function generateModelContent(schema: Schema, dbType: DBType) {
       (field) =>
         `  ${toCamelCase(field.name)}: ${config.typeMappings[field.type](
           field.name,
-          field.references
+          field.references,
+          field.cascade
         )}${field.notNull ? ".notNull()" : ""}`
     )
     .join(",\n");
