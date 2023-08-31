@@ -16,7 +16,7 @@ import {
 } from "./generators.js";
 import { AuthProvider, AuthProviders } from "./utils.js";
 import { checkbox } from "@inquirer/prompts";
-import { addToDotEnv } from "../drizzle/generators.js";
+import { addToDotEnv, createInitSchema } from "../drizzle/generators.js";
 import { addContextProviderToLayout } from "../utils.js";
 
 export const addNextAuth = async () => {

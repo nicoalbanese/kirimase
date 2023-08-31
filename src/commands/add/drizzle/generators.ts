@@ -315,13 +315,20 @@ runMigrate().catch((err) => {
   createFile(`${libPath}/db/migrate.ts`, template);
 };
 
-export const createInitSchema = (libPath: string, dbType: DBType) => {
-  const { packages } = readConfigFile();
+export const createInitSchema = (libPath?: string, dbType?: DBType) => {
+  const { packages, hasSrc, driver } = readConfigFile();
+  const path = libPath
+    ? `./${libPath}/db/schema/computers.ts`
+    : `${hasSrc ? "src/" : ""}lib/db/schema/computers.ts`;
+  const dbDriver = dbType ?? driver;
   let initModel = "";
-  switch (dbType) {
+  switch (dbDriver) {
     case "pg":
-      initModel = `import { pgTable, serial, text } from "drizzle-orm/pg-core";
-${packages.includes("next-auth") ? 'import { users } from "./auth";' : ""}
+      initModel = `import { pgTable, serial, text } from "drizzle-orm/pg-core";${
+        packages.includes("next-auth")
+          ? '\nimport { users } from "./auth";'
+          : ""
+      }
 
 export const computers = pgTable("computers", {
   id: serial("id").primaryKey(),
@@ -335,8 +342,11 @@ export const computers = pgTable("computers", {
       break;
 
     case "mysql":
-      initModel = `import { mysqlTable, serial, varchar } from "drizzle-orm/mysql-core";
-import { users } from "./auth";
+      initModel = `import { mysqlTable, serial, varchar } from "drizzle-orm/mysql-core";${
+        packages.includes("next-auth")
+          ? '\nimport { users } from "./auth";'
+          : ""
+      }
 
 export const computers = mysqlTable("computers", {
   id: serial("id").primaryKey(),
@@ -349,8 +359,11 @@ export const computers = mysqlTable("computers", {
 });`;
       break;
     case "sqlite":
-      initModel = `import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
-import { users } from "./auth";
+      initModel = `import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";${
+        packages.includes("next-auth")
+          ? '\nimport { users } from "./auth";'
+          : ""
+      }
 
 export const computers = sqliteTable("computers", {
   id: integer("id").primaryKey(),
@@ -365,7 +378,7 @@ export const computers = sqliteTable("computers", {
     default:
       break;
   }
-  createFile(`./${libPath}/db/schema/computers.ts`, initModel);
+  createFile(path, initModel);
 };
 
 export const addScriptsToPackageJson = (libPath: string, driver: DBType) => {

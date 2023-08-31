@@ -25,7 +25,7 @@ export const addContextProviderToLayout = (
   const importStatement =
     provider === "NextAuthProvider"
       ? `import NextAuthProvider from "@/lib/auth/Provider";`
-      : `import TRPCProvider from "@/lib/trpc/Provider";`;
+      : `import TrpcProvider from "@/lib/trpc/Provider";`;
 
   const modifiedImportContent = `${beforeImport}${importStatement}\n${afterImport}`;
 
