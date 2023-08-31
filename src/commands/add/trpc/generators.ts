@@ -13,7 +13,7 @@ export type AppRouter = typeof appRouter;
 
 // 2. create server/trpc.ts
 export const serverTrpcTs = () => {
-  return `import { initTRPC } from "@trpc/server";
+  return `import { initTRPC, TRPCError } from "@trpc/server";
 import { Context } from "../trpc/context";
 
 /**
@@ -45,7 +45,7 @@ export const apiTrpcRouteTs = () => {
   return `import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
 import { appRouter } from "@/lib/server/routers/_app";
-import { createContext } from "@/lib/server/context";
+import { createContext } from "@/lib/trpc/context";
 
 const handler = (req: Request) =>
   fetchRequestHandler({

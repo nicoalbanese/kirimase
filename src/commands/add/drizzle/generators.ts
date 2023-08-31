@@ -324,7 +324,7 @@ export const createInitSchema = (libPath?: string, dbType?: DBType) => {
   let initModel = "";
   switch (dbDriver) {
     case "pg":
-      initModel = `import { pgTable, serial, text } from "drizzle-orm/pg-core";${
+      initModel = `import { pgTable, serial, text, integer } from "drizzle-orm/pg-core";${
         packages.includes("next-auth")
           ? '\nimport { users } from "./auth";'
           : ""
@@ -342,7 +342,7 @@ export const computers = pgTable("computers", {
       break;
 
     case "mysql":
-      initModel = `import { mysqlTable, serial, varchar } from "drizzle-orm/mysql-core";${
+      initModel = `import { mysqlTable, serial, varchar, integer } from "drizzle-orm/mysql-core";${
         packages.includes("next-auth")
           ? '\nimport { users } from "./auth";'
           : ""
@@ -396,7 +396,7 @@ export const addScriptsToPackageJson = (libPath: string, driver: DBType) => {
     "db:migrate": `tsx ${libPath}/db/migrate.ts`,
     "db:drop": `drizzle-kit drop`,
     "db:pull": `drizzle-kit introspect:${driver}`,
-    ...(driver !== "pg" ? { push: `drizzle-kit push:${driver}` } : {}),
+    ...(driver !== "pg" ? { "db:push": `drizzle-kit push:${driver}` } : {}),
     "db:studio": "drizzle-kit studio",
     "db:check": `drizzle-kit check:${driver}`,
   };
