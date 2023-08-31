@@ -1,7 +1,7 @@
 import { consola } from "consola";
 import fs from "fs";
 import path from "path";
-import { createFile, installPackages } from "../../../utils.js";
+import { createFile, installPackages, readConfigFile } from "../../../utils.js";
 import { DBProvider, DBType, PMType } from "../../../types.js";
 
 type ConfigDriver = "pg" | "turso" | "libsql" | "mysql" | "better-sqlite";
@@ -316,43 +316,56 @@ runMigrate().catch((err) => {
 };
 
 export const createInitSchema = (libPath: string, dbType: DBType) => {
-  let userSchema = "";
+  const { packages } = readConfigFile();
+  let initModel = "";
   switch (dbType) {
     case "pg":
-      userSchema = `import { pgTable, serial, text } from "drizzle-orm/pg-core";
+      initModel = `import { pgTable, serial, text } from "drizzle-orm/pg-core";
+${packages.includes("next-auth") ? 'import { users } from "./auth";' : ""}
 
-export const users = pgTable("users", {
+export const computers = pgTable("computers", {
   id: serial("id").primaryKey(),
-  name: text("name"),
-  email: text("email").notNull(),
-  password: text("password").notNull(),
+  brand: text("brand").notNull(),
+  cores: integer("cores").notNull(),${
+    packages.includes("next-auth")
+      ? '\nuserId: integer("user_id").notNull().references(() => users.id)'
+      : ""
+  }
 });`;
       break;
 
     case "mysql":
-      userSchema = `import { mysqlTable, serial, varchar } from "drizzle-orm/mysql-core";
+      initModel = `import { mysqlTable, serial, varchar } from "drizzle-orm/mysql-core";
+import { users } from "./auth";
 
-export const users = mysqlTable("users", {
+export const computers = mysqlTable("computers", {
   id: serial("id").primaryKey(),
-  name: varchar("name", {length: 256}),
-  email: varchar("email", {length: 256}).notNull(),
-  password: varchar("password", {length: 256}).notNull(),
+  brand: varchar("brand", {length: 256}).notNull(),
+  cores: integer("cores").notNull(),${
+    packages.includes("next-auth")
+      ? '\nuserId: integer("user_id").notNull().references(() => users.id)'
+      : ""
+  }
 });`;
       break;
     case "sqlite":
-      userSchema = `import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
+      initModel = `import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
+import { users } from "./auth";
 
-export const users = sqliteTable("users", {
+export const computers = sqliteTable("computers", {
   id: integer("id").primaryKey(),
-  name: text("name"),
-  email: text("email").notNull(),
-  password: text("password").notNull(),
+  brand: text("brand").notNull(),
+  cores: integer("cores").notNull(),${
+    packages.includes("next-auth")
+      ? '\nuserId: integer("user_id").notNull().references(() => users.id)'
+      : ""
+  }
 });`;
       break;
     default:
       break;
   }
-  createFile(`./${libPath}/db/schema/users.ts`, userSchema);
+  createFile(`./${libPath}/db/schema/computers.ts`, initModel);
 };
 
 export const addScriptsToPackageJson = (libPath: string, driver: DBType) => {

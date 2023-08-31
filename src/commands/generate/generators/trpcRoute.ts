@@ -39,7 +39,7 @@ function updateTRPCRouter(routerName: string): void {
   const modifiedRouterContent = `${beforeRouter}\n  ${routerName}: ${routerName}Router,${afterRouter}`;
   replaceFile(filePath, modifiedRouterContent);
 
-  consola.success("Added ${routerName} router to root router successfully.");
+  consola.success(`Added ${routerName} router to root router successfully.`);
 }
 
 const generateRouteContent = (schema: Schema) => {
