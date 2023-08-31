@@ -5,7 +5,7 @@ import {
   pgColumnType,
   sqliteColumnType,
 } from "../../../types.js";
-import { createFile } from "../../../utils.js";
+import { createFile, readConfigFile } from "../../../utils.js";
 import { Schema } from "../types.js";
 import {
   ReferenceType,
@@ -43,7 +43,7 @@ export const createConfig = () => {
       tableFunc: "pgTable",
       typeMappings: {
         id: (name: string) => `serial("${name}").primaryKey()`,
-        string: (name: string) => `varchar("${name}", { length: 256 })`,
+        varchar: (name: string) => `varchar("${name}", { length: 256 })`,
         text: (name: string) => `text("${name}")`,
         number: (name: string) => `integer("${name}")`,
         float: (name: string) => `real("${name}")`,
@@ -72,7 +72,7 @@ export const createConfig = () => {
       tableFunc: "mysqlTable",
       typeMappings: {
         id: (name: string) => `serial("${name}").primaryKey()`,
-        string: (name: string) => `varchar("${name}", { length: 256 })`,
+        varchar: (name: string) => `varchar("${name}", { length: 256 })`,
         text: (name: string) => `text("${name}")`,
         number: (name: string) => `int("${name}")`,
         float: (name: string) => `real("${name}")`,
@@ -102,7 +102,7 @@ export const createConfig = () => {
         id: (name: string) => `integer("${name}").primaryKey()`,
         string: (name: string) => `text("${name}")`,
         number: (name: string) => `integer("${name}")`,
-        boolean: (name: string) => `integer("${name}", { mode: boolean })`,
+        boolean: (name: string) => `integer("${name}", { mode: "boolean" })`,
         references: (
           name: string,
           referencedTable: string = "REFERENCE",
@@ -114,9 +114,9 @@ export const createConfig = () => {
           }("${name}").references(() => ${toCamelCase(referencedTable)}.id${
             cascade ? ', { onDelete: "cascade" }' : ""
           })`,
-        date: (name: string) => `integer("${name}", { mode: timestamp })`,
+        date: (name: string) => `integer("${name}", { mode: "timestamp" })`,
         timestamp: (name: string) =>
-          `integer("${name}", { mode: timestamp_ms })`,
+          `integer("${name}", { mode: "timestamp_ms" })`,
         blob: (name: string) => `blob("${name}")`,
       } as Record<
         sqliteColumnType,
@@ -220,7 +220,7 @@ export type ${tableNameSingularCapitalised}Id = z.infer<typeof ${tableNameSingul
 // create queries and mutations folders
 
 const generateQueryContent = (schema: Schema) => {
-  const { tableName } = schema;
+  const { tableName, belongsToUser } = schema;
   const {
     tableNameCamelCase,
     tableNameSingular,
@@ -230,10 +230,17 @@ const generateQueryContent = (schema: Schema) => {
   const relations = schema.fields.filter(
     (field) => field.type === "references"
   );
+
+  const getAuth = belongsToUser
+    ? "\n  const { session } = await getUserAuth();"
+    : "";
+  // add and statment
   // TODO: UPDATE IMPORTS to _IdSchema
   const template = `import { db } from "@/lib/db";
-import { eq } from "drizzle-orm";
-import { ${tableNameSingular}IdSchema, ${tableNameCamelCase} } from "@/lib/db/schema/${tableNameCamelCase}";
+import { eq${belongsToUser ? ", and" : ""} } from "drizzle-orm";${
+    belongsToUser ? '\nimport { getUserAuth } from "@/lib/auth/utils";' : ""
+  }
+import { type ${tableNameSingularCapitalised}Id, ${tableNameSingular}IdSchema, ${tableNameCamelCase} } from "@/lib/db/schema/${tableNameCamelCase}";
 ${
   relations.length > 0
     ? relations.map(
@@ -244,7 +251,7 @@ ${
       )
     : ""
 }
-export const get${tableNameSingularCapitalised}s = async () => {
+export const get${tableNameSingularCapitalised}s = async () => {${getAuth}
   const ${tableNameFirstChar} = await db.select().from(${tableNameCamelCase})${
     relations.length > 0
       ? relations.map(
@@ -256,13 +263,23 @@ export const get${tableNameSingularCapitalised}s = async () => {
             )}, ${toCamelCase(relation.references)}.id))`
         )
       : ""
+  }${
+    belongsToUser
+      ? `.where(eq(${tableNameCamelCase}.userId, session?.user.id!))`
+      : ""
   };
   return { ${tableNameCamelCase}: ${tableNameFirstChar} };
 };
 
-export const get${tableNameSingularCapitalised}ById = async (id: number) => {
+export const get${tableNameSingularCapitalised}ById = async (id: ${tableNameSingularCapitalised}Id) => {${getAuth}
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
-  const [${tableNameFirstChar}] = await db.select().from(${tableNameCamelCase}).where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id))${
+  const [${tableNameFirstChar}] = await db.select().from(${tableNameCamelCase}).where(${
+    belongsToUser ? "and(" : ""
+  }eq(${tableNameCamelCase}.id, ${tableNameSingular}Id)${
+    belongsToUser
+      ? `, eq(${tableNameCamelCase}.userId, session?.user.id!))`
+      : ""
+  })${
     relations.length > 0
       ? relations.map(
           (relation) =>
@@ -282,48 +299,87 @@ export const get${tableNameSingularCapitalised}ById = async (id: number) => {
 };
 
 const generateMutationContent = (schema: Schema) => {
-  const { tableName } = schema;
+  const { tableName, belongsToUser } = schema;
+  const { driver } = readConfigFile();
   const {
     tableNameCamelCase,
     tableNameSingular,
     tableNameSingularCapitalised,
     tableNameFirstChar,
   } = formatTableName(tableName);
+  const getAuth = belongsToUser
+    ? "\n  const { session } = await getUserAuth();"
+    : "";
 
   const template = `import { db } from "@/lib/db";
-import { eq } from "drizzle-orm";
-import { New${tableNameSingularCapitalised}, insert${tableNameSingularCapitalised}Schema, ${tableNameCamelCase}, ${tableNameSingular}IdSchema } from "@/lib/db/schema/${tableNameCamelCase}";
+import { ${belongsToUser ? "and, " : ""}eq } from "drizzle-orm";
+import { New${tableNameSingularCapitalised}, insert${tableNameSingularCapitalised}Schema, ${tableNameCamelCase}, ${tableNameSingular}IdSchema } from "@/lib/db/schema/${tableNameCamelCase}";${
+    belongsToUser ? '\nimport { getUserAuth } from "@/lib/auth/utils";' : ""
+  }
 
-export const create${tableNameSingularCapitalised} = async (${tableNameSingular}: New${tableNameSingularCapitalised}) => {
-  const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${tableNameSingular});
+export const create${tableNameSingularCapitalised} = async (${tableNameSingular}: New${tableNameSingularCapitalised}) => {${getAuth}
+  const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${
+    belongsToUser
+      ? `{ ${tableNameSingular}, userId: session?.user.id! }`
+      : `${tableNameSingular}`
+  });
   try {
-    const [${tableNameFirstChar}] = await db.insert(${tableNameCamelCase}).values(new${tableNameSingularCapitalised}).returning();
-    return { ${tableNameSingular}: ${tableNameFirstChar} };
+    ${
+      driver === "mysql" ? "" : `const [${tableNameFirstChar}] =  `
+    }await db.insert(${tableNameCamelCase}).values(new${tableNameSingularCapitalised})${
+    driver === "mysql"
+      ? "\nreturn { sucess: true }"
+      : `.returning();
+    return { ${tableNameSingular}: ${tableNameFirstChar} };`
+  }
   } catch (err) {
     return { error: (err as Error).message ?? "Error, please try again" };
   }
 };
 
-export const update${tableNameSingularCapitalised} = async (id: number, ${tableNameSingular}: New${tableNameSingularCapitalised}) => {
+export const update${tableNameSingularCapitalised} = async (id: number, ${tableNameSingular}: New${tableNameSingularCapitalised}) => {${getAuth}
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${tableNameSingular});
   try {
-    const [${tableNameFirstChar}] = await db
+    ${driver === "mysql" ? "" : `const [${tableNameFirstChar}] =  `}await db
      .update(${tableNameCamelCase})
      .set(new${tableNameSingularCapitalised})
-     .where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!))
+     .where(${
+       belongsToUser ? "and(" : ""
+     }eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!)${
+    belongsToUser
+      ? `, eq(${tableNameCamelCase}.userId, session?.user.id!)))`
+      : ")"
+  }${
+    driver === "mysql"
+      ? "\n    return {success: true}"
+      : `
      .returning();
-    return { ${tableNameSingular}: ${tableNameFirstChar} };
+    return { ${tableNameSingular}: ${tableNameFirstChar} };`
+  }
   } catch (err) {
     return { error: (err as Error).message ?? "Error, please try again" };
   }
 };
 
-export const delete${tableNameSingularCapitalised} = async (id: number) => {
+export const delete${tableNameSingularCapitalised} = async (id: number) => {${getAuth}
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   try {
-    const [${tableNameFirstChar}] = await db.delete(${tableNameCamelCase}).where(eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!)).returning();
-    return { ${tableNameSingular}: ${tableNameFirstChar} };
+    ${
+      driver === "mysql" ? "" : `const [${tableNameFirstChar}] =  `
+    }await db.delete(${tableNameCamelCase}).where(${
+    belongsToUser ? "and(" : ""
+  }eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!)${
+    belongsToUser
+      ? `, eq(${tableNameCamelCase}.userId, session?.user.id!)))`
+      : ")"
+  }${
+    driver === "mysql"
+      ? "\n    return {success: true}"
+      : `
+    .returning();
+    return { ${tableNameSingular}: ${tableNameFirstChar} };`
+  }
   } catch (err) {
     return { error: (err as Error).message ?? "Error, please try again" };
   }

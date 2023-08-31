@@ -65,7 +65,8 @@ export type ScaffoldSchema = {
 };
 
 export type pgColumnType =
-  | "string"
+  | "varchar"
+  | "text"
   | "number"
   | "float"
   | "boolean"
@@ -75,7 +76,8 @@ export type pgColumnType =
   | "json";
 
 export type mysqlColumnType =
-  | "string"
+  | "varchar"
+  | "text"
   | "number"
   | "float"
   | "boolean"
