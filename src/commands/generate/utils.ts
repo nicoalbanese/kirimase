@@ -36,3 +36,12 @@ export const formatTableName = (tableName: string) => {
     tableNameCapitalised,
   };
 };
+
+export type ReferenceType = "string" | "number";
+export const getReferenceFieldType = (type: ReferenceType) => {
+  return {
+    pg: type === "string" ? "varchar" : "integer",
+    mysql: type === "string" ? "varchar" : "int",
+    sqlite: type === "string" ? "text" : "integer",
+  };
+};

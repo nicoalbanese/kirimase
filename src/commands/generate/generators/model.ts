@@ -1,3 +1,4 @@
+import { consola } from "consola";
 import {
   DBType,
   mysqlColumnType,
@@ -7,13 +8,15 @@ import {
 import { createFile } from "../../../utils.js";
 import { Schema } from "../types.js";
 import {
+  ReferenceType,
   capitaliseForZodSchema,
   formatTableName,
+  getReferenceFieldType,
   toCamelCase,
 } from "../utils.js";
 
 export function scaffoldModel(schema: Schema, dbType: DBType, hasSrc: boolean) {
-  const { tableName } = schema;
+  const { tableName, belongsToUser } = schema;
 
   // create model file
   const modelPath = `${hasSrc ? "src/" : ""}lib/db/schema/${toCamelCase(
@@ -39,24 +42,27 @@ export const createConfig = () => {
     pg: {
       tableFunc: "pgTable",
       typeMappings: {
-        id: (name: string) => `serial('${name}').primaryKey()`,
+        id: (name: string) => `serial("${name}").primaryKey()`,
         string: (name: string) => `varchar("${name}", { length: 256 })`,
         text: (name: string) => `text("${name}")`,
-        number: (name: string) => `integer('${name}')`,
-        float: (name: string) => `real('${name}')`,
-        boolean: (name: string) => `boolean('${name}')`,
+        number: (name: string) => `integer("${name}")`,
+        float: (name: string) => `real("${name}")`,
+        boolean: (name: string) => `boolean("${name}")`,
         references: (
           name: string,
           referencedTable: string = "REFERENCE",
-          cascade: boolean
+          cascade: boolean,
+          referenceIdType: ReferenceType = "number"
         ) =>
-          `integer('${name}').references(() => ${referencedTable}.id${
+          `${getReferenceFieldType(referenceIdType)["pg"]}("${name}"${
+            referenceIdType === "string" ? ", { length: 256 }" : ""
+          }).references(() => ${referencedTable}.id${
             cascade ? ', { onDelete: "cascade" }' : ""
           })`,
         // Add more types here as needed
-        timestamp: (name: string) => `timestamp('${name}')`,
-        date: (name: string) => `date('${name}')`,
-        json: (name: string) => `json('${name}')`,
+        timestamp: (name: string) => `timestamp("${name}")`,
+        date: (name: string) => `date("${name}")`,
+        json: (name: string) => `json("${name}")`,
       } as Record<
         pgColumnType,
         (name: string, referencedTable?: string, cascade?: boolean) => string
@@ -65,23 +71,26 @@ export const createConfig = () => {
     mysql: {
       tableFunc: "mysqlTable",
       typeMappings: {
-        id: (name: string) => `serial('${name}').primaryKey()`,
+        id: (name: string) => `serial("${name}").primaryKey()`,
         string: (name: string) => `varchar("${name}", { length: 256 })`,
         text: (name: string) => `text("${name}")`,
-        number: (name: string) => `int('${name}')`,
-        float: (name: string) => `real('${name}')`,
-        boolean: (name: string) => `boolean('${name}')`,
+        number: (name: string) => `int("${name}")`,
+        float: (name: string) => `real("${name}")`,
+        boolean: (name: string) => `boolean("${name}")`,
         references: (
           name: string,
           referencedTable: string = "REFERENCE",
-          cascade: boolean
+          cascade: boolean,
+          referenceIdType: ReferenceType = "number"
         ) =>
-          `int('${name}').references(() => ${toCamelCase(referencedTable)}.id${
+          `${getReferenceFieldType(referenceIdType)["mysql"]}("${name}"${
+            referenceIdType === "string" ? ", { length: 256 }" : ""
+          }).references(() => ${toCamelCase(referencedTable)}.id${
             cascade ? ', { onDelete: "cascade" }' : ""
           })`,
-        date: (name: string) => `date('${name}')`,
-        timestamp: (name: string) => `timestamp('${name}')`,
-        json: (name: string) => `json('${name}')`,
+        date: (name: string) => `date("${name}")`,
+        timestamp: (name: string) => `timestamp("${name}")`,
+        json: (name: string) => `json("${name}")`,
       } as Record<
         mysqlColumnType,
         (name: string, referencedTable?: string, cascade?: boolean) => string
@@ -90,22 +99,25 @@ export const createConfig = () => {
     sqlite: {
       tableFunc: "sqliteTable",
       typeMappings: {
-        id: (name: string) => `integer('${name}').primaryKey()`,
-        string: (name: string) => `text('${name}')`,
-        number: (name: string) => `integer('${name}')`,
-        boolean: (name: string) => `integer('${name}', { mode: boolean })`,
+        id: (name: string) => `integer("${name}").primaryKey()`,
+        string: (name: string) => `text("${name}")`,
+        number: (name: string) => `integer("${name}")`,
+        boolean: (name: string) => `integer("${name}", { mode: boolean })`,
         references: (
           name: string,
           referencedTable: string = "REFERENCE",
-          cascade: boolean
+          cascade: boolean,
+          referenceIdType: ReferenceType = "number"
         ) =>
-          `int('${name}').references(() => ${toCamelCase(referencedTable)}.id${
+          `${
+            getReferenceFieldType(referenceIdType)["sqlite"]
+          }("${name}").references(() => ${toCamelCase(referencedTable)}.id${
             cascade ? ', { onDelete: "cascade" }' : ""
           })`,
-        date: (name: string) => `integer('${name}', { mode: timestamp })`,
+        date: (name: string) => `integer("${name}", { mode: timestamp })`,
         timestamp: (name: string) =>
-          `integer('${name}', { mode: timestamp_ms })`,
-        blob: (name: string) => `blob('${name}')`,
+          `integer("${name}", { mode: timestamp_ms })`,
+        blob: (name: string) => `blob("${name}")`,
       } as Record<
         sqliteColumnType,
         (name: string, referencedTable?: string, cascade?: boolean) => string
@@ -144,13 +156,13 @@ function generateModelContent(schema: Schema, dbType: DBType) {
   );
 
   const uniqueTypes = Array.from(new Set(usedTypes));
-  const importStatement = `import {${uniqueTypes
+  const importStatement = `import { ${uniqueTypes
     .join(", ")
     .concat(
       `, ${config.tableFunc}`
-    )}} from 'drizzle-orm/${dbType}-core';\nimport { createInsertSchema, createSelectSchema } from 'drizzle-zod';\nimport { z } from 'zod';\n${
+    )}} from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
     referenceImports.length > 0 ? referenceImports.join("\n") : ""
-  }`;
+  }${schema.belongsToUser ? '\nimport { users } from "./auth";' : ""}`;
 
   const schemaFields = fields
     .map(
@@ -179,29 +191,27 @@ function generateModelContent(schema: Schema, dbType: DBType) {
     config.tableFunc
   }('${tableName}', {
   id: ${config.typeMappings["id"]("id")},
-${schemaFields}
+${schemaFields}${
+    schema.belongsToUser
+      ? `,\n  userId: ${config.typeMappings["references"](
+          "user_id",
+          "users",
+          true,
+          "string"
+        ).concat(".notNull()")},`
+      : ""
+  }
 }${indexFormatted});\n 
 
-// Schema for inserting ${tableNameCamelCase} - can be used to validate API requests
-export const insert${tableNameSingularCapitalised}Schema = createInsertSchema(${tableNameCamelCase}${
-    relations.length > 0
-      ? `, {\n  ${relations
-          .map((relation) => `${toCamelCase(relation.name)}: z.coerce.number()`)
-          .join(",\n")}\n}`
-      : ""
-  });
-export type New${tableNameSingularCapitalised} = z.infer<typeof insert${tableNameSingularCapitalised}Schema>;
-
-// Schema for selecting ${tableNameCamelCase} - can be used to validate API responses
-export const select${tableNameSingularCapitalised}Schema = createSelectSchema(${tableNameCamelCase}, { 
-  id: z.coerce.number()
-});
+// Schema for ${tableNameCamelCase} - used to validate API requests
+export const insert${tableNameSingularCapitalised}Schema = createInsertSchema(${tableNameCamelCase});
+export const select${tableNameSingularCapitalised}Schema = createSelectSchema(${tableNameCamelCase});
 export const update${tableNameSingularCapitalised}Schema = select${tableNameSingularCapitalised}Schema;
-
-export type ${tableNameSingularCapitalised} = z.infer<typeof select${tableNameSingularCapitalised}Schema>;
-
 export const ${tableNameSingular}IdSchema = select${tableNameSingularCapitalised}Schema.pick({ id: true });
 
+export type ${tableNameSingularCapitalised} = z.infer<typeof select${tableNameSingularCapitalised}Schema>;
+export type New${tableNameSingularCapitalised} = z.infer<typeof insert${tableNameSingularCapitalised}Schema>;
+export type ${tableNameSingularCapitalised}Id = z.infer<typeof ${tableNameSingular}IdSchema>["id"];
 `;
 
   return `${importStatement}\n\n${schemaContent}`;

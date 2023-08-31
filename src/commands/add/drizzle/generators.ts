@@ -342,7 +342,7 @@ export const computers = pgTable("computers", {
       break;
 
     case "mysql":
-      initModel = `import { mysqlTable, serial, varchar, integer } from "drizzle-orm/mysql-core";${
+      initModel = `import { mysqlTable, serial, varchar, int } from "drizzle-orm/mysql-core";${
         packages.includes("next-auth")
           ? '\nimport { users } from "./auth";'
           : ""
@@ -351,7 +351,7 @@ export const computers = pgTable("computers", {
 export const computers = mysqlTable("computers", {
   id: serial("id").primaryKey(),
   brand: varchar("brand", {length: 256}).notNull(),
-  cores: integer("cores").notNull(),${
+  cores: int("cores").notNull(),${
     packages.includes("next-auth")
       ? '\nuserId: integer("user_id").notNull().references(() => users.id)'
       : ""

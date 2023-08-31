@@ -4,4 +4,5 @@ export type Schema = {
   tableName: string;
   fields: DBField[];
   index: string;
+  belongsToUser?: boolean;
 };

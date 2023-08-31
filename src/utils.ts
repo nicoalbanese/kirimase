@@ -15,7 +15,7 @@ export function createFile(filePath: string, content: string) {
   if (!fs.existsSync(dirName)) {
     // If not, create the directory and any nested directories that might be needed
     fs.mkdirSync(dirName, { recursive: true });
-    consola.success(`Directory ${dirName} created.`);
+    // consola.success(`Directory ${dirName} created.`);
   }
 
   fs.writeFileSync(resolvedPath, content);

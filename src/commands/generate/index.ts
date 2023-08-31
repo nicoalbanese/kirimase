@@ -8,6 +8,7 @@ import { readConfigFile } from "../../utils.js";
 import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
 import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
+import { Schema } from "./types.js";
 
 function provideInstructions() {
   consola.info(
@@ -37,6 +38,14 @@ async function askForTable() {
         : "Table name must be in snake_case if more than one word, and plural.",
   });
   return tableName;
+}
+
+async function askIfBelongsToUser() {
+  const belongsToUser = await confirm({
+    message: "Does this model belong to the user?",
+    default: true,
+  });
+  return belongsToUser;
 }
 
 async function askForFields(dbType: DBType) {
@@ -135,12 +144,23 @@ export async function buildSchema() {
       const fields = await askForFields(driver);
       const indexedField = await askForIndex(fields);
       // console.log(indexedField);
-
-      const schema = {
-        tableName,
-        fields,
-        index: indexedField,
-      };
+      let schema: Schema;
+      if (resourceType.includes("model") && packages.includes("next-auth")) {
+        const belongsToUser = await askIfBelongsToUser();
+        schema = {
+          tableName,
+          fields,
+          index: indexedField,
+          belongsToUser,
+        };
+      } else {
+        schema = {
+          tableName,
+          fields,
+          index: indexedField,
+          belongsToUser: false,
+        };
+      }
 
       if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
       if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
