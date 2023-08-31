@@ -247,7 +247,7 @@ ${
         (relation) =>
           `import { ${toCamelCase(
             relation.references
-          )} } from "@/lib/db/schema/${toCamelCase(relation.references)}";`
+          )} } from "@/lib/db/schema/${toCamelCase(relation.references)}";\n`
       )
     : ""
 }
@@ -291,7 +291,6 @@ export const get${tableNameSingularCapitalised}ById = async (id: ${tableNameSing
         )
       : ""
   };
-
   return { ${tableNameSingular}: ${tableNameFirstChar} };
 };
 `;
