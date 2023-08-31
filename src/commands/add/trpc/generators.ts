@@ -15,12 +15,29 @@ export type AppRouter = typeof appRouter;
 export const serverTrpcTs = () => {
   return `import { initTRPC, TRPCError } from "@trpc/server";
 import { Context } from "../trpc/context";
+import superjson from "superjson";
+import { ZodError } from "zod";
 
 /**
  * Initialization of tRPC backend
  * Should be done only once per backend!
  */
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({
+  transformer: superjson,
+  errorFormatter(opts) {
+    const { shape, error } = opts;
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        zodError:
+          error.code === "BAD_REQUEST" && error.cause instanceof ZodError
+            ? error.cause.flatten()
+            : null,
+      },
+    };
+  },
+});
 /**
  * Export reusable router and procedure helpers
  * that can be used throughout the router
@@ -30,11 +47,11 @@ export const publicProcedure = t.procedure;`;
 };
 
 // 3. create server/router/users.ts directory and maybe a users file
-export const serverRouterUsersTs = () => {
+export const serverRouterComputersTs = () => {
   return `import { publicProcedure, router } from "../trpc";
-export const usersRouter = router({
-  getUsers: publicProcedure.query(async () => {
-    return [{ id: 1, name: "John Doe" }, { id: 2, name: "Jane Doe" }];
+export const computersRouter = router({
+  getComputers: publicProcedure.query(async () => {
+    return [{ id: 1, name: "Macintosh" }, { id: 2, name: "Microsoft" }];
   }),
 });
 `;
@@ -75,14 +92,17 @@ import { httpBatchLink } from "@trpc/client";
 import React, { useState } from "react";
 
 import { trpc } from "./client";
+import { getUrl } from "./utils";
+import SuperJSON from "superjson";
 
 export default function TrpcProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient({}));
   const [trpcClient] = useState(() =>
     trpc.createClient({
+      transformer: SuperJSON,
       links: [
         httpBatchLink({
-          url: "http://localhost:3000/api/trpc",
+          url: getUrl(),
         }),
       ],
     })
@@ -111,6 +131,48 @@ export const serverClient = appRouter.createCaller({
 `;
 };
 
+export const libTrpcApiTs = () => {
+  return `import { cookies } from "next/headers";
+import { getUserAuth } from "../auth/utils";
+import { appRouter } from "../server/routers/_app";
+import { loggerLink } from "@trpc/client";
+import { experimental_createTRPCNextAppDirServer as createTRPCNextAppDirServer } from "@trpc/next/app-dir/server";
+import { experimental_nextCacheLink as nextCacheLink } from "@trpc/next/app-dir/links/nextCache";
+import SuperJSON from "superjson";
+
+/**
+ * This client invokes procedures directly on the server without fetching over HTTP.
+ */
+export const api = createTRPCNextAppDirServer<typeof appRouter>({
+  config() {
+    return {
+      transformer: SuperJSON,
+      links: [
+        loggerLink({
+          enabled: (op) => true,
+        }),
+        nextCacheLink({
+          // requests are cached for 5 seconds
+          revalidate: 5,
+          router: appRouter,
+          async createContext() {
+            const { session } = await getUserAuth();
+            return {
+              session,
+              headers: {
+                cookie: cookies().toString(),
+                "x-trpc-source": "rsc-invoke",
+              },
+            };
+          },
+        }),
+      ],
+    };
+  },
+});
+`;
+};
+
 // 8. create lib/trpc/context.ts
 export const libTrpcContextTs = (withSession: boolean = false) => {
   return `import { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
@@ -127,4 +189,16 @@ ${withSession ? "" : " // "}const { session } = await getUserAuth();
 
 export type Context = Awaited<ReturnType<typeof createContext>>;
 `;
+};
+
+export const libTrpcUtilsTs = () => {
+  return `function getBaseUrl() {
+  if (typeof window !== "undefined") return "";
+  if (process.env.VERCEL_URL) return \`https://${process.env.VERCEL_URL}\`;
+  return "http://localhost:3000";
+}
+
+export function getUrl() {
+  return getBaseUrl() + "/api/trpc";
+}`;
 };
