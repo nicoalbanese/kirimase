@@ -13,6 +13,7 @@ import {
   createIndexTs,
   createInitSchema,
   createMigrateTs,
+  createQueriesAndMutationsFolders,
   installDependencies,
   updateTsConfigTarget,
 } from "./generators.js";
@@ -65,6 +66,7 @@ export const addDrizzle = async () => {
 
   // create all the files here
   createInitSchema(libPath, dbType);
+  createQueriesAndMutationsFolders(libPath);
 
   // dependent on dbtype and driver, create
   createIndexTs(libPath, dbType, dbProvider);

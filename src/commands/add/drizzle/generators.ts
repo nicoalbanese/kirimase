@@ -378,7 +378,20 @@ export const computers = sqliteTable("computers", {
     default:
       break;
   }
-  createFile(path, initModel);
+  const sharedImports = `import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { z } from 'zod';`;
+  const sharedSchemas = `// Schema for CRUD - used to validate API requests
+export const insertComputerSchema = createInsertSchema(computers);
+export const selectComputerSchema = createSelectSchema(computers);
+export const computerIdSchema = selectComputerSchema.pick({ id: true });
+export const updateComputerSchema = selectComputerSchema;
+
+export type Computer = z.infer<typeof selectComputerSchema>;
+export type NewComputer = z.infer<typeof insertComputerSchema>;
+export type ComputerId = z.infer<typeof computerIdSchema>["id"];`;
+
+  const finalDoc = `${sharedImports}\n${initModel}\n${sharedSchemas}`;
+  createFile(path, finalDoc);
 };
 
 export const addScriptsToPackageJson = (libPath: string, driver: DBType) => {
@@ -499,7 +512,62 @@ export function updateTsConfigTarget() {
   });
 }
 
-export function createQueriesAndMutationsFolders() {
-  // create users queries
-  // create users mutations
+export function createQueriesAndMutationsFolders(libPath: string) {
+  // create computers queries
+  const query = `import { db } from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { computerIdSchema, computers, ComputerId } from "@/lib/db/schema/computers";
+
+export const getComputers = async () => {
+  const c = await db.select().from(computers);
+  return { computers: c };
+};
+
+export const getComputerById = async (id: ComputerId) => {
+  const { id: computerId } = computerIdSchema.parse({ id });
+  const [c] = await db.select().from(computers).where(eq(computers.id, computerId));
+
+  return { computer: c };
+};`;
+
+  const mutation = `import { db } from "@/lib/db";
+import { eq } from "drizzle-orm";
+import { NewComputer, insertComputerSchema, computers, computerIdSchema, ComputerId } from "@/lib/db/schema/computers";
+
+export const createComputer = async (computer: NewComputer) => {
+  const newComputer = insertComputerSchema.parse(computer);
+  try {
+    const [c] = await db.insert(computers).values(newComputer).returning();
+    return { computer: c };
+  } catch (err) {
+    return { error: (err as Error).message ?? "Error, please try again" };
+  }
+};
+
+export const updateComputer = async (id: ComputerId, computer: NewComputer) => {
+  const { id: computerId } = computerIdSchema.parse({ id });
+  const newComputer = insertComputerSchema.parse(computer);
+  try {
+    const [c] = await db
+     .update(computers)
+     .set(newComputer)
+     .where(eq(computers.id, computerId!))
+     .returning();
+    return { computer: c };
+  } catch (err) {
+    return { error: (err as Error).message ?? "Error, please try again" };
+  }
+};
+
+export const deleteComputer = async (id: ComputerId) => {
+  const { id: computerId } = computerIdSchema.parse({ id });
+  try {
+    const [c] = await db.delete(computers).where(eq(computers.id, computerId!)).returning();
+    return { computer: c };
+  } catch (err) {
+    return { error: (err as Error).message ?? "Error, please try again" };
+  }
+};`;
+  createFile(`${libPath}/api/computers/queries.ts`, query);
+  createFile(`${libPath}/api/computers/mutations.ts`, mutation);
 }

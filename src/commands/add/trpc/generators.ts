@@ -1,10 +1,10 @@
 // 1. Create server/index.ts moved to root router position
 export const rootRouterTs = () => {
-  return `import { usersRouter } from "./users";
+  return `import { computersRouter } from "./computers";
 import { router } from "../trpc";
 
 export const appRouter = router({
-  users: usersRouter,
+  computers: computersRouter,
 });
 
 export type AppRouter = typeof appRouter;

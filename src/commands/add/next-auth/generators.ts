@@ -33,6 +33,12 @@ declare module "next-auth" {
 
 export const authOptions: NextAuthOptions = {
   adapter: DrizzleAdapter(db),
+  callbacks: {
+    session: ({ session, user }) => {
+      session.user.id = user.id;
+      return session;
+    },
+  },
   providers: [
      ${providersToUse.map((provider) => provider.providerKey).join(",\n")}
   ],
@@ -60,7 +66,7 @@ export default function NextAuthProvider({ children }: Props) {
 
 // 3. create lib/auth/utils.ts
 export const libAuthUtilsTs = () => {
-  return `import { authOptions } from "@/app/api/auth/[...nextauth]";
+  return `import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 
 export const getUserAuth = async () => {

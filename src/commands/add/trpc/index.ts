@@ -11,13 +11,13 @@ import {
   libTrpcClientTs,
   libTrpcContextTs,
   libTrpcProviderTsx,
-  libTrpcServerClientTs,
   libTrpcUtilsTs,
   rootRouterTs,
   serverRouterComputersTs,
   serverTrpcTs,
 } from "./generators.js";
 import { addContextProviderToLayout } from "../utils.js";
+import { addToDotEnv } from "../drizzle/generators.js";
 
 export const addTrpc = async () => {
   const { hasSrc, preferredPackageManager, packages } = readConfigFile();
@@ -63,6 +63,9 @@ export const addTrpc = async () => {
   addPackageToConfig("trpc");
   // 9. Instruct user to add the <Provider /> to their root layout.
   addContextProviderToLayout("TrpcProvider");
+  addToDotEnv([
+    { key: "VERCEL_URL", value: "https://your-project-url.vercel.app" },
+  ]);
   consola.success("Successfully added trpc to your project!");
   // consola.warn(
   //   "Please add the <Provider> to your root layout, by wrapping it around your children"
