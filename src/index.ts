@@ -10,7 +10,7 @@ program.name("kirimase").description("Kirimase CLI").version("0.0.1");
 
 program
   .command("init")
-  .description("init drizzle config with desired db type (pg, mysql, sqlite))")
+  .description("initialise and configure kirimase within directory")
   .action(initProject);
 
 // program
