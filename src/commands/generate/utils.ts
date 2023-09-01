@@ -1,3 +1,4 @@
+import { DBField, FieldType } from "../../types.js";
 import { Schema } from "./types.js";
 
 export function toCamelCase(input: string): string {
@@ -44,4 +45,32 @@ export const getReferenceFieldType = (type: ReferenceType) => {
     mysql: type === "string" ? "varchar" : "int",
     sqlite: type === "string" ? "text" : "integer",
   };
+};
+
+const excludedTypes: Array<FieldType> = ["text", "string", "varchar"];
+
+export const getNonStringFields = (fields: DBField[]) => {
+  return fields.filter((field) => !excludedTypes.includes(field.type));
+};
+
+type ZodType = "string" | "number" | "boolean" | "date" | "bigint" | "object";
+
+const ZodMappings: Partial<Record<FieldType, ZodType>> = {
+  number: "number",
+  date: "date",
+  boolean: "boolean",
+  float: "number",
+  references: "number",
+  timestamp: "date",
+  json: "object",
+};
+
+export const getZodMappings = (fields: DBField[]) => {
+  return fields.map((field) => {
+    const zodType = ZodMappings[field.type];
+    return {
+      name: field.name,
+      type: zodType,
+    };
+  });
 };

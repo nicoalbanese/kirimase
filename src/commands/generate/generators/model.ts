@@ -1,6 +1,7 @@
 import { consola } from "consola";
 import {
   DBType,
+  FieldType,
   mysqlColumnType,
   pgColumnType,
   sqliteColumnType,
@@ -11,7 +12,9 @@ import {
   ReferenceType,
   capitaliseForZodSchema,
   formatTableName,
+  getNonStringFields,
   getReferenceFieldType,
+  getZodMappings,
   toCamelCase,
 } from "../utils.js";
 
@@ -155,6 +158,10 @@ function generateModelContent(schema: Schema, dbType: DBType) {
       )}"`
   );
 
+  // get non string fields
+  const nonStringFields = getNonStringFields(fields);
+  const zodMappings = getZodMappings(nonStringFields);
+
   const uniqueTypes = Array.from(new Set(usedTypes));
   const importStatement = `import { ${uniqueTypes
     .join(", ")
@@ -205,12 +212,28 @@ ${schemaFields}${
 
 // Schema for ${tableNameCamelCase} - used to validate API requests
 export const insert${tableNameSingularCapitalised}Schema = createInsertSchema(${tableNameCamelCase});
-export const select${tableNameSingularCapitalised}Schema = createSelectSchema(${tableNameCamelCase});
-export const update${tableNameSingularCapitalised}Schema = select${tableNameSingularCapitalised}Schema;
-export const ${tableNameSingular}IdSchema = select${tableNameSingularCapitalised}Schema.pick({ id: true });
+export const insert${tableNameSingularCapitalised}Params = createSelectSchema(${tableNameCamelCase}, {
+  ${zodMappings
+    .map((field) => `${field.name}: z.coerce.${field.type}()`)
+    .join(`,\n`)}
+}).omit({ 
+  id: true${schema.belongsToUser ? ",\n  userId: true" : ""}
+});
+export const update${tableNameSingularCapitalised}Schema = createSelectSchema(${tableNameCamelCase});
+export const update${tableNameSingularCapitalised}Params = createSelectSchema(${tableNameCamelCase}, {
+  ${zodMappings
+    .map((field) => `${field.name}: z.coerce.${field.type}()`)
+    .join(`,\n`)}
+}).omit({ 
+  id: true
+});
+export const ${tableNameSingular}IdSchema = update${tableNameSingularCapitalised}Schema.pick({ id: true });
 
-export type ${tableNameSingularCapitalised} = z.infer<typeof select${tableNameSingularCapitalised}Schema>;
+// Types for ${tableNameCamelCase} - used to type API request params and within Components
+export type ${tableNameSingularCapitalised} = z.infer<typeof update${tableNameSingularCapitalised}Schema>;
 export type New${tableNameSingularCapitalised} = z.infer<typeof insert${tableNameSingularCapitalised}Schema>;
+export type New${tableNameSingularCapitalised}Params = z.infer<typeof insert${tableNameSingularCapitalised}Params>;
+export type Update${tableNameSingularCapitalised}Params = z.infer<typeof update${tableNameSingularCapitalised}Params>;
 export type ${tableNameSingularCapitalised}Id = z.infer<typeof ${tableNameSingular}IdSchema>["id"];
 `;
 
@@ -312,11 +335,18 @@ const generateMutationContent = (schema: Schema) => {
 
   const template = `import { db } from "@/lib/db";
 import { ${belongsToUser ? "and, " : ""}eq } from "drizzle-orm";
-import { New${tableNameSingularCapitalised}, insert${tableNameSingularCapitalised}Schema, ${tableNameCamelCase}, ${tableNameSingular}IdSchema } from "@/lib/db/schema/${tableNameCamelCase}";${
+import { ${tableNameSingularCapitalised}Id, 
+  New${tableNameSingularCapitalised}Params,
+  Update${tableNameSingularCapitalised}Params, 
+  update${tableNameSingularCapitalised}Schema,
+  insert${tableNameSingularCapitalised}Schema, 
+  ${tableNameCamelCase},
+  ${tableNameSingular}IdSchema 
+} from "@/lib/db/schema/${tableNameCamelCase}";${
     belongsToUser ? '\nimport { getUserAuth } from "@/lib/auth/utils";' : ""
   }
 
-export const create${tableNameSingularCapitalised} = async (${tableNameSingular}: New${tableNameSingularCapitalised}) => {${getAuth}
+export const create${tableNameSingularCapitalised} = async (${tableNameSingular}: New${tableNameSingularCapitalised}Params) => {${getAuth}
   const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${
     belongsToUser
       ? `{ ...${tableNameSingular}, userId: session?.user.id! }`
@@ -336,9 +366,13 @@ export const create${tableNameSingularCapitalised} = async (${tableNameSingular}
   }
 };
 
-export const update${tableNameSingularCapitalised} = async (id: number, ${tableNameSingular}: New${tableNameSingularCapitalised}) => {${getAuth}
+export const update${tableNameSingularCapitalised} = async (id: ${tableNameSingular}Id, ${tableNameSingular}: Update${tableNameSingularCapitalised}Params) => {${getAuth}
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
-  const new${tableNameSingularCapitalised} = insert${tableNameSingularCapitalised}Schema.parse(${tableNameSingular});
+  const new${tableNameSingularCapitalised} = update${tableNameSingularCapitalised}Schema.parse(${
+    belongsToUser
+      ? `{ ...${tableNameSingular}, userId: session?.user.id! }`
+      : `${tableNameSingular}`
+  });
   try {
     ${driver === "mysql" ? "" : `const [${tableNameFirstChar}] =  `}await db
      .update(${tableNameCamelCase})
@@ -361,7 +395,7 @@ export const update${tableNameSingularCapitalised} = async (id: number, ${tableN
   }
 };
 
-export const delete${tableNameSingularCapitalised} = async (id: number) => {${getAuth}
+export const delete${tableNameSingularCapitalised} = async (id: ${tableNameSingularCapitalised}Id) => {${getAuth}
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   try {
     ${
