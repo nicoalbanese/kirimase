@@ -1,4 +1,4 @@
-export type AuthProvider = "discord" | "google";
+export type AuthProvider = "discord" | "google" | "github" | "apple";
 type ProviderConfig = { [key in AuthProvider]: string };
 
 export const AuthProviders: ProviderConfig = {
@@ -9,6 +9,14 @@ export const AuthProviders: ProviderConfig = {
   google: `GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    })`,
+  github: `GithubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    })`,
+  apple: `AppleProvider({
+      clientId: process.env.APPLE_CLIENT_ID!,
+      clientSecret: process.env.APPLE_CLIENT_SECRET!,
     })`,
 };
 
