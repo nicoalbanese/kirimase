@@ -339,3 +339,15 @@ export const enableSessionInContext = () => {
 
   consola.success("TRPC Context updated successfully to add Session data.");
 };
+
+export const enableSessionInTRPCApi = () => {
+  const { hasSrc } = readConfigFile();
+  const filePath = `${hasSrc ? "src/" : ""}lib/trpc/api.ts`;
+
+  const fileContent = fs.readFileSync(filePath, "utf-8");
+  const updatedContent = fileContent.replace(/\/\//g, "");
+
+  fs.writeFileSync(filePath, updatedContent);
+
+  consola.success("TRPC Server API updated successfully to add Session data.");
+};

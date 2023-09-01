@@ -1,6 +1,6 @@
 {
   "name": "kirimase",
-  "version": "0.0.0.1",
+  "version": "0.0.2",
   "description": "A Rails-like CLI for Nextjs and Drizzle ORM",
   "main": "index.js",
   "type": "module",
@@ -23,9 +23,7 @@
     "@inquirer/checkbox": "^1.3.6",
     "@inquirer/prompts": "^3.0.1",
     "commander": "^11.0.0",
-    "consola": "^3.2.3",
-    "figlet": "^1.6.0",
-    "handlebars": "^4.7.8"
+    "consola": "^3.2.3"
   },
   "devDependencies": {
     "@types/node": "^20.4.5",

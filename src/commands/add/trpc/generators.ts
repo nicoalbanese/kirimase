@@ -1,3 +1,5 @@
+import { readConfigFile } from "../../../utils.js";
+
 // 1. Create server/index.ts moved to root router position
 export const rootRouterTs = () => {
   return `import { computersRouter } from "./computers";
@@ -132,8 +134,12 @@ export const serverClient = appRouter.createCaller({
 };
 
 export const libTrpcApiTs = () => {
+  const { packages } = readConfigFile();
+
   return `import { cookies } from "next/headers";
-import { getUserAuth } from "../auth/utils";
+${
+  packages.includes("next-auth") ? "" : "  //  "
+}import { getUserAuth } from "../auth/utils";
 import { appRouter } from "../server/routers/_app";
 import { loggerLink } from "@trpc/client";
 import { experimental_createTRPCNextAppDirServer as createTRPCNextAppDirServer } from "@trpc/next/app-dir/server";
@@ -152,13 +158,14 @@ export const api = createTRPCNextAppDirServer<typeof appRouter>({
           enabled: (op) => true,
         }),
         nextCacheLink({
-          // requests are cached for 5 seconds
           revalidate: 5,
           router: appRouter,
           async createContext() {
-            const { session } = await getUserAuth();
+            ${
+              packages.includes("next-auth") ? "" : "  //  "
+            }const { session } = await getUserAuth();
             return {
-              session,
+              ${packages.includes("next-auth") ? "" : "  //  "}session,
               headers: {
                 cookie: cookies().toString(),
                 "x-trpc-source": "rsc-invoke",

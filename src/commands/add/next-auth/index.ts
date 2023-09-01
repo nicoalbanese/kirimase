@@ -10,6 +10,7 @@ import {
   createAuthSchema,
   createSignInComponent,
   enableSessionInContext,
+  enableSessionInTRPCApi,
   libAuthProviderTsx,
   libAuthUtilsTs,
   updateTrpcTs,
@@ -57,6 +58,7 @@ export const addNextAuth = async () => {
   if (packages.includes("trpc")) {
     updateTrpcTs();
     enableSessionInContext();
+    enableSessionInTRPCApi();
   }
 
   // add to env
