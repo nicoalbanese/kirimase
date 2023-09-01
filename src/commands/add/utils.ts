@@ -12,7 +12,7 @@ export const addContextProviderToLayout = (
   provider: "NextAuthProvider" | "TrpcProvider"
 ) => {
   const { hasSrc } = readConfigFile();
-  const path = `${hasSrc ? "src" : ""}/app/layout.tsx`;
+  const path = `${hasSrc ? "src/" : ""}app/layout.tsx`;
 
   const fileContent = fs.readFileSync(path, "utf-8");
 

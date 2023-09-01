@@ -29,28 +29,28 @@ export const addNextAuth = async () => {
   })) as AuthProvider[];
   const { hasSrc, preferredPackageManager, driver, packages } =
     readConfigFile();
-  const rootPath = `${hasSrc ? "src" : ""}`;
+  const rootPath = `${hasSrc ? "src/" : ""}`;
   // 1. Create app/api/auth/[...nextauth].ts
   createFile(
-    rootPath.concat("/app/api/auth/[...nextauth]/route.ts"),
+    rootPath.concat("app/api/auth/[...nextauth]/route.ts"),
     apiAuthNextAuthTs(providers)
   );
 
   // 2. create lib/auth/Provider.tsx
-  createFile(rootPath.concat("/lib/auth/Provider.tsx"), libAuthProviderTsx());
+  createFile(rootPath.concat("lib/auth/Provider.tsx"), libAuthProviderTsx());
 
   // 3. create lib/auth/utils.ts
-  createFile(rootPath.concat("/lib/auth/utils.ts"), libAuthUtilsTs());
+  createFile(rootPath.concat("lib/auth/utils.ts"), libAuthUtilsTs());
 
   // 4. create lib/db/schema/auth.ts
   createFile(
-    rootPath.concat("/lib/db/schema/auth.ts"),
+    rootPath.concat("lib/db/schema/auth.ts"),
     createAuthSchema(driver)
   );
 
   // 5. create components/auth/SignIn.tsx
   createFile(
-    rootPath.concat("/components/auth/SignIn.tsx"),
+    rootPath.concat("components/auth/SignIn.tsx"),
     createSignInComponent()
   );
 

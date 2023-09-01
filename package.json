@@ -1,6 +1,6 @@
 {
   "name": "kirimase",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "A Rails-like CLI for Nextjs and Drizzle ORM",
   "main": "index.js",
   "type": "module",

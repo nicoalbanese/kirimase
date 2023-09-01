@@ -21,35 +21,35 @@ import { addToDotEnv } from "../drizzle/generators.js";
 
 export const addTrpc = async () => {
   const { hasSrc, preferredPackageManager, packages } = readConfigFile();
-  const rootPath = `${hasSrc ? "src" : ""}`;
+  const rootPath = `${hasSrc ? "src/" : ""}`;
   // 1. Create lib/server/index.ts
-  createFile(`${rootPath}/lib/server/routers/_app.ts`, rootRouterTs());
+  createFile(`${rootPath}lib/server/routers/_app.ts`, rootRouterTs());
 
   // 2. create lib/server/trpc.ts
-  createFile(`${rootPath}/lib/server/trpc.ts`, serverTrpcTs());
+  createFile(`${rootPath}lib/server/trpc.ts`, serverTrpcTs());
   // 3. create lib/server/router/ directory and maybe a users file
   createFile(
-    `${rootPath}/lib/server/routers/computers.ts`,
+    `${rootPath}lib/server/routers/computers.ts`,
     serverRouterComputersTs()
   );
   // 4. create app/api/trpc/[trpc]/route.ts
-  createFile(`${rootPath}/app/api/trpc/[trpc]/route.ts`, apiTrpcRouteTs());
+  createFile(`${rootPath}app/api/trpc/[trpc]/route.ts`, apiTrpcRouteTs());
   // 5. create lib/trpc/client.ts
-  createFile(`${rootPath}/lib/trpc/client.ts`, libTrpcClientTs());
+  createFile(`${rootPath}lib/trpc/client.ts`, libTrpcClientTs());
   // 6. create lib/trpc/Provider.tsx
-  createFile(`${rootPath}/lib/trpc/Provider.tsx`, libTrpcProviderTsx());
+  createFile(`${rootPath}lib/trpc/Provider.tsx`, libTrpcProviderTsx());
   // 7. create lib/trpc/serverClient.ts -> updated to lib/trpc/api.ts using server invoker
   // createFile(`${rootPath}/lib/trpc/serverClient.ts`, libTrpcServerClientTs());
-  createFile(`${rootPath}/lib/trpc/api.ts`, libTrpcApiTs());
+  createFile(`${rootPath}lib/trpc/api.ts`, libTrpcApiTs());
 
   // 7.5. create context file and update to include context file above
   createFile(
-    `${rootPath}/lib/trpc/context.ts`,
+    `${rootPath}lib/trpc/context.ts`,
     libTrpcContextTs(packages.includes("next-auth"))
   );
 
   // create trpc utils file lib/trpc/utils.ts
-  createFile(`${rootPath}/lib/trpc/utils.ts`, libTrpcUtilsTs());
+  createFile(`${rootPath}lib/trpc/utils.ts`, libTrpcUtilsTs());
 
   // 8. Install Packages: @tanstack/react-query, @trpc/client, @trpc/react-query, @trpc/server
   await installPackages(
