@@ -4,7 +4,7 @@ import { DBField, DBType, FieldType } from "../../types.js";
 import { Choice } from "@inquirer/checkbox";
 import { createConfig, scaffoldModel } from "./generators/model.js";
 import { scaffoldAPIRoute } from "./generators/apiRoute.js";
-import { readConfigFile } from "../../utils.js";
+import { readConfigFile, wrapInParenthesis } from "../../utils.js";
 import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
 import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
@@ -12,7 +12,7 @@ import { Schema } from "./types.js";
 
 function provideInstructions() {
   consola.info(
-    "Use Kirimase scaffold to quickly generate your Model (drizzle-schema), View (React components), and Controllers (API Routes and TRPC Routes)"
+    "Quickly generate your Model (Drizzle schema + queries / mutations) and Controllers (API Routes and TRPC Routes)"
   );
 }
 
@@ -23,7 +23,16 @@ async function askForResourceType() {
       { name: "Model", value: "model" },
       { name: "API Route", value: "api_route" },
       { name: "TRPC Route", value: "trpc_route" },
-      { name: "Views", value: "views", disabled: "Coming soon!" },
+      {
+        name: "Views",
+        value: "views",
+        disabled: wrapInParenthesis("Coming soon!"),
+      },
+      {
+        name: "Components",
+        value: "components",
+        disabled: wrapInParenthesis("Coming soon!"),
+      },
     ],
   });
   return resourcesRequested;

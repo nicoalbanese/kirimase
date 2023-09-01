@@ -22,10 +22,10 @@
 
 - [] add seed script
 - [x] update script needs to stringify with null, 2
-- [] add provider automatically?
-- [] change queries and mutations to find items based on typeof id rather than on a fixed type (number)
+- [x] add provider automatically?
+- [x] change queries and mutations to find items based on typeof id rather than on a fixed type (number)
 
-- [] add all remaining columns for drivers
+- [x] add all remaining columns for drivers
 
 ## Relations
 
@@ -34,4 +34,4 @@
 # Next Auth
 
 - [x] add next auth
-- [] add (is owned by user) to generate
+- [x] add (is owned by user) to generate

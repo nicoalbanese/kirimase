@@ -2,9 +2,9 @@
 
 Rails-like CLI for building projects with Nextjs and Drizzle ORM
 
-### Current Supported Commands
+## Current Supported Commands
 
-1. Init  
+1. Add  
    Quickly initialise relevant files and configuration for:
 
    - Drizzle ORM (with your flavour of SQL and provider)
@@ -12,7 +12,6 @@ Rails-like CLI for building projects with Nextjs and Drizzle ORM
    - NextAuth
 
 2. Generate  
-   Similar to rails generate <resources> <table_name> [fields], this command allows you to quickly generate
+   Similar to rails scaffold / generate, this command allows you to quickly generate:
    - Models (schema declaration + query/mutation logic)
-   - Views (Form Component to view edit and submit)
    - Controllers (API + TRPC routes to manage querying and mutating of model)

@@ -5,7 +5,7 @@ import fs from "fs";
 export const Packages: { name: string; value: AvailablePackage }[] = [
   { name: "Drizzle", value: "drizzle" },
   { name: "TRPC", value: "trpc" },
-  { name: "Auth.js", value: "next-auth" },
+  { name: "Auth.js (NextAuth)", value: "next-auth" },
 ];
 
 export const addContextProviderToLayout = (
