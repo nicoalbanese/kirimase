@@ -83,8 +83,13 @@ export const addNextAuth = async () => {
   // 9. Instruct user to add the <Provider /> to their root layout.
   addContextProviderToLayout("NextAuthProvider");
   consola.success("Successfully added Next Auth to your project!");
-  // consola.warn(
-  //   "Please add the <NextAuthProvider> to your root layout, by wrapping it around your children"
-  // );
-  //
+
+  providers.forEach((provider) => {
+    consola.info(
+      `To get up and running with ${provider}, create credentials at ${AuthProviders[provider].website}`
+    );
+    consola.info(
+      `and remember to add /api/auth/callback/${provider} to your ${provider} app's redirect URIs`
+    );
+  });
 };

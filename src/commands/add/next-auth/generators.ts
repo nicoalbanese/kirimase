@@ -7,7 +7,11 @@ import fs from "fs";
 // 1. Create app/api/auth/[...nextauth].ts
 export const apiAuthNextAuthTs = (providers: AuthProvider[]) => {
   const providersToUse = providers.map((provider) => {
-    return { name: provider, providerKey: AuthProviders[provider] };
+    return {
+      name: provider,
+      providerKey: AuthProviders[provider].code,
+      website: AuthProviders[provider].website,
+    };
   });
 
   return `import { db } from "@/lib/db";
@@ -40,7 +44,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
-     ${providersToUse.map((provider) => provider.providerKey).join(",\n")}
+     ${providersToUse.map((provider) => provider.providerKey).join(",\n    ")}
   ],
 };
 
