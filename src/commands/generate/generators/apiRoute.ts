@@ -1,17 +1,18 @@
+import { DBType } from "../../../types.js";
 import { createFile, readConfigFile } from "../../../utils.js";
 import { Schema } from "../types.js";
 import { formatTableName, toCamelCase } from "../utils.js";
 
 export const scaffoldAPIRoute = (schema: Schema) => {
-  const { hasSrc } = readConfigFile();
+  const { hasSrc, driver } = readConfigFile();
   const { tableName } = schema;
   const path = `${hasSrc ? "src/" : ""}app/api/${toCamelCase(
     tableName
   )}/route.ts`;
-  createFile(path, generateRouteContent(schema));
+  createFile(path, generateRouteContent(schema, driver));
 };
 
-const generateRouteContent = (schema: Schema) => {
+const generateRouteContent = (schema: Schema, driver: DBType) => {
   const { tableName } = schema;
   const {
     tableNameSingularCapitalised,
@@ -28,15 +29,23 @@ import {
   delete${tableNameSingularCapitalised},
   update${tableNameSingularCapitalised},
 } from "@/lib/api/${tableNameCamelCase}/mutations";
-import { ${tableNameSingular}IdSchema, insert${tableNameSingularCapitalised}Schema } from "@/lib/db/schema/${tableNameCamelCase}";
+import { 
+  ${tableNameSingular}IdSchema,
+  insert${tableNameSingularCapitalised}Params,
+  update${tableNameSingularCapitalised}Params 
+} from "@/lib/db/schema/${tableNameCamelCase}";
 
 export async function POST(req: Request) {
   try {
-    const validatedData = insert${tableNameSingularCapitalised}Schema.parse(await req.json());
-    const { ${tableNameSingular}, error } = await create${tableNameSingularCapitalised}(validatedData);
+    const validatedData = insert${tableNameSingularCapitalised}Params.parse(await req.json());
+    const { ${
+      driver === "mysql" ? "success" : tableNameSingular
+    }, error } = await create${tableNameSingularCapitalised}(validatedData);
     if (error) return NextResponse.json({ error }, { status: 500 });
     revalidatePath("/${tableNameCamelCase}"); // optional - assumes you will have named route same as entity
-    return NextResponse.json(${tableNameSingular}, { status: 201 });
+    return NextResponse.json(${
+      driver === "mysql" ? "success" : tableNameSingular
+    }, { status: 201 });
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: err.issues }, { status: 400 });
@@ -52,12 +61,17 @@ export async function PUT(req: Request) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
 
-    const validatedData = insert${tableNameSingularCapitalised}Schema.parse(await req.json());
+    const validatedData = update${tableNameSingularCapitalised}Params.parse(await req.json());
     const validatedParams = ${tableNameSingular}IdSchema.parse({ id });
 
-    const { ${tableNameSingular} } = await update${tableNameSingularCapitalised}(validatedParams.id, validatedData);
+    const { ${
+      driver === "mysql" ? "success" : tableNameSingular
+    }, error } = await update${tableNameSingularCapitalised}(validatedParams.id, validatedData);
 
-    return NextResponse.json(${tableNameSingular}, { status: 200 });
+    if (error) return NextResponse.json({ error }, { status: 500 });
+    return NextResponse.json(${
+      driver === "mysql" ? "success" : tableNameSingular
+    }, { status: 200 });
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: err.issues }, { status: 400 });
@@ -73,8 +87,14 @@ export async function DELETE(req: Request) {
     const id = searchParams.get("id");
 
     const validatedParams = ${tableNameSingular}IdSchema.parse({ id });
-    const { ${tableNameSingular} } = await delete${tableNameSingularCapitalised}(validatedParams.id);
-    return NextResponse.json(${tableNameSingular}, { status: 200 });
+    const { ${
+      driver === "mysql" ? "success" : tableNameSingular
+    }, error } = await delete${tableNameSingularCapitalised}(validatedParams.id);
+    if (error) return NextResponse.json({ error }, { status: 500 });
+
+    return NextResponse.json(${
+      driver === "mysql" ? "success" : tableNameSingular
+    }, { status: 200 });
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: err.issues }, { status: 400 });

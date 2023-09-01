@@ -59,6 +59,7 @@ import {
   update${tableNameSingularCapitalised}Params,
 } from "@/lib/db/schema/${tableNameCamelCase}";
 import { create${tableNameSingularCapitalised}, delete${tableNameSingularCapitalised}, update${tableNameSingularCapitalised} } from "@/lib/api/${tableNameCamelCase}/mutations";
+
 export const ${tableNameCamelCase}Router = router({
   get${tableNameCapitalised}: publicProcedure.query(async () => {
     return get${tableNameCapitalised}();

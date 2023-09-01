@@ -92,7 +92,7 @@ async function askForFields(dbType: DBType) {
 
       const notNull = await confirm({
         message: "Is this field required?",
-        default: false,
+        default: true,
       });
 
       fields.push({ name: fieldName.toLowerCase(), type: fieldType, notNull });
