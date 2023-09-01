@@ -167,7 +167,7 @@ function generateModelContent(schema: Schema, dbType: DBType) {
     .join(", ")
     .concat(
       `, ${config.tableFunc}`
-    )}} from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
+    )} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
     referenceImports.length > 0 ? referenceImports.join("\n") : ""
   }${schema.belongsToUser ? '\nimport { users } from "./auth";' : ""}`;
 
@@ -215,7 +215,7 @@ export const insert${tableNameSingularCapitalised}Schema = createInsertSchema(${
 export const insert${tableNameSingularCapitalised}Params = createSelectSchema(${tableNameCamelCase}, {
   ${zodMappings
     .map((field) => `${field.name}: z.coerce.${field.type}()`)
-    .join(`,\n`)}
+    .join(`,\n  `)}
 }).omit({ 
   id: true${schema.belongsToUser ? ",\n  userId: true" : ""}
 });
@@ -224,9 +224,13 @@ export const update${tableNameSingularCapitalised}Params = createSelectSchema(${
   ${zodMappings
     .map((field) => `${field.name}: z.coerce.${field.type}()`)
     .join(`,\n`)}
-}).omit({ 
-  id: true
-});
+})${
+    schema.belongsToUser
+      ? `.omit({ 
+  userId: true
+});`
+      : ""
+  }
 export const ${tableNameSingular}IdSchema = update${tableNameSingularCapitalised}Schema.pick({ id: true });
 
 // Types for ${tableNameCamelCase} - used to type API request params and within Components
@@ -335,7 +339,8 @@ const generateMutationContent = (schema: Schema) => {
 
   const template = `import { db } from "@/lib/db";
 import { ${belongsToUser ? "and, " : ""}eq } from "drizzle-orm";
-import { ${tableNameSingularCapitalised}Id, 
+import { 
+  ${tableNameSingularCapitalised}Id, 
   New${tableNameSingularCapitalised}Params,
   Update${tableNameSingularCapitalised}Params, 
   update${tableNameSingularCapitalised}Schema,
@@ -366,7 +371,7 @@ export const create${tableNameSingularCapitalised} = async (${tableNameSingular}
   }
 };
 
-export const update${tableNameSingularCapitalised} = async (id: ${tableNameSingular}Id, ${tableNameSingular}: Update${tableNameSingularCapitalised}Params) => {${getAuth}
+export const update${tableNameSingularCapitalised} = async (id: ${tableNameSingularCapitalised}Id, ${tableNameSingular}: Update${tableNameSingularCapitalised}Params) => {${getAuth}
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   const new${tableNameSingularCapitalised} = update${tableNameSingularCapitalised}Schema.parse(${
     belongsToUser

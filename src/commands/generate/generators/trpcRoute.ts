@@ -55,8 +55,8 @@ const generateRouteContent = (schema: Schema) => {
 import { publicProcedure, router } from "../trpc";
 import {
   ${tableNameSingular}IdSchema,
-  insert${tableNameSingularCapitalised}Schema,
-  update${tableNameSingularCapitalised}Schema,
+  insert${tableNameSingularCapitalised}Params,
+  update${tableNameSingularCapitalised}Params,
 } from "@/lib/db/schema/${tableNameCamelCase}";
 import { create${tableNameSingularCapitalised}, delete${tableNameSingularCapitalised}, update${tableNameSingularCapitalised} } from "@/lib/api/${tableNameCamelCase}/mutations";
 export const ${tableNameCamelCase}Router = router({
@@ -67,12 +67,12 @@ export const ${tableNameCamelCase}Router = router({
     return get${tableNameSingularCapitalised}ById(input.id);
   }),
   create${tableNameSingularCapitalised}: publicProcedure
-    .input(insert${tableNameSingularCapitalised}Schema)
+    .input(insert${tableNameSingularCapitalised}Params)
     .mutation(async ({ input }) => {
       return create${tableNameSingularCapitalised}(input);
     }),
   update${tableNameSingularCapitalised}: publicProcedure
-    .input(update${tableNameSingularCapitalised}Schema)
+    .input(update${tableNameSingularCapitalised}Params)
     .mutation(async ({ input }) => {
       return update${tableNameSingularCapitalised}(input.id, input);
     }),
