@@ -16,6 +16,10 @@ export function snakeToKebab(snakeString: string): string {
   return snakeString.replace(/_/g, "-");
 }
 
+export function capitalise(input: string): string {
+  return input.charAt(0).toUpperCase() + input.slice(1);
+}
+
 export function capitaliseForZodSchema(input: string): string {
   return input.charAt(0).toUpperCase() + input.slice(1, -1);
 }
@@ -74,3 +78,25 @@ export const getZodMappings = (fields: DBField[]) => {
     };
   });
 };
+
+export const defaultValueMappings: Partial<Record<FieldType, string>> = {
+  string: '""',
+  number: "0",
+  boolean: "false",
+  blob: '""',
+  date: '""',
+  json: '""',
+  text: '""',
+  float: "0.0",
+  varchar: '""',
+  timestamp: '""',
+  references: "0",
+};
+
+export function toNormalEnglish(input: string, lowercase?: boolean): string {
+  const output = input
+    .split("_")
+    .map((word) => capitalise(word))
+    .join(" ");
+  return lowercase ? output.toLowerCase() : output;
+}

@@ -214,7 +214,7 @@ ${schemaFields}${
 export const insert${tableNameSingularCapitalised}Schema = createInsertSchema(${tableNameCamelCase});
 export const insert${tableNameSingularCapitalised}Params = createSelectSchema(${tableNameCamelCase}, {
   ${zodMappings
-    .map((field) => `${field.name}: z.coerce.${field.type}()`)
+    .map((field) => `${toCamelCase(field.name)}: z.coerce.${field.type}()`)
     .join(`,\n  `)}
 }).omit({ 
   id: true${schema.belongsToUser ? ",\n  userId: true" : ""}
@@ -222,8 +222,8 @@ export const insert${tableNameSingularCapitalised}Params = createSelectSchema(${
 export const update${tableNameSingularCapitalised}Schema = createSelectSchema(${tableNameCamelCase});
 export const update${tableNameSingularCapitalised}Params = createSelectSchema(${tableNameCamelCase}, {
   ${zodMappings
-    .map((field) => `${field.name}: z.coerce.${field.type}()`)
-    .join(`,\n`)}
+    .map((field) => `${toCamelCase(field.name)}: z.coerce.${field.type}()`)
+    .join(`,\n  `)}
 })${
     schema.belongsToUser
       ? `.omit({ 

@@ -9,6 +9,7 @@ import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
 import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
 import { Schema } from "./types.js";
+import { scaffoldViewsAndComponents } from "./generators/views.js";
 
 function provideInstructions() {
   consola.info(
@@ -24,14 +25,8 @@ async function askForResourceType() {
       { name: "API Route", value: "api_route" },
       { name: "TRPC Route", value: "trpc_route" },
       {
-        name: "Views",
-        value: "views",
-        disabled: wrapInParenthesis("Coming soon!"),
-      },
-      {
-        name: "Components",
-        value: "components",
-        disabled: wrapInParenthesis("Coming soon!"),
+        name: "Views + Components",
+        value: "views_and_components",
       },
     ],
   });
@@ -174,6 +169,8 @@ export async function buildSchema() {
       if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
       if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
       if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
+      if (resourceType.includes("views_and_components"))
+        scaffoldViewsAndComponents(schema);
       // if (resourceType.includes("views")) scaffoldModel()
 
       // console.log("Schema:", schema);
