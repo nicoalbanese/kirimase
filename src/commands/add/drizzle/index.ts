@@ -51,14 +51,10 @@ export const addDrizzle = async () => {
 
   if (dbType === "sqlite") {
     databaseUrl = "sqlite.db";
+  } else if (dbType === "mysql") {
+    databaseUrl = "mysql://root:root@localhost:3306/{DB_NAME}";
   } else {
-    databaseUrl = await input({
-      message: "What is the database url?",
-      default:
-        dbType === "pg"
-          ? "postgresql://postgres:postgres@localhost:5432/{DB_NAME}"
-          : "mysql://root:root@localhost:3306/{DB_NAME}",
-    });
+    databaseUrl = "postgres://postgres:postgres@localhost:5432/{DB_NAME}";
   }
 
   if (dbProvider === "neon")
