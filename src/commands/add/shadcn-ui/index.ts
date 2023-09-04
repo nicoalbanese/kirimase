@@ -8,6 +8,7 @@ import {
 } from "../../../utils.js";
 
 export const installShadcnUI = async () => {
+  consola.start("Installing Shadcn UI...");
   const { preferredPackageManager } = readConfigFile();
   const filePath = "components.json";
 
