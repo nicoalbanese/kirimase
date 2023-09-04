@@ -23,7 +23,8 @@
     "@inquirer/checkbox": "^1.3.6",
     "@inquirer/prompts": "^3.0.1",
     "commander": "^11.0.0",
-    "consola": "^3.2.3"
+    "consola": "^3.2.3",
+    "execa": "^8.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.4.5",

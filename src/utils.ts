@@ -3,6 +3,7 @@ import path from "path";
 import { consola } from "consola";
 import { AvailablePackage, Config, PMType, UpdateConfig } from "./types.js";
 import { spawn } from "child_process";
+import { execa } from "execa";
 
 export const delay = (ms = 2000) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -43,41 +44,82 @@ export function createFolder(relativePath: string) {
   consola.success(`Folder created at ${fullPath}`);
 }
 
+// export async function installPackages(
+//   packages: { regular: string; dev: string },
+//   pmType: PMType
+// ) {
+//   const packagesListString = packages.regular.concat(" ").concat(packages.dev);
+//   consola.start(`Installing packages: ${packagesListString}...`);
+//
+//   const runCommand = (command: string, args: string[]): Promise<void> => {
+//     return new Promise((resolve, reject) => {
+//       const cmd = spawn(command, args, { stdio: "inherit" });
+//
+//       cmd.on("close", (code: number) => {
+//         if (code !== 0) {
+//           reject(
+//             new Error(
+//               `command "${command} ${args.join(" ")}" exited with code ${code}`
+//             )
+//           );
+//         } else {
+//           resolve();
+//         }
+//       });
+//     });
+//   };
+//
+//   try {
+//     if (packages.dev) {
+//       await runCommand(
+//         pmType,
+//         ["install", "-D"].concat(packages.dev.split(" "))
+//       );
+//     }
+//
+//     if (packages.regular) {
+//       await runCommand(pmType, ["install"].concat(packages.regular.split(" ")));
+//     }
+//
+//     consola.success(`Packages installed: ${packagesListString}`);
+//   } catch (error) {
+//     console.error(`An error occurred: ${error.message}`);
+//   }
+// }
+
 export async function installPackages(
   packages: { regular: string; dev: string },
   pmType: PMType
 ) {
+  consola.log("switched to execa");
   const packagesListString = packages.regular.concat(" ").concat(packages.dev);
   consola.start(`Installing packages: ${packagesListString}...`);
 
-  const runCommand = (command: string, args: string[]): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const cmd = spawn(command, args, { stdio: "inherit" });
-
-      cmd.on("close", (code: number) => {
-        if (code !== 0) {
-          reject(
-            new Error(
-              `command "${command} ${args.join(" ")}" exited with code ${code}`
-            )
-          );
-        } else {
-          resolve();
-        }
-      });
-    });
+  const runCommand = async (command: string, args: string[]) => {
+    try {
+      await execa(command, args, { stdio: "inherit" });
+    } catch (error) {
+      throw new Error(
+        `command "${command} ${args.join(" ")}" exited with code ${error.code}`
+      );
+    }
   };
+
+  const installCommand = pmType === "npm" ? "install" : "add";
 
   try {
     if (packages.dev) {
       await runCommand(
         pmType,
-        ["install", "-D"].concat(packages.dev.split(" "))
+        [installCommand, "-D"].concat(packages.dev.split(" "))
       );
     }
 
     if (packages.regular) {
-      await runCommand(pmType, ["install"].concat(packages.regular.split(" ")));
+      await runCommand(
+        pmType,
+        [installCommand].concat(packages.regular.split(" "))
+      );
     }
 
     consola.success(`Packages installed: ${packagesListString}`);
