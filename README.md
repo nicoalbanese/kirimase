@@ -2,11 +2,9 @@
 
 Rails-like CLI for building projects with Nextjs and Drizzle ORM
 
-### Quickly generate resources
+### Quickly scaffold resources for your Nextjs app
 
 ![](https://github.com/nicoalbanese/gifs_for_demos/blob/main/gif_generate_script_1.gif?raw=true)
-
-### With fully typesafe front-end thanks to Zod, TRPC, React Hook Form, and Shadcn-UI
 
 ![](https://github.com/nicoalbanese/gifs_for_demos/blob/main/gif_generate_script_2.gif?raw=true)
 
