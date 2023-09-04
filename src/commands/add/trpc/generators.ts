@@ -171,7 +171,7 @@ export const api = createTRPCNextAppDirServer<typeof appRouter>({
           enabled: (op) => true,
         }),
         nextCacheLink({
-          revalidate: 5,
+          revalidate: 1,
           router: appRouter,
           async createContext() {
             ${

@@ -82,6 +82,7 @@ export const getUserAuth = async () => {
 
 // 4. create lib/db/schema/auth.ts
 export const createAuthSchema = (dbType: DBType) => {
+  const { provider } = readConfigFile();
   switch (dbType) {
     case "pg":
       return `import {
@@ -168,8 +169,11 @@ export const accounts = mysqlTable(
   "account",
   {
     userId: varchar("userId", { length: 255 })
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .notNull()${
+        provider === "planetscale"
+          ? ""
+          : '\n.references(() => users.id, { onDelete: "cascade" })'
+      },
     type: varchar("type", { length: 255 })
       .$type<AdapterAccount["type"]>()
       .notNull(),
@@ -191,8 +195,11 @@ export const accounts = mysqlTable(
 export const sessions = mysqlTable("session", {
   sessionToken: varchar("sessionToken", { length: 255 }).notNull().primaryKey(),
   userId: varchar("userId", { length: 255 })
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .notNull()${
+      provider === "planetscale"
+        ? ""
+        : '\n.references(() => users.id, { onDelete: "cascade" })'
+    },
   expires: timestamp("expires", { mode: "date" }).notNull(),
 });
 

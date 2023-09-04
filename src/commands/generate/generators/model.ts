@@ -41,6 +41,7 @@ export function scaffoldModel(schema: Schema, dbType: DBType, hasSrc: boolean) {
 }
 
 export const createConfig = () => {
+  const { provider } = readConfigFile();
   return {
     pg: {
       tableFunc: "pgTable",
@@ -88,9 +89,13 @@ export const createConfig = () => {
         ) =>
           `${getReferenceFieldType(referenceIdType)["mysql"]}("${name}"${
             referenceIdType === "string" ? ", { length: 256 }" : ""
-          }).references(() => ${toCamelCase(referencedTable)}.id${
-            cascade ? ', { onDelete: "cascade" }' : ""
-          })`,
+          })${
+            provider === "planetscale"
+              ? ""
+              : `.references(() => ${toCamelCase(referencedTable)}.id${
+                  cascade ? ', { onDelete: "cascade" }' : ""
+                })`
+          }`,
         date: (name: string) => `date("${name}")`,
         timestamp: (name: string) => `timestamp("${name}")`,
         json: (name: string) => `json("${name}")`,

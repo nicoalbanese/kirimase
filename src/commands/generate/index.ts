@@ -31,7 +31,7 @@ async function askForResourceType() {
         value: "views_and_components",
         disabled:
           !packages.includes("shadcn-ui") || !packages.includes("trpc")
-            ? "[You need to have shadcn-ui and trpc installed]"
+            ? "[You need to have shadcn-ui and trpc installed. Run 'kirimase add']"
             : false,
       },
     ],
