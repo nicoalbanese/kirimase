@@ -169,9 +169,12 @@ function generateModelContent(schema: Schema, dbType: DBType) {
 
   const uniqueTypes = Array.from(new Set(usedTypes));
   const importStatement = `import { ${uniqueTypes
-    .join(", ")
     .concat(
-      `, ${config.tableFunc}`
+      schema.belongsToUser ? [getReferenceFieldType("string")[dbType]] : []
+    )
+    .concat(config.tableFunc)
+    .join(
+      ", "
     )} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
     referenceImports.length > 0 ? referenceImports.join("\n") : ""
   }${schema.belongsToUser ? '\nimport { users } from "./auth";' : ""}`;
