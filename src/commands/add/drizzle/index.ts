@@ -1,8 +1,9 @@
-import { input, select } from "@inquirer/prompts";
+import { confirm, input, select } from "@inquirer/prompts";
 import { DBProvider, DBType } from "../../../types.js";
 import { DBProviders } from "../../init/utils.js";
 import {
   addPackageToConfig,
+  createFolder,
   readConfigFile,
   updateConfigFile,
 } from "../../../utils.js";
@@ -60,9 +61,21 @@ export const addDrizzle = async () => {
   if (dbProvider === "neon")
     databaseUrl = databaseUrl.concat("?sslmode=require");
 
+  const includeExampleModel = await confirm({
+    message:
+      "Would you like to include an example model? (suggested for new users)",
+    default: true,
+  });
+
   // create all the files here
-  createInitSchema(libPath, dbType);
-  createQueriesAndMutationsFolders(libPath);
+
+  if (includeExampleModel) {
+    createInitSchema(libPath, dbType);
+    createQueriesAndMutationsFolders(libPath);
+  } else {
+    createFolder(`${hasSrc ? "src/" : ""}lib/db/schema`);
+    createFolder(`${hasSrc ? "src/" : ""}lib/api`);
+  }
 
   // dependent on dbtype and driver, create
   createIndexTs(libPath, dbType, dbProvider);

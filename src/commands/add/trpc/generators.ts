@@ -1,3 +1,4 @@
+import { existsSync } from "fs";
 import { readConfigFile } from "../../../utils.js";
 
 // 1. Create server/index.ts moved to root router position
@@ -50,10 +51,22 @@ export const publicProcedure = t.procedure;`;
 
 // 3. create server/router/users.ts directory and maybe a users file
 export const serverRouterComputersTs = () => {
-  return `import { publicProcedure, router } from "../trpc";
+  const { hasSrc } = readConfigFile();
+  // check if file exists at src/lib/db/schema/computers.ts
+  const schemaPath = `${hasSrc ? "src/" : ""}lib/db/schema/computers.ts`;
+  const schemaExists = existsSync(schemaPath);
+  return `import { publicProcedure, router } from "../trpc";${
+    schemaExists
+      ? '\nimport { getComputers } from "@/lib/api/computers/queries"'
+      : ""
+  }
 export const computersRouter = router({
   getComputers: publicProcedure.query(async () => {
-    return [{ id: 1, name: "Macintosh" }, { id: 2, name: "Microsoft" }];
+    return ${
+      schemaExists
+        ? "getComputers()"
+        : '[{ id: 1, name: "Macintosh" }, { id: 2, name: "Microsoft" }]'
+    };
   }),
 });
 `;

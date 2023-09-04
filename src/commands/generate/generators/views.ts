@@ -49,7 +49,11 @@ export const scaffoldViewsAndComponents = (schema: Schema) => {
       createModalComponent(schema)
     );
     // install shadcn packages (button, dialog, form, input, label) - exec script: pnpm dlx shadcn-ui@latest add _
-    installShadcnUIComponents(["button", "dialog", "form", "input", "label"]);
+    const baseComponents = ["button", "dialog", "form", "input", "label"];
+    schema.fields.filter((field) => field.type === "boolean").length > 0
+      ? baseComponents.push("checkbox")
+      : null;
+    installShadcnUIComponents(baseComponents);
   } else {
     addPackage();
   }
@@ -173,9 +177,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "../ui/button";
-import { z } from "zod";
-// address later if boolean field
-import { Checkbox } from "../ui/checkbox";
+import { z } from "zod";${
+    schema.fields.filter((field) => field.type === "boolean").length > 0
+      ? '\nimport { Checkbox } from "../ui/checkbox";'
+      : ""
+  }
 import { useRouter } from "next/navigation";
 
 const ${tableNameSingularCapitalised}Form = ({
@@ -192,6 +198,8 @@ const ${tableNameSingularCapitalised}Form = ({
   const utils = trpc.useContext();
 
   const form = useForm<z.infer<typeof insert${tableNameSingularCapitalised}Params>>({
+    // @ts-expect-error latest Zod release has introduced a TS error with zodResolver
+    // open issue: https://github.com/colinhacks/zod/issues/2663
     resolver: zodResolver(insert${tableNameSingularCapitalised}Params),
     defaultValues: ${tableNameSingular} ?? {
       ${schema.fields.map(
@@ -251,7 +259,7 @@ const ${tableNameSingularCapitalised}Form = ({
           )}
         />`
           )
-          .join("\n")}
+          .join("\n        ")}
         <Button
           type="submit"
           className="mr-1"
