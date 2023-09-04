@@ -6,6 +6,7 @@ export const Packages: { name: string; value: AvailablePackage }[] = [
   { name: "Drizzle", value: "drizzle" },
   { name: "TRPC", value: "trpc" },
   { name: "Auth.js (NextAuth)", value: "next-auth" },
+  { name: "Shadcn UI", value: "shadcn-ui" },
 ];
 
 export const addContextProviderToLayout = (

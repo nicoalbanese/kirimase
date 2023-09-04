@@ -6,6 +6,7 @@ import { readConfigFile } from "../../utils.js";
 import { initProject } from "../init/index.js";
 import { consola } from "consola";
 import { addNextAuth } from "./next-auth/index.js";
+import { installShadcnUI } from "./shadcn-ui/index.js";
 
 export const addPackage = async () => {
   const config = readConfigFile();
@@ -24,6 +25,7 @@ export const addPackage = async () => {
       if (packageToInstall.includes("drizzle")) await addDrizzle();
       if (packageToInstall.includes("trpc")) await addTrpc();
       if (packageToInstall.includes("next-auth")) await addNextAuth();
+      if (packageToInstall.includes("shadcn-ui")) await installShadcnUI();
     } else {
       consola.info("All available packages are already installed");
     }

@@ -40,7 +40,7 @@ export type DBField = {
   cascade?: boolean;
 };
 
-export type AvailablePackage = "drizzle" | "trpc" | "next-auth";
+export type AvailablePackage = "drizzle" | "trpc" | "next-auth" | "shadcn-ui";
 
 export type Config = {
   hasSrc: boolean;

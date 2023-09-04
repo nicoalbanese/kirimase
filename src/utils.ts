@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs, { existsSync } from "fs";
+import path, { join } from "path";
 import { consola } from "consola";
 import { AvailablePackage, Config, PMType, UpdateConfig } from "./types.js";
 import { spawn } from "child_process";
@@ -87,6 +87,16 @@ export function createFolder(relativePath: string) {
 //   }
 // }
 
+export const runCommand = async (command: string, args: string[]) => {
+  try {
+    await execa(command, args, { stdio: "inherit" });
+  } catch (error) {
+    throw new Error(
+      `command "${command} ${args.join(" ")}" exited with code ${error.code}`
+    );
+  }
+};
+
 export async function installPackages(
   packages: { regular: string; dev: string },
   pmType: PMType
@@ -94,16 +104,6 @@ export async function installPackages(
   consola.log("switched to execa");
   const packagesListString = packages.regular.concat(" ").concat(packages.dev);
   consola.start(`Installing packages: ${packagesListString}...`);
-
-  const runCommand = async (command: string, args: string[]) => {
-    try {
-      await execa(command, args, { stdio: "inherit" });
-    } catch (error) {
-      throw new Error(
-        `command "${command} ${args.join(" ")}" exited with code ${error.code}`
-      );
-    }
-  };
 
   const installCommand = pmType === "npm" ? "install" : "add";
 
@@ -163,3 +163,43 @@ export const addPackageToConfig = (packageName: AvailablePackage) => {
 export const wrapInParenthesis = (string: string) => {
   return "(" + string + ")";
 };
+
+// shadcn specific utils
+
+export const pmInstallCommand = { pnpm: "pnpm", npm: "npx", yarn: "npx" };
+
+export async function installShadcnUIComponents(
+  components: string[]
+): Promise<void> {
+  const { preferredPackageManager } = readConfigFile();
+  const componentsToInstall: string[] = [];
+
+  for (const component of components) {
+    const tsxFilePath = path.resolve(`components/ui/${component}.tsx`);
+
+    if (!existsSync(tsxFilePath)) {
+      componentsToInstall.push(component);
+    }
+  }
+  const baseArgs = ["shadcn-ui@latest", "add", ...componentsToInstall];
+  const installArgs =
+    preferredPackageManager === "pnpm" ? ["dlx", ...baseArgs] : baseArgs;
+
+  if (componentsToInstall.length > 0) {
+    consola.start(
+      `Installing shadcn-ui components: ${componentsToInstall.join(", ")}`
+    );
+    try {
+      await execa(pmInstallCommand[preferredPackageManager], installArgs, {
+        stdio: "inherit",
+      });
+      consola.success(
+        `Installed components: ${componentsToInstall.join(", ")}`
+      );
+    } catch (error) {
+      consola.error(`Failed to install components: ${error.message}`);
+    }
+  } else {
+    consola.info("All items already installed.");
+  }
+}

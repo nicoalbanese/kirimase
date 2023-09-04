@@ -1,4 +1,8 @@
-import { createFile, readConfigFile } from "../../../utils.js";
+import {
+  createFile,
+  installShadcnUIComponents,
+  readConfigFile,
+} from "../../../utils.js";
 import { addTrpc } from "../../add/trpc/index.js";
 import { Schema } from "../types.js";
 import {
@@ -44,6 +48,7 @@ export const scaffoldViewsAndComponents = (schema: Schema) => {
       createModalComponent(schema)
     );
     // install shadcn packages (button, dialog, form, input, label) - exec script: pnpm dlx shadcn-ui@latest add _
+    installShadcnUIComponents(["button", "dialog", "form", "input", "label"]);
   } else {
     addTrpc();
   }
