@@ -101,7 +101,6 @@ export async function installPackages(
   packages: { regular: string; dev: string },
   pmType: PMType
 ) {
-  consola.log("switched to execa");
   const packagesListString = packages.regular.concat(" ").concat(packages.dev);
   consola.start(`Installing packages: ${packagesListString}...`);
 

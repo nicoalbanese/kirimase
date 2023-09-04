@@ -1,6 +1,6 @@
 {
   "name": "kirimase",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A Rails-like CLI for Nextjs and Drizzle ORM",
   "main": "index.js",
   "type": "module",
@@ -15,7 +15,12 @@
   },
   "keywords": [
     "cli",
-    "nextjs"
+    "nextjs",
+    "drizzle",
+    "next-auth",
+    "rails",
+    "shadcn",
+    "authjs"
   ],
   "author": "Nico Albanese",
   "license": "ISC",
