@@ -171,11 +171,13 @@ export const pmInstallCommand = { pnpm: "pnpm", npm: "npx", yarn: "npx" };
 export async function installShadcnUIComponents(
   components: string[]
 ): Promise<void> {
-  const { preferredPackageManager } = readConfigFile();
+  const { preferredPackageManager, hasSrc } = readConfigFile();
   const componentsToInstall: string[] = [];
 
   for (const component of components) {
-    const tsxFilePath = path.resolve(`components/ui/${component}.tsx`);
+    const tsxFilePath = path.resolve(
+      `${hasSrc ? "src/" : ""}components/ui/${component}.tsx`
+    );
 
     if (!existsSync(tsxFilePath)) {
       componentsToInstall.push(component);

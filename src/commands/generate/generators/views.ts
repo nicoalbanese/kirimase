@@ -3,6 +3,7 @@ import {
   installShadcnUIComponents,
   readConfigFile,
 } from "../../../utils.js";
+import { addPackage } from "../../add/index.js";
 import { addTrpc } from "../../add/trpc/index.js";
 import { Schema } from "../types.js";
 import {
@@ -19,7 +20,7 @@ export const scaffoldViewsAndComponents = (schema: Schema) => {
     schema.tableName
   );
   // require trpc for these views
-  if (packages.includes("trpc")) {
+  if (packages.includes("trpc") && packages.includes("shadcn-ui")) {
     // create view - tableName/page.tsx
     const rootPath = hasSrc ? "src/" : "";
     createFile(
@@ -50,7 +51,7 @@ export const scaffoldViewsAndComponents = (schema: Schema) => {
     // install shadcn packages (button, dialog, form, input, label) - exec script: pnpm dlx shadcn-ui@latest add _
     installShadcnUIComponents(["button", "dialog", "form", "input", "label"]);
   } else {
-    addTrpc();
+    addPackage();
   }
 };
 

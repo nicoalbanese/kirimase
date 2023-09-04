@@ -25,7 +25,7 @@ async function askForResourceType() {
       { name: "API Route", value: "api_route" },
       { name: "TRPC Route", value: "trpc_route" },
       {
-        name: "Views + Components",
+        name: "Views + Components (with Shadcn UI)",
         value: "views_and_components",
       },
     ],
