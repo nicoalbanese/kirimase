@@ -13,11 +13,13 @@ import { scaffoldViewsAndComponents } from "./generators/views.js";
 
 function provideInstructions() {
   consola.info(
-    "Quickly generate your Model (Drizzle schema + queries / mutations) and Controllers (API Routes and TRPC Routes)"
+    "Quickly generate your Model (Drizzle schema + queries / mutations), Controllers (API Routes and TRPC Routes), and Views"
   );
 }
 
 async function askForResourceType() {
+  const { packages } = readConfigFile();
+
   const resourcesRequested = await checkbox({
     message: "Please select the resources you would like to generate:",
     choices: [
@@ -25,8 +27,12 @@ async function askForResourceType() {
       { name: "API Route", value: "api_route" },
       { name: "TRPC Route", value: "trpc_route" },
       {
-        name: "Views + Components (with Shadcn UI)",
+        name: "Views + Components (with Shadcn UI, requires TRPC route)",
         value: "views_and_components",
+        disabled:
+          !packages.includes("shadcn-ui") || !packages.includes("trpc")
+            ? "[You need to have shadcn-ui and trpc installed]"
+            : false,
       },
     ],
   });

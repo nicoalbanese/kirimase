@@ -17,7 +17,8 @@ export const installShadcnUI = async () => {
     preferredPackageManager === "pnpm" ? ["dlx", ...baseArgs] : baseArgs;
 
   if (existsSync(filePath)) {
-    consola.log("Shadcn is already installed.");
+    consola.info("Shadcn is already installed. Adding Shadcn UI to config...");
+    addPackageToConfig("shadcn-ui");
   } else {
     try {
       await execa(pmInstallCommand[preferredPackageManager], installArgs, {
