@@ -67,10 +67,17 @@ const generateView = (schema: Schema) => {
   } = formatTableName(schema.tableName);
   return `import ${tableNameSingularCapitalised}List from "@/components/${tableNameCamelCase}/${tableNameSingularCapitalised}List";
 import New${tableNameSingularCapitalised}Modal from "@/components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal";
-import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";
+import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";${
+    schema.belongsToUser
+      ? '\nimport { checkAuth } from "@/lib/auth/utils";'
+      : ""
+  }
 
 export default async function ${tableNameCapitalised}() {
-  const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();
+  ${
+    schema.belongsToUser ? "await checkAuth();\n  " : ""
+  }const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();  
+
   return (
     <main className="max-w-3xl mx-auto p-5 sm:p-0 sm:pt-4">
       <div className="flex justify-between">
