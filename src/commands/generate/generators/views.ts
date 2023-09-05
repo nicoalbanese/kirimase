@@ -314,7 +314,6 @@ import {
 } from "../ui/dialog";
 import ${tableNameSingularCapitalised}Form from "./${tableNameSingularCapitalised}Form";
 import { ${tableNameSingularCapitalised} } from "@/lib/db/schema/${tableNameCamelCase}";
-import { PlusIcon } from "lucide-react";
 
 export default function ${tableNameSingularCapitalised}Modal({ 
   ${tableNameSingular},
@@ -331,7 +330,21 @@ export default function ${tableNameSingularCapitalised}Modal({
       <DialogTrigger asChild>
       { emptyState ? (
           <Button>
-            <PlusIcon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mr-1"
+            >
+              <path d="M5 12h14" />
+              <path d="M12 5v14" />
+            </svg>
             New ${tableNameSingularCapitalised}
           </Button>
         ) : (
