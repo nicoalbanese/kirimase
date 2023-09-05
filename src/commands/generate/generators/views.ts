@@ -204,8 +204,8 @@ const ${tableNameSingularCapitalised}Form = ({
 
   const form = useForm<z.infer<typeof insert${tableNameSingularCapitalised}Params>>({
     // latest Zod release has introduced a TS error with zodResolver
-    // does not arise in build though so no need for ts-expect-error
     // open issue: https://github.com/colinhacks/zod/issues/2663
+    // errors locally but not in production
     resolver: zodResolver(insert${tableNameSingularCapitalised}Params),
     defaultValues: ${tableNameSingular} ?? {
       ${schema.fields.map(

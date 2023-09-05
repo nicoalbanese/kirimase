@@ -135,6 +135,7 @@ export const createConfig = () => {
 };
 
 function generateModelContent(schema: Schema, dbType: DBType) {
+  const { provider } = readConfigFile();
   const { index, fields, tableName } = schema;
   const {
     tableNameCamelCase,
@@ -180,7 +181,11 @@ function generateModelContent(schema: Schema, dbType: DBType) {
       `, ${config.tableFunc}`
     )} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
     referenceImports.length > 0 ? referenceImports.join("\n") : ""
-  }${schema.belongsToUser ? '\nimport { users } from "./auth";' : ""}`;
+  }${
+    schema.belongsToUser && provider !== "planetscale"
+      ? '\nimport { users } from "./auth";'
+      : ""
+  }`;
 
   const schemaFields = fields
     .map(

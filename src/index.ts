@@ -13,11 +13,6 @@ program
   .description("initialise and configure kirimase within directory")
   .action(initProject);
 
-// program
-//   .command("scaffold")
-//   .description("Scaffold a new resource")
-//   .action(buildSchema);
-
 program
   .command("generate")
   .description("Generate a new resource")
