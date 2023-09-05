@@ -252,7 +252,7 @@ import { migrate } from "drizzle-orm/planetscale-serverless/migrator";
 import { connect } from "@planetscale/database";
 `;
       connectionLogic = `
-const connection = connect(process.env.DATABASE_URL!);
+const connection = connect({ url: process.env.DATABASE_URL! });
  
 const db = drizzle(connection);
 `;

@@ -67,12 +67,10 @@ const generateView = (schema: Schema) => {
   } = formatTableName(schema.tableName);
   return `import ${tableNameSingularCapitalised}List from "@/components/${tableNameCamelCase}/${tableNameSingularCapitalised}List";
 import New${tableNameSingularCapitalised}Modal from "@/components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal";
-import { api } from "@/lib/trpc/api";
-
-export const revalidate = 0;
+import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";
 
 export default async function ${tableNameCapitalised}() {
-  const { ${tableNameCamelCase} } = await api.${tableNameCamelCase}.get${tableNameCapitalised}.query();
+  const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();
   return (
     <main className="max-w-3xl mx-auto p-5 sm:p-0 sm:pt-4">
       <div className="flex justify-between">
@@ -198,7 +196,8 @@ const ${tableNameSingularCapitalised}Form = ({
   const utils = trpc.useContext();
 
   const form = useForm<z.infer<typeof insert${tableNameSingularCapitalised}Params>>({
-    // @ts-expect-error latest Zod release has introduced a TS error with zodResolver
+    // latest Zod release has introduced a TS error with zodResolver
+    // does not arise in build though so no need for ts-expect-error
     // open issue: https://github.com/colinhacks/zod/issues/2663
     resolver: zodResolver(insert${tableNameSingularCapitalised}Params),
     defaultValues: ${tableNameSingular} ?? {
