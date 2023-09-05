@@ -167,7 +167,13 @@ function generateModelContent(schema: Schema, dbType: DBType) {
   const nonStringFields = getNonStringFields(fields);
   const zodMappings = getZodMappings(nonStringFields);
 
-  const uniqueTypes = Array.from(new Set(usedTypes));
+  const uniqueTypes = Array.from(
+    new Set(
+      usedTypes.concat(
+        schema.belongsToUser ? [getReferenceFieldType("string")[dbType]] : []
+      )
+    )
+  );
   const importStatement = `import { ${uniqueTypes
     .join(", ")
     .concat(
