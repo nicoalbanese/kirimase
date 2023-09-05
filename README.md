@@ -2,6 +2,8 @@
 
 Rails-like CLI for building projects with Nextjs and Drizzle ORM
 
+[DEMO](https://www.loom.com/share/cb329939c83b4c9eb6a56abfd2638bd4?sid=6d902fcc-3ef6-4436-bf7d-9d0c2943812f)
+
 ### Quickly scaffold resources for your Nextjs app
 
 ![](https://github.com/nicoalbanese/gifs_for_demos/blob/main/gif_generate_script_1.gif?raw=true)
