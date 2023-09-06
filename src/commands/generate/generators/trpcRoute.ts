@@ -48,54 +48,61 @@ function updateTRPCRouter(routerName: string): void {
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
 
-  // Add import statement after the last import
-  const importInsertionPoint = fileContent.lastIndexOf("import");
-  const nextLineAfterLastImport =
-    fileContent.indexOf("\n", importInsertionPoint) + 1;
-  const beforeImport = fileContent.slice(0, nextLineAfterLastImport);
-  const afterImport = fileContent.slice(nextLineAfterLastImport);
-  const newImportStatement = `import { ${routerName}Router } from "./${routerName}";\n`;
-  const withNewImport = `${beforeImport}${newImportStatement}${afterImport}`;
-
-  let modifiedRouterContent = "";
-
-  if (withNewImport.includes("router({})")) {
-    // Handle empty router
-    const beforeRouterBlock = withNewImport.indexOf("router({})");
-    const afterRouterBlock = withNewImport.slice(
-      beforeRouterBlock + "router({})".length
-    );
-    modifiedRouterContent = `${withNewImport.slice(
-      0,
-      beforeRouterBlock
-    )}router({ ${routerName}: ${routerName}Router })${afterRouterBlock}`;
-  } else if (withNewImport.match(/router\({ \w+: \w+Router }\)/)) {
-    // Single-line router
-    const singleRouterMatch = withNewImport.match(
-      /router\({ \w+: \w+Router }\)/
-    );
-    const oldRouter = singleRouterMatch[0];
-    const newRouter = oldRouter.replace(
-      "}",
-      `,\n  ${routerName}: ${routerName}Router,\n  }`
-    );
-    modifiedRouterContent = withNewImport.replace(oldRouter, newRouter);
+  const routerAlreadyExists = fileContent.includes(`${routerName}Router`);
+  if (routerAlreadyExists) {
+    consola.info(`Router '${routerName}' already exists in root router.`);
   } else {
-    // Regular multi-line router
-    const routerBlockEnd = withNewImport.indexOf("});");
-    const beforeRouterBlockEnd = withNewImport.lastIndexOf(
-      "\n",
-      routerBlockEnd
+    // Add import statement after the last import
+    const importInsertionPoint = fileContent.lastIndexOf("import");
+    const nextLineAfterLastImport =
+      fileContent.indexOf("\n", importInsertionPoint) + 1;
+    const beforeImport = fileContent.slice(0, nextLineAfterLastImport);
+    const afterImport = fileContent.slice(nextLineAfterLastImport);
+    const newImportStatement = `import { ${routerName}Router } from "./${routerName}";\n`;
+    const withNewImport = `${beforeImport}${newImportStatement}${afterImport}`;
+
+    let modifiedRouterContent = "";
+
+    if (withNewImport.includes("router({})")) {
+      // Handle empty router
+      const beforeRouterBlock = withNewImport.indexOf("router({})");
+      const afterRouterBlock = withNewImport.slice(
+        beforeRouterBlock + "router({})".length
+      );
+      modifiedRouterContent = `${withNewImport.slice(
+        0,
+        beforeRouterBlock
+      )}router({ ${routerName}: ${routerName}Router })${afterRouterBlock}`;
+    } else if (withNewImport.match(/router\({ \w+: \w+Router }\)/)) {
+      // Single-line router
+      const singleRouterMatch = withNewImport.match(
+        /router\({ \w+: \w+Router }\)/
+      );
+      const oldRouter = singleRouterMatch[0];
+      const newRouter = oldRouter.replace(
+        "}",
+        `,\n  ${routerName}: ${routerName}Router,\n  }`
+      );
+      modifiedRouterContent = withNewImport.replace(oldRouter, newRouter);
+    } else {
+      // Regular multi-line router
+      const routerBlockEnd = withNewImport.indexOf("});");
+      const beforeRouterBlockEnd = withNewImport.lastIndexOf(
+        "\n",
+        routerBlockEnd
+      );
+      const beforeRouter = withNewImport.slice(0, beforeRouterBlockEnd);
+      const afterRouter = withNewImport.slice(beforeRouterBlockEnd);
+      const newRouterStatement = `\n  ${routerName}: ${routerName}Router,`;
+      modifiedRouterContent = `${beforeRouter}${newRouterStatement}${afterRouter}`;
+    }
+
+    replaceFile(filePath, modifiedRouterContent);
+
+    consola.success(
+      `Added '${routerName}' router to the root tRPC router successfully.`
     );
-    const beforeRouter = withNewImport.slice(0, beforeRouterBlockEnd);
-    const afterRouter = withNewImport.slice(beforeRouterBlockEnd);
-    const newRouterStatement = `\n  ${routerName}: ${routerName}Router,`;
-    modifiedRouterContent = `${beforeRouter}${newRouterStatement}${afterRouter}`;
   }
-
-  replaceFile(filePath, modifiedRouterContent);
-
-  consola.success(`Added ${routerName} router to root router successfully.`);
 }
 
 const generateRouteContent = (schema: Schema) => {

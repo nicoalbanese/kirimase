@@ -23,9 +23,21 @@ async function askForResourceType() {
   const resourcesRequested = await checkbox({
     message: "Please select the resources you would like to generate:",
     choices: [
-      { name: "Model", value: "model" },
+      {
+        name: "Model",
+        value: "model",
+        disabled: !packages.includes("drizzle")
+          ? "[You need to have drizzle installed. Run 'kirimase add']"
+          : false,
+      },
       { name: "API Route", value: "api_route" },
-      { name: "TRPC Route", value: "trpc_route" },
+      {
+        name: "TRPC Route",
+        value: "trpc_route",
+        disabled: !packages.includes("trpc")
+          ? "[You need to have trpc installed. Run 'kirimase add']"
+          : false,
+      },
       {
         name: "Views + Components (with Shadcn UI, requires TRPC route)",
         value: "views_and_components",

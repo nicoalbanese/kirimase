@@ -378,7 +378,7 @@ export const create${tableNameSingularCapitalised} = async (${tableNameSingular}
       driver === "mysql" ? "" : `const [${tableNameFirstChar}] =  `
     }await db.insert(${tableNameCamelCase}).values(new${tableNameSingularCapitalised})${
     driver === "mysql"
-      ? "\nreturn { success: true }"
+      ? "\n    return { success: true }"
       : `.returning();
     return { ${tableNameSingular}: ${tableNameFirstChar} };`
   }
