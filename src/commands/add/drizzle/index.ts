@@ -71,7 +71,7 @@ export const addDrizzle = async () => {
 
   if (includeExampleModel) {
     createInitSchema(libPath, dbType);
-    createQueriesAndMutationsFolders(libPath);
+    createQueriesAndMutationsFolders(libPath, dbType);
   } else {
     createFolder(`${hasSrc ? "src/" : ""}lib/db/schema`);
     createFolder(`${hasSrc ? "src/" : ""}lib/api`);

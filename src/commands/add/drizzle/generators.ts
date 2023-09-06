@@ -512,7 +512,10 @@ export function updateTsConfigTarget() {
   });
 }
 
-export function createQueriesAndMutationsFolders(libPath: string) {
+export function createQueriesAndMutationsFolders(
+  libPath: string,
+  driver: DBType
+) {
   // create computers queries
   const query = `import { db } from "@/lib/db";
 import { eq } from "drizzle-orm";
@@ -537,8 +540,13 @@ import { NewComputer, insertComputerSchema, computers, computerIdSchema, Compute
 export const createComputer = async (computer: NewComputer) => {
   const newComputer = insertComputerSchema.parse(computer);
   try {
-    const [c] = await db.insert(computers).values(newComputer).returning();
-    return { computer: c };
+    ${
+      driver === "mysql" ? "" : "const [c] = "
+    } await db.insert(computers).values(newComputer)${
+    driver === "mysql"
+      ? "\n    return { success: true }"
+      : ".returning();\n    return { computer: c }"
+  }
   } catch (err) {
     return { error: (err as Error).message ?? "Error, please try again" };
   }
@@ -548,12 +556,14 @@ export const updateComputer = async (id: ComputerId, computer: NewComputer) => {
   const { id: computerId } = computerIdSchema.parse({ id });
   const newComputer = insertComputerSchema.parse(computer);
   try {
-    const [c] = await db
+    ${driver === "mysql" ? "" : "const [c] = "}await db
      .update(computers)
      .set(newComputer)
-     .where(eq(computers.id, computerId!))
-     .returning();
-    return { computer: c };
+     .where(eq(computers.id, computerId!))${
+       driver === "mysql"
+         ? "\n    return { success: true };"
+         : ".returning();\n    return { computer: c };"
+     }
   } catch (err) {
     return { error: (err as Error).message ?? "Error, please try again" };
   }
@@ -562,8 +572,13 @@ export const updateComputer = async (id: ComputerId, computer: NewComputer) => {
 export const deleteComputer = async (id: ComputerId) => {
   const { id: computerId } = computerIdSchema.parse({ id });
   try {
-    const [c] = await db.delete(computers).where(eq(computers.id, computerId!)).returning();
-    return { computer: c };
+    ${
+      driver === "mysql" ? "" : "const [c] = "
+    }await db.delete(computers).where(eq(computers.id, computerId!))${
+    driver === "mysql"
+      ? "\n    return { success: true };"
+      : ".returning();\n    return { computer: c };"
+  }
   } catch (err) {
     return { error: (err as Error).message ?? "Error, please try again" };
   }
