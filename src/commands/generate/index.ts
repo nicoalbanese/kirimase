@@ -10,7 +10,7 @@ import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
 import { Schema } from "./types.js";
 import { scaffoldViewsAndComponents } from "./generators/views.js";
-import { getCurrentSchemas } from "./utils.js";
+import { getCurrentSchemas, toCamelCase } from "./utils.js";
 
 function provideInstructions() {
   consola.info(
@@ -71,7 +71,7 @@ async function askIfBelongsToUser() {
   return belongsToUser;
 }
 
-async function askForFields(dbType: DBType) {
+async function askForFields(dbType: DBType, tableName: string) {
   const fields: DBField[] = [];
   let addMore = true;
 
@@ -98,9 +98,11 @@ async function askForFields(dbType: DBType) {
     if (fieldType === "references") {
       const referencesTable = await select({
         message: "Which table do you want it reference?",
-        choices: currentSchemas.map((schema) => {
-          return { name: schema, value: schema };
-        }),
+        choices: currentSchemas
+          .filter((schema) => schema !== toCamelCase(tableName))
+          .map((schema) => {
+            return { name: schema, value: schema };
+          }),
       });
 
       const fieldName = `${referencesTable.slice(0, -1)}_id`;
@@ -176,7 +178,7 @@ export async function buildSchema() {
       provideInstructions();
       const resourceType = await askForResourceType();
       const tableName = await askForTable();
-      const fields = await askForFields(driver);
+      const fields = await askForFields(driver, tableName);
       const indexedField = await askForIndex(fields);
       // console.log(indexedField);
       let schema: Schema;
