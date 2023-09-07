@@ -165,7 +165,7 @@ export const wrapInParenthesis = (string: string) => {
 
 // shadcn specific utils
 
-export const pmInstallCommand = { pnpm: "pnpm", npm: "npx", yarn: "npx" };
+export const pmInstallCommand = { pnpm: "pnpm", npm: "npx", yarn: "npx", bun: "bunx" };
 
 export async function installShadcnUIComponents(
   components: string[]
