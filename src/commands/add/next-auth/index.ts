@@ -19,6 +19,7 @@ import { AuthProvider, AuthProviders } from "./utils.js";
 import { checkbox } from "@inquirer/prompts";
 import { addToDotEnv, createInitSchema } from "../drizzle/generators.js";
 import { addContextProviderToLayout } from "../utils.js";
+import { updateSignInComponentWithShadcnUI } from "../shadcn-ui/index.js";
 
 export const addNextAuth = async () => {
   const providers = (await checkbox({
@@ -49,10 +50,14 @@ export const addNextAuth = async () => {
   );
 
   // 5. create components/auth/SignIn.tsx
-  createFile(
-    rootPath.concat("components/auth/SignIn.tsx"),
-    createSignInComponent()
-  );
+  if (packages.includes("shadcn-ui")) {
+    updateSignInComponentWithShadcnUI();
+  } else {
+    createFile(
+      rootPath.concat("components/auth/SignIn.tsx"),
+      createSignInComponent()
+    );
+  }
 
   // 6. If trpc installed, add protectedProcedure
   if (packages.includes("trpc")) {

@@ -8,8 +8,9 @@ import {
   readConfigFile,
   replaceFile,
 } from "../../../utils.js";
+import { AvailablePackage } from "../../../types.js";
 
-export const installShadcnUI = async () => {
+export const installShadcnUI = async (packages: AvailablePackage[]) => {
   consola.start("Installing Shadcn UI...");
   const { preferredPackageManager } = readConfigFile();
   const filePath = "components.json";
@@ -33,10 +34,10 @@ export const installShadcnUI = async () => {
     }
   }
   await installShadcnUIComponents(["button"]);
-  updateSignInComponent();
+  if (packages.includes("next-auth")) updateSignInComponentWithShadcnUI();
 };
 
-const updateSignInComponent = () => {
+export const updateSignInComponentWithShadcnUI = () => {
   const { hasSrc } = readConfigFile();
   const filepath = "components/auth/SignIn.tsx";
   const updatedContent = `"use client";

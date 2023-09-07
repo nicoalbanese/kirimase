@@ -25,7 +25,8 @@ export const addPackage = async () => {
       if (packageToInstall.includes("drizzle")) await addDrizzle();
       if (packageToInstall.includes("trpc")) await addTrpc();
       if (packageToInstall.includes("next-auth")) await addNextAuth();
-      if (packageToInstall.includes("shadcn-ui")) await installShadcnUI();
+      if (packageToInstall.includes("shadcn-ui"))
+        await installShadcnUI(packageToInstall.concat(packages));
     } else {
       consola.info("All available packages are already installed");
     }
