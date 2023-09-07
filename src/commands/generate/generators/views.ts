@@ -99,14 +99,17 @@ const createListComponent = (schema: Schema) => {
     tableNameCapitalised,
     tableNameFirstChar,
   } = formatTableName(schema.tableName);
+  const relations = schema.fields.filter(
+    (field) => field.type === "references"
+  );
 
   return `"use client";
-import { ${tableNameSingularCapitalised} } from "@/lib/db/schema/${tableNameCamelCase}";
+import { Complete${tableNameSingularCapitalised} } from "@/lib/db/schema/${tableNameCamelCase}";
 import { trpc } from "@/lib/trpc/client";
 import ${tableNameSingularCapitalised}Modal from "./${tableNameSingularCapitalised}Modal";
 
 
-export default function ${tableNameSingularCapitalised}List({ ${tableNameCamelCase} }: { ${tableNameCamelCase}: ${tableNameSingularCapitalised}[] }) {
+export default function ${tableNameSingularCapitalised}List({ ${tableNameCamelCase} }: { ${tableNameCamelCase}: Complete${tableNameSingularCapitalised}[] }) {
   const { data: ${tableNameFirstChar} } = trpc.${tableNameCamelCase}.get${tableNameCapitalised}.useQuery(undefined, {
     initialData: { ${tableNameCamelCase} },
     refetchOnMount: false,
@@ -119,19 +122,31 @@ export default function ${tableNameSingularCapitalised}List({ ${tableNameCamelCa
   return (
     <ul>
       {${tableNameFirstChar}.${tableNameCamelCase}.map((${tableNameSingular}) => (
-        <${tableNameSingularCapitalised} ${tableNameSingular}={${tableNameSingular}} key={${tableNameSingular}.id} />
+        <${tableNameSingularCapitalised} ${tableNameSingular}={${tableNameSingular}} key={${
+    relations.length > 0
+      ? `${tableNameSingular}.${tableNameSingular}`
+      : tableNameSingular
+  }.id} />
       ))}
     </ul>
   );
 }
 
-const ${tableNameSingularCapitalised} = ({ ${tableNameSingular} }: { ${tableNameSingular}: ${tableNameSingularCapitalised} }) => {
+const ${tableNameSingularCapitalised} = ({ ${tableNameSingular} }: { ${tableNameSingular}: Complete${tableNameSingularCapitalised} }) => {
   return (
     <li className="flex justify-between my-2">
       <div className="w-full">
-        <div>{${tableNameSingular}.${schema.fields[0].name}}</div>
+        <div>{${
+          relations.length > 0
+            ? `${tableNameSingular}.${tableNameSingular}`
+            : tableNameSingular
+        }.${schema.fields[0].name}}</div>
       </div>
-      <${tableNameSingularCapitalised}Modal ${tableNameSingular}={${tableNameSingular}} />
+      <${tableNameSingularCapitalised}Modal ${tableNameSingular}={${
+    relations.length > 0
+      ? `${tableNameSingular}.${tableNameSingular}`
+      : tableNameSingular
+  }} />
     </li>
   );
 };

@@ -141,6 +141,7 @@ function generateModelContent(schema: Schema, dbType: DBType) {
     tableNameCamelCase,
     tableNameSingular,
     tableNameSingularCapitalised,
+    tableNameCapitalised,
   } = formatTableName(tableName);
   const relations = schema.fields.filter(
     (field) => field.type === "references"
@@ -185,7 +186,8 @@ function generateModelContent(schema: Schema, dbType: DBType) {
     schema.belongsToUser && provider !== "planetscale"
       ? '\nimport { users } from "./auth";'
       : ""
-  }`;
+  }
+import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";`;
 
   const schemaFields = fields
     .map(
@@ -255,6 +257,9 @@ export type New${tableNameSingularCapitalised} = z.infer<typeof insert${tableNam
 export type New${tableNameSingularCapitalised}Params = z.infer<typeof insert${tableNameSingularCapitalised}Params>;
 export type Update${tableNameSingularCapitalised}Params = z.infer<typeof update${tableNameSingularCapitalised}Params>;
 export type ${tableNameSingularCapitalised}Id = z.infer<typeof ${tableNameSingular}IdSchema>["id"];
+    
+// this type infers the return from get${tableNameCapitalised}() - meaning it will include any joins
+export type Complete${tableNameSingularCapitalised} = Awaited<ReturnType<typeof get${tableNameCapitalised}>>["${tableNameCamelCase}"][number];
 `;
 
   return `${importStatement}\n\n${schemaContent}`;
@@ -295,7 +300,16 @@ ${
     : ""
 }
 export const get${tableNameSingularCapitalised}s = async () => {${getAuth}
-  const ${tableNameFirstChar} = await db.select().from(${tableNameCamelCase})${
+  const ${tableNameFirstChar} = await db.select(${
+    relations.length > 0
+      ? `{ ${tableNameSingular}: ${tableNameCamelCase}, ${relations
+          .map(
+            (relation) =>
+              `${relation.references.slice(0, -1)}: ${relation.references}`
+          )
+          .join(", ")} }`
+      : ""
+  }).from(${tableNameCamelCase})${
     relations.length > 0
       ? relations.map(
           (relation) =>
