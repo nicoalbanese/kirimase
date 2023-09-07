@@ -74,6 +74,7 @@ const generateView = (schema: Schema) => {
     tableNameCamelCase,
     tableNameSingularCapitalised,
     tableNameCapitalised,
+    tableNameNormalEnglishCapitalised,
   } = formatTableName(schema.tableName);
   return `import ${tableNameSingularCapitalised}List from "@/components/${tableNameCamelCase}/${tableNameSingularCapitalised}List";
 import New${tableNameSingularCapitalised}Modal from "@/components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal";
@@ -91,7 +92,7 @@ export default async function ${tableNameCapitalised}() {
   return (
     <main className="max-w-3xl mx-auto p-5 md:p-0 sm:pt-4">
       <div className="flex justify-between">
-        <h1 className="font-semibold text-2xl my-2">${tableNameCapitalised}</h1>
+        <h1 className="font-semibold text-2xl my-2">${tableNameNormalEnglishCapitalised}</h1>
         <New${tableNameSingularCapitalised}Modal />
       </div>
       <${tableNameSingularCapitalised}List ${tableNameCamelCase}={${tableNameCamelCase}} />
@@ -115,6 +116,8 @@ const createListComponent = (schema: Schema) => {
     tableNameSingularCapitalised,
     tableNameCapitalised,
     tableNameFirstChar,
+    tableNameNormalEnglishSingularLowerCase,
+    tableNameNormalEnglishCapitalised,
   } = formatTableName(schema.tableName);
   const relations = schema.fields.filter(
     (field) => field.type === "references"
@@ -157,7 +160,11 @@ const ${tableNameSingularCapitalised} = ({ ${tableNameSingular} }: { ${tableName
           relations.length > 0
             ? `${tableNameSingular}.${tableNameSingular}`
             : tableNameSingular
-        }.${toCamelCase(schema.fields[0].name)}}</div>
+        }.${toCamelCase(schema.fields[0].name)}${
+    schema.fields[0].type === "date" || schema.fields[0].type === "timestamp"
+      ? ".toString()"
+      : ""
+  }}</div>
       </div>
       <${tableNameSingularCapitalised}Modal ${tableNameSingular}={${
     relations.length > 0
@@ -171,12 +178,9 @@ const ${tableNameSingularCapitalised} = ({ ${tableNameSingular} }: { ${tableName
 const EmptyState = () => {
   return (
     <div className="text-center">
-      <h3 className="mt-2 text-sm font-semibold text-gray-900">No ${toNormalEnglish(
-        tableNameCamelCase,
-        true
-      )}</h3>
+      <h3 className="mt-2 text-sm font-semibold text-gray-900">No ${tableNameNormalEnglishSingularLowerCase}</h3>
       <p className="mt-1 text-sm text-gray-500">
-        Get started by creating a new ${tableNameSingular}.
+        Get started by creating a new ${tableNameNormalEnglishSingularLowerCase}.
       </p>
       <div className="mt-6">
         <${tableNameSingularCapitalised}Modal emptyState={true} />
@@ -271,8 +275,9 @@ const createFormComponent = (schema: Schema) => {
     tableNameSingularCapitalised,
     tableNameCapitalised,
     tableNameFirstChar,
+    tableNameNormalEnglishSingular,
   } = formatTableName(schema.tableName);
-  const { packages } = readConfigFile();
+  const { packages, driver } = readConfigFile();
   const relations = schema.fields.filter(
     (field) => field.type === "references"
   );
@@ -346,10 +351,14 @@ const ${tableNameSingularCapitalised}Form = ({
     // errors locally but not in production
     resolver: zodResolver(insert${tableNameSingularCapitalised}Params),
     defaultValues: ${tableNameSingular} ?? {
-      ${schema.fields.map(
-        (field) =>
-          `${toCamelCase(field.name)}: ${defaultValueMappings[field.type]}`
-      )}
+      ${schema.fields
+        .map(
+          (field) =>
+            `${toCamelCase(field.name)}: ${
+              defaultValueMappings[driver][field.type]
+            }`
+        )
+        .join(",\n     ")}
     },
   });
 
@@ -364,7 +373,7 @@ const ${tableNameSingularCapitalised}Form = ({
       packages.includes("shadcn-ui")
         ? `toast({
       title: 'Success',
-      description: \`${tableNameSingularCapitalised} \${action}d!\`,
+      description: \`${tableNameNormalEnglishSingular} \${action}d!\`,
       variant: "default",
     });`
         : null
@@ -448,8 +457,7 @@ export const createModalComponent = (schema: Schema) => {
     tableNameCamelCase,
     tableNameSingular,
     tableNameSingularCapitalised,
-    tableNameCapitalised,
-    tableNameFirstChar,
+    tableNameNormalEnglishSingular,
   } = formatTableName(schema.tableName);
   return `"use client";
 
@@ -495,7 +503,7 @@ export default function ${tableNameSingularCapitalised}Modal({
               <path d="M5 12h14" />
               <path d="M12 5v14" />
             </svg>
-            New ${tableNameSingularCapitalised}
+            New ${tableNameNormalEnglishSingular}
           </Button>
         ) : (
         <Button
@@ -507,7 +515,7 @@ export default function ${tableNameSingularCapitalised}Modal({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader className="px-5 pt-5">
-          <DialogTitle>{ editing ? "Edit" : "Create" } ${tableNameSingularCapitalised}</DialogTitle>
+          <DialogTitle>{ editing ? "Edit" : "Create" } ${tableNameNormalEnglishSingular}</DialogTitle>
         </DialogHeader>
         <div className="px-5 pb-5">
           <${tableNameSingularCapitalised}Form closeModal={closeModal} ${tableNameSingular}={${tableNameSingular}} />

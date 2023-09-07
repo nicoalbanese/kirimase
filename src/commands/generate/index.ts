@@ -10,6 +10,7 @@ import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
 import { Schema } from "./types.js";
 import { scaffoldViewsAndComponents } from "./generators/views.js";
+import { getCurrentSchemas } from "./utils.js";
 
 function provideInstructions() {
   consola.info(
@@ -75,19 +76,31 @@ async function askForFields(dbType: DBType) {
   let addMore = true;
 
   while (addMore) {
+    const currentSchemas = getCurrentSchemas();
+    const baseFieldTypeChoices = Object.keys(
+      createConfig()[dbType].typeMappings
+    )
+      .filter((field) => field !== "id")
+      .map((field) => {
+        return { name: field, value: field };
+      });
+
+    const fieldTypeChoices =
+      currentSchemas.length < 1
+        ? baseFieldTypeChoices.filter((field) => field.name !== "references")
+        : baseFieldTypeChoices;
+
     const fieldType = (await select({
       message: "Please select the type of this field:",
-      choices: Object.keys(createConfig()[dbType].typeMappings)
-        .filter((field) => field !== "id")
-        .map((field) => {
-          return { name: field, value: field };
-        }),
+      choices: fieldTypeChoices,
     })) as FieldType;
 
     if (fieldType === "references") {
-      const referencesTable = await input({
-        message:
-          "Which table does it reference? (in snake_case if more than one word)",
+      const referencesTable = await select({
+        message: "Which table do you want it reference?",
+        choices: currentSchemas.map((schema) => {
+          return { name: schema, value: schema };
+        }),
       });
 
       const fieldName = `${referencesTable.slice(0, -1)}_id`;

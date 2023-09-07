@@ -1,6 +1,8 @@
+import path from "path";
 import { DBField, DBType, FieldType } from "../../types.js";
 import { readConfigFile } from "../../utils.js";
 import { Schema } from "./types.js";
+import fs from "fs";
 
 export function toCamelCase(input: string): string {
   return input
@@ -33,6 +35,27 @@ export const formatTableName = (tableName: string) => {
     capitaliseForZodSchema(tableNameCamelCase);
   const tableNameSingular = tableNameCamelCase.slice(0, -1);
   const tableNameFirstChar = tableNameCamelCase.charAt(0);
+  const tableNameNormalEnglishCapitalised = toNormalEnglish(
+    tableName,
+    false,
+    false
+  );
+  const tableNameNormalEnglishSingular = toNormalEnglish(
+    tableName,
+    false,
+    true
+  );
+  const tableNameNormalEnglishSingularLowerCase = toNormalEnglish(
+    tableName,
+    true,
+    true
+  );
+
+  const tableNameNormalEnglishLowerCase = toNormalEnglish(
+    tableName,
+    true,
+    false
+  );
 
   return {
     tableNameCamelCase,
@@ -40,6 +63,10 @@ export const formatTableName = (tableName: string) => {
     tableNameSingularCapitalised,
     tableNameFirstChar,
     tableNameCapitalised,
+    tableNameNormalEnglishCapitalised,
+    tableNameNormalEnglishSingular,
+    tableNameNormalEnglishLowerCase,
+    tableNameNormalEnglishSingularLowerCase,
   };
 };
 
@@ -101,24 +128,82 @@ export const getZodMappings = (fields: DBField[]) => {
   });
 };
 
-export const defaultValueMappings: Partial<Record<FieldType, string>> = {
-  string: '""',
-  number: "0",
-  boolean: "false",
-  blob: '""',
-  date: '""',
-  json: '""',
-  text: '""',
-  float: "0.0",
-  varchar: '""',
-  timestamp: '""',
-  references: "0",
+export const defaultValueMappings: Record<
+  DBType,
+  Partial<Record<FieldType, string>>
+> = {
+  pg: {
+    string: '""',
+    number: "0",
+    boolean: "false",
+    blob: '""',
+    date: '""',
+    json: '""',
+    text: '""',
+    float: "0.0",
+    varchar: '""',
+    timestamp: '""',
+    references: "0",
+  },
+  mysql: {
+    string: '""',
+    number: "0",
+    boolean: "false",
+    blob: '""',
+    date: '""',
+    json: '""',
+    text: '""',
+    float: "0.0",
+    varchar: '""',
+    timestamp: '""',
+    references: "0",
+  },
+  sqlite: {
+    string: '""',
+    number: "0",
+    boolean: "false",
+    blob: '""',
+    date: "new Date()",
+    json: '""',
+    text: '""',
+    float: "0.0",
+    varchar: '""',
+    timestamp: "new Date()",
+    references: "0",
+  },
 };
 
-export function toNormalEnglish(input: string, lowercase?: boolean): string {
+export function toNormalEnglish(
+  input: string,
+  lowercase?: boolean,
+  singular?: boolean
+): string {
   const output = input
     .split("_")
     .map((word) => capitalise(word))
     .join(" ");
-  return lowercase ? output.toLowerCase() : output;
+
+  const newOutput = singular ? output.slice(0, -1) : output;
+
+  return lowercase ? newOutput.toLowerCase() : newOutput;
+}
+
+export function getCurrentSchemas() {
+  const { hasSrc } = readConfigFile();
+  const directory = `${hasSrc ? "src/" : ""}lib/db/schema`;
+
+  try {
+    // Read the directory content
+    const files = fs.readdirSync(directory);
+
+    // Filter and transform to get only .ts files and remove their extensions
+    const schemaNames = files
+      .filter((file) => path.extname(file) === ".ts")
+      .map((file) => path.basename(file, ".ts"));
+
+    return schemaNames.filter((schema) => schema !== "auth");
+  } catch (error) {
+    console.error(`Error reading schemas ${directory}:`, error);
+    return [];
+  }
 }
