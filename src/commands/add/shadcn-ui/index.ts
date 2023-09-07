@@ -9,6 +9,7 @@ import {
   replaceFile,
 } from "../../../utils.js";
 import { AvailablePackage } from "../../../types.js";
+import { addContextProviderToLayout } from "../utils.js";
 
 export const installShadcnUI = async (packages: AvailablePackage[]) => {
   consola.start("Installing Shadcn UI...");
@@ -33,7 +34,8 @@ export const installShadcnUI = async (packages: AvailablePackage[]) => {
       consola.error(`Failed to initialize Shadcn: ${error.message}`);
     }
   }
-  await installShadcnUIComponents(["button"]);
+  await installShadcnUIComponents(["button", "toast"]);
+  addContextProviderToLayout("ShadcnToast");
   if (packages.includes("next-auth")) updateSignInComponentWithShadcnUI();
 };
 

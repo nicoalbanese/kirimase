@@ -179,6 +179,7 @@ const createFormComponent = (schema: Schema) => {
     tableNameCapitalised,
     tableNameFirstChar,
   } = formatTableName(schema.tableName);
+  const { packages } = readConfigFile();
 
   return `"use client";
 
@@ -202,7 +203,11 @@ import { z } from "zod";${
       ? '\nimport { Checkbox } from "../ui/checkbox";'
       : ""
   }
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";${
+    packages.includes("shadcn-ui")
+      ? `\nimport { useToast } from "@/components/ui/use-toast";`
+      : ""
+  }
 
 const ${tableNameSingularCapitalised}Form = ({
   ${tableNameSingular},
@@ -210,7 +215,9 @@ const ${tableNameSingularCapitalised}Form = ({
 }: {
   ${tableNameSingular}?: ${tableNameSingularCapitalised};
   closeModal: () => void;
-}) => {
+}) => {${
+    packages.includes("shadcn-ui") ? `\n  const { toast } = useToast();` : ""
+  }
 
   const editing = !!${tableNameSingular}?.id;
 
@@ -230,25 +237,43 @@ const ${tableNameSingularCapitalised}Form = ({
     },
   });
 
-  const onSuccess = () => {
+  const onSuccess = (${
+    packages.includes("shadcn-ui")
+      ? 'action: "create" | "update" | "delete"'
+      : ""
+  }) => {
     utils.${tableNameCamelCase}.get${tableNameCapitalised}.invalidate();
     router.refresh();
-    closeModal();
+    closeModal();${
+      packages.includes("shadcn-ui")
+        ? `toast({
+      title: 'Success',
+      description: \`${tableNameSingularCapitalised} \${action}d!\`,
+      variant: "default",
+    });`
+        : null
+    }
   };
 
   const { mutate: create${tableNameSingularCapitalised}, isLoading: isCreating } =
     trpc.${tableNameCamelCase}.create${tableNameSingularCapitalised}.useMutation({
-      onSuccess,
+      onSuccess${
+        packages.includes("shadcn-ui") ? ': () => onSuccess("create")' : ""
+      },
     });
 
   const { mutate: update${tableNameSingularCapitalised}, isLoading: isUpdating } =
     trpc.${tableNameCamelCase}.update${tableNameSingularCapitalised}.useMutation({
-      onSuccess,
+      onSuccess${
+        packages.includes("shadcn-ui") ? ': () => onSuccess("update")' : ""
+      },
     });
 
   const { mutate: delete${tableNameSingularCapitalised}, isLoading: isDeleting } =
     trpc.${tableNameCamelCase}.delete${tableNameSingularCapitalised}.useMutation({
-      onSuccess,
+      onSuccess${
+        packages.includes("shadcn-ui") ? ': () => onSuccess("delete")' : ""
+      },
     });
 
   const handleSubmit = (values: New${tableNameSingularCapitalised}Params) => {
