@@ -1,3 +1,4 @@
+import { DBField, FieldType } from "../../../types.js";
 import {
   createFile,
   installShadcnUIComponents,
@@ -52,6 +53,9 @@ export const scaffoldViewsAndComponents = (schema: Schema) => {
     const baseComponents = ["button", "dialog", "form", "input", "label"];
     schema.fields.filter((field) => field.type === "boolean").length > 0
       ? baseComponents.push("checkbox")
+      : null;
+    schema.fields.filter((field) => field.type === "references").length > 0
+      ? baseComponents.push("select")
       : null;
     installShadcnUIComponents(baseComponents);
   } else {
@@ -171,6 +175,37 @@ const EmptyState = () => {
 `;
 };
 
+const createformInputComponent = (field: DBField): string => {
+  if (field.type == "boolean")
+    return `<Checkbox {...field} checked={field.value} onCheckedChange={field.onChange} value={""} />`;
+  if (field.type == "references") {
+    const referencesSingular = field.references.slice(0, -1);
+    return `<Select
+                  onValueChange={field.onChange}
+                  defaultValue={String(field.value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a ${referencesSingular}" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {${field.references}?.${field.references}.map((${referencesSingular}) => (
+                      <SelectItem key={${referencesSingular}.id} value={${referencesSingular}.id.toString()}>
+                        {${referencesSingular}.id}  {/* TODO: Replace with a field from the ${referencesSingular} model */}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+`;
+  }
+  return `<Input {...field} />`;
+};
+
+const generateTrpcGetQuery = (referenceTable: string) => {
+  const { tableNameCamelCase, tableNameCapitalised } =
+    formatTableName(referenceTable);
+  return `const { data: ${tableNameCamelCase} } = trpc.${tableNameCamelCase}.get${tableNameCapitalised}.useQuery();`;
+};
+
 const createFormComponent = (schema: Schema) => {
   const {
     tableNameCamelCase,
@@ -180,6 +215,9 @@ const createFormComponent = (schema: Schema) => {
     tableNameFirstChar,
   } = formatTableName(schema.tableName);
   const { packages } = readConfigFile();
+  const relations = schema.fields.filter(
+    (field) => field.type === "references"
+  );
 
   return `"use client";
 
@@ -202,6 +240,10 @@ import { z } from "zod";${
     schema.fields.filter((field) => field.type === "boolean").length > 0
       ? '\nimport { Checkbox } from "../ui/checkbox";'
       : ""
+  }${
+    relations.length > 0
+      ? '\nimport { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";'
+      : ""
   }
 import { useRouter } from "next/navigation";${
     packages.includes("shadcn-ui")
@@ -218,7 +260,13 @@ const ${tableNameSingularCapitalised}Form = ({
 }) => {${
     packages.includes("shadcn-ui") ? `\n  const { toast } = useToast();` : ""
   }
-
+  ${
+    relations.length > 0
+      ? relations
+          .map((relation) => generateTrpcGetQuery(relation.references))
+          .join("\n  ")
+      : ""
+  }
   const editing = !!${tableNameSingular}?.id;
 
   const router = useRouter();
@@ -294,11 +342,7 @@ const ${tableNameSingularCapitalised}Form = ({
           render={({ field }) => (<FormItem>
               <FormLabel>${toNormalEnglish(field.name)}</FormLabel>
               <FormControl>
-                ${
-                  field.type === "boolean"
-                    ? `<Checkbox {...field} checked={field.value} onCheckedChange={field.onChange} value={""} />`
-                    : '<Input placeholder="" {...field} />'
-                }
+                ${createformInputComponent(field)}
               </FormControl>
               <FormMessage />
             </FormItem>
