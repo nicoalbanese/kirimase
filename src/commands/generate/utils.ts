@@ -1,4 +1,5 @@
-import { DBField, FieldType } from "../../types.js";
+import { DBField, DBType, FieldType } from "../../types.js";
+import { readConfigFile } from "../../utils.js";
 import { Schema } from "./types.js";
 
 export function toCamelCase(input: string): string {
@@ -59,19 +60,40 @@ export const getNonStringFields = (fields: DBField[]) => {
 
 type ZodType = "string" | "number" | "boolean" | "date" | "bigint" | "object";
 
-const ZodMappings: Partial<Record<FieldType, ZodType>> = {
-  number: "number",
-  date: "date",
-  boolean: "boolean",
-  float: "number",
-  references: "number",
-  timestamp: "date",
-  json: "object",
+const ZodMappings: Record<DBType, Partial<Record<FieldType, ZodType>>> = {
+  pg: {
+    number: "number",
+    date: "string",
+    boolean: "boolean",
+    float: "number",
+    references: "number",
+    timestamp: "string",
+    json: "object",
+  },
+  mysql: {
+    number: "number",
+    date: "string",
+    boolean: "boolean",
+    float: "number",
+    references: "number",
+    timestamp: "string",
+    json: "object",
+  },
+  sqlite: {
+    number: "number",
+    date: "date",
+    boolean: "boolean",
+    float: "number",
+    references: "number",
+    timestamp: "date",
+    json: "object",
+  },
 };
 
 export const getZodMappings = (fields: DBField[]) => {
+  const { driver } = readConfigFile();
   return fields.map((field) => {
-    const zodType = ZodMappings[field.type];
+    const zodType = ZodMappings[driver][field.type];
     return {
       name: field.name,
       type: zodType,

@@ -3,6 +3,7 @@ import { execa } from "execa";
 import { existsSync } from "fs";
 import {
   addPackageToConfig,
+  installPackages,
   installShadcnUIComponents,
   pmInstallCommand,
   readConfigFile,
@@ -16,6 +17,10 @@ export const installShadcnUI = async (packages: AvailablePackage[]) => {
   const { preferredPackageManager } = readConfigFile();
   const filePath = "components.json";
 
+  installPackages(
+    { regular: "lucide-react", dev: "" },
+    preferredPackageManager
+  );
   const baseArgs = ["shadcn-ui@latest", "init"];
   const installArgs =
     preferredPackageManager === "pnpm" ? ["dlx", ...baseArgs] : baseArgs;

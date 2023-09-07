@@ -1,6 +1,7 @@
 import { DBField, FieldType } from "../../../types.js";
 import {
   createFile,
+  getFileContents,
   installShadcnUIComponents,
   readConfigFile,
 } from "../../../utils.js";
@@ -57,6 +58,11 @@ export const scaffoldViewsAndComponents = (schema: Schema) => {
     schema.fields.filter((field) => field.type === "references").length > 0
       ? baseComponents.push("select")
       : null;
+    schema.fields.filter(
+      (field) => field.type === "date" || field.type === "timestamp"
+    ).length > 0
+      ? baseComponents.push("popover", "calendar")
+      : null;
     installShadcnUIComponents(baseComponents);
   } else {
     addPackage();
@@ -83,7 +89,7 @@ export default async function ${tableNameCapitalised}() {
   }const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();  
 
   return (
-    <main className="max-w-3xl mx-auto p-5 sm:p-0 sm:pt-4">
+    <main className="max-w-3xl mx-auto p-5 md:p-0 sm:pt-4">
       <div className="flex justify-between">
         <h1 className="font-semibold text-2xl my-2">${tableNameCapitalised}</h1>
         <New${tableNameSingularCapitalised}Modal />
@@ -93,6 +99,13 @@ export default async function ${tableNameCapitalised}() {
   );
 }
 `;
+};
+
+const queryHasJoins = (tableName: string) => {
+  const { hasSrc } = readConfigFile();
+  const path = `${hasSrc ? "src/" : ""}lib/api/${tableName}/queries.ts`;
+  const queryContent = getFileContents(path);
+  return queryContent.includes("Join");
 };
 
 const createListComponent = (schema: Schema) => {
@@ -144,7 +157,7 @@ const ${tableNameSingularCapitalised} = ({ ${tableNameSingular} }: { ${tableName
           relations.length > 0
             ? `${tableNameSingular}.${tableNameSingular}`
             : tableNameSingular
-        }.${schema.fields[0].name}}</div>
+        }.${toCamelCase(schema.fields[0].name)}}</div>
       </div>
       <${tableNameSingularCapitalised}Modal ${tableNameSingular}={${
     relations.length > 0
@@ -177,10 +190,17 @@ const EmptyState = () => {
 
 const createformInputComponent = (field: DBField): string => {
   if (field.type == "boolean")
-    return `<Checkbox {...field} checked={field.value} onCheckedChange={field.onChange} value={""} />`;
+    return `<br />
+            <FormControl>
+              <Checkbox {...field} checked={!!field.value} onCheckedChange={field.onChange} value={""} />
+            </FormControl>`;
   if (field.type == "references") {
     const referencesSingular = field.references.slice(0, -1);
-    return `<Select
+    const entity = queryHasJoins(toCamelCase(field.references))
+      ? `${referencesSingular}.${referencesSingular}`
+      : referencesSingular;
+    return `<FormControl>
+                <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
                 >
@@ -189,15 +209,53 @@ const createformInputComponent = (field: DBField): string => {
                   </SelectTrigger>
                   <SelectContent>
                     {${field.references}?.${field.references}.map((${referencesSingular}) => (
-                      <SelectItem key={${referencesSingular}.id} value={${referencesSingular}.id.toString()}>
-                        {${referencesSingular}.id}  {/* TODO: Replace with a field from the ${referencesSingular} model */}
+                      <SelectItem key={${entity}.id} value={${entity}.id.toString()}>
+                        {${entity}.id}  {/* TODO: Replace with a field from the ${referencesSingular} model */}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+            </FormControl>
 `;
   }
-  return `<Input {...field} />`;
+  if (field.type == "date" || field.type == "timestamp")
+    return `<br />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-[240px] pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(new Date(field.value), "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={new Date(field.value)}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date > new Date() || date < new Date("1900-01-01")
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+`;
+  return `<FormControl>
+            <Input {...field} />
+          </FormControl>
+`;
 };
 
 const generateTrpcGetQuery = (referenceTable: string) => {
@@ -243,6 +301,16 @@ import { z } from "zod";${
   }${
     relations.length > 0
       ? '\nimport { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";'
+      : ""
+  }${
+    schema.fields.filter(
+      (field) => field.type === "date" || field.type === "timestamp"
+    ).length > 0
+      ? `import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";`
       : ""
   }
 import { useRouter } from "next/navigation";${
@@ -341,9 +409,7 @@ const ${tableNameSingularCapitalised}Form = ({
           name="${toCamelCase(field.name)}"
           render={({ field }) => (<FormItem>
               <FormLabel>${toNormalEnglish(field.name)}</FormLabel>
-              <FormControl>
                 ${createformInputComponent(field)}
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}

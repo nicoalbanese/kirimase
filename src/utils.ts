@@ -165,7 +165,12 @@ export const wrapInParenthesis = (string: string) => {
 
 // shadcn specific utils
 
-export const pmInstallCommand = { pnpm: "pnpm", npm: "npx", yarn: "npx", bun: "bunx" };
+export const pmInstallCommand = {
+  pnpm: "pnpm",
+  npm: "npx",
+  yarn: "npx",
+  bun: "bunx",
+};
 
 export async function installShadcnUIComponents(
   components: string[]
@@ -204,3 +209,8 @@ export async function installShadcnUIComponents(
     consola.info("All items already installed.");
   }
 }
+
+export const getFileContents = (filePath: string) => {
+  const fileContents = fs.readFileSync(filePath, "utf-8");
+  return fileContents;
+};
