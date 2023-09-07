@@ -383,7 +383,9 @@ export const create${tableNameSingularCapitalised} = async (${tableNameSingular}
     return { ${tableNameSingular}: ${tableNameFirstChar} };`
   }
   } catch (err) {
-    return { error: (err as Error).message ?? "Error, please try again" };
+    const message = (err as Error).message ?? "Error, please try again";
+    console.error(message);
+    return { error: message };
   }
 };
 
@@ -412,7 +414,9 @@ export const update${tableNameSingularCapitalised} = async (id: ${tableNameSingu
     return { ${tableNameSingular}: ${tableNameFirstChar} };`
   }
   } catch (err) {
-    return { error: (err as Error).message ?? "Error, please try again" };
+    const message = (err as Error).message ?? "Error, please try again";
+    console.error(message);
+    return { error: message };
   }
 };
 
@@ -435,7 +439,9 @@ export const delete${tableNameSingularCapitalised} = async (id: ${tableNameSingu
     return { ${tableNameSingular}: ${tableNameFirstChar} };`
   }
   } catch (err) {
-    return { error: (err as Error).message ?? "Error, please try again" };
+    const message = (err as Error).message ?? "Error, please try again";
+    console.error(message);
+    return { error: message };
   }
 };
 

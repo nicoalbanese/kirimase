@@ -548,7 +548,9 @@ export const createComputer = async (computer: NewComputer) => {
       : ".returning();\n    return { computer: c }"
   }
   } catch (err) {
-    return { error: (err as Error).message ?? "Error, please try again" };
+    const message = (err as Error).message ?? "Error, please try again";
+    console.error(message);
+    return { error: message };
   }
 };
 
@@ -565,7 +567,9 @@ export const updateComputer = async (id: ComputerId, computer: NewComputer) => {
          : ".returning();\n    return { computer: c };"
      }
   } catch (err) {
-    return { error: (err as Error).message ?? "Error, please try again" };
+    const message = (err as Error).message ?? "Error, please try again"
+    console.error(message);
+    return { error: message };
   }
 };
 
@@ -580,7 +584,9 @@ export const deleteComputer = async (id: ComputerId) => {
       : ".returning();\n    return { computer: c };"
   }
   } catch (err) {
-    return { error: (err as Error).message ?? "Error, please try again" };
+    const message = (err as Error).message ?? "Error, please try again"
+    console.error(message);
+    return { error: message };
   }
 };`;
   createFile(`${libPath}/api/computers/queries.ts`, query);
