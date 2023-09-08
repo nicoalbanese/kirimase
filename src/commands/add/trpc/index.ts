@@ -54,8 +54,9 @@ export const addTrpc = async () => {
   // 8. Install Packages: @tanstack/react-query, @trpc/client, @trpc/react-query, @trpc/server
   await installPackages(
     {
-      regular:
-        "@tanstack/react-query @trpc/client @trpc/react-query @trpc/server @trpc/next superjson",
+      regular: `@tanstack/react-query @trpc/client @trpc/react-query @trpc/server @trpc/next superjson${
+        !packages.includes("drizzle") ? " zod" : ""
+      }`,
       dev: "",
     },
     preferredPackageManager
