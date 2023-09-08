@@ -1,8 +1,9 @@
 import path from "path";
 import { DBField, DBType, FieldType } from "../../types.js";
-import { readConfigFile } from "../../utils.js";
+import { readConfigFile, replaceFile } from "../../utils.js";
 import { Schema } from "./types.js";
-import fs from "fs";
+import fs, { existsSync, readFileSync } from "fs";
+import { consola } from "consola";
 
 export function toCamelCase(input: string): string {
   return input
@@ -207,3 +208,16 @@ export function getCurrentSchemas() {
     return [];
   }
 }
+
+export const AddToPrismaSchema = (schema: string) => {
+  const schemaPath = "prisma/schema.prisma";
+  const schemaExists = existsSync(schemaPath);
+  if (schemaExists) {
+    const schemaContents = readFileSync(schemaPath, "utf-8");
+    const newContent = schemaContents.concat("\n", schema);
+    replaceFile(schemaPath, newContent);
+    consola.success("updated prisma schema");
+  } else {
+    consola.info(`Prisma schema file does not exist`);
+  }
+};

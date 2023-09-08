@@ -1,13 +1,19 @@
 import { consola } from "consola";
-import { AuthProvider, AuthProviders, capitalised } from "./utils.js";
+import {
+  AuthDriver,
+  AuthProvider,
+  AuthProviders,
+  capitalised,
+} from "./utils.js";
 import fs from "fs";
-import { DBType } from "../../../../types.js";
+import { DBType, ORMType } from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
 
 // 1. Create app/api/auth/[...nextauth].ts
 export const apiAuthNextAuthTs = (
   providers: AuthProvider[],
-  dbType: DBType | null
+  dbType: DBType | null,
+  orm: ORMType
 ) => {
   const providersToUse = providers.map((provider) => {
     return {
@@ -20,7 +26,7 @@ export const apiAuthNextAuthTs = (
   return `${
     dbType !== null
       ? `import { db } from "@/lib/db";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";`
+${AuthDriver[orm].import}`
       : ""
   }
 import { DefaultSession, NextAuthOptions } from "next-auth";
@@ -45,7 +51,7 @@ declare module "next-auth" {
 export const authOptions: NextAuthOptions = {
   ${
     dbType !== null
-      ? "adapter: DrizzleAdapter(db),"
+      ? `adapter: ${AuthDriver[orm].adapter}(db),`
       : "// adapter: yourDBAdapterHere"
   }
   callbacks: {
@@ -98,7 +104,7 @@ export const checkAuth = async () => {
 };
 
 // 4. create lib/db/schema/auth.ts
-export const createAuthSchema = (dbType: DBType) => {
+export const createDrizzleAuthSchema = (dbType: DBType) => {
   const { provider } = readConfigFile();
   switch (dbType) {
     case "pg":
@@ -378,4 +384,51 @@ export const enableSessionInTRPCApi = () => {
   fs.writeFileSync(filePath, updatedContent);
 
   consola.success("TRPC Server API updated successfully to add Session data.");
+};
+
+export const createPrismaAuthSchema = () => {
+  return `model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}`;
 };

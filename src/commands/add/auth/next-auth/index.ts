@@ -8,7 +8,8 @@ import {
 } from "../../../../utils.js";
 import {
   apiAuthNextAuthTs,
-  createAuthSchema,
+  createDrizzleAuthSchema,
+  createPrismaAuthSchema,
   createSignInComponent,
   enableSessionInContext,
   enableSessionInTRPCApi,
@@ -16,11 +17,13 @@ import {
   libAuthUtilsTs,
   updateTrpcTs,
 } from "./generators.js";
-import { AuthProvider, AuthProviders } from "./utils.js";
+import { AuthDriver, AuthProvider, AuthProviders } from "./utils.js";
 import { checkbox } from "@inquirer/prompts";
 import { addContextProviderToLayout } from "../../utils.js";
 import { updateSignInComponentWithShadcnUI } from "../../misc/shadcn-ui/index.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
+import { AddToPrismaSchema } from "../../../generate/utils.js";
+import { prismaGenerate } from "../../orm/utils.js";
 
 export const addNextAuth = async () => {
   const providers = (await checkbox({
@@ -30,13 +33,13 @@ export const addNextAuth = async () => {
     }),
   })) as AuthProvider[];
 
-  const { hasSrc, preferredPackageManager, driver, packages } =
+  const { hasSrc, preferredPackageManager, driver, packages, orm } =
     readConfigFile();
   const rootPath = `${hasSrc ? "src/" : ""}`;
   // 1. Create app/api/auth/[...nextauth].ts
   createFile(
     rootPath.concat("app/api/auth/[...nextauth]/route.ts"),
-    apiAuthNextAuthTs(providers, driver)
+    apiAuthNextAuthTs(providers, driver, orm)
   );
 
   // 2. create lib/auth/Provider.tsx
@@ -46,11 +49,16 @@ export const addNextAuth = async () => {
   createFile(rootPath.concat("lib/auth/utils.ts"), libAuthUtilsTs());
 
   // 4. create lib/db/schema/auth.ts
-  if (driver !== null) {
-    createFile(
-      rootPath.concat("lib/db/schema/auth.ts"),
-      createAuthSchema(driver)
-    );
+  if (orm !== null) {
+    if (orm === "drizzle") {
+      createFile(
+        rootPath.concat("lib/db/schema/auth.ts"),
+        createDrizzleAuthSchema(driver)
+      );
+    }
+    if (orm === "prisma") {
+      AddToPrismaSchema(createPrismaAuthSchema());
+    }
   }
 
   // 5. create components/auth/SignIn.tsx
@@ -85,7 +93,9 @@ export const addNextAuth = async () => {
   // 7. Install Packages: @auth/core @auth/drizzle-adapter next-auth
   await installPackages(
     {
-      regular: "@auth/core @auth/drizzle-adapter next-auth",
+      regular: `@auth/core next-auth${
+        orm !== null ? ` ${AuthDriver[orm].package}` : ""
+      }`,
       dev: "",
     },
     preferredPackageManager
@@ -94,6 +104,7 @@ export const addNextAuth = async () => {
   updateConfigFile({ auth: "next-auth" });
   // 9. Instruct user to add the <Provider /> to their root layout.
   addContextProviderToLayout("NextAuthProvider");
+  if (orm === "prisma") await prismaGenerate(preferredPackageManager);
   consola.success("Successfully added Next Auth to your project!");
 
   providers.forEach((provider) => {
