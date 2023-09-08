@@ -61,9 +61,9 @@ Kirimase generates:
 
 #### a) Model:
 
-- Generates column types based on your SQL flavor and database provider.
+- Generates a drizzle schema with column types based on your SQL flavor and database provider.
 - Uses drizzle-zod to generate Zod schemas for frontend and backend validation.
-- Generates queries and mutations for CRUD operations, optimized for consumption via a Next.js front-end.
+- Generates queries and mutations for CRUD operations, fully typed and optimized for consumption via a Next.js front-end.
 
 #### b) Controller:
 
