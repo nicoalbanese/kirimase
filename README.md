@@ -15,9 +15,9 @@ Kirimase is a command-line tool for building full-stack Next.js apps faster. It 
 
 Install Kirimase CLI globally:
 
-\`\`\`bash
+```bash
 npm install -g kirimase
-\`\`\`
+```
 
 ## Commands
 
