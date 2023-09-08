@@ -29,11 +29,9 @@ export const addNextAuth = async () => {
       return { name: p, value: p };
     }),
   })) as AuthProvider[];
-    console.log("made it here 1")
 
   const { hasSrc, preferredPackageManager, driver, packages } =
     readConfigFile();
-  console.log("made it here 2")
   const rootPath = `${hasSrc ? "src/" : ""}`;
   // 1. Create app/api/auth/[...nextauth].ts
   createFile(
@@ -48,7 +46,6 @@ export const addNextAuth = async () => {
   createFile(rootPath.concat("lib/auth/utils.ts"), libAuthUtilsTs());
 
   // 4. create lib/db/schema/auth.ts
-  console.log(driver)
   if (driver !== null) {
     createFile(
       rootPath.concat("lib/db/schema/auth.ts"),
