@@ -217,3 +217,15 @@ export const getFileContents = (filePath: string) => {
   const fileContents = fs.readFileSync(filePath, "utf-8");
   return fileContents;
 };
+
+export const updateConfigFileAfterUpdate = () => {
+  const { packages, orm, auth } = readConfigFile();
+  if (orm === undefined || auth === undefined) {
+    const updatedOrm = packages.includes("drizzle") ? "drizzle" : null;
+    const updatedAuth = packages.includes("next-auth") ? "next-auth" : null;
+    updateConfigFile({ orm: updatedOrm, auth: updatedAuth });
+    consola.info("Config file updated.");
+  } else {
+    consola.info("Config file already up to date.");
+  }
+};
