@@ -88,11 +88,12 @@ export function createFolder(relativePath: string) {
 // }
 
 export const runCommand = async (command: string, args: string[]) => {
+  const formattedArgs = args.filter((a) => a !== "");
   try {
-    await execa(command, args, { stdio: "inherit" });
+    await execa(command, formattedArgs, { stdio: "inherit" });
   } catch (error) {
     throw new Error(
-      `command "${command} ${args.join(" ")}" exited with code ${error.code}`
+      `command "${command} ${formattedArgs.join(" ").trim()}" exited with code ${error.code}`
     );
   }
 };
