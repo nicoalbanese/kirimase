@@ -14,13 +14,14 @@ export type DBProvider =
   | "planetscale"
   | "mysql-2"
   | "better-sqlite3";
+// | "bun-sqlite";
 
 export type DBProviderOptions = {
   pg: DBProviderItem[];
   mysql: DBProviderItem[];
   sqlite: DBProviderItem[];
 };
-export type PMType = "npm" | "yarn" | "pnpm" | "bun";
+export type PMType = "npm" | "yarn" | "pnpm"; // | "bun";
 
 // export type FieldType =
 //   | "id"

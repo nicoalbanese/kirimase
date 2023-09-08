@@ -141,6 +141,13 @@ import Database from 'better-sqlite3';
 const sqlite = new Database('sqlite.db');
 export const db: BetterSQLite3Database = drizzle(sqlite);
 `;
+    //     case "bun-sqlite":
+    //       indexTS = `import { drizzle, BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite';
+    // import { Database } from 'bun:sqlite';
+    //
+    // const sqlite = new Database('sqlite.db');
+    // export const db: BunSQLiteDatabase = drizzle(sqlite);
+    // `;
     default:
       break;
   }
@@ -444,6 +451,7 @@ export const installDependencies = async (
       regular: "better-sqlite3",
       dev: "@types/better-sqlite3",
     },
+    // "bun-sqlite": { regular: "drizzle-orm", dev: "drizzle-kit" },
   };
   // note this change hasnt been tested yet
   const dbSpecificPackage = packages[dbType];

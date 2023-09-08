@@ -43,6 +43,11 @@ export const addDrizzle = async () => {
     ],
   })) as DBType;
 
+  // const dbProviders = DBProviders[dbType].filter((p) => {
+  //   if (preferredPackageManager === "bun") return p.value !== "better-sqlite3";
+  //   else return p.value !== "bun-sqlite";
+  // });
+
   const dbProvider = (await select({
     message: "Please choose your DB Provider",
     choices: DBProviders[dbType],

@@ -18,5 +18,8 @@ export const DBProviders: DBProviderOptions = {
     { name: "PlanetScale", value: "planetscale" },
     { name: "MySQL 2", value: "mysql-2" },
   ],
-  sqlite: [{ name: "better-sqlite3", value: "better-sqlite3" }],
+  sqlite: [
+    { name: "better-sqlite3", value: "better-sqlite3" },
+    // { name: "Bun SQLite", value: "bun-sqlite" },
+  ],
 };

@@ -29,7 +29,7 @@ export async function initProject() {
       { name: "NPM", value: "npm" },
       { name: "Yarn", value: "yarn" },
       { name: "PNPM", value: "pnpm" },
-      { name: "Bun", value: "bun" },
+      // { name: "Bun", value: "bun" },
     ],
   })) as PMType;
   // console.log("installing dependencies with", preferredPackageManager);

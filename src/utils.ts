@@ -93,7 +93,9 @@ export const runCommand = async (command: string, args: string[]) => {
     await execa(command, formattedArgs, { stdio: "inherit" });
   } catch (error) {
     throw new Error(
-      `command "${command} ${formattedArgs.join(" ").trim()}" exited with code ${error.code}`
+      `command "${command} ${formattedArgs
+        .join(" ")
+        .trim()}" exited with code ${error.code}`
     );
   }
 };
@@ -170,7 +172,7 @@ export const pmInstallCommand = {
   pnpm: "pnpm",
   npm: "npx",
   yarn: "npx",
-  bun: "bunx",
+  // bun: "bunx",
 };
 
 export async function installShadcnUIComponents(
