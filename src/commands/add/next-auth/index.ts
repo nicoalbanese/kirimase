@@ -34,7 +34,7 @@ export const addNextAuth = async () => {
   // 1. Create app/api/auth/[...nextauth].ts
   createFile(
     rootPath.concat("app/api/auth/[...nextauth]/route.ts"),
-    apiAuthNextAuthTs(providers)
+    apiAuthNextAuthTs(providers, driver)
   );
 
   // 2. create lib/auth/Provider.tsx
@@ -44,10 +44,12 @@ export const addNextAuth = async () => {
   createFile(rootPath.concat("lib/auth/utils.ts"), libAuthUtilsTs());
 
   // 4. create lib/db/schema/auth.ts
-  createFile(
-    rootPath.concat("lib/db/schema/auth.ts"),
-    createAuthSchema(driver)
-  );
+  if (driver !== null) {
+    createFile(
+      rootPath.concat("lib/db/schema/auth.ts"),
+      createAuthSchema(driver)
+    );
+  }
 
   // 5. create components/auth/SignIn.tsx
   if (packages.includes("shadcn-ui")) {

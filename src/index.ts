@@ -6,7 +6,7 @@ import { buildSchema } from "./commands/generate/index.js";
 import { addPackage } from "./commands/add/index.js";
 
 const program = new Command();
-program.name("kirimase").description("Kirimase CLI").version("0.0.9");
+program.name("kirimase").description("Kirimase CLI").version("0.0.10");
 
 program
   .command("init")

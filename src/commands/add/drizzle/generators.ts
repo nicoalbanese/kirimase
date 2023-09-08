@@ -467,12 +467,15 @@ export const createDotEnv = (databaseUrl?: string) => {
 
 export const addToDotEnv = (items: { key: string; value: string }[]) => {
   const envPath = path.resolve(".env");
-  const envData = fs.readFileSync(envPath, "utf-8");
-
+  const envExists = fs.existsSync(envPath);
   const newData = items.map((item) => `${item.key}=${item.value}`).join("\n");
-  const updatedEnvData = `${envData}\n${newData}`;
-
-  fs.writeFileSync(envPath, updatedEnvData);
+  if (envExists) {
+    const envData = fs.readFileSync(envPath, "utf-8");
+    const updatedEnvData = `${envData}\n${newData}`;
+    fs.writeFileSync(envPath, updatedEnvData);
+  } else {
+    fs.writeFileSync(envPath, newData);
+  }
 };
 export function updateTsConfigTarget() {
   // Define the path to the tsconfig.json file

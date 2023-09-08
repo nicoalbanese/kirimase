@@ -5,7 +5,10 @@ import { AuthProvider, AuthProviders, capitalised } from "./utils.js";
 import fs from "fs";
 
 // 1. Create app/api/auth/[...nextauth].ts
-export const apiAuthNextAuthTs = (providers: AuthProvider[]) => {
+export const apiAuthNextAuthTs = (
+  providers: AuthProvider[],
+  dbType: DBType | null
+) => {
   const providersToUse = providers.map((provider) => {
     return {
       name: provider,
@@ -14,8 +17,12 @@ export const apiAuthNextAuthTs = (providers: AuthProvider[]) => {
     };
   });
 
-  return `import { db } from "@/lib/db";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
+  return `${
+    dbType !== null
+      ? `import { db } from "@/lib/db";
+import { DrizzleAdapter } from "@auth/drizzle-adapter";`
+      : ""
+  }
 import { DefaultSession, NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth/next";
 ${providersToUse
@@ -36,7 +43,11 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: DrizzleAdapter(db),
+  ${
+    dbType !== null
+      ? "adapter: DrizzleAdapter(db),"
+      : "// adapter: yourDBAdapterHere"
+  }
   callbacks: {
     session: ({ session, user }) => {
       session.user.id = user.id;
