@@ -42,22 +42,21 @@ export type DBField = {
 };
 
 export type AvailablePackage = "drizzle" | "trpc" | "next-auth" | "shadcn-ui";
+export type PackageType = "orm" | "auth" | "misc";
+export type ORMType = "drizzle";
+export type AuthType = "next-auth";
 
 export type Config = {
   hasSrc: boolean;
-  driver?: DBType;
-  provider?: DBProvider;
   preferredPackageManager: PMType;
-  packages?: AvailablePackage[];
+  driver: DBType | null;
+  provider: DBProvider | null;
+  packages: AvailablePackage[];
+  orm: ORMType | null;
+  auth: AuthType | null;
 };
 
-export type UpdateConfig = {
-  hasSrc?: boolean;
-  driver?: DBType;
-  provider?: DBProvider;
-  preferredPackageManager?: PMType;
-  packages?: AvailablePackage[];
-};
+export type UpdateConfig = Partial<Config>;
 
 export type ScaffoldSchema = {
   tableName: string;

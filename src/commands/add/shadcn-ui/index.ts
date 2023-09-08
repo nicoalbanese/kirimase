@@ -12,7 +12,11 @@ import {
 import { AvailablePackage } from "../../../types.js";
 import { addContextProviderToLayout } from "../utils.js";
 
-export const installShadcnUI = async (packages: AvailablePackage[]) => {
+export const installShadcnUI = async (
+  packagesBeingInstalled: AvailablePackage[]
+) => {
+  const { packages: installedPackages } = readConfigFile();
+  const packages = packagesBeingInstalled.concat(installedPackages);
   consola.start("Installing Shadcn UI...");
   const { preferredPackageManager } = readConfigFile();
   const filePath = "components.json";

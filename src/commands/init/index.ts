@@ -34,11 +34,13 @@ export async function initProject() {
   })) as PMType;
   // console.log("installing dependencies with", preferredPackageManager);
   createConfigFile({
-    driver: null,
+    driver: undefined,
     hasSrc: srcExists,
-    provider: null,
+    provider: undefined,
     packages: [],
     preferredPackageManager,
+    orm: undefined,
+    auth: undefined,
   });
   consola.success("Kirimase initialized!");
   consola.info("You can now add packages.");

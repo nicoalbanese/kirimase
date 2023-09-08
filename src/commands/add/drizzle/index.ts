@@ -92,7 +92,7 @@ export const addDrizzle = async () => {
   createDotEnv(databaseUrl);
   updateTsConfigTarget();
 
-  updateConfigFile({ driver: dbType, provider: dbProvider });
+  updateConfigFile({ driver: dbType, provider: dbProvider, orm: "drizzle" });
   await installDependencies(dbProvider, preferredPackageManager);
   addPackageToConfig("drizzle");
 };

@@ -1,8 +1,8 @@
-import { checkbox } from "@inquirer/prompts";
+import { checkbox, select } from "@inquirer/prompts";
 import { Packages } from "./utils.js";
 import { addTrpc } from "./trpc/index.js";
 import { addDrizzle } from "./drizzle/index.js";
-import { readConfigFile } from "../../utils.js";
+import { readConfigFile, updateConfigFile } from "../../utils.js";
 import { initProject } from "../init/index.js";
 import { consola } from "consola";
 import { addNextAuth } from "./next-auth/index.js";
@@ -12,21 +12,44 @@ export const addPackage = async () => {
   const config = readConfigFile();
 
   if (config) {
-    const { packages } = config;
-    const uninstalledPackages = Packages.filter(
+    const { packages, orm, auth } = config;
+
+    const nullOption = { name: "None", value: null };
+    // check if orm
+    if (orm === undefined) {
+      const ormToInstall = await select({
+        message: "Select an ORM to use:",
+        choices: Packages.orm.concat(nullOption),
+      });
+
+      if (ormToInstall === "drizzle") await addDrizzle();
+      if (ormToInstall === null) updateConfigFile({ orm: null, driver: null, provider: null });
+    }
+    // check if auth
+    if (auth === undefined) {
+      const authToInstall = await select({
+        message: "Select an authentication package to use:",
+        choices: Packages.auth.concat(nullOption),
+      });
+
+      if (authToInstall === "next-auth") await addNextAuth();
+      if (authToInstall === null) updateConfigFile({ auth: null });
+    }
+
+    // check if misc
+
+    const uninstalledPackages = Packages.misc.filter(
       (p) => !packages.includes(p.value)
     );
     if (uninstalledPackages.length > 0) {
       const packageToInstall = await checkbox({
-        message: "Select a package to add",
+        message: "Select any miscellaneous packages to add:",
         choices: uninstalledPackages,
       });
 
-      if (packageToInstall.includes("drizzle")) await addDrizzle();
       if (packageToInstall.includes("trpc")) await addTrpc();
-      if (packageToInstall.includes("next-auth")) await addNextAuth();
       if (packageToInstall.includes("shadcn-ui"))
-        await installShadcnUI(packageToInstall.concat(packages));
+        await installShadcnUI(packageToInstall);
     } else {
       consola.info("All available packages are already installed");
     }

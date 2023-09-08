@@ -1,13 +1,21 @@
-import { AvailablePackage } from "../../types.js";
+import { AvailablePackage, PackageType } from "../../types.js";
 import { readConfigFile, replaceFile } from "../../utils.js";
 import fs from "fs";
 
-export const Packages: { name: string; value: AvailablePackage }[] = [
-  { name: "Drizzle", value: "drizzle" },
-  { name: "TRPC", value: "trpc" },
-  { name: "Auth.js (NextAuth)", value: "next-auth" },
-  { name: "Shadcn UI", value: "shadcn-ui" },
-];
+export const Packages: {
+  [key in PackageType]: {
+    name: string;
+    value: AvailablePackage;
+    disabled?: boolean;
+  }[];
+} = {
+  orm: [{ name: "Drizzle", value: "drizzle" }],
+  auth: [{ name: "Auth.js (NextAuth)", value: "next-auth" }],
+  misc: [
+    { name: "TRPC", value: "trpc" },
+    { name: "Shadcn UI", value: "shadcn-ui" },
+  ],
+};
 
 export const addContextProviderToLayout = (
   provider: "NextAuthProvider" | "TrpcProvider" | "ShadcnToast"
