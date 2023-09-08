@@ -1,5 +1,5 @@
 import { existsSync } from "fs";
-import { readConfigFile } from "../../../utils.js";
+import { readConfigFile } from "../../../../utils.js";
 
 // 1. Create server/index.ts moved to root router position
 export const rootRouterTs = () => {

@@ -1,12 +1,11 @@
-import { confirm, input, select } from "@inquirer/prompts";
-import { DBProvider, DBType } from "../../../types.js";
-import { DBProviders } from "../../init/utils.js";
+import { confirm, select } from "@inquirer/prompts";
+import { DBProvider, DBType } from "../../../../types.js";
 import {
   addPackageToConfig,
   createFolder,
   readConfigFile,
   updateConfigFile,
-} from "../../../utils.js";
+} from "../../../../utils.js";
 import {
   addScriptsToPackageJson,
   createDotEnv,
@@ -18,6 +17,7 @@ import {
   installDependencies,
   updateTsConfigTarget,
 } from "./generators.js";
+import { DBProviders } from "../../../init/utils.js";
 
 export const addDrizzle = async () => {
   const { preferredPackageManager, hasSrc } = readConfigFile();

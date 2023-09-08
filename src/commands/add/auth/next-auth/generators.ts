@@ -1,8 +1,8 @@
 import { consola } from "consola";
-import { DBType } from "../../../types.js";
-import { readConfigFile } from "../../../utils.js";
 import { AuthProvider, AuthProviders, capitalised } from "./utils.js";
 import fs from "fs";
+import { DBType } from "../../../../types.js";
+import { readConfigFile } from "../../../../utils.js";
 
 // 1. Create app/api/auth/[...nextauth].ts
 export const apiAuthNextAuthTs = (

@@ -1,12 +1,12 @@
 import { checkbox, select } from "@inquirer/prompts";
 import { Packages } from "./utils.js";
-import { addTrpc } from "./trpc/index.js";
-import { addDrizzle } from "./drizzle/index.js";
 import { readConfigFile, updateConfigFile } from "../../utils.js";
-import { initProject } from "../init/index.js";
+import { addDrizzle } from "./orm/drizzle/index.js";
+import { addNextAuth } from "./auth/next-auth/index.js";
+import { addTrpc } from "./misc/trpc/index.js";
+import { installShadcnUI } from "./misc/shadcn-ui/index.js";
 import { consola } from "consola";
-import { addNextAuth } from "./next-auth/index.js";
-import { installShadcnUI } from "./shadcn-ui/index.js";
+import { initProject } from "../init/index.js";
 
 export const addPackage = async () => {
   const config = readConfigFile();
@@ -23,7 +23,8 @@ export const addPackage = async () => {
       });
 
       if (ormToInstall === "drizzle") await addDrizzle();
-      if (ormToInstall === null) updateConfigFile({ orm: null, driver: null, provider: null });
+      if (ormToInstall === null)
+        updateConfigFile({ orm: null, driver: null, provider: null });
     }
     // check if auth
     if (auth === undefined) {

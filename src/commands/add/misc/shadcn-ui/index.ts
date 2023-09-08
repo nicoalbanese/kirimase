@@ -8,9 +8,9 @@ import {
   pmInstallCommand,
   readConfigFile,
   replaceFile,
-} from "../../../utils.js";
-import { AvailablePackage } from "../../../types.js";
-import { addContextProviderToLayout } from "../utils.js";
+} from "../../../../utils.js";
+import { AvailablePackage } from "../../../../types.js";
+import { addContextProviderToLayout } from "../../utils.js";
 
 export const installShadcnUI = async (
   packagesBeingInstalled: AvailablePackage[]

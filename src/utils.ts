@@ -1,8 +1,7 @@
 import fs, { existsSync } from "fs";
-import path, { join } from "path";
+import path from "path";
 import { consola } from "consola";
 import { AvailablePackage, Config, PMType, UpdateConfig } from "./types.js";
-import { spawn } from "child_process";
 import { execa } from "execa";
 
 export const delay = (ms = 2000) =>

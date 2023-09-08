@@ -1,4 +1,4 @@
-import { DBField, FieldType } from "../../../types.js";
+import { DBField } from "../../../types.js";
 import {
   createFile,
   getFileContents,
@@ -6,10 +6,8 @@ import {
   readConfigFile,
 } from "../../../utils.js";
 import { addPackage } from "../../add/index.js";
-import { addTrpc } from "../../add/trpc/index.js";
 import { Schema } from "../types.js";
 import {
-  capitalise,
   defaultValueMappings,
   formatTableName,
   toCamelCase,

@@ -5,7 +5,7 @@ import {
   installPackages,
   readConfigFile,
   updateConfigFile,
-} from "../../../utils.js";
+} from "../../../../utils.js";
 import {
   apiAuthNextAuthTs,
   createAuthSchema,
@@ -18,9 +18,9 @@ import {
 } from "./generators.js";
 import { AuthProvider, AuthProviders } from "./utils.js";
 import { checkbox } from "@inquirer/prompts";
-import { addToDotEnv, createInitSchema } from "../drizzle/generators.js";
-import { addContextProviderToLayout } from "../utils.js";
-import { updateSignInComponentWithShadcnUI } from "../shadcn-ui/index.js";
+import { addContextProviderToLayout } from "../../utils.js";
+import { updateSignInComponentWithShadcnUI } from "../../misc/shadcn-ui/index.js";
+import { addToDotEnv } from "../../orm/drizzle/generators.js";
 
 export const addNextAuth = async () => {
   const providers = (await checkbox({

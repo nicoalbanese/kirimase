@@ -4,7 +4,7 @@ import {
   createFile,
   installPackages,
   readConfigFile,
-} from "../../../utils.js";
+} from "../../../../utils.js";
 import {
   apiTrpcRouteTs,
   libTrpcApiTs,
@@ -16,8 +16,8 @@ import {
   serverRouterComputersTs,
   serverTrpcTs,
 } from "./generators.js";
-import { addContextProviderToLayout } from "../utils.js";
-import { addToDotEnv } from "../drizzle/generators.js";
+import { addContextProviderToLayout } from "../../utils.js";
+import { addToDotEnv } from "../../orm/drizzle/generators.js";
 
 export const addTrpc = async () => {
   const { hasSrc, preferredPackageManager, packages } = readConfigFile();

@@ -1,7 +1,5 @@
-import { consola } from "consola";
 import {
   DBType,
-  FieldType,
   mysqlColumnType,
   pgColumnType,
   sqliteColumnType,
@@ -10,7 +8,6 @@ import { createFile, readConfigFile } from "../../../utils.js";
 import { Schema } from "../types.js";
 import {
   ReferenceType,
-  capitaliseForZodSchema,
   formatTableName,
   getNonStringFields,
   getReferenceFieldType,
