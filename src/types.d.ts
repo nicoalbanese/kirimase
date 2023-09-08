@@ -41,9 +41,14 @@ export type DBField = {
   cascade?: boolean;
 };
 
-export type AvailablePackage = "drizzle" | "trpc" | "next-auth" | "shadcn-ui";
+export type AvailablePackage =
+  | "drizzle"
+  | "trpc"
+  | "next-auth"
+  | "shadcn-ui"
+  | "prisma";
 export type PackageType = "orm" | "auth" | "misc";
-export type ORMType = "drizzle";
+export type ORMType = "drizzle" | "prisma";
 export type AuthType = "next-auth";
 
 export type Config = {

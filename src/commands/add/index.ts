@@ -1,4 +1,4 @@
-import { checkbox, select } from "@inquirer/prompts";
+import { checkbox, select, Separator } from "@inquirer/prompts";
 import { Packages } from "./utils.js";
 import { readConfigFile, updateConfigFile } from "../../utils.js";
 import { addDrizzle } from "./orm/drizzle/index.js";
@@ -7,6 +7,7 @@ import { addTrpc } from "./misc/trpc/index.js";
 import { installShadcnUI } from "./misc/shadcn-ui/index.js";
 import { consola } from "consola";
 import { initProject } from "../init/index.js";
+import { addPrisma } from "./orm/prisma/index.js";
 
 export const addPackage = async () => {
   const config = readConfigFile();
@@ -19,10 +20,11 @@ export const addPackage = async () => {
     if (orm === undefined) {
       const ormToInstall = await select({
         message: "Select an ORM to use:",
-        choices: Packages.orm.concat(nullOption),
+        choices: [...Packages.orm, new Separator(), nullOption],
       });
 
       if (ormToInstall === "drizzle") await addDrizzle();
+      if (ormToInstall === "prisma") await addPrisma();
       if (ormToInstall === null)
         updateConfigFile({ orm: null, driver: null, provider: null });
     }

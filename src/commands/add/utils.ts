@@ -9,7 +9,10 @@ export const Packages: {
     disabled?: boolean;
   }[];
 } = {
-  orm: [{ name: "Drizzle", value: "drizzle" }],
+  orm: [
+    { name: "Drizzle", value: "drizzle" },
+    { name: "Prisma", value: "prisma" },
+  ],
   auth: [{ name: "Auth.js (NextAuth)", value: "next-auth" }],
   misc: [
     { name: "TRPC", value: "trpc" },
