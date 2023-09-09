@@ -1,7 +1,11 @@
 import path from "path";
-import { DBField, DBType, FieldType } from "../../types.js";
+import {
+  DBField,
+  DBType,
+  DrizzleColumnType,
+  PrismaColumnType,
+} from "../../types.js";
 import { readConfigFile, replaceFile } from "../../utils.js";
-import { Schema } from "./types.js";
 import fs, { existsSync, readFileSync } from "fs";
 import { consola } from "consola";
 
@@ -80,7 +84,12 @@ export const getReferenceFieldType = (type: ReferenceType) => {
   };
 };
 
-const excludedTypes: Array<FieldType> = ["text", "string", "varchar"];
+const excludedTypes: Array<DrizzleColumnType | PrismaColumnType> = [
+  "text",
+  "string",
+  "varchar",
+  "String",
+];
 
 export const getNonStringFields = (fields: DBField[]) => {
   return fields.filter((field) => !excludedTypes.includes(field.type));
@@ -88,7 +97,10 @@ export const getNonStringFields = (fields: DBField[]) => {
 
 type ZodType = "string" | "number" | "boolean" | "date" | "bigint" | "object";
 
-const ZodMappings: Record<DBType, Partial<Record<FieldType, ZodType>>> = {
+const DrizzleToZodMappings: Record<
+  DBType,
+  Partial<Record<DrizzleColumnType, ZodType>>
+> = {
   pg: {
     number: "number",
     date: "string",
@@ -118,20 +130,41 @@ const ZodMappings: Record<DBType, Partial<Record<FieldType, ZodType>>> = {
   },
 };
 
+const PrismaToZodMappings: Record<PrismaColumnType, ZodType> = {
+  Int: "number",
+  Float: "number",
+  Decimal: "number",
+  String: "string",
+  Boolean: "boolean",
+  DateTime: "date",
+  BigInt: "bigint",
+  Json: "object",
+};
+
 export const getZodMappings = (fields: DBField[]) => {
-  const { driver } = readConfigFile();
-  return fields.map((field) => {
-    const zodType = ZodMappings[driver][field.type];
-    return {
-      name: field.name,
-      type: zodType,
-    };
-  });
+  const { driver, orm } = readConfigFile();
+  if (orm === "drizzle") {
+    return fields.map((field) => {
+      const zodType = DrizzleToZodMappings[driver][field.type];
+      return {
+        name: field.name,
+        type: zodType,
+      };
+    });
+  } else if (orm === "prisma") {
+    return fields.map((field) => {
+      const zodType = PrismaToZodMappings[field.type];
+      return {
+        name: field.name,
+        type: zodType,
+      };
+    });
+  }
 };
 
 export const defaultValueMappings: Record<
   DBType,
-  Partial<Record<FieldType, string>>
+  Partial<Record<DrizzleColumnType, string>>
 > = {
   pg: {
     string: '""',
@@ -190,22 +223,47 @@ export function toNormalEnglish(
 }
 
 export function getCurrentSchemas() {
-  const { hasSrc } = readConfigFile();
-  const directory = `${hasSrc ? "src/" : ""}lib/db/schema`;
+  const { hasSrc, orm } = readConfigFile();
+  if (orm === "drizzle") {
+    const directory = `${hasSrc ? "src/" : ""}lib/db/schema`;
 
-  try {
-    // Read the directory content
-    const files = fs.readdirSync(directory);
+    try {
+      // Read the directory content
+      const files = fs.readdirSync(directory);
 
-    // Filter and transform to get only .ts files and remove their extensions
-    const schemaNames = files
-      .filter((file) => path.extname(file) === ".ts")
-      .map((file) => path.basename(file, ".ts"));
+      // Filter and transform to get only .ts files and remove their extensions
+      const schemaNames = files
+        .filter((file) => path.extname(file) === ".ts")
+        .map((file) => path.basename(file, ".ts"));
 
-    return schemaNames.filter((schema) => schema !== "auth");
-  } catch (error) {
-    console.error(`Error reading schemas ${directory}:`, error);
-    return [];
+      return schemaNames.filter((schema) => schema !== "auth");
+    } catch (error) {
+      console.error(`Error reading schemas ${directory}:`, error);
+      return [];
+    }
+  }
+  if (orm === "prisma") {
+    const schemaPath = "prisma/schema.prisma";
+    const schemaExists = existsSync(schemaPath);
+    if (schemaExists) {
+      const schemaContents = readFileSync(schemaPath, "utf-8");
+      const excludedSchemas = [
+        "User",
+        "Session",
+        "VerificationToken",
+        "Account",
+        "",
+      ];
+      const schemaNames = schemaContents
+        .split("\n")
+        .filter((line) => line.includes("model") && line.includes("{"))
+        .map((line) => line.split(" ")[1])
+        .filter((item) => !excludedSchemas.includes(item));
+      return schemaNames;
+    } else {
+      consola.info(`Prisma schema file does not exist`);
+      return [];
+    }
   }
 }
 

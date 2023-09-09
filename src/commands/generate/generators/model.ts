@@ -16,7 +16,7 @@ import {
 } from "../utils.js";
 
 export function scaffoldModel(schema: Schema, dbType: DBType, hasSrc: boolean) {
-  const { tableName, belongsToUser } = schema;
+  const { tableName } = schema;
 
   // create model file
   const modelPath = `${hasSrc ? "src/" : ""}lib/db/schema/${toCamelCase(
@@ -140,9 +140,9 @@ function generateModelContent(schema: Schema, dbType: DBType) {
     tableNameSingularCapitalised,
     tableNameCapitalised,
   } = formatTableName(tableName);
-  const relations = schema.fields.filter(
-    (field) => field.type === "references"
-  );
+  // const relations = schema.fields.filter(
+  //   (field) => field.type === "references"
+  // );
 
   const config = createConfig()[dbType];
 

@@ -31,15 +31,30 @@ export type PMType = "npm" | "yarn" | "pnpm"; // | "bun";
 //   | "references"
 //   | "boolean";
 
-export type FieldType = pgColumnType | mysqlColumnType | sqliteColumnType;
+export type DrizzleColumnType =
+  | pgColumnType
+  | mysqlColumnType
+  | sqliteColumnType;
 
-export type DBField = {
+export type ColumnType = DrizzleColumnType | PrismaColumnType;
+
+export type DBField<T extends ColumnType = ColumnType> = {
   name: string;
-  type: FieldType;
+  type: T;
   references?: string;
   notNull?: boolean; // change to required later
   cascade?: boolean;
 };
+
+// export type DBField = {
+//   name: string;
+//   type: DrizzleColumnType;
+//   references?: string;
+//   notNull?: boolean; // change to required later
+//   cascade?: boolean;
+// };
+
+// extend type or do a base type with prisma field and drizzle field
 
 export type AvailablePackage =
   | "drizzle"
@@ -98,3 +113,14 @@ export type sqliteColumnType =
   | "date"
   | "timestamp"
   | "blob";
+
+export type PrismaColumnType =
+  | "String"
+  | "Boolean"
+  | "Int"
+  | "BigInt"
+  | "Float"
+  | "Decimal"
+  | "Boolean"
+  | "DateTime"
+  | "Json";

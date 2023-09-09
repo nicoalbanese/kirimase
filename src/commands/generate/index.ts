@@ -1,6 +1,6 @@
 import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { consola } from "consola";
-import { DBField, DBType, FieldType } from "../../types.js";
+import { DBField, DBType, DrizzleColumnType } from "../../types.js";
 import { Choice } from "@inquirer/checkbox";
 import { createConfig, scaffoldModel } from "./generators/model.js";
 import { scaffoldAPIRoute } from "./generators/apiRoute.js";
@@ -93,7 +93,7 @@ async function askForFields(dbType: DBType, tableName: string) {
     const fieldType = (await select({
       message: "Please select the type of this field:",
       choices: fieldTypeChoices,
-    })) as FieldType;
+    })) as DrizzleColumnType;
 
     if (fieldType === "references") {
       const referencesTable = await select({
