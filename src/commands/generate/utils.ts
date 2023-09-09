@@ -139,7 +139,10 @@ const PrismaToZodMappings: Record<PrismaColumnType, ZodType> = {
   DateTime: "date",
   BigInt: "bigint",
   Json: "object",
+  References: "string",
 };
+
+export type ZodMapping = { name: string; type: ZodType };
 
 export const getZodMappings = (fields: DBField[]) => {
   const { driver, orm } = readConfigFile();
@@ -156,7 +159,7 @@ export const getZodMappings = (fields: DBField[]) => {
       const zodType = PrismaToZodMappings[field.type];
       return {
         name: field.name,
-        type: zodType,
+        type: zodType as ZodType,
       };
     });
   }
@@ -258,7 +261,8 @@ export function getCurrentSchemas() {
         .split("\n")
         .filter((line) => line.includes("model") && line.includes("{"))
         .map((line) => line.split(" ")[1])
-        .filter((item) => !excludedSchemas.includes(item));
+        .filter((item) => !excludedSchemas.includes(item))
+        .map((item) => `${item[0].toLowerCase()}${item.slice(1)}s`);
       return schemaNames;
     } else {
       consola.info(`Prisma schema file does not exist`);
@@ -267,15 +271,76 @@ export function getCurrentSchemas() {
   }
 }
 
-export const AddToPrismaSchema = (schema: string) => {
+export const addToPrismaSchema = (schema: string, modelName: string) => {
   const schemaPath = "prisma/schema.prisma";
   const schemaExists = existsSync(schemaPath);
   if (schemaExists) {
     const schemaContents = readFileSync(schemaPath, "utf-8");
-    const newContent = schemaContents.concat("\n", schema);
-    replaceFile(schemaPath, newContent);
-    consola.success("updated prisma schema");
+    // write logic to check if model already exists -> if so replace
+    const { modelStart, modelEnd, modelExists } = getPrismaModelStartAndEnd(
+      schemaContents,
+      modelName
+    );
+
+    if (modelExists) {
+      const newContent =
+        schemaContents.slice(0, modelStart) +
+        schema +
+        schemaContents.slice(modelEnd + 1);
+      replaceFile(schemaPath, newContent);
+      consola.success(`Replaced ${modelName} in Prisma schema`);
+    } else {
+      const newContent = schemaContents.concat("\n", schema);
+      replaceFile(schemaPath, newContent);
+      consola.success(`Added ${modelName} to Prisma schema`);
+    }
   } else {
     consola.info(`Prisma schema file does not exist`);
   }
 };
+
+export const formatPrismaModelName = (name: string) => {
+  const lowerCase = name.toLowerCase();
+  const firstLetter = lowerCase[0];
+  const plural = name + "s";
+  const pluralLowerCase = lowerCase + "s";
+
+  return {
+    lowerCase,
+    firstLetter,
+    plural,
+    pluralLowerCase,
+  };
+};
+
+const getPrismaModelStartAndEnd = (schema: string, modelName: string) => {
+  const modelStart = schema.indexOf(`model ${modelName} {`);
+  let modelExists = true;
+  if (modelStart === -1) {
+    modelExists = false;
+  }
+  const modelEnd = schema.indexOf("}", modelStart);
+  if (modelEnd === -1) {
+    modelExists = false;
+  }
+  return { modelStart, modelEnd, modelExists };
+};
+
+export function addToPrismaModel(modelName: string, attributesToAdd: string) {
+  const hasSchema = existsSync("prisma/schema.prisma");
+  if (!hasSchema) {
+    console.error("Prisma schema not found!");
+    return;
+  }
+  const schema = readFileSync("prisma/schema.prisma", "utf-8");
+  // Find the start and end positions of the specified model
+  const { modelEnd } = getPrismaModelStartAndEnd(schema, modelName);
+  // Split the schema and insert the attributes at the right position
+  const beforeModelEnd = schema.substring(0, modelEnd);
+  const afterModelEnd = schema.substring(modelEnd);
+
+  const newSchema =
+    beforeModelEnd + "  " + attributesToAdd + "\n" + afterModelEnd;
+  replaceFile("prisma/schema.prisma", newSchema);
+  consola.info("updated schema");
+}

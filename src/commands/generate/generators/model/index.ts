@@ -1,28 +1,34 @@
+import { DBProvider, DBType } from "../../../../types.js";
+import { createFile, readConfigFile } from "../../../../utils.js";
+import { prismaFormat, prismaGenerate } from "../../../add/orm/utils.js";
+import { Schema } from "../../types.js";
 import {
-  DBType,
-  mysqlColumnType,
-  pgColumnType,
-  sqliteColumnType,
-} from "../../../types.js";
-import { createFile, readConfigFile } from "../../../utils.js";
-import { Schema } from "../types.js";
-import {
-  ReferenceType,
+  addToPrismaSchema,
+  addToPrismaModel,
   formatTableName,
-  getNonStringFields,
   getReferenceFieldType,
-  getZodMappings,
   toCamelCase,
-} from "../utils.js";
+} from "../../utils.js";
+import { createZodSchemas } from "./generators.js";
+import { createOrmMappings } from "./utils.js";
 
-export function scaffoldModel(schema: Schema, dbType: DBType, hasSrc: boolean) {
+export async function scaffoldModel(
+  schema: Schema,
+  dbType: DBType,
+  hasSrc: boolean
+) {
   const { tableName } = schema;
+  const { orm, preferredPackageManager } = readConfigFile();
 
   // create model file
   const modelPath = `${hasSrc ? "src/" : ""}lib/db/schema/${toCamelCase(
     tableName
   )}.ts`;
   createFile(modelPath, generateModelContent(schema, dbType));
+  if (orm === "prisma") {
+    await prismaFormat(preferredPackageManager);
+    await prismaGenerate(preferredPackageManager);
+  }
 
   // create queryFile
   const queryPath = `${hasSrc ? "src/" : ""}lib/api/${toCamelCase(
@@ -37,122 +43,23 @@ export function scaffoldModel(schema: Schema, dbType: DBType, hasSrc: boolean) {
   createFile(mutationPath, generateMutationContent(schema));
 }
 
-export const createConfig = () => {
-  const { provider } = readConfigFile();
-  return {
-    pg: {
-      tableFunc: "pgTable",
-      typeMappings: {
-        id: (name: string) => `serial("${name}").primaryKey()`,
-        varchar: (name: string) => `varchar("${name}", { length: 256 })`,
-        text: (name: string) => `text("${name}")`,
-        number: (name: string) => `integer("${name}")`,
-        float: (name: string) => `real("${name}")`,
-        boolean: (name: string) => `boolean("${name}")`,
-        references: (
-          name: string,
-          referencedTable: string = "REFERENCE",
-          cascade: boolean,
-          referenceIdType: ReferenceType = "number"
-        ) =>
-          `${getReferenceFieldType(referenceIdType)["pg"]}("${name}"${
-            referenceIdType === "string" ? ", { length: 256 }" : ""
-          }).references(() => ${referencedTable}.id${
-            cascade ? ', { onDelete: "cascade" }' : ""
-          })`,
-        // Add more types here as needed
-        timestamp: (name: string) => `timestamp("${name}")`,
-        date: (name: string) => `date("${name}")`,
-        json: (name: string) => `json("${name}")`,
-      } as Record<
-        pgColumnType,
-        (name: string, referencedTable?: string, cascade?: boolean) => string
-      >,
-    },
-    mysql: {
-      tableFunc: "mysqlTable",
-      typeMappings: {
-        id: (name: string) => `serial("${name}").primaryKey()`,
-        varchar: (name: string) => `varchar("${name}", { length: 256 })`,
-        text: (name: string) => `text("${name}")`,
-        number: (name: string) => `int("${name}")`,
-        float: (name: string) => `real("${name}")`,
-        boolean: (name: string) => `boolean("${name}")`,
-        references: (
-          name: string,
-          referencedTable: string = "REFERENCE",
-          cascade: boolean,
-          referenceIdType: ReferenceType = "number"
-        ) =>
-          `${getReferenceFieldType(referenceIdType)["mysql"]}("${name}"${
-            referenceIdType === "string" ? ", { length: 256 }" : ""
-          })${
-            provider === "planetscale"
-              ? ""
-              : `.references(() => ${toCamelCase(referencedTable)}.id${
-                  cascade ? ', { onDelete: "cascade" }' : ""
-                })`
-          }`,
-        date: (name: string) => `date("${name}")`,
-        timestamp: (name: string) => `timestamp("${name}")`,
-        json: (name: string) => `json("${name}")`,
-      } as Record<
-        mysqlColumnType,
-        (name: string, referencedTable?: string, cascade?: boolean) => string
-      >,
-    },
-    sqlite: {
-      tableFunc: "sqliteTable",
-      typeMappings: {
-        id: (name: string) => `integer("${name}").primaryKey()`,
-        string: (name: string) => `text("${name}")`,
-        number: (name: string) => `integer("${name}")`,
-        boolean: (name: string) => `integer("${name}", { mode: "boolean" })`,
-        references: (
-          name: string,
-          referencedTable: string = "REFERENCE",
-          cascade: boolean,
-          referenceIdType: ReferenceType = "number"
-        ) =>
-          `${
-            getReferenceFieldType(referenceIdType)["sqlite"]
-          }("${name}").references(() => ${toCamelCase(referencedTable)}.id${
-            cascade ? ', { onDelete: "cascade" }' : ""
-          })`,
-        date: (name: string) => `integer("${name}", { mode: "timestamp" })`,
-        timestamp: (name: string) =>
-          `integer("${name}", { mode: "timestamp_ms" })`,
-        blob: (name: string) => `blob("${name}")`,
-      } as Record<
-        sqliteColumnType,
-        (name: string, referencedTable?: string, cascade?: boolean) => string
-      >,
-    },
-  };
-};
-
-function generateModelContent(schema: Schema, dbType: DBType) {
-  const { provider } = readConfigFile();
-  const { index, fields, tableName } = schema;
-  const {
-    tableNameCamelCase,
-    tableNameSingular,
-    tableNameSingularCapitalised,
-    tableNameCapitalised,
-  } = formatTableName(tableName);
-  // const relations = schema.fields.filter(
-  //   (field) => field.type === "references"
-  // );
-
-  const config = createConfig()[dbType];
-
+const generateDrizzleSchema = (
+  schema: Schema,
+  mappings,
+  provider: DBProvider,
+  dbType: DBType,
+  zodSchemas: string
+) => {
+  const { tableName, fields, index } = schema;
+  const { tableNameCamelCase, tableNameCapitalised } =
+    formatTableName(tableName);
   const usedTypes: string[] = fields
     .map((field) => {
-      const mappingFunction = config.typeMappings[field.type];
+      const mappingFunction = mappings.typeMappings[field.type];
       // Assuming 'field.name' contains the appropriate value for the 'name' parameter
       return mappingFunction(field.name).split("(")[0];
     })
-    .concat(config.typeMappings["id"]("id").split("(")[0]); // Assuming number (int) is always used for the 'id' field
+    .concat(mappings.typeMappings["id"]("id").split("(")[0]); // Assuming number (int) is always used for the 'id' field
 
   const referenceFields = fields.filter((field) => field.type === "references");
   const referenceImports = referenceFields.map(
@@ -161,10 +68,6 @@ function generateModelContent(schema: Schema, dbType: DBType) {
         field.references
       )}"`
   );
-
-  // get non string fields
-  const nonStringFields = getNonStringFields(fields);
-  const zodMappings = getZodMappings(nonStringFields);
 
   const uniqueTypes = Array.from(
     new Set(
@@ -176,7 +79,7 @@ function generateModelContent(schema: Schema, dbType: DBType) {
   const importStatement = `import { ${uniqueTypes
     .join(", ")
     .concat(
-      `, ${config.tableFunc}`
+      `, ${mappings.tableFunc}`
     )} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
     referenceImports.length > 0 ? referenceImports.join("\n") : ""
   }${
@@ -189,7 +92,7 @@ import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/quer
   const schemaFields = fields
     .map(
       (field) =>
-        `  ${toCamelCase(field.name)}: ${config.typeMappings[field.type](
+        `  ${toCamelCase(field.name)}: ${mappings.typeMappings[field.type](
           field.name,
           field.references,
           field.cascade
@@ -209,13 +112,13 @@ import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/quer
 }`
     : "";
 
-  const schemaContent = `export const ${tableNameCamelCase} = ${
-    config.tableFunc
+  const drizzleSchemaContent = `export const ${tableNameCamelCase} = ${
+    mappings.tableFunc
   }('${tableName}', {
-  id: ${config.typeMappings["id"]("id")},
+  id: ${mappings.typeMappings["id"]("id")},
 ${schemaFields}${
     schema.belongsToUser
-      ? `,\n  userId: ${config.typeMappings["references"](
+      ? `,\n  userId: ${mappings.typeMappings["references"](
           "user_id",
           "users",
           true,
@@ -223,43 +126,62 @@ ${schemaFields}${
         ).concat(".notNull()")},`
       : ""
   }
-}${indexFormatted});\n 
+}${indexFormatted});\n`;
 
-// Schema for ${tableNameCamelCase} - used to validate API requests
-export const insert${tableNameSingularCapitalised}Schema = createInsertSchema(${tableNameCamelCase});
-export const insert${tableNameSingularCapitalised}Params = createSelectSchema(${tableNameCamelCase}, {
-  ${zodMappings
-    .map((field) => `${toCamelCase(field.name)}: z.coerce.${field.type}()`)
-    .join(`,\n  `)}
-}).omit({ 
-  id: true${schema.belongsToUser ? ",\n  userId: true" : ""}
-});
-export const update${tableNameSingularCapitalised}Schema = createSelectSchema(${tableNameCamelCase});
-export const update${tableNameSingularCapitalised}Params = createSelectSchema(${tableNameCamelCase}, {
-  ${zodMappings
-    .map((field) => `${toCamelCase(field.name)}: z.coerce.${field.type}()`)
-    .join(`,\n  `)}
-})${
-    schema.belongsToUser
-      ? `.omit({ 
-  userId: true
-});`
-      : ""
-  }
-export const ${tableNameSingular}IdSchema = update${tableNameSingularCapitalised}Schema.pick({ id: true });
+  return `${importStatement}\n\n${drizzleSchemaContent}\n\n${zodSchemas}`;
+};
 
-// Types for ${tableNameCamelCase} - used to type API request params and within Components
-export type ${tableNameSingularCapitalised} = z.infer<typeof update${tableNameSingularCapitalised}Schema>;
-export type New${tableNameSingularCapitalised} = z.infer<typeof insert${tableNameSingularCapitalised}Schema>;
-export type New${tableNameSingularCapitalised}Params = z.infer<typeof insert${tableNameSingularCapitalised}Params>;
-export type Update${tableNameSingularCapitalised}Params = z.infer<typeof update${tableNameSingularCapitalised}Params>;
-export type ${tableNameSingularCapitalised}Id = z.infer<typeof ${tableNameSingular}IdSchema>["id"];
-    
-// this type infers the return from get${tableNameCapitalised}() - meaning it will include any joins
-export type Complete${tableNameSingularCapitalised} = Awaited<ReturnType<typeof get${tableNameCapitalised}>>["${tableNameCamelCase}"][number];
+const generatePrismaSchema = (schema: Schema, mappings, zodSchemas: string) => {
+  const {
+    tableNameCapitalised,
+    tableNameSingularCapitalised,
+    tableNameCamelCase,
+    tableNameSingular,
+  } = formatTableName(schema.tableName);
+  const prismaSchemaContent = `model ${tableNameSingularCapitalised} {
+    id    String @id @default(cuid())
+  ${schema.fields
+    .map((field) => mappings.typeMappings[field.type](field))
+    .join("\n  ")}
+}`;
+  addToPrismaSchema(prismaSchemaContent, tableNameSingularCapitalised);
+  const relations = schema.fields.filter(
+    (field) => field.type.toLowerCase() === "references"
+  );
+  relations.forEach((relation) => {
+    const { references } = relation;
+    const { tableNameSingularCapitalised: singularCapitalised } =
+      formatTableName(references);
+    addToPrismaModel(
+      singularCapitalised,
+      `${tableNameCamelCase} ${tableNameSingularCapitalised}[]`
+    );
+  });
+  const importStatement = `import { ${tableNameSingular}Schema } from "@/zodAutoGenSchemas";
+import { z } from "zod";
+import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";
 `;
 
-  return `${importStatement}\n\n${schemaContent}`;
+  return `${importStatement}\n\n${zodSchemas}`;
+};
+
+function generateModelContent(schema: Schema, dbType: DBType) {
+  const { provider, orm } = readConfigFile();
+  const mappings = createOrmMappings()[orm][dbType];
+  const zodSchemas = createZodSchemas(schema, orm);
+
+  if (orm === "drizzle") {
+    return generateDrizzleSchema(
+      schema,
+      mappings,
+      provider,
+      dbType,
+      zodSchemas
+    );
+  }
+  if (orm === "prisma") {
+    return generatePrismaSchema(schema, mappings, zodSchemas);
+  }
 }
 
 // create queries and mutations folders
@@ -279,9 +201,8 @@ const generateQueryContent = (schema: Schema) => {
   const getAuth = belongsToUser
     ? "\n  const { session } = await getUserAuth();"
     : "";
-  // add and statment
-  // TODO: UPDATE IMPORTS to _IdSchema
-  const template = `import { db } from "@/lib/db";
+
+  const drizzleTemplate = `import { db } from "@/lib/db";
 import { eq${belongsToUser ? ", and" : ""} } from "drizzle-orm";${
     belongsToUser ? '\nimport { getUserAuth } from "@/lib/auth/utils";' : ""
   }
@@ -348,12 +269,50 @@ export const get${tableNameSingularCapitalised}ById = async (id: ${tableNameSing
   return { ${tableNameSingular}: ${tableNameFirstChar} };
 };
 `;
-  return template;
+  const prismaTemplate = `import { db } from "@/lib/db";${
+    belongsToUser ? '\nimport { getUserAuth } from "@/lib/auth/utils";' : ""
+  }
+import { type ${tableNameSingularCapitalised}Id, ${tableNameSingular}IdSchema } from "@/lib/db/schema/${tableNameCamelCase}";
+
+export const get${tableNameSingularCapitalised}s = async () => {${getAuth}
+  const ${tableNameFirstChar} = await db.${tableNameSingular}.findMany({${
+    belongsToUser
+      ? ` where: {${tableNameCamelCase}.userId: session?.user.id!}`
+      : ""
+  }${
+    relations.length > 0
+      ? ` include: { ${relations
+          .map((relation) => `${relation.references.slice(0, -1)}: true`)
+          .join(", ")} }`
+      : ""
+  }});
+  return { ${tableNameCamelCase}: ${tableNameFirstChar} };
+};
+// LEFT OFF HERE
+
+export const get${tableNameSingularCapitalised}ById = async (id: ${tableNameSingularCapitalised}Id) => {${getAuth}
+  const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
+  const ${tableNameFirstChar} = await db.${tableNameSingular}.findFirst({${
+    belongsToUser
+      ? ` where: {${tableNameCamelCase}.userId: session?.user.id!}`
+      : ""
+  }${
+    relations.length > 0
+      ? ` include: { ${relations
+          .map((relation) => `${relation.references.slice(0, -1)}: true`)
+          .join(", ")} }`
+      : ""
+  }});
+  return { ${tableNameSingular}: ${tableNameFirstChar} };
+};
+`;
+
+  return drizzleTemplate;
 };
 
 const generateMutationContent = (schema: Schema) => {
   const { tableName, belongsToUser } = schema;
-  const { driver } = readConfigFile();
+  const { driver, orm } = readConfigFile();
   const {
     tableNameCamelCase,
     tableNameSingular,

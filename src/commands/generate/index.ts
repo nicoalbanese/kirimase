@@ -1,16 +1,23 @@
 import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { consola } from "consola";
-import { DBField, DBType, DrizzleColumnType } from "../../types.js";
+import {
+  DBField,
+  DBType,
+  DrizzleColumnType,
+  ORMType,
+  PrismaColumnType,
+} from "../../types.js";
 import { Choice } from "@inquirer/checkbox";
-import { createConfig, scaffoldModel } from "./generators/model.js";
+import { createOrmMappings } from "./generators/model/utils.js";
 import { scaffoldAPIRoute } from "./generators/apiRoute.js";
-import { readConfigFile, wrapInParenthesis } from "../../utils.js";
+import { readConfigFile } from "../../utils.js";
 import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
 import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
 import { Schema } from "./types.js";
 import { scaffoldViewsAndComponents } from "./generators/views.js";
 import { getCurrentSchemas, toCamelCase } from "./utils.js";
+import { scaffoldModel } from "./generators/model/index.js";
 
 function provideInstructions() {
   consola.info(
@@ -19,7 +26,7 @@ function provideInstructions() {
 }
 
 async function askForResourceType() {
-  const { packages } = readConfigFile();
+  const { packages, orm } = readConfigFile();
 
   const resourcesRequested = await checkbox({
     message: "Please select the resources you would like to generate:",
@@ -27,9 +34,10 @@ async function askForResourceType() {
       {
         name: "Model",
         value: "model",
-        disabled: !packages.includes("drizzle")
-          ? "[You need to have drizzle installed. Run 'kirimase add']"
-          : false,
+        disabled:
+          orm === null
+            ? "[You need to have an orm installed. Run 'kirimase add']"
+            : false,
       },
       { name: "API Route", value: "api_route" },
       {
@@ -71,18 +79,19 @@ async function askIfBelongsToUser() {
   return belongsToUser;
 }
 
-async function askForFields(dbType: DBType, tableName: string) {
+async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
   const fields: DBField[] = [];
   let addMore = true;
 
   while (addMore) {
     const currentSchemas = getCurrentSchemas();
+
     const baseFieldTypeChoices = Object.keys(
-      createConfig()[dbType].typeMappings
+      createOrmMappings()[orm][dbType].typeMappings
     )
       .filter((field) => field !== "id")
       .map((field) => {
-        return { name: field, value: field };
+        return { name: field.toLowerCase(), value: field };
       });
 
     const fieldTypeChoices =
@@ -93,9 +102,9 @@ async function askForFields(dbType: DBType, tableName: string) {
     const fieldType = (await select({
       message: "Please select the type of this field:",
       choices: fieldTypeChoices,
-    })) as DrizzleColumnType;
+    })) as DrizzleColumnType | PrismaColumnType;
 
-    if (fieldType === "references") {
+    if (fieldType.toLowerCase() === "references") {
       const referencesTable = await select({
         message: "Which table do you want it reference?",
         choices: currentSchemas
@@ -172,13 +181,13 @@ export async function buildSchema() {
   const config = readConfigFile();
 
   if (config) {
-    const { driver, hasSrc, packages } = config;
+    const { driver, hasSrc, packages, orm } = config;
 
-    if (packages.includes("drizzle")) {
+    if (orm !== null) {
       provideInstructions();
       const resourceType = await askForResourceType();
       const tableName = await askForTable();
-      const fields = await askForFields(driver, tableName);
+      const fields = await askForFields(orm, driver, tableName);
       const indexedField = await askForIndex(fields);
       // console.log(indexedField);
       let schema: Schema;

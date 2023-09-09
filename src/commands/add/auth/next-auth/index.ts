@@ -22,7 +22,7 @@ import { checkbox } from "@inquirer/prompts";
 import { addContextProviderToLayout } from "../../utils.js";
 import { updateSignInComponentWithShadcnUI } from "../../misc/shadcn-ui/index.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
-import { AddToPrismaSchema } from "../../../generate/utils.js";
+import { addToPrismaSchema } from "../../../generate/utils.js";
 import { prismaGenerate } from "../../orm/utils.js";
 
 export const addNextAuth = async () => {
@@ -57,7 +57,7 @@ export const addNextAuth = async () => {
       );
     }
     if (orm === "prisma") {
-      AddToPrismaSchema(createPrismaAuthSchema());
+      addToPrismaSchema(createPrismaAuthSchema(), "Auth");
     }
   }
 

@@ -43,49 +43,6 @@ export function createFolder(relativePath: string) {
   consola.success(`Folder created at ${fullPath}`);
 }
 
-// export async function installPackages(
-//   packages: { regular: string; dev: string },
-//   pmType: PMType
-// ) {
-//   const packagesListString = packages.regular.concat(" ").concat(packages.dev);
-//   consola.start(`Installing packages: ${packagesListString}...`);
-//
-//   const runCommand = (command: string, args: string[]): Promise<void> => {
-//     return new Promise((resolve, reject) => {
-//       const cmd = spawn(command, args, { stdio: "inherit" });
-//
-//       cmd.on("close", (code: number) => {
-//         if (code !== 0) {
-//           reject(
-//             new Error(
-//               `command "${command} ${args.join(" ")}" exited with code ${code}`
-//             )
-//           );
-//         } else {
-//           resolve();
-//         }
-//       });
-//     });
-//   };
-//
-//   try {
-//     if (packages.dev) {
-//       await runCommand(
-//         pmType,
-//         ["install", "-D"].concat(packages.dev.split(" "))
-//       );
-//     }
-//
-//     if (packages.regular) {
-//       await runCommand(pmType, ["install"].concat(packages.regular.split(" ")));
-//     }
-//
-//     consola.success(`Packages installed: ${packagesListString}`);
-//   } catch (error) {
-//     console.error(`An error occurred: ${error.message}`);
-//   }
-// }
-
 export const runCommand = async (command: string, args: string[]) => {
   const formattedArgs = args.filter((a) => a !== "");
   try {
@@ -139,7 +96,7 @@ export const updateConfigFile = (options: UpdateConfig) => {
   replaceFile("./kirimase.config.json", JSON.stringify(newConfig, null, 2));
 };
 
-export const readConfigFile = (): Config | null => {
+export const readConfigFile = (): (Config & { rootPath: string }) | null => {
   // Define the path to package.json
   const configPath = path.join(process.cwd(), "kirimase.config.json");
 
@@ -152,8 +109,8 @@ export const readConfigFile = (): Config | null => {
   // Parse package.json content
   let config: Config = JSON.parse(configJsonData);
 
-  // Update the scripts property
-  return config as Config;
+  const rootPath = config.hasSrc ? "src/" : "";
+  return { ...config, rootPath };
 };
 
 export const addPackageToConfig = (packageName: AvailablePackage) => {

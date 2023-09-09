@@ -35,6 +35,17 @@ export const prismaGenerate = async (packageManager: PMType) => {
   }
 };
 
+export const prismaFormat = async (packageManager: PMType) => {
+  // consola.start(`Running Prisma format.`);
+  try {
+    await execa(pmInstallCommand[packageManager], ["prisma", "format"], {
+      stdio: "inherit",
+    });
+  } catch (error) {
+    consola.error(`Failed to run Prisma format: ${error.message}`);
+  }
+};
+
 export function updateTsConfigPrismaTypeAlias() {
   // Define the path to the tsconfig.json file
   const tsConfigPath = path.join(process.cwd(), "tsconfig.json");

@@ -112,6 +112,7 @@ export type sqliteColumnType =
   | "boolean"
   | "date"
   | "timestamp"
+  | "references"
   | "blob";
 
 export type PrismaColumnType =
@@ -123,4 +124,5 @@ export type PrismaColumnType =
   | "Decimal"
   | "Boolean"
   | "DateTime"
+  | "References"
   | "Json";
