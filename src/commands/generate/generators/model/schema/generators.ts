@@ -1,12 +1,12 @@
-import { ORMType } from "../../../../types.js";
-import { Schema } from "../../types.js";
+import { ORMType } from "../../../../../types.js";
+import { Schema } from "../../../types.js";
 import {
   ZodMapping,
   formatTableName,
   getNonStringFields,
   getZodMappings,
   toCamelCase,
-} from "../../utils.js";
+} from "../../../utils.js";
 
 const createInsertZodSchema = (
   schema: Schema,
