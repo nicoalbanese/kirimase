@@ -23,29 +23,38 @@ npm install -g kirimase
 
 ### 1. `kirimase add`
 
-Initializes and configures the following packages for your Next.js project:
+Initializes and configures the following packages for your Next.js project, categorized into:
 
-#### a) Drizzle-ORM
+#### ORM
 
-- Based on your chosen database type (PostgreSQL, MySQL, SQLite), Kirimase sets up the required files for Drizzle-ORM and drizzle-kit to manage migrations.
-- Scripts are auto-added to `package.json` for immediate use of drizzle-kit.
+- **Drizzle-ORM**
 
-#### b) tRPC
+  - Based on your chosen database type (PostgreSQL, MySQL, SQLite), Kirimase sets up the required files for Drizzle-ORM, drizzle-zod for validations and and drizzle-kit to manage migrations.
+  - Scripts are auto-added to `package.json` for immediate use of drizzle-kit.
 
-- Generates files to configure tRPC with the app router.
-- Provides client-side tRPC and scaffolds server-side configuration using the experimental server-invoker pattern.
-- Wraps the root layout in the tRPC provider.
+- **Prisma**
+  - Kirimase sets up required files for Prisma with zod-prisma for validations.
 
-#### c) Auth.js
+#### Authentication
 
-- Generates files for Auth.js (Next-Auth), including the latest Drizzle adapter. (For PlanetScale, references are excluded as it doesn't support foreign keys).
-- Generates a generic sign-in component for immediate use within your Next.js project.
-- Wraps the root layout with the auth provider and generates utilities for auth checks and redirects in your Next.js routes.
+- **Auth.js**
 
-#### d) Shadcn-UI
+  - Generates files for Auth.js (Next-Auth), including the latest Drizzle adapter. (For PlanetScale, references are excluded as it doesn't support foreign keys).
+  - Generates a generic sign-in component for immediate use within your Next.js project.
+  - Wraps the root layout with the auth provider and generates utilities for auth checks and redirects in your Next.js routes.
 
-- Initiates the Shadcn-UI CLI designed for Next.js and installs button and toast components.
-- Inserts the toast-provider (`<Toaster />`) to the root layout for instant toast notifications in your Next.js app.
+#### Other
+
+- **tRPC**
+
+  - Generates files to configure tRPC with the app router.
+  - Provides client-side tRPC and scaffolds server-side configuration using the experimental server-invoker pattern.
+  - Wraps the root layout in the tRPC provider.
+
+- Shadcn-UI
+
+  - Initiates the Shadcn-UI CLI designed for Next.js and installs button and toast components.
+  - Inserts the toast-provider (`<Toaster />`) to the root layout for instant toast notifications in your Next.js app.
 
 Kirimase also adds relevant keys to your `.env` which you'll need to provide values for.
 
