@@ -158,40 +158,16 @@ ${userGeneratedFields}${addUserReferenceIfBelongsToUser(schema, mappings)}
 };
 
 const generateIndexFields = (
-  schema: Schema,
+  index: string | null,
   relations: DBField[],
   usingPlanetscale: boolean
-): string => {
-  const { index, belongsToUser } = schema;
-  // Handle the case where index is null and there are no relations and usingPlanetscale is false
-  if (index === null && relations.length === 0 && !usingPlanetscale) {
-    return "";
-  }
-
-  // Start building the @@index
-  let fields: string[] = [];
-
-  // If there is an index, push it to fields array
-  if (index !== null) {
-    fields.push(toCamelCase(index));
-  }
-
-  if (belongsToUser) {
-    fields.push("userId");
-  }
-
-  // If using planetscale and there are relations, add relations to fields array
-  if (usingPlanetscale && relations.length > 0) {
-    fields = fields.concat(
-      relations.map((relation) => toCamelCase(relation.name))
-    );
-  }
-
-  const uniqueFields = Array.from(new Set(fields));
-
-  return `\n  ${uniqueFields
-    .map((field) => `@@index([${field}])`)
-    .join("\n  ")}`;
+) => {
+  const relationsFormatted = relations
+    .map((relation) => toCamelCase(relation.name))
+    .join(", ");
+  return usingPlanetscale
+    ? `@@index([ ${relationsFormatted}])`
+    : `@@index([${index}])`;
 };
 
 const generatePrismaSchema = (
@@ -204,7 +180,7 @@ const generatePrismaSchema = (
     schema.tableName
   );
   const relations = schema.fields.filter(
-    (field) => field.type === "References"
+    (field) => field.type.toLowerCase() === "references"
   );
   const prismaSchemaContent = `model ${tableNameSingularCapitalised} {
     id    String @id @default(cuid())
@@ -215,7 +191,7 @@ const generatePrismaSchema = (
     schema.belongsToUser
       ? "userId String\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)"
       : ""
-  }${generateIndexFields(schema, relations, usingPlanetscale)}
+  }${schema.index || relations.length > 0 ? `\n  @@index([])` : ""}
 }`;
   addToPrismaSchema(prismaSchemaContent, tableNameSingularCapitalised);
   addToPrismaModel(
@@ -226,7 +202,6 @@ const generatePrismaSchema = (
     const { references } = relation;
     const { tableNameSingularCapitalised: singularCapitalised } =
       formatTableName(references);
-    console.log(relations, references, singularCapitalised);
     addToPrismaModel(
       singularCapitalised,
       `${tableNameCamelCase} ${tableNameSingularCapitalised}[]`

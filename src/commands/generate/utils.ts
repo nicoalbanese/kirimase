@@ -360,16 +360,19 @@ export function addToPrismaModel(modelName: string, attributesToAdd: string) {
     return;
   }
   const schema = readFileSync("prisma/schema.prisma", "utf-8");
-  if (!schema.includes(modelName)) return;
-  if (schema.includes(attributesToAdd)) return;
-  // Find the start and end positions of the specified model
-  const { modelEnd } = getPrismaModelStartAndEnd(schema, modelName);
-  // Split the schema and insert the attributes at the right position
-  const beforeModelEnd = schema.substring(0, modelEnd);
-  const afterModelEnd = schema.substring(modelEnd);
+  if (
+    !schema.includes(attributesToAdd.split(" ")[1]) &&
+    schema.includes(modelName)
+  ) {
+    // Find the start and end positions of the specified model
+    const { modelEnd } = getPrismaModelStartAndEnd(schema, modelName);
+    // Split the schema and insert the attributes at the right position
+    const beforeModelEnd = schema.substring(0, modelEnd);
+    const afterModelEnd = schema.substring(modelEnd);
 
-  const newSchema =
-    beforeModelEnd + "  " + attributesToAdd + "\n" + afterModelEnd;
-  replaceFile("prisma/schema.prisma", newSchema);
-  consola.info("updated schema");
+    const newSchema =
+      beforeModelEnd + "  " + attributesToAdd + "\n" + afterModelEnd;
+    replaceFile("prisma/schema.prisma", newSchema);
+    consola.info("updated schema");
+  }
 }

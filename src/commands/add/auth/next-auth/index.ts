@@ -33,8 +33,14 @@ export const addNextAuth = async () => {
     }),
   })) as AuthProvider[];
 
-  const { hasSrc, preferredPackageManager, driver, packages, orm } =
-    readConfigFile();
+  const {
+    hasSrc,
+    preferredPackageManager,
+    driver,
+    packages,
+    orm,
+    provider: dbProvider,
+  } = readConfigFile();
   const rootPath = `${hasSrc ? "src/" : ""}`;
   // 1. Create app/api/auth/[...nextauth].ts
   createFile(
@@ -57,7 +63,10 @@ export const addNextAuth = async () => {
       );
     }
     if (orm === "prisma") {
-      addToPrismaSchema(createPrismaAuthSchema(driver), "Auth");
+      addToPrismaSchema(
+        createPrismaAuthSchema(driver, dbProvider === "planetscale"),
+        "Auth"
+      );
     }
   }
 

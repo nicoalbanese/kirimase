@@ -386,7 +386,10 @@ export const enableSessionInTRPCApi = () => {
   consola.success("TRPC Server API updated successfully to add Session data.");
 };
 
-export const createPrismaAuthSchema = (driver: DBType) => {
+export const createPrismaAuthSchema = (
+  driver: DBType,
+  usingPlanetScale: boolean
+) => {
   return `model Account {
   id                 String  @id @default(cuid())
   userId             String
@@ -403,7 +406,9 @@ export const createPrismaAuthSchema = (driver: DBType) => {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])${
+    usingPlanetScale ? "\n  @@index([userId])" : ""
+  }
 }
 
 model Session {
@@ -411,7 +416,9 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)${
+    usingPlanetScale ? "\n  @@index([userId])" : ""
+  }"}
 }
 
 model User {

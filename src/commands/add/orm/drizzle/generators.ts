@@ -138,6 +138,7 @@ const poolConnection = mysql.createPool(process.env.DATABASE_URL!);
  
 export const db = drizzle(poolConnection);
 `;
+      break;
     case "better-sqlite3":
       indexTS = `import { drizzle, BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
@@ -145,6 +146,7 @@ import Database from 'better-sqlite3';
 const sqlite = new Database('sqlite.db');
 export const db: BetterSQLite3Database = drizzle(sqlite);
 `;
+      break;
     //     case "bun-sqlite":
     //       indexTS = `import { drizzle, BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite';
     // import { Database } from 'bun:sqlite';
@@ -152,6 +154,7 @@ export const db: BetterSQLite3Database = drizzle(sqlite);
     // const sqlite = new Database('sqlite.db');
     // export const db: BunSQLiteDatabase = drizzle(sqlite);
     // `;
+    // break;
     default:
       break;
   }
