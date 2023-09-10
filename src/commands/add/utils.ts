@@ -34,8 +34,11 @@ export const addContextProviderToLayout = (
 
   // Add import statement after the last import
   const importInsertionPoint = fileContent.lastIndexOf("import");
+  // If no imports exist, add the import statement at the top of the file
   const nextLineAfterLastImport =
-    fileContent.indexOf("\n", importInsertionPoint) + 1;
+    importInsertionPoint !== -1
+      ? fileContent.indexOf("\n", importInsertionPoint) + 1
+      : 0;
   const beforeImport = fileContent.slice(0, nextLineAfterLastImport);
   const afterImport = fileContent.slice(nextLineAfterLastImport);
 
