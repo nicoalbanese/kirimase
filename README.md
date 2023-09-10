@@ -8,7 +8,6 @@ Kirimase is a command-line tool for **building full-stack Next.js apps faster**.
 
 [DEMO](https://www.loom.com/share/cb329939c83b4c9eb6a56abfd2638bd4?sid=6d902fcc-3ef6-4436-bf7d-9d0c2943812f)
 
-
 ## Features
 
 1. **Initialization and Configuration**: quickly add and set up essential packages to jump-start your Next.js project.
@@ -23,7 +22,7 @@ Install Kirimase CLI globally:
 ```bash
 npm install -g kirimase
 ```
-<br />
+
 <br />
 
 # Commands
@@ -42,10 +41,9 @@ Initializes and configures the following packages for your Next.js project, cate
 #### Prisma
 
 - Kirimase sets up required files for [Prisma](https://github.com/prisma/prisma) with [zod-prisma](https://github.com/CarterGrimmeisen/zod-prisma) for validations.
-<br />
-<br />
 
 ---
+
 ### Authentication
 
 #### Auth.js
@@ -54,12 +52,10 @@ Initializes and configures the following packages for your Next.js project, cate
 - Generates a generic sign-in component for immediate use within your Next.js project.
 - Wraps the root layout with the auth provider and generates utilities for auth checks and redirects in your Next.js routes.
 
-
 _more auth packages coming soon..._
 
-<br />
-
 ---
+
 ### Other
 
 #### tRPC
@@ -76,7 +72,6 @@ _more auth packages coming soon..._
 Kirimase also adds relevant keys to your `.env` which you'll need to provide values for.
 
 <br />
-
 
 ## 2. `kirimase generate`
 
