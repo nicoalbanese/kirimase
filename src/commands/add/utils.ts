@@ -1,6 +1,7 @@
 import { AvailablePackage, PackageType } from "../../types.js";
-import { readConfigFile, replaceFile } from "../../utils.js";
+import { createFile, readConfigFile, replaceFile } from "../../utils.js";
 import fs from "fs";
+import { rootLayoutTs } from "./generators.js";
 
 export const Packages: {
   [key in PackageType]: {
@@ -25,6 +26,9 @@ export const addContextProviderToLayout = (
 ) => {
   const { hasSrc } = readConfigFile();
   const path = `${hasSrc ? "src/" : ""}app/layout.tsx`;
+
+  // Create the root layout file if it doesn't exist
+  if (!fs.existsSync(path)) createFile(path, rootLayoutTs());
 
   const fileContent = fs.readFileSync(path, "utf-8");
 
