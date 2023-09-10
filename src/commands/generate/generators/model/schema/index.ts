@@ -226,7 +226,6 @@ const generatePrismaSchema = (
     const { references } = relation;
     const { tableNameSingularCapitalised: singularCapitalised } =
       formatTableName(references);
-    console.log(relations, references, singularCapitalised);
     addToPrismaModel(
       singularCapitalised,
       `${tableNameCamelCase} ${tableNameSingularCapitalised}[]`

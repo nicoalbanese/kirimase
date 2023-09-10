@@ -373,6 +373,6 @@ export function addToPrismaModel(modelName: string, attributesToAdd: string) {
     const newSchema =
       beforeModelEnd + "  " + attributesToAdd + "\n" + afterModelEnd;
     replaceFile("prisma/schema.prisma", newSchema);
-    consola.info("updated schema");
+    consola.info("Updated Prisma schema");
   }
 }
