@@ -32,7 +32,7 @@ export const addPackage = async () => {
     if (auth === undefined) {
       const authToInstall = await select({
         message: "Select an authentication package to use:",
-        choices: Packages.auth.concat(nullOption),
+        choices: [...Packages.auth, new Separator(), nullOption],
       });
 
       if (authToInstall === "next-auth") await addNextAuth();
