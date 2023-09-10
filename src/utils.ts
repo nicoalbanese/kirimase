@@ -22,7 +22,7 @@ export function createFile(filePath: string, content: string) {
   consola.success(`File created at ${filePath}`);
 }
 
-export function replaceFile(filePath: string, content: string) {
+export function replaceFile(filePath: string, content: string, log = true) {
   const resolvedPath = path.resolve(filePath);
   const dirName = path.dirname(resolvedPath);
 
@@ -34,13 +34,17 @@ export function replaceFile(filePath: string, content: string) {
   }
 
   fs.writeFileSync(resolvedPath, content);
-  consola.success(`File replaced at ${filePath}`);
+  if (log === true) {
+    consola.success(`File replaced at ${filePath}`);
+  }
 }
 
-export function createFolder(relativePath: string) {
+export function createFolder(relativePath: string, log = true) {
   const fullPath = path.join(process.cwd(), relativePath);
   fs.mkdirSync(fullPath, { recursive: true });
-  consola.success(`Folder created at ${fullPath}`);
+  if (log) {
+    consola.success(`Folder created at ${fullPath}`);
+  }
 }
 
 export const runCommand = async (command: string, args: string[]) => {
@@ -93,7 +97,11 @@ export const createConfigFile = (options: Config) => {
 export const updateConfigFile = (options: UpdateConfig) => {
   const config = readConfigFile();
   const newConfig = { ...config, ...options };
-  replaceFile("./kirimase.config.json", JSON.stringify(newConfig, null, 2));
+  replaceFile(
+    "./kirimase.config.json",
+    JSON.stringify(newConfig, null, 2),
+    false
+  );
 };
 
 export const readConfigFile = (): (Config & { rootPath: string }) | null => {

@@ -119,7 +119,7 @@ const createListComponent = (schema: Schema) => {
     tableNameCapitalised,
     tableNameFirstChar,
     tableNameNormalEnglishSingularLowerCase,
-    tableNameNormalEnglishCapitalised,
+    tableNameNormalEnglishLowerCase,
   } = formatTableName(schema.tableName);
   const relations = schema.fields.filter(
     (field) => field.type === "references"
@@ -182,7 +182,7 @@ const ${tableNameSingularCapitalised} = ({ ${tableNameSingular} }: { ${tableName
 const EmptyState = () => {
   return (
     <div className="text-center">
-      <h3 className="mt-2 text-sm font-semibold text-gray-900">No ${tableNameNormalEnglishSingularLowerCase}</h3>
+      <h3 className="mt-2 text-sm font-semibold text-gray-900">No ${tableNameNormalEnglishLowerCase}</h3>
       <p className="mt-1 text-sm text-gray-500">
         Get started by creating a new ${tableNameNormalEnglishSingularLowerCase}.
       </p>

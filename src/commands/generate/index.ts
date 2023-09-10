@@ -10,7 +10,7 @@ import {
 import { Choice } from "@inquirer/checkbox";
 import { createOrmMappings } from "./generators/model/utils.js";
 import { scaffoldAPIRoute } from "./generators/apiRoute.js";
-import { readConfigFile } from "../../utils.js";
+import { readConfigFile, updateConfigFileAfterUpdate } from "../../utils.js";
 import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
 import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
@@ -177,54 +177,61 @@ async function askForIndex(fields: DBField[]) {
   }
 }
 
-export async function buildSchema() {
+export function preBuild() {
   const config = readConfigFile();
 
-  if (config) {
-    const { driver, hasSrc, packages, orm } = config;
-
-    if (orm !== null) {
-      provideInstructions();
-      const resourceType = await askForResourceType();
-      const tableName = await askForTable();
-      const fields = await askForFields(orm, driver, tableName);
-      const indexedField = await askForIndex(fields);
-      // console.log(indexedField);
-      let schema: Schema;
-      if (resourceType.includes("model") && packages.includes("next-auth")) {
-        const belongsToUser = await askIfBelongsToUser();
-        schema = {
-          tableName,
-          fields,
-          index: indexedField,
-          belongsToUser,
-        };
-      } else {
-        schema = {
-          tableName,
-          fields,
-          index: indexedField,
-          belongsToUser: false,
-        };
-      }
-
-      if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
-      if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
-      if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
-      if (resourceType.includes("views_and_components"))
-        scaffoldViewsAndComponents(schema);
-      // if (resourceType.includes("views")) scaffoldModel()
-
-      // console.log("Schema:", schema);
-      // You can now pass this schema object to the scaffoldResource function
-    } else {
-      consola.warn(
-        "You need to have drizzle installed in order to use the scaffold command."
-      );
-      addPackage();
-    }
-  } else {
+  if (!config) {
     consola.warn("You need to have a config file in order to use generate.");
     initProject();
+    return false;
+  }
+
+  if (config.orm === undefined) updateConfigFileAfterUpdate();
+  return true;
+}
+
+export async function buildSchema() {
+  const ready = preBuild();
+
+  if (!ready) return;
+
+  const config = readConfigFile();
+
+  const { driver, hasSrc, packages, orm } = config;
+
+  if (orm !== null) {
+    provideInstructions();
+    const resourceType = await askForResourceType();
+    const tableName = await askForTable();
+    const fields = await askForFields(orm, driver, tableName);
+    const indexedField = await askForIndex(fields);
+    let schema: Schema;
+    if (resourceType.includes("model") && packages.includes("next-auth")) {
+      const belongsToUser = await askIfBelongsToUser();
+      schema = {
+        tableName,
+        fields,
+        index: indexedField,
+        belongsToUser,
+      };
+    } else {
+      schema = {
+        tableName,
+        fields,
+        index: indexedField,
+        belongsToUser: false,
+      };
+    }
+
+    if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
+    if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
+    if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
+    if (resourceType.includes("views_and_components"))
+      scaffoldViewsAndComponents(schema);
+  } else {
+    consola.warn(
+      "You need to have an ORM installed in order to use the scaffold command."
+    );
+    addPackage();
   }
 }

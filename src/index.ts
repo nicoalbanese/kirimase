@@ -34,16 +34,4 @@ program
   .description("Update Kirimase config file after update")
   .action(updateConfigFileAfterUpdate);
 
-// TO REMOVE
-program
-  .command("schemas")
-  .description("List all schemas")
-  .action(() => consola.info(getCurrentSchemas()));
-
-// TO REMOVE
-program
-  .command("updateSchema")
-  .description("Update schema")
-  .action(() => addToPrismaModel("User", "aTestString String"));
-
 program.parse(process.argv);
