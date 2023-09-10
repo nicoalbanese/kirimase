@@ -418,7 +418,7 @@ model Session {
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)${
     usingPlanetScale ? "\n  @@index([userId])" : ""
-  }"}
+  }
 }
 
 model User {
