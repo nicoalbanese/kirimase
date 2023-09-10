@@ -2,14 +2,19 @@
 
 ![npm](https://img.shields.io/npm/v/kirimase?style=flat-square)
 
-Kirimase is a command-line tool for building full-stack Next.js apps faster. It supercharges your development workflow, allowing you to seamlessly integrate essential packages and scaffold your application with best practices in mind.
+Kirimase is a command-line tool for **building full-stack Next.js apps faster**. It supercharges your development workflow, allowing you to quickly integrate essential packages and scaffold resources for your application with best practices in mind.
+
+<br />
 
 [DEMO](https://www.loom.com/share/cb329939c83b4c9eb6a56abfd2638bd4?sid=6d902fcc-3ef6-4436-bf7d-9d0c2943812f)
+
 
 ## Features
 
 1. **Initialization and Configuration**: quickly add and set up essential packages to jump-start your Next.js project.
 2. **Code Generation**: scaffold models, views, and controllers directly from the CLI.
+
+<br />
 
 ## Quick Start
 
@@ -18,47 +23,62 @@ Install Kirimase CLI globally:
 ```bash
 npm install -g kirimase
 ```
+<br />
+<br />
 
-## Commands
+# Commands
 
 ### 1. `kirimase add`
 
 Initializes and configures the following packages for your Next.js project, categorized into:
 
-#### ORM
+### ORM
 
-- **Drizzle-ORM**
+#### Drizzle-ORM
 
-  - Based on your chosen database type (PostgreSQL, MySQL, SQLite), Kirimase sets up the required files for Drizzle-ORM, drizzle-zod for validations and and drizzle-kit to manage migrations.
-  - Scripts are auto-added to `package.json` for immediate use of drizzle-kit.
+- Based on your chosen database type (PostgreSQL, MySQL, SQLite), Kirimase sets up the required files for [Drizzle-ORM](https://github.com/drizzle-team/drizzle-orm), [drizzle-zod](https://github.com/drizzle-team/drizzle-orm/blob/main/drizzle-zod/README.md) for validations and and [drizzle-kit](https://github.com/drizzle-team/drizzle-kit-mirror) to manage migrations.
+- Scripts are auto-added to `package.json` for immediate use of drizzle-kit.
 
-- **Prisma**
-  - Kirimase sets up required files for Prisma with zod-prisma for validations.
+#### Prisma
 
-#### Authentication
+- Kirimase sets up required files for [Prisma](https://github.com/prisma/prisma) with [zod-prisma](https://github.com/CarterGrimmeisen/zod-prisma) for validations.
+<br />
+<br />
 
-- **Auth.js**
+---
+### Authentication
 
-  - Generates files for Auth.js (Next-Auth), including the latest Drizzle adapter. (For PlanetScale, references are excluded as it doesn't support foreign keys).
-  - Generates a generic sign-in component for immediate use within your Next.js project.
-  - Wraps the root layout with the auth provider and generates utilities for auth checks and redirects in your Next.js routes.
+#### Auth.js
 
-#### Other
+- Generates files for [Auth.js](https://github.com/nextauthjs/next-auth) (Next-Auth), including the latest Drizzle adapter. (For PlanetScale, references are excluded as it doesn't support foreign keys).
+- Generates a generic sign-in component for immediate use within your Next.js project.
+- Wraps the root layout with the auth provider and generates utilities for auth checks and redirects in your Next.js routes.
 
-- **tRPC**
 
-  - Generates files to configure tRPC with the app router.
-  - Provides client-side tRPC and scaffolds server-side configuration using the experimental server-invoker pattern.
-  - Wraps the root layout in the tRPC provider.
+_more auth packages coming soon..._
 
-- Shadcn-UI
+<br />
 
-  - Initiates the Shadcn-UI CLI designed for Next.js and installs button and toast components.
-  - Inserts the toast-provider (`<Toaster />`) to the root layout for instant toast notifications in your Next.js app.
+---
+### Other
+
+#### tRPC
+
+- Generates files to configure [tRPC](https://github.com/trpc/trpc) with the app router.
+- Provides client-side tRPC and scaffolds server-side configuration using the experimental server-invoker pattern.
+- Wraps the root layout in the tRPC provider.
+
+#### Shadcn-UI
+
+- Initiates the [Shadcn-UI](https://github.com/shadcn-ui/ui) CLI designed for Next.js and installs button and toast components.
+- Inserts the toast-provider (`<Toaster />`) to the root layout for instant toast notifications in your Next.js app.
 
 Kirimase also adds relevant keys to your `.env` which you'll need to provide values for.
 
-### 2. `kirimase generate`
+<br />
+
+
+## 2. `kirimase generate`
 
 Akin to `rails scaffold` but for Next.js:
 
