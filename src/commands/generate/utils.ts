@@ -167,7 +167,7 @@ export const getZodMappings = (fields: DBField[]) => {
 
 export const defaultValueMappings: Record<
   DBType,
-  Partial<Record<DrizzleColumnType, string>>
+  Partial<Record<DrizzleColumnType | PrismaColumnType, string>>
 > = {
   pg: {
     string: '""',
@@ -181,6 +181,15 @@ export const defaultValueMappings: Record<
     varchar: '""',
     timestamp: '""',
     references: "0",
+    Int: "0",
+    Json: '""',
+    DateTime: "new Date()",
+    Boolean: "false",
+    String: '""',
+    Float: "0.0",
+    Decimal: "0.0",
+    BigInt: "0",
+    References: '""',
   },
   mysql: {
     string: '""',
@@ -194,6 +203,15 @@ export const defaultValueMappings: Record<
     varchar: '""',
     timestamp: '""',
     references: "0",
+    Int: "0",
+    Json: '""',
+    DateTime: "new Date()",
+    Boolean: "false",
+    String: '""',
+    Float: "0.0",
+    Decimal: "0.0",
+    BigInt: "0",
+    References: '""',
   },
   sqlite: {
     string: '""',
@@ -207,6 +225,15 @@ export const defaultValueMappings: Record<
     varchar: '""',
     timestamp: "new Date()",
     references: "0",
+    Int: "0",
+    Json: '""',
+    DateTime: "new Date()",
+    Boolean: "false",
+    String: '""',
+    Float: "0.0",
+    Decimal: "0.0",
+    BigInt: "0",
+    References: '""',
   },
 };
 
