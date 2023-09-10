@@ -147,14 +147,14 @@ const sqlite = new Database('sqlite.db');
 export const db: BetterSQLite3Database = drizzle(sqlite);
 `;
       break;
-    //     case "bun-sqlite":
-    //       indexTS = `import { drizzle, BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite';
+    // case "bun-sqlite":
+    //   indexTS = `import { drizzle, BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite';
     // import { Database } from 'bun:sqlite';
     //
     // const sqlite = new Database('sqlite.db');
     // export const db: BunSQLiteDatabase = drizzle(sqlite);
     // `;
-    // break;
+    //   break;
     default:
       break;
   }

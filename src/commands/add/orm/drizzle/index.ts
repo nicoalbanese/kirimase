@@ -51,6 +51,7 @@ export const addDrizzle = async () => {
   const dbProvider = (await select({
     message: "Please choose your DB Provider",
     choices: DBProviders[dbType],
+    // choices: dbProviders,
   })) as DBProvider;
 
   let databaseUrl = "";
