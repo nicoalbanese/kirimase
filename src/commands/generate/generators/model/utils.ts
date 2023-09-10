@@ -1,11 +1,5 @@
-import {
-  PrismaColumnType,
-  mysqlColumnType,
-  pgColumnType,
-  sqliteColumnType,
-} from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
-import { ORMTypeMap, TypeMap, TypeMapFunction } from "../../types.js";
+import { ORMTypeMap, TypeMap } from "../../types.js";
 import {
   formatTableName,
   getReferenceFieldType,
@@ -132,4 +126,12 @@ export const createOrmMappings = () => {
       sqlite: prismaMappings,
     },
   } as ORMTypeMap;
+};
+
+export const generateAuthCheck = (belongsToUser: boolean) => {
+  return belongsToUser ? "\n  const { session } = await getUserAuth();" : "";
+};
+
+export const authForWhereClausePrisma = (belongsToUser: boolean) => {
+  return belongsToUser ? ", userId: session?.user.id!" : "";
 };

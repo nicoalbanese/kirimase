@@ -386,19 +386,19 @@ export const enableSessionInTRPCApi = () => {
   consola.success("TRPC Server API updated successfully to add Session data.");
 };
 
-export const createPrismaAuthSchema = () => {
+export const createPrismaAuthSchema = (driver: DBType) => {
   return `model Account {
   id                 String  @id @default(cuid())
   userId             String
   type               String
   provider           String
   providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
+  refresh_token      String?  ${driver !== "sqlite" ? "@db.Text" : ""}
+  access_token       String?  ${driver !== "sqlite" ? "@db.Text" : ""}
   expires_at         Int?
   token_type         String?
   scope              String?
-  id_token           String?  @db.Text
+  id_token           String?  ${driver !== "sqlite" ? "@db.Text" : ""}
   session_state      String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

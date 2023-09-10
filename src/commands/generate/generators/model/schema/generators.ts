@@ -21,7 +21,7 @@ const createInsertZodSchema = (
   const insertSchema = `export const insert${tableNameSingularCapitalised}Schema = ${
     orm === "drizzle"
       ? `createInsertSchema(${tableNameCamelCase})`
-      : `${tableNameSingular}Schema`
+      : `${tableNameSingular}Schema.omit({ id: true })`
   };
 `;
   const insertParams = `export const insert${tableNameSingularCapitalised}Params = ${

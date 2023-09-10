@@ -170,8 +170,17 @@ const generatePrismaSchema = (
   ${schema.fields
     .map((field) => mappings.typeMappings[field.type](field))
     .join("\n  ")}
+  ${
+    schema.belongsToUser
+      ? "userId String\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)"
+      : ""
+  }${schema.index ? `\n  @@index([${schema.index}])` : ""}
 }`;
   addToPrismaSchema(prismaSchemaContent, tableNameSingularCapitalised);
+  addToPrismaModel(
+    "User",
+    `${tableNameCamelCase} ${tableNameSingularCapitalised}[]`
+  );
   const relations = schema.fields.filter(
     (field) => field.type.toLowerCase() === "references"
   );

@@ -1,10 +1,8 @@
-import { DBField, ORMType } from "../../../../../types.js";
+import { DBField } from "../../../../../types.js";
 import { Schema } from "../../../types.js";
 import { formatTableName, toCamelCase } from "../../../utils.js";
+import { generateAuthCheck } from "../utils.js";
 
-const generateAuthCheck = (belongsToUser: boolean) => {
-  return belongsToUser ? "\n  const { session } = await getUserAuth();" : "";
-};
 const generateDrizzleImports = (schema: Schema, relations: DBField[]) => {
   const { tableName, belongsToUser } = schema;
   const {
@@ -131,7 +129,7 @@ const generatePrismaGetQuery = (schema: Schema, relations: DBField[]) => {
     belongsToUser ? ` where: {userId: session?.user.id!}` : ""
   }${
     relations.length > 0
-      ? ` include: { ${relations
+      ? `, include: { ${relations
           .map((relation) => `${relation.references.slice(0, -1)}: true`)
           .join(", ")}}`
       : ""
@@ -155,14 +153,13 @@ const generatePrismaGetByIdQuery = (schema: Schema, relations: DBField[]) => {
   const ${tableNameFirstChar} = await db.${tableNameSingular}.findFirst({
     where: { id: ${tableNameSingular}Id${
     belongsToUser ? `, userId: session?.user.id!` : ""
-  }}
-${
-  relations.length > 0
-    ? ` include: { ${relations
-        .map((relation) => `${relation.references.slice(0, -1)}: true`)
-        .join(", ")} }`
-    : ""
-}  });
+  }}${
+    relations.length > 0
+      ? `,\n    include: { ${relations
+          .map((relation) => `${relation.references.slice(0, -1)}: true`)
+          .join(", ")} }\n  `
+      : ""
+  }});
   return { ${tableNameCamelCase}: ${tableNameFirstChar} };
 };
 `;

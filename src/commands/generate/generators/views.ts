@@ -53,11 +53,15 @@ export const scaffoldViewsAndComponents = (schema: Schema) => {
     schema.fields.filter((field) => field.type === "boolean").length > 0
       ? baseComponents.push("checkbox")
       : null;
-    schema.fields.filter((field) => field.type === "references").length > 0
+    schema.fields.filter((field) => field.type.toLowerCase() === "references")
+      .length > 0
       ? baseComponents.push("select")
       : null;
     schema.fields.filter(
-      (field) => field.type === "date" || field.type === "timestamp"
+      (field) =>
+        field.type === "date" ||
+        field.type === "timestamp" ||
+        field.type === "DateTime"
     ).length > 0
       ? baseComponents.push("popover", "calendar")
       : null;
@@ -159,7 +163,9 @@ const ${tableNameSingularCapitalised} = ({ ${tableNameSingular} }: { ${tableName
             ? `${tableNameSingular}.${tableNameSingular}`
             : tableNameSingular
         }.${toCamelCase(schema.fields[0].name)}${
-    schema.fields[0].type === "date" || schema.fields[0].type === "timestamp"
+    schema.fields[0].type === "date" ||
+    schema.fields[0].type === "timestamp" ||
+    schema.fields[0].type === "DateTime"
       ? ".toString()"
       : ""
   }}</div>
@@ -191,12 +197,12 @@ const EmptyState = () => {
 };
 
 const createformInputComponent = (field: DBField): string => {
-  if (field.type == "boolean")
+  if (field.type.toLowerCase() == "boolean")
     return `<br />
             <FormControl>
               <Checkbox {...field} checked={!!field.value} onCheckedChange={field.onChange} value={""} />
             </FormControl>`;
-  if (field.type == "references") {
+  if (field.type.toLowerCase() == "references") {
     const referencesSingular = field.references.slice(0, -1);
     const entity = queryHasJoins(toCamelCase(field.references))
       ? `${referencesSingular}.${referencesSingular}`
@@ -220,7 +226,11 @@ const createformInputComponent = (field: DBField): string => {
             </FormControl>
 `;
   }
-  if (field.type == "date" || field.type == "timestamp")
+  if (
+    field.type == "date" ||
+    field.type == "timestamp" ||
+    field.type == "DateTime"
+  )
     return `<br />
               <Popover>
                 <PopoverTrigger asChild>
@@ -272,12 +282,11 @@ const createFormComponent = (schema: Schema) => {
     tableNameSingular,
     tableNameSingularCapitalised,
     tableNameCapitalised,
-    tableNameFirstChar,
     tableNameNormalEnglishSingular,
   } = formatTableName(schema.tableName);
   const { packages, driver } = readConfigFile();
   const relations = schema.fields.filter(
-    (field) => field.type === "references"
+    (field) => field.type.toLowerCase() === "references"
   );
 
   return `"use client";
@@ -298,7 +307,8 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc/client";
 import { Button } from "../ui/button";
 import { z } from "zod";${
-    schema.fields.filter((field) => field.type === "boolean").length > 0
+    schema.fields.filter((field) => field.type.toLowerCase() === "boolean")
+      .length > 0
       ? '\nimport { Checkbox } from "../ui/checkbox";'
       : ""
   }${
@@ -307,7 +317,10 @@ import { z } from "zod";${
       : ""
   }${
     schema.fields.filter(
-      (field) => field.type === "date" || field.type === "timestamp"
+      (field) =>
+        field.type === "date" ||
+        field.type === "timestamp" ||
+        field.type === "DateTime"
     ).length > 0
       ? `import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";

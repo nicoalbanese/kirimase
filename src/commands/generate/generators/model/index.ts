@@ -13,7 +13,7 @@ export async function scaffoldModel(
   hasSrc: boolean
 ) {
   const { tableName } = schema;
-  const { orm, preferredPackageManager } = readConfigFile();
+  const { orm, preferredPackageManager, driver } = readConfigFile();
 
   // create model file
   const modelPath = `${hasSrc ? "src/" : ""}lib/db/schema/${toCamelCase(
@@ -35,5 +35,5 @@ export async function scaffoldModel(
   const mutationPath = `${hasSrc ? "src/" : ""}lib/api/${toCamelCase(
     tableName
   )}/mutations.ts`;
-  createFile(mutationPath, generateMutationContent(schema));
+  createFile(mutationPath, generateMutationContent(schema, driver, orm));
 }

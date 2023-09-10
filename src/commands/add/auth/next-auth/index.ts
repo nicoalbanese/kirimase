@@ -57,7 +57,7 @@ export const addNextAuth = async () => {
       );
     }
     if (orm === "prisma") {
-      addToPrismaSchema(createPrismaAuthSchema(), "Auth");
+      addToPrismaSchema(createPrismaAuthSchema(driver), "Auth");
     }
   }
 
