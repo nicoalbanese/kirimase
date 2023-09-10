@@ -1,4 +1,10 @@
-import { DBProvider, DBType } from "../../../../../types.js";
+import {
+  DBField,
+  DBProvider,
+  DBType,
+  DrizzleColumnType,
+  ORMType,
+} from "../../../../../types.js";
 import { readConfigFile } from "../../../../../utils.js";
 import { Schema, TypeMap } from "../../../types.js";
 import {
@@ -11,53 +17,79 @@ import {
 import { createOrmMappings } from "../utils.js";
 import { createZodSchemas } from "./generators.js";
 
-const generateDrizzleSchema = (
-  schema: Schema,
-  mappings: TypeMap,
-  provider: DBProvider,
-  dbType: DBType,
-  zodSchemas: string
-) => {
-  const { tableName, fields, index } = schema;
-  const { tableNameCamelCase, tableNameCapitalised } =
-    formatTableName(tableName);
-  const usedTypes: string[] = fields
+const getUsedTypes = (fields: DBField[], mappings: TypeMap) => {
+  return fields
     .map((field) => {
       const mappingFunction = mappings.typeMappings[field.type];
       // Assuming 'field.name' contains the appropriate value for the 'name' parameter
       return mappingFunction({ name: field.name }).split("(")[0];
     })
-    .concat(mappings.typeMappings["id"]({ name: "id" }).split("(")[0]); // Assuming number (int) is always used for the 'id' field
+    .concat(
+      mappings.typeMappings["id"]({ name: "id" }).split("(")[0]
+    ) as DrizzleColumnType[]; // Assuming number (int) is always used for the 'id' field
+};
 
+const getReferenceImports = (fields: DBField[]) => {
   const referenceFields = fields.filter((field) => field.type === "references");
-  const referenceImports = referenceFields.map(
+  return referenceFields.map(
     (field) =>
       `import { ${toCamelCase(field.references)} } from "./${toCamelCase(
         field.references
       )}"`
   );
+};
 
-  const uniqueTypes = Array.from(
+const getUniqueTypes = (
+  usedTypes: string[],
+  belongsToUser: boolean,
+  dbType: DBType
+) => {
+  return Array.from(
     new Set(
       usedTypes.concat(
-        schema.belongsToUser ? [getReferenceFieldType("string")[dbType]] : []
+        belongsToUser ? [getReferenceFieldType("string")[dbType]] : []
       )
     )
   );
-  const importStatement = `import { ${uniqueTypes
-    .join(", ")
-    .concat(
-      `, ${mappings.tableFunc}`
-    )} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
-    referenceImports.length > 0 ? referenceImports.join("\n") : ""
-  }${
-    schema.belongsToUser && provider !== "planetscale"
-      ? '\nimport { users } from "./auth";'
-      : ""
-  }
-import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";`;
+};
 
-  const schemaFields = fields
+const generateImportStatement = (
+  orm: ORMType,
+  schema: Schema,
+  mappings: TypeMap,
+  dbType?: DBType,
+  provider?: DBProvider
+) => {
+  const { fields, belongsToUser, tableName } = schema;
+  const { tableNameCamelCase, tableNameCapitalised, tableNameSingular } =
+    formatTableName(tableName);
+  if (orm === "drizzle") {
+    const usedTypes = getUsedTypes(fields, mappings);
+    const referenceImports = getReferenceImports(fields);
+
+    const uniqueTypes = getUniqueTypes(usedTypes, belongsToUser, dbType);
+    return `import { ${uniqueTypes
+      .join(", ")
+      .concat(
+        `, ${mappings.tableFunc}`
+      )} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
+      referenceImports.length > 0 ? referenceImports.join("\n") : ""
+    }${
+      belongsToUser && provider !== "planetscale"
+        ? '\nimport { users } from "./auth";'
+        : ""
+    }
+import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";`;
+  }
+  if (orm === "prisma")
+    return `import { ${tableNameSingular}Schema } from "@/zodAutoGenSchemas";
+import { z } from "zod";
+import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";
+`;
+};
+
+const generateFieldsForSchema = (fields: DBField[], mappings: TypeMap) => {
+  return fields
     .map(
       (field) =>
         `  ${toCamelCase(field.name)}: ${mappings.typeMappings[field.type](
@@ -65,8 +97,12 @@ import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/quer
         )}${field.notNull ? ".notNull()" : ""}`
     )
     .join(",\n");
+};
 
-  const indexFormatted = index
+const generateIndex = (schema: Schema) => {
+  const { tableName, index } = schema;
+  const { tableNameCamelCase } = formatTableName(tableName);
+  return index
     ? `, (${tableNameCamelCase}) => {
   return {
     ${toCamelCase(
@@ -77,21 +113,45 @@ import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/quer
   }
 }`
     : "";
+};
+
+const addUserReferenceIfBelongsToUser = (schema: Schema, mappings: TypeMap) => {
+  return schema.belongsToUser
+    ? `,\n  userId: ${mappings.typeMappings["references"]({
+        name: "user_id",
+        references: "users",
+        cascade: true,
+        referenceIdType: "string",
+      }).concat(".notNull()")},`
+    : "";
+};
+
+const generateDrizzleSchema = (
+  schema: Schema,
+  mappings: TypeMap,
+  provider: DBProvider,
+  dbType: DBType,
+  zodSchemas: string
+) => {
+  const { tableName, fields } = schema;
+  const { tableNameCamelCase } = formatTableName(tableName);
+
+  const importStatement = generateImportStatement(
+    "drizzle",
+    schema,
+    mappings,
+    dbType,
+    provider
+  );
+
+  const userGeneratedFields = generateFieldsForSchema(fields, mappings);
+  const indexFormatted = generateIndex(schema);
 
   const drizzleSchemaContent = `export const ${tableNameCamelCase} = ${
     mappings.tableFunc
   }('${tableName}', {
   id: ${mappings.typeMappings["id"]({ name: "id" })},
-${schemaFields}${
-    schema.belongsToUser
-      ? `,\n  userId: ${mappings.typeMappings["references"]({
-          name: "user_id",
-          references: "users",
-          cascade: true,
-          referenceIdType: "string",
-        }).concat(".notNull()")},`
-      : ""
-  }
+${userGeneratedFields}${addUserReferenceIfBelongsToUser(schema, mappings)}
 }${indexFormatted});\n`;
 
   return `${importStatement}\n\n${drizzleSchemaContent}\n\n${zodSchemas}`;
@@ -102,12 +162,9 @@ const generatePrismaSchema = (
   mappings: TypeMap,
   zodSchemas: string
 ) => {
-  const {
-    tableNameCapitalised,
-    tableNameSingularCapitalised,
-    tableNameCamelCase,
-    tableNameSingular,
-  } = formatTableName(schema.tableName);
+  const { tableNameSingularCapitalised, tableNameCamelCase } = formatTableName(
+    schema.tableName
+  );
   const prismaSchemaContent = `model ${tableNameSingularCapitalised} {
     id    String @id @default(cuid())
   ${schema.fields
@@ -127,10 +184,7 @@ const generatePrismaSchema = (
       `${tableNameCamelCase} ${tableNameSingularCapitalised}[]`
     );
   });
-  const importStatement = `import { ${tableNameSingular}Schema } from "@/zodAutoGenSchemas";
-import { z } from "zod";
-import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";
-`;
+  const importStatement = generateImportStatement("prisma", schema, mappings);
 
   return `${importStatement}\n\n${zodSchemas}`;
 };

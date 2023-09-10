@@ -29,7 +29,7 @@ export async function scaffoldModel(
   const queryPath = `${hasSrc ? "src/" : ""}lib/api/${toCamelCase(
     tableName
   )}/queries.ts`;
-  createFile(queryPath, generateQueryContent(schema));
+  createFile(queryPath, generateQueryContent(schema, orm));
 
   // create mutationFile
   const mutationPath = `${hasSrc ? "src/" : ""}lib/api/${toCamelCase(

@@ -333,6 +333,8 @@ export function addToPrismaModel(modelName: string, attributesToAdd: string) {
     return;
   }
   const schema = readFileSync("prisma/schema.prisma", "utf-8");
+  if (!schema.includes(modelName)) return;
+  if (schema.includes(attributesToAdd)) return;
   // Find the start and end positions of the specified model
   const { modelEnd } = getPrismaModelStartAndEnd(schema, modelName);
   // Split the schema and insert the attributes at the right position
