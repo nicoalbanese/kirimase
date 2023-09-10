@@ -92,8 +92,8 @@ export type pgColumnType =
   | "boolean"
   | "references"
   | "timestamp"
-  | "date"
-  | "json";
+  | "date";
+// | "json";
 
 export type mysqlColumnType =
   | "varchar"
@@ -103,8 +103,8 @@ export type mysqlColumnType =
   | "boolean"
   | "references"
   | "date"
-  | "timestamp"
-  | "json";
+  | "timestamp";
+// | "json";
 
 export type sqliteColumnType =
   | "string"
@@ -112,8 +112,8 @@ export type sqliteColumnType =
   | "boolean"
   | "date"
   | "timestamp"
-  | "references"
-  | "blob";
+  | "references";
+// | "blob";
 
 export type PrismaColumnType =
   | "String"
@@ -124,5 +124,5 @@ export type PrismaColumnType =
   | "Decimal"
   | "Boolean"
   | "DateTime"
-  | "References"
-  | "Json";
+  | "References";
+// | "Json";

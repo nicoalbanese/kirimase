@@ -94,10 +94,15 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
         return { name: field.toLowerCase(), value: field };
       });
 
-    const fieldTypeChoices =
-      currentSchemas.length < 1
-        ? baseFieldTypeChoices.filter((field) => field.name !== "references")
-        : baseFieldTypeChoices;
+    const removeReferenceOption =
+      currentSchemas.length > 2 ||
+      (currentSchemas.length === 1 &&
+        currentSchemas[0] === toCamelCase(tableName));
+    const fieldTypeChoices = removeReferenceOption
+      ? baseFieldTypeChoices.filter(
+          (field) => field.name.toLowerCase() !== "references"
+        )
+      : baseFieldTypeChoices;
 
     const fieldType = (await select({
       message: "Please select the type of this field:",

@@ -29,8 +29,8 @@ export const prismaMappings = {
     },
     DateTime: ({ name, notNull }) =>
       `${toCamelCase(name)} DateTime${notNull ? "" : "?"}`,
-    Json: ({ name, notNull }) =>
-      `${toCamelCase(name)} Json${notNull ? "" : "?"}`,
+    // Json: ({ name, notNull }) =>
+    //   `${toCamelCase(name)} Json${notNull ? "" : "?"}`,
     Decimal: ({ name, notNull }) =>
       `${toCamelCase(name)} Decimal${notNull ? "" : "?"}`,
   },
@@ -63,7 +63,7 @@ export const createOrmMappings = () => {
           // Add more types here as needed
           timestamp: ({ name }) => `timestamp("${name}")`,
           date: ({ name }) => `date("${name}")`,
-          json: ({ name }) => `json("${name}")`,
+          // json: ({ name }) => `json("${name}")`,
         },
       },
       mysql: {
@@ -92,7 +92,7 @@ export const createOrmMappings = () => {
             }`,
           date: ({ name }) => `date("${name}")`,
           timestamp: ({ name }) => `timestamp("${name}")`,
-          json: ({ name }) => `json("${name}")`,
+          // json: ({ name }) => `json("${name}")`,
         },
       },
       sqlite: {
@@ -116,7 +116,7 @@ export const createOrmMappings = () => {
           date: ({ name }) => `integer("${name}", { mode: "timestamp" })`,
           timestamp: ({ name }) =>
             `integer("${name}", { mode: "timestamp_ms" })`,
-          blob: ({ name }) => `blob("${name}")`,
+          // blob: ({ name }) => `blob("${name}")`,
         },
       },
     },
