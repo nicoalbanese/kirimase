@@ -127,9 +127,9 @@ const generatePrismaGetQuery = (schema: Schema, relations: DBField[]) => {
   return `export const get${tableNameSingularCapitalised}s = async () => {${getAuth}
   const ${tableNameFirstChar} = await db.${tableNameSingular}.findMany({${
     belongsToUser ? ` where: {userId: session?.user.id!}` : ""
-  }${
+  }${belongsToUser && relations.length > 0 ? ", " : ""}${
     relations.length > 0
-      ? `, include: { ${relations
+      ? `include: { ${relations
           .map((relation) => `${relation.references.slice(0, -1)}: true`)
           .join(", ")}}`
       : ""

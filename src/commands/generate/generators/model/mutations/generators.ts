@@ -10,7 +10,6 @@ const generateDrizzleImports = (schema: Schema) => {
     tableNameCamelCase,
     tableNameSingular,
   } = formatTableName(tableName);
-  const importAuthCheck = generateAuthCheck(belongsToUser);
 
   return `import { db } from "@/lib/db";
 import { ${belongsToUser ? "and, " : ""}eq } from "drizzle-orm";
@@ -22,7 +21,9 @@ import {
   insert${tableNameSingularCapitalised}Schema, 
   ${tableNameCamelCase},
   ${tableNameSingular}IdSchema 
-} from "@/lib/db/schema/${tableNameCamelCase}";${importAuthCheck}
+} from "@/lib/db/schema/${tableNameCamelCase}";${
+    belongsToUser ? '\nimport { getUserAuth } from "@/lib/auth/utils";' : ""
+  }
 `;
 };
 
@@ -142,7 +143,6 @@ const generatePrismaImports = (schema: Schema) => {
     tableNameCamelCase,
     tableNameSingular,
   } = formatTableName(tableName);
-  const importAuthCheck = generateAuthCheck(belongsToUser);
 
   return `import { db } from "@/lib/db";
 import { 
@@ -152,7 +152,9 @@ import {
   update${tableNameSingularCapitalised}Schema,
   insert${tableNameSingularCapitalised}Schema, 
   ${tableNameSingular}IdSchema 
-} from "@/lib/db/schema/${tableNameCamelCase}";${importAuthCheck}
+} from "@/lib/db/schema/${tableNameCamelCase}";${
+    belongsToUser ? '\nimport { getUserAuth } from "@/lib/auth/utils";' : ""
+  }
 `;
 };
 const generatePrismaCreateMutation = (schema: Schema) => {
