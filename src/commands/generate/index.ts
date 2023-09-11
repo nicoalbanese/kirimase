@@ -95,7 +95,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
       });
 
     const removeReferenceOption =
-      currentSchemas.length > 2 ||
+      currentSchemas.length === 0 ||
       (currentSchemas.length === 1 &&
         currentSchemas[0] === toCamelCase(tableName));
     const fieldTypeChoices = removeReferenceOption
