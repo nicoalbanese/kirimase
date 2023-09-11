@@ -34,6 +34,4 @@ program
   .description("Update Kirimase config file after update")
   .action(updateConfigFileAfterUpdate);
 
-program.command("schemas").action(() => console.log(getCurrentSchemas()));
-
 program.parse(process.argv);
