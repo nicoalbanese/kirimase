@@ -88,16 +88,41 @@ export const addNextAuth = async () => {
   }
 
   // add to env
-  addToDotEnv([
-    { key: "NEXTAUTH_SECRET", value: "your_super_secret_key_here" },
-    ...providers.flatMap((p) => [
-      { key: p.toUpperCase().concat("_CLIENT_ID"), value: `your_${p}_id_here` },
+  addToDotEnv(
+    [
       {
-        key: p.toUpperCase().concat("_CLIENT_SECRET"),
-        value: `your_${p}_secret_here`,
+        key: "NEXTAUTH_SECRET",
+        value: "your_super_secret_key_here",
+        customZodImplementation: `process.env.NODE_ENV === "production"
+        ? z.string().min(1)
+        : z.string().min(1).optional()`,
       },
-    ]),
-  ]);
+      {
+        key: "NEXTAUTH_URL",
+        value: "http://localhost:3000",
+        customZodImplementation: `z.preprocess(
+      // This makes Vercel deployments not fail if you don't set NEXTAUTH_URL
+      // Since NextAuth.js automatically uses the VERCEL_URL if present.
+      (str) => process.env.VERCEL_URL ?? str,
+      // VERCEL_URL doesn't include \`https\` so it cant be validated as a URL
+      process.env.VERCEL_URL ? z.string().min(1) : z.string().url()
+    )`,
+      },
+      ...providers.flatMap((p) => [
+        {
+          key: p.toUpperCase().concat("_CLIENT_ID"),
+          value: `your_${p}_id_here`,
+          // value: "",
+        },
+        {
+          key: p.toUpperCase().concat("_CLIENT_SECRET"),
+          value: `your_${p}_secret_here`,
+          // value: "",
+        },
+      ]),
+    ],
+    hasSrc ? "src/" : ""
+  );
 
   // 7. Install Packages: @auth/core @auth/drizzle-adapter next-auth
   await installPackages(

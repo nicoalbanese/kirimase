@@ -1,3 +1,4 @@
+import { consola } from "consola";
 import { AvailablePackage, PackageType } from "../../types.js";
 import { readConfigFile, replaceFile } from "../../utils.js";
 import fs from "fs";
@@ -48,6 +49,11 @@ export const addContextProviderToLayout = (
       break;
   }
 
+  // check if the provider already exists
+  if (fileContent.includes(importStatement)) {
+    consola.info(`Provider ${provider} already exists in layout.tsx`);
+    return;
+  }
   const modifiedImportContent = `${beforeImport}${importStatement}\n${afterImport}`;
 
   const newLayoutContent =

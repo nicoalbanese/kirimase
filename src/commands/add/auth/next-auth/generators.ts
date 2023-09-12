@@ -31,6 +31,7 @@ ${AuthDriver[orm].import}`
   }
 import { DefaultSession, NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth/next";
+import { env } from "@/lib/env.mjs"
 ${providersToUse
   .map(
     (provider) =>

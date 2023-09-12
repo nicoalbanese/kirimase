@@ -96,8 +96,8 @@ export const addDrizzle = async () => {
 
   // perhaps using push rather than migrate for sqlite?
   addScriptsToPackageJson(libPath, dbType, preferredPackageManager);
-  createDotEnv(databaseUrl, dbProvider === "planetscale");
-  updateTsConfigTarget();
+  createDotEnv(databaseUrl, dbProvider === "planetscale", hasSrc ? "src/" : "");
+  await updateTsConfigTarget();
 
   updateConfigFile({ driver: dbType, provider: dbProvider, orm: "drizzle" });
   await installDependencies(dbProvider, preferredPackageManager);

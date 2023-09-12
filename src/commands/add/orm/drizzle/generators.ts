@@ -26,7 +26,7 @@ export const createDrizzleConfig = (libPath: string, provider: DBProvider) => {
   createFile(
     "drizzle.config.ts",
     `import type { Config } from "drizzle-kit";
-import "dotenv/config";
+import { env } from "@/lib/env.mjs";
 
 export default {
   schema: "./${libPath}/db/schema",
@@ -35,8 +35,8 @@ export default {
   dbCredentials: {
     ${
       provider == "better-sqlite3"
-        ? "url: process.env.DATABASE_URL!"
-        : "connectionString: process.env.DATABASE_URL!"
+        ? "url: env.DATABASE_URL"
+        : "connectionString: env.DATABASE_URL"
     },
   }
 } satisfies Config;`
@@ -53,36 +53,36 @@ export const createIndexTs = (
     case "postgresjs":
       indexTS = `import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import "dotenv/config";
+import { env } from "@/lib/env.mjs";
 
-const client = postgres(process.env.DATABASE_URL!);
+const client = postgres(env.DATABASE_URL);
 export const db = drizzle(client);`;
       break;
     case "node-postgres":
       indexTS = `import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg"
-import "dotenv/config";
+import { env } from "@/lib/env.mjs";
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL!,
+  connectionString: env.DATABASE_URL,
 });
 export const db = drizzle(pool);`;
       break;
     case "neon":
       indexTS = `import { neon, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
-import "dotenv/config";
+import { env } from "@/lib/env.mjs";
 
 neonConfig.fetchConnectionCache = true;
  
-const sql = neon(process.env.DATABASE_URL!);
+const sql = neon(env.DATABASE_URL);
 export const db = drizzle(sql);
 `;
       break;
     case "vercel-pg":
       indexTS = `import { sql } from '@vercel/postgres';
 import { drizzle } from 'drizzle-orm/vercel-postgres';
-import "dotenv/config";
+import { env } from "@/lib/env.mjs";
  
 export const db = drizzle(sql)
 `;
@@ -90,9 +90,9 @@ export const db = drizzle(sql)
     case "supabase":
       indexTS = `import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
-import "dotenv/config";
+import { env } from "@/lib/env.mjs";
  
-const connectionString = process.env.DATABASE_URL!
+const connectionString = env.DATABASE_URL
 const client = postgres(connectionString)
 export const db = drizzle(client);
 `;
@@ -105,25 +105,25 @@ import "dotenv/config";
 
  
 const rdsClient = new RDSDataClient({
-  	credentials: fromIni({ profile: process.env['PROFILE'] }),
+  	credentials: fromIni({ profile: env['PROFILE'] }),
 		region: 'us-east-1',
 });
  
 export const db = drizzle(rdsClient, {
-  database: process.env['DATABASE']!,
-  secretArn: process.env['SECRET_ARN']!,
-  resourceArn: process.env['RESOURCE_ARN']!,
+  database: env['DATABASE']!,
+  secretArn: env['SECRET_ARN']!,
+  resourceArn: env['RESOURCE_ARN']!,
 });
 `;
       break;
     case "planetscale":
       indexTS = `import { drizzle } from "drizzle-orm/planetscale-serverless";
 import { connect } from "@planetscale/database";
-import "dotenv/config";
+import { env } from "@/lib/env.mjs";
  
 // create the connection
 const connection = connect({
-  url: process.env.DATABASE_URL!
+  url: env.DATABASE_URL
 });
  
 export const db = drizzle(connection);
@@ -132,9 +132,9 @@ export const db = drizzle(connection);
     case "mysql-2":
       indexTS = `import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import "dotenv/config";
+import { env } from "@/lib/env.mjs";
  
-const poolConnection = mysql.createPool(process.env.DATABASE_URL!);
+const poolConnection = mysql.createPool(env.DATABASE_URL);
  
 export const db = drizzle(poolConnection);
 `;
@@ -179,7 +179,7 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 `;
       connectionLogic = `
-const connection = postgres(process.env.DATABASE_URL, { max: 1 });
+const connection = postgres(env.DATABASE_URL, { max: 1 });
 
 const db = drizzle(connection);
 `;
@@ -193,7 +193,7 @@ import { Client } from "pg";
 `;
       connectionLogic = `
 const client = new Client({
-  connectionString: process.env.DATABASE_URL!,
+  connectionString: env.DATABASE_URL,
 });
 
 await client.connect();
@@ -210,7 +210,7 @@ import { neon, neonConfig } from '@neondatabase/serverless';
       connectionLogic = `
 neonConfig.fetchConnectionCache = true;
  
-const sql = neon(process.env.DATABASE_URL!);
+const sql = neon(env.DATABASE_URL);
 const db = drizzle(sql);
 `;
       break;
@@ -232,7 +232,7 @@ import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 `;
       connectionLogic = `
-  const connection = postgres(process.env.DATABASE_URL, { max: 1 });
+  const connection = postgres(env.DATABASE_URL, { max: 1 });
 
   const db = drizzle(connection);
 `;
@@ -266,7 +266,7 @@ import { migrate } from "drizzle-orm/planetscale-serverless/migrator";
 import { connect } from "@planetscale/database";
 `;
       connectionLogic = `
-const connection = connect({ url: process.env.DATABASE_URL! });
+const connection = connect({ url: env.DATABASE_URL });
  
 const db = drizzle(connection);
 `;
@@ -278,7 +278,7 @@ import { migrate } from "drizzle-orm/mysql2/migrator";
 import mysql from "mysql2/promise";
 `;
       connectionLogic = `
-  const connection = await mysql.createConnection(process.env.DATABASE_URL!);
+  const connection = await mysql.createConnection(env.DATABASE_URL);
 
   const db = drizzle(connection);
 `;
@@ -297,11 +297,11 @@ const db: BetterSQLite3Database = drizzle(sqlite);
     default:
       break;
   }
-  const template = `import "dotenv/config";
+  const template = `import { env } from "@/lib/env.mjs";
   ${imports}
 
 const runMigrate = async () => {
-  if (!process.env.DATABASE_URL) {
+  if (!env.DATABASE_URL) {
     throw new Error("DATABASE_URL is not defined");
   }
 
@@ -471,7 +471,7 @@ export const installDependencies = async (
   if (dbSpecificPackage) {
     await installPackages(
       {
-        regular: `drizzle-orm drizzle-zod zod ${dbSpecificPackage.regular}`,
+        regular: `drizzle-orm drizzle-zod @t3-oss/env-nextjs zod ${dbSpecificPackage.regular}`,
         dev: `drizzle-kit tsx dotenv ${dbSpecificPackage.dev}`,
       },
       preferredPackageManager
@@ -481,7 +481,8 @@ export const installDependencies = async (
 
 export const createDotEnv = (
   databaseUrl?: string,
-  usingPlanetscale: boolean = false
+  usingPlanetscale: boolean = false,
+  rootPath: string = ""
 ) => {
   const dburl =
     databaseUrl ?? "postgresql://postgres:postgres@localhost:5432/{DB_NAME}";
@@ -494,9 +495,20 @@ export const createDotEnv = (
         : ""
     }DATABASE_URL=${dburl}`
   );
+  createFile(`${rootPath}lib/env.mjs`, generateEnvMjs());
 };
 
-export const addToDotEnv = (items: { key: string; value: string }[]) => {
+export const addToDotEnv = (
+  items: {
+    key: string;
+    value: string;
+    isUrl?: boolean;
+    isOptional?: boolean;
+    customZodImplementation?: string;
+  }[],
+  rootPath: string
+) => {
+  // handling dotenv
   const envPath = path.resolve(".env");
   const envExists = fs.existsSync(envPath);
   const newData = items.map((item) => `${item.key}=${item.value}`).join("\n");
@@ -507,8 +519,34 @@ export const addToDotEnv = (items: { key: string; value: string }[]) => {
   } else {
     fs.writeFileSync(envPath, newData);
   }
+  // handling env.mjs
+  const envmjsfilePath = rootPath.concat("lib/env.mjs");
+  let envmjsfileContents = fs.readFileSync(envmjsfilePath, "utf-8");
+
+  const additionalItemsForEnvMjs = items
+    .map(
+      (item) =>
+        `    ${item.key}: ${
+          item.customZodImplementation ??
+          `z.string().${item.isUrl ? "url()" : "min(1)"}`
+        },`
+    )
+    .join("    \n");
+  // Construct the replacement string
+  const replacementStr = `  },\n  client: {\n`;
+
+  // Use regex to replace the content right before "client" object
+  const regex = /  },\n  client: {\n/s;
+  envmjsfileContents = envmjsfileContents.replace(
+    regex,
+    `${additionalItemsForEnvMjs}\n${replacementStr}`
+  );
+
+  // Write the updated contents back to the file
+  fs.writeFileSync(envmjsfilePath, envmjsfileContents);
 };
-export function updateTsConfigTarget() {
+
+export async function updateTsConfigTarget() {
   // Define the path to the tsconfig.json file
   const tsConfigPath = path.join(process.cwd(), "tsconfig.json");
 
@@ -626,3 +664,30 @@ export const deleteComputer = async (id: ComputerId) => {
   createFile(`${libPath}/api/computers/queries.ts`, query);
   createFile(`${libPath}/api/computers/mutations.ts`, mutation);
 }
+
+const generateEnvMjs = () => {
+  return `import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+
+export const env = createEnv({
+  server: {
+    NODE_ENV: z
+      .enum(["development", "test", "production"])
+      .default("development"),
+    DATABASE_URL: z.string().min(1),
+  },
+  client: {
+    // NEXT_PUBLIC_PUBLISHABLE_KEY: z.string().min(1),
+  },
+  // If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
+  // runtimeEnv: {
+  //   DATABASE_URL: process.env.DATABASE_URL,
+  //   NEXT_PUBLIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_PUBLISHABLE_KEY,
+  // },
+  // For Next.js >= 13.4.4, you only need to destructure client variables:
+  experimental__runtimeEnv: {
+    // NEXT_PUBLIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_PUBLISHABLE_KEY,
+  },
+});
+`;
+};

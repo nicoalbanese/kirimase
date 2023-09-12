@@ -3,6 +3,7 @@ import { DBType } from "../../../../types.js";
 import {
   addPackageToConfig,
   createFile,
+  createFolder,
   installPackages,
   readConfigFile,
   updateConfigFile,
@@ -53,13 +54,14 @@ export const addPrisma = async () => {
       generatePrismaSchema(dbType, usingPlanetscale)
     );
     updateConfigFile({ provider: "planetscale" });
+    createDotEnv(generateDbUrl(dbType), true, hasSrc ? "src/" : "");
   } else {
     // create prisma/schema.prisma (with db type)
     createFile(`prisma/schema.prisma`, generatePrismaSchema(dbType, false));
+    createDotEnv(generateDbUrl(dbType), false, hasSrc ? "src/" : "");
   }
 
   // create .env with database_url
-  createDotEnv(generateDbUrl(dbType));
 
   // generate prisma global instance
   createFile(`${rootPath}lib/db/index.ts`, generatePrismaDbInstance());
@@ -67,25 +69,38 @@ export const addPrisma = async () => {
   // update tsconfig with import alias for prisma types
   updateTsConfigPrismaTypeAlias();
 
-  // generate /lib/db/schema/computers.ts
-  createFile(
-    `${rootPath}lib/db/schema/computers.ts`,
-    generatePrismaComputerModel()
-  );
+  const includeExampleModel = await confirm({
+    message:
+      "Would you like to include an example model? (suggested for new users)",
+    default: true,
+  });
 
-  // generate /lib/api/computers/queries.ts && /lib/api/computers/mutations.ts
-  createFile(
-    `${rootPath}lib/api/computers/queries.ts`,
-    generatePrismaComputerQueries()
-  );
-  createFile(
-    `${rootPath}lib/api/computers/mutations.ts`,
-    generatePrismaComputerMutations()
-  );
+  // create all the files here
+
+  if (includeExampleModel) {
+    // generate /lib/db/schema/computers.ts
+    createFile(
+      `${rootPath}lib/db/schema/computers.ts`,
+      generatePrismaComputerModel()
+    );
+
+    // generate /lib/api/computers/queries.ts && /lib/api/computers/mutations.ts
+    createFile(
+      `${rootPath}lib/api/computers/queries.ts`,
+      generatePrismaComputerQueries()
+    );
+    createFile(
+      `${rootPath}lib/api/computers/mutations.ts`,
+      generatePrismaComputerMutations()
+    );
+  } else {
+    createFolder(`${hasSrc ? "src/" : ""}lib/db/schema`);
+    createFolder(`${hasSrc ? "src/" : ""}lib/api`);
+  }
 
   // install packages: regular: [] dev: [prisma, zod-prisma]
   await installPackages(
-    { regular: "zod", dev: "prisma zod-prisma" },
+    { regular: "zod @t3-oss/env-nextjs", dev: "prisma zod-prisma" },
     preferredPackageManager
   );
 
