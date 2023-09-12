@@ -5,6 +5,7 @@ import {
   createFolder,
   readConfigFile,
   updateConfigFile,
+  wrapInParenthesis,
 } from "../../../../utils.js";
 import {
   addScriptsToPackageJson,
@@ -38,7 +39,12 @@ export const addDrizzle = async () => {
       {
         name: "SQLite",
         value: "sqlite",
-        // disabled: wrapInParenthesis("SQLite is not yet supported"),
+        disabled:
+          preferredPackageManager === "bun"
+            ? wrapInParenthesis(
+                "Drizzle Kit doesn't support SQLite with Bun yet"
+              )
+            : false,
       },
     ],
   })) as DBType;
@@ -89,8 +95,8 @@ export const addDrizzle = async () => {
   createDrizzleConfig(libPath, dbProvider);
 
   // perhaps using push rather than migrate for sqlite?
-  addScriptsToPackageJson(libPath, dbType);
-  createDotEnv(databaseUrl);
+  addScriptsToPackageJson(libPath, dbType, preferredPackageManager);
+  createDotEnv(databaseUrl, dbProvider === "planetscale");
   updateTsConfigTarget();
 
   updateConfigFile({ driver: dbType, provider: dbProvider, orm: "drizzle" });

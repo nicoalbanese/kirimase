@@ -12,7 +12,7 @@ import {
 import { consola } from "consola";
 
 const program = new Command();
-program.name("kirimase").description("Kirimase CLI").version("0.0.11");
+program.name("kirimase").description("Kirimase CLI").version("0.0.13");
 
 program
   .command("init")

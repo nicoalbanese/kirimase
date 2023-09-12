@@ -21,7 +21,7 @@ export type DBProviderOptions = {
   mysql: DBProviderItem[];
   sqlite: DBProviderItem[];
 };
-export type PMType = "npm" | "yarn" | "pnpm"; // | "bun";
+export type PMType = "npm" | "yarn" | "pnpm" | "bun";
 
 // export type FieldType =
 //   | "id"

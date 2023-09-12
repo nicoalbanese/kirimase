@@ -408,7 +408,11 @@ export type ComputerId = z.infer<typeof computerIdSchema>["id"];`;
   createFile(path, finalDoc);
 };
 
-export const addScriptsToPackageJson = (libPath: string, driver: DBType) => {
+export const addScriptsToPackageJson = (
+  libPath: string,
+  driver: DBType,
+  preferredPackageManager: PMType
+) => {
   // Define the path to package.json
   const packageJsonPath = path.resolve("package.json");
 
@@ -420,7 +424,9 @@ export const addScriptsToPackageJson = (libPath: string, driver: DBType) => {
 
   const newItems = {
     "db:generate": `drizzle-kit generate:${driver}`,
-    "db:migrate": `tsx ${libPath}/db/migrate.ts`,
+    "db:migrate": `${
+      preferredPackageManager === "bun" ? "bun run" : "tsx"
+    } ${libPath}/db/migrate.ts`,
     "db:drop": `drizzle-kit drop`,
     "db:pull": `drizzle-kit introspect:${driver}`,
     ...(driver !== "pg" ? { "db:push": `drizzle-kit push:${driver}` } : {}),
@@ -473,11 +479,21 @@ export const installDependencies = async (
   }
 };
 
-export const createDotEnv = (databaseUrl?: string) => {
+export const createDotEnv = (
+  databaseUrl?: string,
+  usingPlanetscale: boolean = false
+) => {
   const dburl =
     databaseUrl ?? "postgresql://postgres:postgres@localhost:5432/{DB_NAME}";
 
-  createFile(".env", `DATABASE_URL=${dburl}`);
+  createFile(
+    ".env",
+    `${
+      usingPlanetscale
+        ? `# When using the PlanetScale driver, your connection string must end with ?ssl={"rejectUnauthorized":true} instead of ?sslaccept=strict.\n`
+        : ""
+    }DATABASE_URL=${dburl}`
+  );
 };
 
 export const addToDotEnv = (items: { key: string; value: string }[]) => {
