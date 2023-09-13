@@ -8,6 +8,8 @@ import { installShadcnUI } from "./misc/shadcn-ui/index.js";
 import { consola } from "consola";
 import { initProject } from "../init/index.js";
 import { addPrisma } from "./orm/prisma/index.js";
+import { AuthType, ORMType } from "../../types.js";
+import { addClerk } from "./auth/clerk/index.js";
 
 export const addPackage = async () => {
   const config = readConfigFile();
@@ -18,10 +20,10 @@ export const addPackage = async () => {
     const nullOption = { name: "None", value: null };
     // check if orm
     if (orm === undefined) {
-      const ormToInstall = await select({
+      const ormToInstall = (await select({
         message: "Select an ORM to use:",
         choices: [...Packages.orm, new Separator(), nullOption],
-      });
+      })) as ORMType | null;
 
       if (ormToInstall === "drizzle") await addDrizzle();
       if (ormToInstall === "prisma") await addPrisma();
@@ -30,12 +32,13 @@ export const addPackage = async () => {
     }
     // check if auth
     if (auth === undefined) {
-      const authToInstall = await select({
+      const authToInstall = (await select({
         message: "Select an authentication package to use:",
         choices: [...Packages.auth, new Separator(), nullOption],
-      });
+      })) as AuthType | null;
 
       if (authToInstall === "next-auth") await addNextAuth();
+      if (authToInstall === "clerk") await addClerk();
       if (authToInstall === null) updateConfigFile({ auth: null });
     }
 

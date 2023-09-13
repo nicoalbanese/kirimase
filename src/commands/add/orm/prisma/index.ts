@@ -22,6 +22,7 @@ import {
   updateTsConfigPrismaTypeAlias,
 } from "../utils.js";
 import { consola } from "consola";
+import { addToPrismaSchema } from "../../../generate/utils.js";
 
 export const addPrisma = async () => {
   const { preferredPackageManager, hasSrc } = readConfigFile();
@@ -78,6 +79,14 @@ export const addPrisma = async () => {
   // create all the files here
 
   if (includeExampleModel) {
+    addToPrismaSchema(
+      `model Computer {
+  id    String @id @default(cuid())
+  brand String
+  cores Int
+}`,
+      "Computer"
+    );
     // generate /lib/db/schema/computers.ts
     createFile(
       `${rootPath}lib/db/schema/computers.ts`,
@@ -105,7 +114,8 @@ export const addPrisma = async () => {
   );
 
   // run prisma generate
-  await prismaGenerate(preferredPackageManager);
+  if (includeExampleModel) await prismaGenerate(preferredPackageManager);
+
   addPackageToConfig("prisma");
   updateConfigFile({ orm: "prisma", driver: dbType });
 

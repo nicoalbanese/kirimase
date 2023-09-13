@@ -67,6 +67,8 @@ export function updateTsConfigPrismaTypeAlias() {
       "./prisma/zod/index",
     ];
 
+    tsConfig.compilerOptions.baseUrl = "./";
+
     // Convert the modified object back to a JSON string
     const updatedContent = JSON.stringify(tsConfig, null, 2); // 2 spaces indentation
 

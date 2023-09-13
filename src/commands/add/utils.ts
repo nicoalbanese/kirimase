@@ -14,7 +14,10 @@ export const Packages: {
     { name: "Drizzle", value: "drizzle" },
     { name: "Prisma", value: "prisma" },
   ],
-  auth: [{ name: "Auth.js (NextAuth)", value: "next-auth" }],
+  auth: [
+    { name: "Auth.js (NextAuth)", value: "next-auth" },
+    { name: "Clerk", value: "clerk" },
+  ],
   misc: [
     { name: "TRPC", value: "trpc" },
     { name: "Shadcn UI", value: "shadcn-ui" },
@@ -22,7 +25,11 @@ export const Packages: {
 };
 
 export const addContextProviderToLayout = (
-  provider: "NextAuthProvider" | "TrpcProvider" | "ShadcnToast"
+  provider:
+    | "NextAuthProvider"
+    | "TrpcProvider"
+    | "ShadcnToast"
+    | "ClerkProvider"
 ) => {
   const { hasSrc } = readConfigFile();
   const path = `${hasSrc ? "src/" : ""}app/layout.tsx`;
@@ -46,6 +53,9 @@ export const addContextProviderToLayout = (
       break;
     case "ShadcnToast":
       importStatement = `import { Toaster } from "@/components/ui/toaster";`;
+      break;
+    case "ClerkProvider":
+      importStatement = 'import { ClerkProvider } from "@clerk/nextjs";';
       break;
   }
 

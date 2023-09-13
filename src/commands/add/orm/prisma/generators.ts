@@ -29,11 +29,6 @@ datasource db {
   url      = ${dbType === "sqlite" ? '"file:./dev.db"' : 'env("DATABASE_URL")'}
 }
 
-model Computer {
-  id           String  @id @default(cuid())
-  brand        String
-  cores        Int
-}
 `;
 };
 

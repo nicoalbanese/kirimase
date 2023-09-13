@@ -61,10 +61,11 @@ export type AvailablePackage =
   | "trpc"
   | "next-auth"
   | "shadcn-ui"
-  | "prisma";
+  | "prisma"
+  | "clerk";
 export type PackageType = "orm" | "auth" | "misc";
 export type ORMType = "drizzle" | "prisma";
-export type AuthType = "next-auth";
+export type AuthType = "next-auth" | "clerk";
 
 export type Config = {
   hasSrc: boolean;
@@ -126,3 +127,12 @@ export type PrismaColumnType =
   | "DateTime"
   | "References";
 // | "Json";
+
+export type DotEnvItem = {
+  key: string;
+  value: string;
+  isUrl?: boolean;
+  isOptional?: boolean;
+  customZodImplementation?: string;
+  public?: boolean;
+};

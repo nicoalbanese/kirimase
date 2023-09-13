@@ -6,7 +6,7 @@ import {
   installPackages,
   readConfigFile,
 } from "../../../../utils.js";
-import { DBProvider, DBType, PMType } from "../../../../types.js";
+import { DBProvider, DBType, DotEnvItem, PMType } from "../../../../types.js";
 
 type ConfigDriver = "pg" | "turso" | "libsql" | "mysql" | "better-sqlite";
 
@@ -498,16 +498,7 @@ export const createDotEnv = (
   createFile(`${rootPath}lib/env.mjs`, generateEnvMjs());
 };
 
-export const addToDotEnv = (
-  items: {
-    key: string;
-    value: string;
-    isUrl?: boolean;
-    isOptional?: boolean;
-    customZodImplementation?: string;
-  }[],
-  rootPath: string
-) => {
+export const addToDotEnv = (items: DotEnvItem[], rootPath: string) => {
   // handling dotenv
   const envPath = path.resolve(".env");
   const envExists = fs.existsSync(envPath);
@@ -523,25 +514,40 @@ export const addToDotEnv = (
   const envmjsfilePath = rootPath.concat("lib/env.mjs");
   let envmjsfileContents = fs.readFileSync(envmjsfilePath, "utf-8");
 
-  const additionalItemsForEnvMjs = items
-    .map(
-      (item) =>
-        `    ${item.key}: ${
-          item.customZodImplementation ??
-          `z.string().${item.isUrl ? "url()" : "min(1)"}`
-        },`
-    )
-    .join("    \n");
-  // Construct the replacement string
-  const replacementStr = `  },\n  client: {\n`;
+  const formatItemForDotEnvMjs = (item: DotEnvItem) =>
+    `${item.key}: ${
+      item.customZodImplementation ??
+      `z.string().${item.isUrl ? "url()" : "min(1)"}`
+    },`;
 
-  // Use regex to replace the content right before "client" object
+  const formatPublicItemForRuntimeEnv = (item: DotEnvItem) =>
+    `${item.key}: process.env.${item.key},`;
+
+  const serverItems = items
+    .filter((item) => !item.public)
+    .map(formatItemForDotEnvMjs)
+    .join("\n    ");
+  const clientItems = items
+    .filter((item) => item.public)
+    .map(formatItemForDotEnvMjs)
+    .join("\n    ");
+  const runtimeEnvItems = items
+    .filter((item) => item.public)
+    .map(formatPublicItemForRuntimeEnv)
+    .join("\n    ");
+
+  // Construct the replacement string for both server and client sections
+  const replacementStr = `    ${serverItems}\n  },\n  client: {\n    ${clientItems}`;
+
+  // Replace content using the known pattern
   const regex = /  },\n  client: {\n/s;
-  envmjsfileContents = envmjsfileContents.replace(
-    regex,
-    `${additionalItemsForEnvMjs}\n${replacementStr}`
-  );
+  envmjsfileContents = envmjsfileContents.replace(regex, replacementStr);
 
+  const runtimeEnvRegex = /experimental__runtimeEnv: {\n/s;
+  envmjsfileContents = envmjsfileContents.replace(
+    runtimeEnvRegex,
+    `experimental__runtimeEnv: {\n    ${runtimeEnvItems}`
+  );
   // Write the updated contents back to the file
   fs.writeFileSync(envmjsfilePath, envmjsfileContents);
 };
@@ -564,6 +570,7 @@ export async function updateTsConfigTarget() {
 
     // Modify the target property
     tsConfig.compilerOptions.target = "esnext";
+    tsConfig.compilerOptions.baseUrl = "./";
 
     // Convert the modified object back to a JSON string
     const updatedContent = JSON.stringify(tsConfig, null, 2); // 2 spaces indentation
@@ -668,6 +675,7 @@ export const deleteComputer = async (id: ComputerId) => {
 const generateEnvMjs = () => {
   return `import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
+import "dotenv/config";
 
 export const env = createEnv({
   server: {
