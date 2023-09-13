@@ -202,7 +202,7 @@ export async function buildSchema() {
 
   const config = readConfigFile();
 
-  const { driver, hasSrc, packages, orm } = config;
+  const { driver, hasSrc, packages, orm, auth } = config;
 
   if (orm !== null) {
     provideInstructions();
@@ -211,7 +211,7 @@ export async function buildSchema() {
     const fields = await askForFields(orm, driver, tableName);
     const indexedField = await askForIndex(fields);
     let schema: Schema;
-    if (resourceType.includes("model") && packages.includes("next-auth")) {
+    if (resourceType.includes("model") && auth !== null) {
       const belongsToUser = await askIfBelongsToUser();
       schema = {
         tableName,

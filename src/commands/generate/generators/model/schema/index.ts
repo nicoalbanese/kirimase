@@ -1,4 +1,5 @@
 import {
+  AuthType,
   DBField,
   DBProvider,
   DBType,
@@ -57,6 +58,7 @@ const generateImportStatement = (
   orm: ORMType,
   schema: Schema,
   mappings: TypeMap,
+  authType: AuthType,
   dbType?: DBType,
   provider?: DBProvider
 ) => {
@@ -75,7 +77,7 @@ const generateImportStatement = (
       )} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
       referenceImports.length > 0 ? referenceImports.join("\n") : ""
     }${
-      belongsToUser && provider !== "planetscale"
+      belongsToUser && provider !== "planetscale" && authType === "next-auth"
         ? '\nimport { users } from "./auth";'
         : ""
     }
@@ -115,8 +117,12 @@ const generateIndex = (schema: Schema) => {
     : "";
 };
 
-const addUserReferenceIfBelongsToUser = (schema: Schema, mappings: TypeMap) => {
-  return schema.belongsToUser
+const addUserReferenceIfBelongsToUser = (
+  schema: Schema,
+  mappings: TypeMap,
+  authType: AuthType
+) => {
+  const value = schema.belongsToUser
     ? `,\n  userId: ${mappings.typeMappings["references"]({
         name: "user_id",
         references: "users",
@@ -124,6 +130,11 @@ const addUserReferenceIfBelongsToUser = (schema: Schema, mappings: TypeMap) => {
         referenceIdType: "string",
       }).concat(".notNull()")},`
     : "";
+  const valueIfClerk = value.replace(
+    `.references(() => users.id, { onDelete: "cascade" })`,
+    ""
+  );
+  return authType === "clerk" ? valueIfClerk : value;
 };
 
 const generateDrizzleSchema = (
@@ -131,7 +142,8 @@ const generateDrizzleSchema = (
   mappings: TypeMap,
   provider: DBProvider,
   dbType: DBType,
-  zodSchemas: string
+  zodSchemas: string,
+  authType: AuthType
 ) => {
   const { tableName, fields } = schema;
   const { tableNameCamelCase } = formatTableName(tableName);
@@ -140,6 +152,7 @@ const generateDrizzleSchema = (
     "drizzle",
     schema,
     mappings,
+    authType,
     dbType,
     provider
   );
@@ -151,7 +164,11 @@ const generateDrizzleSchema = (
     mappings.tableFunc
   }('${tableName}', {
   id: ${mappings.typeMappings["id"]({ name: "id" })},
-${userGeneratedFields}${addUserReferenceIfBelongsToUser(schema, mappings)}
+${userGeneratedFields}${addUserReferenceIfBelongsToUser(
+    schema,
+    mappings,
+    authType
+  )}
 }${indexFormatted});\n`;
 
   return `${importStatement}\n\n${drizzleSchemaContent}\n\n${zodSchemas}`;
@@ -198,7 +215,8 @@ const generatePrismaSchema = (
   schema: Schema,
   mappings: TypeMap,
   zodSchemas: string,
-  usingPlanetscale: boolean
+  usingPlanetscale: boolean,
+  authType: AuthType
 ) => {
   const { tableNameSingularCapitalised, tableNameCamelCase } = formatTableName(
     schema.tableName
@@ -231,13 +249,18 @@ const generatePrismaSchema = (
       `${tableNameCamelCase} ${tableNameSingularCapitalised}[]`
     );
   });
-  const importStatement = generateImportStatement("prisma", schema, mappings);
+  const importStatement = generateImportStatement(
+    "prisma",
+    schema,
+    mappings,
+    authType
+  );
 
   return `${importStatement}\n\n${zodSchemas}`;
 };
 
 export function generateModelContent(schema: Schema, dbType: DBType) {
-  const { provider, orm } = readConfigFile();
+  const { provider, orm, auth } = readConfigFile();
   const mappings = createOrmMappings()[orm][dbType];
   const zodSchemas = createZodSchemas(schema, orm);
 
@@ -247,7 +270,8 @@ export function generateModelContent(schema: Schema, dbType: DBType) {
       mappings,
       provider,
       dbType,
-      zodSchemas
+      zodSchemas,
+      auth
     );
   }
   if (orm === "prisma") {
@@ -255,7 +279,8 @@ export function generateModelContent(schema: Schema, dbType: DBType) {
       schema,
       mappings,
       zodSchemas,
-      provider === "planetscale"
+      provider === "planetscale",
+      auth
     );
   }
 }
