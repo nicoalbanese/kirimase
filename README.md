@@ -52,6 +52,11 @@ Initializes and configures the following packages for your Next.js project, cate
 - Generates a generic sign-in component for immediate use within your Next.js project.
 - Wraps the root layout with the auth provider and generates utilities for auth checks and redirects in your Next.js routes.
 
+#### Clerk
+
+- Generates files for [Clerk](https://github.com/clerkinc/javascript) including all necessary config.
+- Wraps the root layout with the auth provider and generates utilities for auth checks and redirects in your Next.js routes.
+
 _more auth packages coming soon..._
 
 ---
