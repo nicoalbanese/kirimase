@@ -55,11 +55,23 @@ export const addPrisma = async () => {
       generatePrismaSchema(dbType, usingPlanetscale)
     );
     updateConfigFile({ provider: "planetscale" });
-    createDotEnv(generateDbUrl(dbType), true, hasSrc ? "src/" : "");
+    createDotEnv(
+      "prisma",
+      preferredPackageManager,
+      generateDbUrl(dbType),
+      true,
+      hasSrc ? "src/" : ""
+    );
   } else {
     // create prisma/schema.prisma (with db type)
     createFile(`prisma/schema.prisma`, generatePrismaSchema(dbType, false));
-    createDotEnv(generateDbUrl(dbType), false, hasSrc ? "src/" : "");
+    createDotEnv(
+      "prisma",
+      preferredPackageManager,
+      generateDbUrl(dbType),
+      false,
+      hasSrc ? "src/" : ""
+    );
   }
 
   // create .env with database_url

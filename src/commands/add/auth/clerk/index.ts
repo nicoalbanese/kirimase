@@ -8,10 +8,12 @@
 
 import { consola } from "consola";
 import {
+  addPackageToConfig,
   createFile,
   installPackages,
   readConfigFile,
   replaceFile,
+  updateConfigFile,
 } from "../../../../utils.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import { addContextProviderToLayout } from "../../utils.js";
@@ -51,6 +53,8 @@ export const addClerk = async () => {
     { regular: "@clerk/nextjs", dev: "" },
     preferredPackageManager
   );
+  addPackageToConfig("clerk");
+  updateConfigFile({ auth: "clerk" });
   consola.success("Successfully added Clerk to your project!");
   consola.info(
     "Head over to https://dashboard.clerk.com/apps/new to create a new Clerk app"

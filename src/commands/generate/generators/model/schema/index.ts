@@ -231,15 +231,21 @@ const generatePrismaSchema = (
     .join("\n  ")}
   ${
     schema.belongsToUser
-      ? "userId String\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)"
+      ? `userId String${
+          authType === "clerk"
+            ? ""
+            : "\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)"
+        }`
       : ""
   }${generateIndexFields(schema, relations, usingPlanetscale)}
 }`;
   addToPrismaSchema(prismaSchemaContent, tableNameSingularCapitalised);
-  addToPrismaModel(
-    "User",
-    `${tableNameCamelCase} ${tableNameSingularCapitalised}[]`
-  );
+  if (authType !== "clerk")
+    addToPrismaModel(
+      "User",
+      `${tableNameCamelCase} ${tableNameSingularCapitalised}[]`
+    );
+
   relations.forEach((relation) => {
     const { references } = relation;
     const { tableNameSingularCapitalised: singularCapitalised } =

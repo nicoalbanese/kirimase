@@ -7,7 +7,7 @@ const generateMiddlewareTs = () => {
 export default authMiddleware({});
 
 export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ['/((?!.+\\\\\.[\\\\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
 };`;
 };
 const generateSignInPageTs = () => {
@@ -48,28 +48,26 @@ export default async function Home() {
 `;
 };
 const generateAuthUtilsTs = () => {
-  return `import { auth, currentUser } from "@clerk/nextjs/server";
+  return `import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 type AuthSession = {
   session: {
     user: {
       id: string;
-      name: string;
-      email: string;
+      name?: string;
+      email?: string;
     };
   } | null;
 };
 
 export const getUserAuth = async () => {
-  const user = await currentUser();
-  if (user) {
+  const { userId } = auth();
+  if (userId) {
     return {
       session: {
         user: {
-          id: user.id,
-          name: user.firstName?.concat(" ", user?.lastName ?? "") ?? "",
-          email: user.emailAddresses[0].emailAddress,
+          id: userId,
         },
       },
     } as AuthSession;

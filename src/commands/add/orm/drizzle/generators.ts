@@ -6,7 +6,13 @@ import {
   installPackages,
   readConfigFile,
 } from "../../../../utils.js";
-import { DBProvider, DBType, DotEnvItem, PMType } from "../../../../types.js";
+import {
+  DBProvider,
+  DBType,
+  DotEnvItem,
+  ORMType,
+  PMType,
+} from "../../../../types.js";
 
 type ConfigDriver = "pg" | "turso" | "libsql" | "mysql" | "better-sqlite";
 
@@ -480,6 +486,8 @@ export const installDependencies = async (
 };
 
 export const createDotEnv = (
+  orm: ORMType,
+  preferredPackageManager: PMType,
   databaseUrl?: string,
   usingPlanetscale: boolean = false,
   rootPath: string = ""
@@ -495,7 +503,10 @@ export const createDotEnv = (
         : ""
     }DATABASE_URL=${dburl}`
   );
-  createFile(`${rootPath}lib/env.mjs`, generateEnvMjs());
+  createFile(
+    `${rootPath}lib/env.mjs`,
+    generateEnvMjs(preferredPackageManager, orm)
+  );
 };
 
 export const addToDotEnv = (items: DotEnvItem[], rootPath: string) => {
@@ -672,10 +683,13 @@ export const deleteComputer = async (id: ComputerId) => {
   createFile(`${libPath}/api/computers/mutations.ts`, mutation);
 }
 
-const generateEnvMjs = () => {
+const generateEnvMjs = (preferredPackageManager: PMType, ormType: ORMType) => {
   return `import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
-import "dotenv/config";
+import { z } from "zod";${
+    preferredPackageManager !== "bun" && ormType === "drizzle"
+      ? '\nimport "dotenv/config";'
+      : ""
+  }
 
 export const env = createEnv({
   server: {

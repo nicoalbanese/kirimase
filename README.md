@@ -25,7 +25,11 @@ npm install -g kirimase
 
 <br />
 
+If you don't already have a Nextjs app, run create-next-app with your preferred package manager.
+
 # Commands
+
+Run these commands within the directory of your Nextjs app:
 
 ### 1. `kirimase add`
 
