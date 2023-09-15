@@ -498,8 +498,8 @@ export const createDotEnv = (
   createFile(
     ".env",
     `${
-      usingPlanetscale
-        ? `# When using the PlanetScale driver, your connection string must end with ?ssl={"rejectUnauthorized":true} instead of ?sslaccept=strict.\n`
+      orm === "drizzle" && usingPlanetscale
+        ? `# When using the PlanetScale driver with Drizzle, your connection string must end with ?ssl={"rejectUnauthorized":true} instead of ?sslaccept=strict.\n`
         : ""
     }DATABASE_URL=${dburl}`
   );

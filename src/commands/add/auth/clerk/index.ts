@@ -42,8 +42,14 @@ export const addClerk = async () => {
   );
   createFile(rootPath.concat("middleware.ts"), generateMiddlewareTs());
 
-  createFile(rootPath.concat("app/sign-in/page.tsx"), generateSignInPageTs());
-  createFile(rootPath.concat("app/sign-up/page.tsx"), generateSignUpPageTs());
+  createFile(
+    rootPath.concat("app/sign-in/[[...sign-in]]/page.tsx"),
+    generateSignInPageTs()
+  );
+  createFile(
+    rootPath.concat("app/sign-up/[[...sign-up]]/page.tsx"),
+    generateSignUpPageTs()
+  );
 
   replaceFile(rootPath.concat("app/page.tsx"), homePageWithUserButton());
 
