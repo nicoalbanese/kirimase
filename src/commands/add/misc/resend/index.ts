@@ -12,6 +12,7 @@ import { addToDotEnv } from "../../orm/drizzle/generators.js";
 export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   const {
     // packages: installedPackages,
+    orm,
     preferredPackageManager,
     rootPath,
   } = readConfigFile();
@@ -44,9 +45,15 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   createFile(rootPath.concat("lib/email/index.ts"), generateEmailIndexTs());
 
   // 6. Add items to .env
-  addToDotEnv([{ key: "RESEND_API_KEY", value: "" }], rootPath);
+  addToDotEnv([{ key: "RESEND_API_KEY", value: "" }], rootPath, true);
   // 7. Install packages (resend)
-  installPackages({ regular: "resend", dev: "" }, preferredPackageManager);
+  installPackages(
+    {
+      regular: `resend${orm === null ? " zod @t3-oss/env-nextjs" : ""}`,
+      dev: "",
+    },
+    preferredPackageManager
+  );
   addPackageToConfig("resend");
   consola.success("Resend successfully installed and configured.");
 };

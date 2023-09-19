@@ -495,21 +495,25 @@ export const createDotEnv = (
   const dburl =
     databaseUrl ?? "postgresql://postgres:postgres@localhost:5432/{DB_NAME}";
 
-  createFile(
-    ".env",
-    `${
-      orm === "drizzle" && usingPlanetscale
-        ? `# When using the PlanetScale driver with Drizzle, your connection string must end with ?ssl={"rejectUnauthorized":true} instead of ?sslaccept=strict.\n`
-        : ""
-    }DATABASE_URL=${dburl}`
-  );
-  createFile(
-    `${rootPath}lib/env.mjs`,
-    generateEnvMjs(preferredPackageManager, orm)
-  );
+  const envPath = path.resolve(".env");
+  const envExists = fs.existsSync(envPath);
+  if (!envExists)
+    createFile(
+      ".env",
+      `${
+        orm === "drizzle" && usingPlanetscale
+          ? `# When using the PlanetScale driver with Drizzle, your connection string must end with ?ssl={"rejectUnauthorized":true} instead of ?sslaccept=strict.\n`
+          : ""
+      }DATABASE_URL=${dburl}`
+    );
 };
 
-export const addToDotEnv = (items: DotEnvItem[], rootPath: string) => {
+export const addToDotEnv = (
+  items: DotEnvItem[],
+  rootPath: string,
+  excludeDbUrlIfBlank = false
+) => {
+  const { orm, preferredPackageManager } = readConfigFile();
   // handling dotenv
   const envPath = path.resolve(".env");
   const envExists = fs.existsSync(envPath);
@@ -523,6 +527,12 @@ export const addToDotEnv = (items: DotEnvItem[], rootPath: string) => {
   }
   // handling env.mjs
   const envmjsfilePath = rootPath.concat("lib/env.mjs");
+  const envMjsExists = fs.existsSync(envmjsfilePath);
+  if (!envMjsExists)
+    createFile(
+      `${rootPath}lib/env.mjs`,
+      generateEnvMjs(preferredPackageManager, orm, excludeDbUrlIfBlank)
+    );
   let envmjsfileContents = fs.readFileSync(envmjsfilePath, "utf-8");
 
   const formatItemForDotEnvMjs = (item: DotEnvItem) =>
@@ -683,7 +693,11 @@ export const deleteComputer = async (id: ComputerId) => {
   createFile(`${libPath}/api/computers/mutations.ts`, mutation);
 }
 
-const generateEnvMjs = (preferredPackageManager: PMType, ormType: ORMType) => {
+const generateEnvMjs = (
+  preferredPackageManager: PMType,
+  ormType: ORMType,
+  blank = false
+) => {
   return `import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";${
     preferredPackageManager !== "bun" && ormType === "drizzle"
@@ -696,7 +710,7 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    DATABASE_URL: z.string().min(1),
+    ${blank ? "// " : ""}DATABASE_URL: z.string().min(1),
   },
   client: {
     // NEXT_PUBLIC_PUBLISHABLE_KEY: z.string().min(1),
