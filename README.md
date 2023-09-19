@@ -78,6 +78,10 @@ _more auth packages coming soon..._
 - Initiates the [Shadcn-UI](https://github.com/shadcn-ui/ui) CLI designed for Next.js and installs button and toast components.
 - Inserts the toast-provider (`<Toaster />`) to the root layout for instant toast notifications in your Next.js app.
 
+#### Resend
+
+- Installs and configures [Resend](https://resend.com/)
+
 Kirimase also adds relevant keys to your `.env` which you'll need to provide values for.
 
 <br />
