@@ -10,6 +10,7 @@ import { initProject } from "../init/index.js";
 import { addPrisma } from "./orm/prisma/index.js";
 import { AuthType, ORMType } from "../../types.js";
 import { addClerk } from "./auth/clerk/index.js";
+import { addResend } from "./misc/resend/index.js";
 
 export const addPackage = async () => {
   const config = readConfigFile();
@@ -56,6 +57,8 @@ export const addPackage = async () => {
       if (packageToInstall.includes("trpc")) await addTrpc();
       if (packageToInstall.includes("shadcn-ui"))
         await installShadcnUI(packageToInstall);
+      if (packageToInstall.includes("resend"))
+        await addResend(packageToInstall);
     } else {
       consola.info("All available packages are already installed");
     }

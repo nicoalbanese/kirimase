@@ -62,10 +62,13 @@ export type AvailablePackage =
   | "next-auth"
   | "shadcn-ui"
   | "prisma"
-  | "clerk";
+  | "clerk"
+  | "resend";
+
 export type PackageType = "orm" | "auth" | "misc";
 export type ORMType = "drizzle" | "prisma";
 export type AuthType = "next-auth" | "clerk";
+export type MiscType = "shadcn-ui" | "trpc" | "resend";
 
 export type Config = {
   hasSrc: boolean;
