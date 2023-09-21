@@ -18,6 +18,8 @@ import {
   addLuciaToPrismaSchema,
 } from "./utils.js";
 
+import fs from "fs";
+
 export const addLucia = async () => {
   // get dbtype and provider
   const { orm, provider, preferredPackageManager, packages, rootPath, driver } =
@@ -115,6 +117,26 @@ export const addLucia = async () => {
       createFile(rootPath.concat("lib/db/schema/auth.ts"), schema);
     }
   }
+
+  // if using neon, add to db/index.ts
+  if (provider === "neon" && orm === "drizzle") {
+    const dbTsPath = rootPath.concat("lib/db/index.ts");
+    const dbTsExists = fs.existsSync(dbTsPath);
+    if (!dbTsExists) return;
+
+    const dbTsContents = fs.readFileSync(dbTsPath, {
+      encoding: "utf-8",
+    });
+    const contentsImportsUpdated = dbTsContents.replace(
+      "{ neon, neonConfig }",
+      "{ neon, neonConfig, Pool }"
+    );
+    const contentsWithPool = contentsImportsUpdated.concat(
+      "\nexport const pool = new Pool({ connectionString: env.DATABASE_URL });"
+    );
+    replaceFile(dbTsPath, contentsWithPool);
+  }
+
   // install packages (lucia, and adapter) will have to pull in specific package
   const adapterPackage =
     orm === "prisma"

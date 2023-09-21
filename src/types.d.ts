@@ -4,6 +4,11 @@ export type DBProviderItem = {
   value: string;
   disabled?: string | boolean;
 };
+export type PackageChoice = {
+  name: string;
+  value: AvailablePackage;
+  disabled?: string | boolean;
+};
 export type DBProvider =
   | "postgresjs"
   | "node-postgres"

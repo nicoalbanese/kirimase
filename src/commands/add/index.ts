@@ -8,7 +8,7 @@ import { installShadcnUI } from "./misc/shadcn-ui/index.js";
 import { consola } from "consola";
 import { initProject } from "../init/index.js";
 import { addPrisma } from "./orm/prisma/index.js";
-import { AuthType, ORMType } from "../../types.js";
+import { AuthType, ORMType, PackageChoice } from "../../types.js";
 import { addClerk } from "./auth/clerk/index.js";
 import { addResend } from "./misc/resend/index.js";
 import { addLucia } from "./auth/lucia/index.js";
@@ -18,7 +18,6 @@ export const addPackage = async () => {
 
   if (config) {
     const { packages, orm, auth } = config;
-    console.log(packages);
 
     const nullOption = { name: "None", value: null };
     // check if orm
@@ -47,10 +46,17 @@ export const addPackage = async () => {
     }
 
     // check if misc
-
-    const uninstalledPackages = Packages.misc.filter(
-      (p) => !packages.includes(p.value)
-    );
+    let uninstalledPackages: PackageChoice[] = [];
+    if (packages.length === 0) {
+      const { packages: packagesPostOrmAndAuth } = readConfigFile();
+      uninstalledPackages = Packages.misc.filter(
+        (p) => !packagesPostOrmAndAuth.includes(p.value)
+      );
+    } else {
+      uninstalledPackages = Packages.misc.filter(
+        (p) => !packages.includes(p.value)
+      );
+    }
     if (uninstalledPackages.length > 0) {
       const packageToInstall = await checkbox({
         message: "Select any miscellaneous packages to add:",
