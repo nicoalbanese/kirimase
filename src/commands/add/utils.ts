@@ -17,6 +17,7 @@ export const Packages: {
   auth: [
     { name: "Auth.js (NextAuth)", value: "next-auth" },
     { name: "Clerk", value: "clerk" },
+    { name: "Lucia", value: "lucia" },
   ],
   misc: [
     { name: "TRPC", value: "trpc" },

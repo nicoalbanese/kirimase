@@ -11,12 +11,14 @@ import { addPrisma } from "./orm/prisma/index.js";
 import { AuthType, ORMType } from "../../types.js";
 import { addClerk } from "./auth/clerk/index.js";
 import { addResend } from "./misc/resend/index.js";
+import { addLucia } from "./auth/lucia/index.js";
 
 export const addPackage = async () => {
   const config = readConfigFile();
 
   if (config) {
     const { packages, orm, auth } = config;
+    console.log(packages);
 
     const nullOption = { name: "None", value: null };
     // check if orm
@@ -40,6 +42,7 @@ export const addPackage = async () => {
 
       if (authToInstall === "next-auth") await addNextAuth();
       if (authToInstall === "clerk") await addClerk();
+      if (authToInstall === "lucia") await addLucia();
       if (authToInstall === null) updateConfigFile({ auth: null });
     }
 

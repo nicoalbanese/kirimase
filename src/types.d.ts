@@ -63,11 +63,12 @@ export type AvailablePackage =
   | "shadcn-ui"
   | "prisma"
   | "clerk"
-  | "resend";
+  | "resend"
+  | "lucia";
 
 export type PackageType = "orm" | "auth" | "misc";
 export type ORMType = "drizzle" | "prisma";
-export type AuthType = "next-auth" | "clerk";
+export type AuthType = "next-auth" | "clerk" | "lucia";
 export type MiscType = "shadcn-ui" | "trpc" | "resend";
 
 export type Config = {

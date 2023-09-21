@@ -61,7 +61,7 @@ export const createIndexTs = (
 import postgres from "postgres";
 import { env } from "@/lib/env.mjs";
 
-const client = postgres(env.DATABASE_URL);
+export const client = postgres(env.DATABASE_URL);
 export const db = drizzle(client);`;
       break;
     case "node-postgres":
@@ -69,7 +69,7 @@ export const db = drizzle(client);`;
 import { Pool } from "pg"
 import { env } from "@/lib/env.mjs";
 
-const pool = new Pool({
+export const pool = new Pool({
   connectionString: env.DATABASE_URL,
 });
 export const db = drizzle(pool);`;
@@ -81,7 +81,7 @@ import { env } from "@/lib/env.mjs";
 
 neonConfig.fetchConnectionCache = true;
  
-const sql = neon(env.DATABASE_URL);
+export const sql = neon(env.DATABASE_URL);
 export const db = drizzle(sql);
 `;
       break;
@@ -128,7 +128,7 @@ import { connect } from "@planetscale/database";
 import { env } from "@/lib/env.mjs";
  
 // create the connection
-const connection = connect({
+export const connection = connect({
   url: env.DATABASE_URL
 });
  
@@ -140,7 +140,7 @@ export const db = drizzle(connection);
 import mysql from "mysql2/promise";
 import { env } from "@/lib/env.mjs";
  
-const poolConnection = mysql.createPool(env.DATABASE_URL);
+export const poolConnection = mysql.createPool(env.DATABASE_URL);
  
 export const db = drizzle(poolConnection);
 `;
@@ -149,7 +149,7 @@ export const db = drizzle(poolConnection);
       indexTS = `import { drizzle, BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
  
-const sqlite = new Database('sqlite.db');
+export const sqlite = new Database('sqlite.db');
 export const db: BetterSQLite3Database = drizzle(sqlite);
 `;
       break;
@@ -505,6 +505,14 @@ export const createDotEnv = (
           ? `# When using the PlanetScale driver with Drizzle, your connection string must end with ?ssl={"rejectUnauthorized":true} instead of ?sslaccept=strict.\n`
           : ""
       }DATABASE_URL=${dburl}`
+    );
+
+  const envmjsfilePath = rootPath.concat("lib/env.mjs");
+  const envMjsExists = fs.existsSync(envmjsfilePath);
+  if (!envMjsExists)
+    createFile(
+      `${rootPath}lib/env.mjs`,
+      generateEnvMjs(preferredPackageManager, orm)
     );
 };
 
