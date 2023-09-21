@@ -61,7 +61,10 @@ Initializes and configures the following packages for your Next.js project, cate
 - Generates files for [Clerk](https://github.com/clerkinc/javascript) including all necessary config.
 - Wraps the root layout with the auth provider and generates utilities for auth checks and redirects in your Next.js routes.
 
-_more auth packages coming soon..._
+#### Lucia
+
+- Generates files for [Lucia](https://github.com/lucia-auth/lucia) including all necessary config.
+- Generates UI and API routes for sign-in and sign-up
 
 ---
 
