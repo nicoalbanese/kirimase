@@ -43,7 +43,7 @@ export default {
       provider == "better-sqlite3"
         ? "url: env.DATABASE_URL"
         : "connectionString: env.DATABASE_URL"
-    },
+    }${provider === "vercel-pg" ? '.concat("?sslmode=require")' : ""},
   }
 } satisfies Config;`
   );
@@ -477,7 +477,7 @@ export const installDependencies = async (
   if (dbSpecificPackage) {
     await installPackages(
       {
-        regular: `drizzle-orm drizzle-zod @t3-oss/env-nextjs zod ${dbSpecificPackage.regular}`,
+        regular: `drizzle-orm drizzle-zod @t3-oss/env-nextjs zod@3.21.4 ${dbSpecificPackage.regular}`,
         dev: `drizzle-kit tsx dotenv ${dbSpecificPackage.dev}`,
       },
       preferredPackageManager

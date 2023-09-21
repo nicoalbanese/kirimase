@@ -9,6 +9,7 @@ import {
 } from "../../../../utils.js";
 import {
   addScriptsToPackageJson,
+  addToDotEnv,
   createDotEnv,
   createDrizzleConfig,
   createIndexTs,
@@ -21,7 +22,7 @@ import {
 import { DBProviders } from "../../../init/utils.js";
 
 export const addDrizzle = async () => {
-  const { preferredPackageManager, hasSrc } = readConfigFile();
+  const { preferredPackageManager, hasSrc, rootPath } = readConfigFile();
 
   let libPath = "";
   hasSrc ? (libPath = "src/lib") : (libPath = "lib");
@@ -103,6 +104,18 @@ export const addDrizzle = async () => {
     dbProvider === "planetscale",
     hasSrc ? "src/" : ""
   );
+  if (dbProvider === "vercel-pg")
+    addToDotEnv(
+      [
+        { key: "POSTGRES_URL", value: "" },
+        { key: "POSTGRES_URL_NON_POOLING", value: "" },
+        { key: "POSTGRES_USER", value: "" },
+        { key: "POSTGRES_HOST", value: "" },
+        { key: "POSTGRES_PASSWORD", value: "" },
+        { key: "POSTGRES_DATABASE", value: "" },
+      ],
+      rootPath
+    );
   await updateTsConfigTarget();
 
   updateConfigFile({ driver: dbType, provider: dbProvider, orm: "drizzle" });

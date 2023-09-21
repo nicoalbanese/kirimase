@@ -283,6 +283,7 @@ export function getCurrentSchemas() {
         "VerificationToken",
         "Account",
         "",
+        "Key",
       ];
       const schemaNames = schemaContents
         .split("\n")

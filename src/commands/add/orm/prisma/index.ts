@@ -121,7 +121,7 @@ export const addPrisma = async () => {
 
   // install packages: regular: [] dev: [prisma, zod-prisma]
   await installPackages(
-    { regular: "zod @t3-oss/env-nextjs", dev: "prisma zod-prisma" },
+    { regular: "zod@3.21.4 @t3-oss/env-nextjs", dev: "prisma zod-prisma" },
     preferredPackageManager
   );
 

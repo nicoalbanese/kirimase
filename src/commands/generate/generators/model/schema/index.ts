@@ -77,7 +77,7 @@ const generateImportStatement = (
       )} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
       referenceImports.length > 0 ? referenceImports.join("\n") : ""
     }${
-      belongsToUser && provider !== "planetscale" && authType === "next-auth"
+      belongsToUser && provider !== "planetscale" && authType !== "clerk"
         ? '\nimport { users } from "./auth";'
         : ""
     }

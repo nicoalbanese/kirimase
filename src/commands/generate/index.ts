@@ -10,7 +10,11 @@ import {
 import { Choice } from "@inquirer/checkbox";
 import { createOrmMappings } from "./generators/model/utils.js";
 import { scaffoldAPIRoute } from "./generators/apiRoute.js";
-import { readConfigFile, updateConfigFileAfterUpdate } from "../../utils.js";
+import {
+  readConfigFile,
+  runCommand,
+  updateConfigFileAfterUpdate,
+} from "../../utils.js";
 import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
 import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
@@ -202,7 +206,8 @@ export async function buildSchema() {
 
   const config = readConfigFile();
 
-  const { driver, hasSrc, packages, orm, auth } = config;
+  const { driver, hasSrc, packages, orm, auth, preferredPackageManager } =
+    config;
 
   if (orm !== null) {
     provideInstructions();

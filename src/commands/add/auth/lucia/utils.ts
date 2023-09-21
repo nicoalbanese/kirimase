@@ -108,7 +108,7 @@ export const DrizzleAdapterDriverMappings: {
 export const DrizzleLuciaSchema: { [k in DBType]: string } = {
   pg: `import { pgTable, bigint, varchar } from "drizzle-orm/pg-core";
 
-export const user = pgTable("auth_user", {
+export const users = pgTable("auth_user", {
 	id: varchar("id", {
 		length: 15 // change this when using custom user ids
 	}).primaryKey(),
@@ -118,7 +118,7 @@ export const user = pgTable("auth_user", {
 	username: varchar("username", { length: 255 }),
 });
 
-export const session = pgTable("user_session", {
+export const sessions = pgTable("user_session", {
 	id: varchar("id", {
 		length: 128
 	}).primaryKey(),
@@ -126,7 +126,7 @@ export const session = pgTable("user_session", {
 		length: 15
 	})
 		.notNull()
-		.references(() => user.id),
+		.references(() => users.id),
 	activeExpires: bigint("active_expires", {
 		mode: "number"
 	}).notNull(),
@@ -135,7 +135,7 @@ export const session = pgTable("user_session", {
 	}).notNull()
 });
 
-export const key = pgTable("user_key", {
+export const keys = pgTable("user_key", {
 	id: varchar("id", {
 		length: 255
 	}).primaryKey(),
@@ -143,14 +143,14 @@ export const key = pgTable("user_key", {
 		length: 15
 	})
 		.notNull()
-		.references(() => user.id),
+		.references(() => users.id),
 	hashedPassword: varchar("hashed_password", {
 		length: 255
 	})
 });`,
   mysql: `import { mysqlTable, bigint, varchar } from "drizzle-orm/mysql-core";
 
-export const user = mysqlTable("auth_user", {
+export const users = mysqlTable("auth_user", {
 	id: varchar("id", {
 		length: 15 // change this when using custom user ids
 	}).primaryKey(),
@@ -160,7 +160,7 @@ export const user = mysqlTable("auth_user", {
 	username: varchar("username", { length: 255 }),
 });
 
-export const key = mysqlTable("user_key", {
+export const keys = mysqlTable("user_key", {
 	id: varchar("id", {
 		length: 255
 	}).primaryKey(),
@@ -168,13 +168,13 @@ export const key = mysqlTable("user_key", {
 		length: 15
 	})
 		.notNull()
-		.references(() => user.id),
+		.references(() => users.id),
 	hashedPassword: varchar("hashed_password", {
 		length: 255
 	})
 });
 
-export const session = mysqlTable("user_session", {
+export const sessions = mysqlTable("user_session", {
 	id: varchar("id", {
 		length: 128
 	}).primaryKey(),
@@ -182,7 +182,7 @@ export const session = mysqlTable("user_session", {
 		length: 15
 	})
 		.notNull()
-		.references(() => user.id),
+		.references(() => users.id),
 	activeExpires: bigint("active_expires", {
 		mode: "number"
 	}).notNull(),
@@ -192,7 +192,7 @@ export const session = mysqlTable("user_session", {
 });`,
   sqlite: `import { sqliteTable, text, blob } from "drizzle-orm/sqlite-core";
 
-export const user = sqliteTable("user", {
+export const users = sqliteTable("user", {
 	id: text("id").primaryKey(),
 	// other user attributes
 	name: text("name"),
@@ -200,11 +200,11 @@ export const user = sqliteTable("user", {
 	username: text("username"),
 });
 
-export const session = sqliteTable("user_session", {
+export const sessions = sqliteTable("user_session", {
 	id: text("id").primaryKey(),
 	userId: text("user_id")
 		.notNull()
-		.references(() => user.id),
+		.references(() => users.id),
 	activeExpires: blob("active_expires", {
 		mode: "bigint"
 	}).notNull(),
@@ -213,11 +213,11 @@ export const session = sqliteTable("user_session", {
 	}).notNull()
 });
 
-export const key = sqliteTable("user_key", {
+export const keys = sqliteTable("user_key", {
 	id: text("id").primaryKey(),
 	userId: text("user_id")
 		.notNull()
-		.references(() => user.id),
+		.references(() => users.id),
 	hashedPassword: text("hashed_password")
 });`,
 };

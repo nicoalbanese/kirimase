@@ -49,7 +49,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   // 7. Install packages (resend)
   installPackages(
     {
-      regular: `resend${orm === null ? " zod @t3-oss/env-nextjs" : ""}`,
+      regular: `resend${orm === null ? " zod@3.21.4 @t3-oss/env-nextjs" : ""}`,
       dev: "",
     },
     preferredPackageManager
