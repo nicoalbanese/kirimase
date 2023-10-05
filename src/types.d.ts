@@ -145,3 +145,12 @@ export type DotEnvItem = {
   customZodImplementation?: string;
   public?: boolean;
 };
+
+export type InitOptions = {
+  srcFolder?: boolean;
+  packageManager?: PMType;
+  orm?: ORMType;
+  db?: DBType;
+  auth?: AuthType;
+  includeExample?: boolean;
+}

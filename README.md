@@ -115,6 +115,24 @@ Kirimase generates:
 
 - Scaffolds views using Shadcn-UI to enable immediate CRUD operations (including select fields for adding relations and datepickers for dates).
 
+## Run in non-interactive mode
+
+You can run Kirimase entirely via the command line as follows:
+
+```sh
+kirimase init -sf -pm pnpm -o prisma -db postgres -a next-auth -ie      
+```
+
+| Command | Short Flag | Long Option            | Description                               | Argument   |
+|---------|------------|------------------------|-------------------------------------------|------------|
+| init    | -          | -                      | initialise and configure kirimase within directory | -          |
+| -       | -sf        | --src-folder           | use a src folder                          | -          |
+| -       | -pm        | --package-manager      | preferred package manager                 | `<pm>`     |
+| -       | -o         | --orm                  | preferred orm                             | `<orm>`    |
+| -       | -db        | --db                   | preferred database                        | `<db>`     |
+| -       | -a         | --auth                 | preferred auth                            | `<auth>`   |
+| -       | -ie        | --include-example      | include example                           | -          |
+
 ## Contributing
 
 Keen on enhancing Kirimase? Contributions, bug reports, and feature requests are always welcome. Feel free to open an issue or submit a pull request.
