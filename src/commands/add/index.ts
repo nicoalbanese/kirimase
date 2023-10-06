@@ -13,7 +13,7 @@ import { addClerk } from "./auth/clerk/index.js";
 import { addResend } from "./misc/resend/index.js";
 import { addLucia } from "./auth/lucia/index.js";
 
-export const addPackage = async (initOptions?: InitOptions) => {
+export const addPackage = async (options?: InitOptions) => {
   const config = readConfigFile();
 
   if (config) {
@@ -22,24 +22,24 @@ export const addPackage = async (initOptions?: InitOptions) => {
     const nullOption = { name: "None", value: null };
     // check if orm
     if (orm === undefined) {
-      const ormToInstall = initOptions?.orm || (await select({
+      const ormToInstall = options?.orm || (await select({
         message: "Select an ORM to use:",
         choices: [...Packages.orm, new Separator(), nullOption],
       })) as ORMType | null;
 
-      if (ormToInstall === "drizzle") await addDrizzle(initOptions);
-      if (ormToInstall === "prisma") await addPrisma(initOptions);
+      if (ormToInstall === "drizzle") await addDrizzle(options);
+      if (ormToInstall === "prisma") await addPrisma(options);
       if (ormToInstall === null)
         updateConfigFile({ orm: null, driver: null, provider: null });
     }
     // check if auth
     if (auth === undefined) {
-      const authToInstall = initOptions?.auth || (await select({
+      const authToInstall = options?.auth || (await select({
         message: "Select an authentication package to use:",
         choices: [...Packages.auth, new Separator(), nullOption],
       })) as AuthType | null;
 
-      if (authToInstall === "next-auth") await addNextAuth(initOptions);
+      if (authToInstall === "next-auth") await addNextAuth(options);
       if (authToInstall === "clerk") await addClerk();
       if (authToInstall === "lucia") await addLucia();
       if (authToInstall === null) updateConfigFile({ auth: null });
@@ -58,7 +58,7 @@ export const addPackage = async (initOptions?: InitOptions) => {
       );
     }
     if (uninstalledPackages.length > 0) {
-      const packageToInstall = initOptions?.packages || await checkbox({
+      const packageToInstall = options?.packages || await checkbox({
         message: "Select any miscellaneous packages to add:",
         choices: uninstalledPackages,
       });
@@ -73,6 +73,6 @@ export const addPackage = async (initOptions?: InitOptions) => {
     }
   } else {
     consola.warn("No config file found, initializing project...");
-    initProject(initOptions);
+    initProject(options);
   }
 };
