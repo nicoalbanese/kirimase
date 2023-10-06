@@ -16,7 +16,7 @@ import { addPackage } from "../add/index.js";
 
 export async function initProject(options?: InitOptions) {
   const srcExists = typeof options?.hasSrcFolder === 'string' ?
-    options.hasSrcFolder === 'true' :
+    options.hasSrcFolder === 'yes' :
     await select({
       message: "Are you using a 'src' folder?",
       choices: [

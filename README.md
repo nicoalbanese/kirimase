@@ -120,7 +120,7 @@ Kirimase generates:
 You can run Kirimase entirely via the command line as follows:
 
 ```sh
-kirimase init -sf -pm pnpm --orm prisma -db pg -a next-auth -ap github discord -ie
+kirimase init -sf yes -pm pnpm --orm prisma -db pg -a next-auth -ap github discord -ie yes
 ```
 
 | Command | Short Flag | Long Option            | Description                               | Argument   |

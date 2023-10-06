@@ -82,8 +82,8 @@ export const addPrisma = async (initOptions: InitOptions) => {
   // update tsconfig with import alias for prisma types
   updateTsConfigPrismaTypeAlias();
 
-  const includeExampleModel = typeof initOptions.includeExample === 'boolean' ?
-    initOptions.includeExample :
+  const includeExampleModel = typeof initOptions.includeExample === 'string' ?
+    initOptions.includeExample === 'yes' :
     await confirm({
       message:
         "Would you like to include an example model? (suggested for new users)",

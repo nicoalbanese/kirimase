@@ -12,13 +12,13 @@ program.name("kirimase").description("Kirimase CLI").version("0.0.17");
 program
   .command("init")
   .description("initialise and configure kirimase within directory")
-  .option("-sf, --has-src-folder <has-source-folder>", "use a src folder")
+  .option("-sf, --has-src-folder <has>", "has a src folder")
   .option("-pm, --package-manager <pm>", "preferred package manager")
   .option("-o, --orm <orm>", "preferred orm")
   .option("-db, --db <db>", "preferred database")
   .option("-a, --auth <auth>", "preferred auth")
   .option("-ap, --auth-providers <auth-providers>", "auth providers")
-  .option("-ie, --include-example", "include example")
+  .option("-ie, --include-example <include>", "include example")
   .action(initProject);
 
 program

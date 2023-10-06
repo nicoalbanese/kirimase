@@ -74,8 +74,8 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
   if (dbProvider === "neon")
     databaseUrl = databaseUrl.concat("?sslmode=require");
 
-  const includeExampleModel = typeof initOptions.includeExample === 'boolean' ?
-    initOptions.includeExample :
+  const includeExampleModel = typeof initOptions?.includeExample === 'string' ?
+    initOptions.includeExample === 'yes' :
     await confirm({
       message:
         "Would you like to include an example model? (suggested for new users)",
