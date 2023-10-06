@@ -90,6 +90,17 @@ export type Config = {
 
 export type UpdateConfig = Partial<Config>;
 
+export type InitOptions = {
+  hasSrcFolder?: 'yes' | 'no';
+  packageManager?: PMType;
+  orm?: ORMType;
+  db?: DBType;
+  auth?: AuthType;
+  authProviders?: AuthProvider[];
+  packages?: AvailablePackage[];
+  includeExample?: 'yes' | 'no';
+}
+
 export type ScaffoldSchema = {
   tableName: string;
   fields: DBField[];
@@ -147,14 +158,3 @@ export type DotEnvItem = {
   customZodImplementation?: string;
   public?: boolean;
 };
-
-export type InitOptions = {
-  hasSrcFolder?: boolean;
-  packageManager?: PMType;
-  orm?: ORMType;
-  db?: DBType;
-  auth?: AuthType;
-  authProviders?: AuthProvider[];
-  packages?: AvailablePackage[];
-  includeExample?: boolean;
-}
