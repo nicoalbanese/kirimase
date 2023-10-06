@@ -15,8 +15,8 @@ import { consola } from "consola";
 import { addPackage } from "../add/index.js";
 
 export async function initProject(options?: InitOptions) {
-  const srcExists = typeof options.srcFolder === 'boolean' ?
-    options.srcFolder :
+  const srcExists = typeof options?.hasSrcFolder === 'string' ?
+    options.hasSrcFolder === 'true' :
     await select({
       message: "Are you using a 'src' folder?",
       choices: [
@@ -25,7 +25,7 @@ export async function initProject(options?: InitOptions) {
       ],
     });
 
-  const preferredPackageManager = options.packageManager || (await select({
+  const preferredPackageManager = options?.packageManager || (await select({
     message: "Please pick your preferred package manager",
     choices: [
       { name: "NPM", value: "npm" },

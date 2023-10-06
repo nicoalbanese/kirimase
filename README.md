@@ -120,17 +120,17 @@ Kirimase generates:
 You can run Kirimase entirely via the command line as follows:
 
 ```sh
-kirimase init -sf -pm pnpm -o prisma -db postgres -a next-auth -ie      
+kirimase init -sf -pm pnpm --orm prisma -db pg -a next-auth -ap github discord -ie
 ```
 
 | Command | Short Flag | Long Option            | Description                               | Argument   |
 |---------|------------|------------------------|-------------------------------------------|------------|
-| init    | -          | -                      | initialise and configure kirimase within directory | -          |
+| init    | -          | -                      | initialise and configure kirimase         | -          |
 | -       | -sf        | --src-folder           | use a src folder                          | -          |
-| -       | -pm        | --package-manager      | preferred package manager                 | `<pm>`     |
-| -       | -o         | --orm                  | preferred orm                             | `<orm>`    |
-| -       | -db        | --db                   | preferred database                        | `<db>`     |
-| -       | -a         | --auth                 | preferred auth                            | `<auth>`   |
+| -       | -pm        | --package-manager      | package manager                           | `<pm>`     |
+| -       | -o         | --orm                  | orm                                       | `<orm>`    |
+| -       | -db        | --db                   | database ("pg" | "mysql" | "sqlite")      | `<db>`     |
+| -       | -a         | --auth                 | auth                                      | `<auth>`   |
 | -       | -ie        | --include-example      | include example                           | -          |
 
 ## Contributing

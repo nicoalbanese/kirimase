@@ -39,7 +39,7 @@ export const addPackage = async (initOptions?: InitOptions) => {
         choices: [...Packages.auth, new Separator(), nullOption],
       })) as AuthType | null;
 
-      if (authToInstall === "next-auth") await addNextAuth();
+      if (authToInstall === "next-auth") await addNextAuth(initOptions);
       if (authToInstall === "clerk") await addClerk();
       if (authToInstall === "lucia") await addLucia();
       if (authToInstall === null) updateConfigFile({ auth: null });

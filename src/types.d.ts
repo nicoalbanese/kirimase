@@ -1,3 +1,5 @@
+import { AuthProvider } from "./commands/add/auth/next-auth/utils.ts";
+
 export type DBType = "pg" | "mysql" | "sqlite";
 export type DBProviderItem = {
   name: string;
@@ -147,10 +149,11 @@ export type DotEnvItem = {
 };
 
 export type InitOptions = {
-  srcFolder?: boolean;
+  hasSrcFolder?: boolean;
   packageManager?: PMType;
   orm?: ORMType;
   db?: DBType;
   auth?: AuthType;
+  authProviders?: AuthProvider[];
   includeExample?: boolean;
 }
