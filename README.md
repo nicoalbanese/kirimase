@@ -123,15 +123,16 @@ You can run Kirimase entirely via the command line as follows:
 kirimase init -sf yes -pm pnpm --orm prisma -db pg -a next-auth -ap github discord -ie yes
 ```
 
-| Command | Short Flag | Long Option            | Description                               | Argument   |
-|---------|------------|------------------------|-------------------------------------------|------------|
-| init    | -          | -                      | initialise and configure kirimase         | -          |
-| -       | -sf        | --src-folder           | use a src folder                          | -          |
-| -       | -pm        | --package-manager      | package manager                           | `<pm>`     |
-| -       | -o         | --orm                  | orm                                       | `<orm>`    |
-| -       | -db        | --db                   | database ("pg" | "mysql" | "sqlite")      | `<db>`     |
-| -       | -a         | --auth                 | auth                                      | `<auth>`   |
-| -       | -ie        | --include-example      | include example                           | -          |
+| Command | Short Flag | Long Option            | Description                               | Argument      |
+|---------|------------|------------------------|-------------------------------------------|---------------|
+| init    | -          | -                      | initialise and configure kirimase         | -             |
+| -       | -sf        | --src-folder           | use a src folder                          | `yes` or `no` |
+| -       | -pm        | --package-manager      | package manager                           | `<pm>`        |
+| -       | -o         | --orm                  | orm                                       | `<orm>`       |
+| -       | -db        | --db                   | database ("pg" | "mysql" | "sqlite")      | `<db>`        |
+| -       | -a         | --auth                 | auth                                      | `<auth>`      |
+| -       | -ap        | --auth-providers       | auth-providers                            | `<providers>` |
+| -       | -ie        | --include-example      | include example                           | `yes` or `no` |
 
 ## Contributing
 

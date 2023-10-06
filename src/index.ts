@@ -17,7 +17,7 @@ program
   .option("-o, --orm <orm>", "preferred orm")
   .option("-db, --db <db>", "preferred database")
   .option("-a, --auth <auth>", "preferred auth")
-  .option("-ap, --auth-providers <auth-providers>", "auth providers")
+  .option("-ap, --auth-providers <auth-providers...>", "auth providers")
   .option("-ie, --include-example <include>", "include example")
   .action(initProject);
 
