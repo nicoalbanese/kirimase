@@ -121,6 +121,7 @@ You can run Kirimase entirely via the command line as follows:
 
 ```sh
 kirimase init -sf no -pm pnpm --orm prisma -db pg -a next-auth -ap github discord -p trpc shadcn-ui resend -ie yes
+kirimase generate -r model api_route -t blog -b yes -f "title:String::yes:yes" -f "content:String::yes:yes" -i title -m yes
 ```
 
 | Command | Short Flag | Long Option       | Description                              | Argument      |

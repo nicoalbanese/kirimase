@@ -91,15 +91,24 @@ export type Config = {
 export type UpdateConfig = Partial<Config>;
 
 export type InitOptions = {
-  hasSrcFolder?: 'yes' | 'no';
+  hasSrcFolder?: "yes" | "no";
   packageManager?: PMType;
   orm?: ORMType;
   db?: DBType;
   auth?: AuthType;
   authProviders?: AuthProvider[];
   packages?: AvailablePackage[];
-  includeExample?: 'yes' | 'no';
-}
+  includeExample?: "yes" | "no";
+};
+
+export type BuildOptions = {
+  resources?: ("model" | "api_route" | "trpc_route" | "views_and_components")[];
+  table?: string
+  belongsToUser?: 'yes' | 'no'
+  index?: string
+  field?: DBField[]
+  migrate?: 'yes' | 'no'
+};
 
 export type ScaffoldSchema = {
   tableName: string;

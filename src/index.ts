@@ -5,6 +5,7 @@ import { initProject } from "./commands/init/index.js";
 import { buildSchema } from "./commands/generate/index.js";
 import { addPackage } from "./commands/add/index.js";
 import { updateConfigFileAfterUpdate } from "./utils.js";
+import { ColumnType, DBField } from "./types.js";
 
 const program = new Command();
 program.name("kirimase").description("Kirimase CLI").version("0.0.17");
@@ -16,6 +17,28 @@ addCommonOptions(program.command("init"))
 program
   .command("generate")
   .description("Generate a new resource")
+  .option("-r, --resources <resources...>", "resources")
+  .option("-t, --table <table>", "table")
+  .option("-b, --belongs-to-user <belongs-to-user>", "belongs to user")
+  .option("-i, --index <index>", "index")
+  .option("-m, --migrate <migrate>", "migrate")
+  .option(
+    "-f, --field <field>",
+    "fields. Format: name:type:references:not-null:cascade. Example: blog:string::true:true",
+    (value, previous) => {
+      const [name, type, references, notNull, cascade] = value.split(":");
+      const field: DBField = {
+        name,
+        type: type as ColumnType,
+        references,
+        notNull: notNull === "true",
+        cascade: cascade === "true",
+      };
+      previous.push(field);
+      return previous;
+    },
+    []
+  )
   .action(buildSchema);
 
 addCommonOptions(program.command("add"))
