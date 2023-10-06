@@ -24,11 +24,11 @@ import {
 import { consola } from "consola";
 import { addToPrismaSchema } from "../../../generate/utils.js";
 
-export const addPrisma = async (initOptions: InitOptions) => {
+export const addPrisma = async (initOptions?: InitOptions) => {
   const { preferredPackageManager, hasSrc } = readConfigFile();
   const rootPath = hasSrc ? "src/" : "";
   // ask for db type
-  const dbType = initOptions.db || (await select({
+  const dbType = initOptions?.db || (await select({
     message: "Please choose your DB type",
     choices: [
       { name: "Postgres", value: "pg" },
@@ -82,7 +82,7 @@ export const addPrisma = async (initOptions: InitOptions) => {
   // update tsconfig with import alias for prisma types
   updateTsConfigPrismaTypeAlias();
 
-  const includeExampleModel = typeof initOptions.includeExample === 'string' ?
+  const includeExampleModel = typeof initOptions?.includeExample === 'string' ?
     initOptions.includeExample === 'yes' :
     await confirm({
       message:

@@ -22,7 +22,7 @@ export const addPackage = async (initOptions?: InitOptions) => {
     const nullOption = { name: "None", value: null };
     // check if orm
     if (orm === undefined) {
-      const ormToInstall = initOptions.orm || (await select({
+      const ormToInstall = initOptions?.orm || (await select({
         message: "Select an ORM to use:",
         choices: [...Packages.orm, new Separator(), nullOption],
       })) as ORMType | null;
@@ -34,7 +34,7 @@ export const addPackage = async (initOptions?: InitOptions) => {
     }
     // check if auth
     if (auth === undefined) {
-      const authToInstall = initOptions.auth || (await select({
+      const authToInstall = initOptions?.auth || (await select({
         message: "Select an authentication package to use:",
         choices: [...Packages.auth, new Separator(), nullOption],
       })) as AuthType | null;
@@ -58,7 +58,7 @@ export const addPackage = async (initOptions?: InitOptions) => {
       );
     }
     if (uninstalledPackages.length > 0) {
-      const packageToInstall = await checkbox({
+      const packageToInstall = initOptions?.packages || await checkbox({
         message: "Select any miscellaneous packages to add:",
         choices: uninstalledPackages,
       });

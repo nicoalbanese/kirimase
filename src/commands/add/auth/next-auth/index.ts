@@ -26,8 +26,8 @@ import { addToPrismaSchema } from "../../../generate/utils.js";
 import { prismaGenerate } from "../../orm/utils.js";
 import { InitOptions } from "../../../../types.js";
 
-export const addNextAuth = async (options: InitOptions) => {
-  const providers = options.authProviders || (await checkbox({
+export const addNextAuth = async (options?: InitOptions) => {
+  const providers = options?.authProviders || (await checkbox({
     message: "Select a provider to add",
     choices: Object.keys(AuthProviders).map((p) => {
       return { name: p, value: p };

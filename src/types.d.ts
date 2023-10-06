@@ -155,5 +155,6 @@ export type InitOptions = {
   db?: DBType;
   auth?: AuthType;
   authProviders?: AuthProvider[];
+  packages?: AvailablePackage[];
   includeExample?: boolean;
 }
