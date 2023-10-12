@@ -136,7 +136,7 @@ export const pmInstallCommand = {
   pnpm: "pnpm",
   npm: "npx",
   yarn: "npx",
-  bun: "bunx",
+  bun: "bun x",
 };
 
 export async function installShadcnUIComponents(
