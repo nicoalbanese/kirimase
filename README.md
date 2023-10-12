@@ -124,8 +124,8 @@ To run locally:
 ```sh
 pnpm i
 pnpm run dev
-# in a second terminal:
-pnpm run dev2 # with Kirimase options eg. "pnpm run dev2 init"
+
+npm install -g . (in a second terminal - this will then make kirimase available across your machine using "kirimase *command*")
 ```
 
 ## License
