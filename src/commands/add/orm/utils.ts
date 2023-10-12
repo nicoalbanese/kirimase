@@ -1,6 +1,6 @@
 import { consola } from "consola";
 import { DBProvider, DBType, PMType } from "../../../types.js";
-import { pmInstallCommand } from "../../../utils.js";
+import { pmInstallCommand, replaceFile } from "../../../utils.js";
 import { execa } from "execa";
 import fs from "fs";
 import path from "path";
@@ -73,17 +73,7 @@ export function updateTsConfigPrismaTypeAlias() {
     const updatedContent = JSON.stringify(tsConfig, null, 2); // 2 spaces indentation
 
     // Write the updated content back to the file
-    fs.writeFile(tsConfigPath, updatedContent, "utf8", (writeErr) => {
-      if (writeErr) {
-        consola.error(
-          `An error occurred while writing the updated tsconfig.json file: ${writeErr}`
-        );
-        return;
-      }
-
-      consola.success(
-        "Updated tsconfig.json to support zod-prisma type alias."
-      );
-    });
+    replaceFile(tsConfigPath, updatedContent);
+    consola.success("Updated tsconfig.json to support zod-prisma type alias.");
   });
 }

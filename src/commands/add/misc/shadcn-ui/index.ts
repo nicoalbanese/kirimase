@@ -1,42 +1,73 @@
 import { consola } from "consola";
-import { execa } from "execa";
+// import { execa } from "execa";
 import { existsSync } from "fs";
 import {
   addPackageToConfig,
+  createFile,
   installPackages,
   installShadcnUIComponents,
-  pmInstallCommand,
+  // pmInstallCommand,
   readConfigFile,
   replaceFile,
 } from "../../../../utils.js";
-import { AvailablePackage } from "../../../../types.js";
+import { AvailablePackage, PMType } from "../../../../types.js";
 import { addContextProviderToLayout } from "../../utils.js";
+import { shadcnGenerators } from "./generators.js";
+
+const manualInstallShadCn = async (
+  preferredPackageManager: PMType,
+  rootPath: string
+) => {
+  const {
+    generateComponentsJson,
+    generateGlobalsCss,
+    generateLibUtilsTs,
+    generateTailwindConfig,
+  } = shadcnGenerators;
+  // add deps (tailwindcss-animate class-variance-authority clsx tailwind-merge lucide-react)
+  await installPackages(
+    {
+      dev: "",
+      regular:
+        "tailwindcss-animate class-variance-authority clsx tailwind-merge lucide-react",
+    },
+    preferredPackageManager
+  );
+  // add tailwind.config.js
+  createFile("tailwind.config.js", generateTailwindConfig(rootPath));
+  // update globals.css
+  replaceFile(rootPath.concat("app/globals.css"), generateGlobalsCss());
+  // add cn helper (lib/utils.ts)
+  createFile(rootPath.concat("lib/utils.ts"), generateLibUtilsTs());
+  // create components.json
+  createFile("components.json", generateComponentsJson(rootPath));
+};
 
 export const installShadcnUI = async (
   packagesBeingInstalled: AvailablePackage[]
 ) => {
-  const { packages: installedPackages } = readConfigFile();
+  const {
+    packages: installedPackages,
+    preferredPackageManager,
+    rootPath,
+  } = readConfigFile();
   const packages = packagesBeingInstalled.concat(installedPackages);
   consola.start("Installing Shadcn UI...");
-  const { preferredPackageManager } = readConfigFile();
   const filePath = "components.json";
 
-  installPackages(
-    { regular: "lucide-react", dev: "" },
-    preferredPackageManager
-  );
-  const baseArgs = ["shadcn-ui@latest", "init"];
-  const installArgs =
-    preferredPackageManager === "pnpm" ? ["dlx", ...baseArgs] : baseArgs;
+  // const baseArgs = ["shadcn-ui@latest", "init"];
+  // const installArgs =
+  //   preferredPackageManager === "pnpm" ? ["dlx", ...baseArgs] : baseArgs;
 
   if (existsSync(filePath)) {
     consola.info("Shadcn is already installed. Adding Shadcn UI to config...");
     addPackageToConfig("shadcn-ui");
   } else {
     try {
-      await execa(pmInstallCommand[preferredPackageManager], installArgs, {
-        stdio: "inherit",
-      });
+      // await execa(pmInstallCommand[preferredPackageManager], installArgs, {
+      //   stdio: "inherit",
+      // });
+      await manualInstallShadCn(preferredPackageManager, rootPath);
       consola.success("Shadcn initialized successfully.");
       addPackageToConfig("shadcn-ui");
     } catch (error) {

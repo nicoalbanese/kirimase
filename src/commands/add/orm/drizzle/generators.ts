@@ -5,6 +5,7 @@ import {
   createFile,
   installPackages,
   readConfigFile,
+  replaceFile,
 } from "../../../../utils.js";
 import {
   DBProvider,
@@ -605,18 +606,10 @@ export async function updateTsConfigTarget() {
     const updatedContent = JSON.stringify(tsConfig, null, 2); // 2 spaces indentation
 
     // Write the updated content back to the file
-    fs.writeFile(tsConfigPath, updatedContent, "utf8", (writeErr) => {
-      if (writeErr) {
-        consola.error(
-          `An error occurred while writing the updated tsconfig.json file: ${writeErr}`
-        );
-        return;
-      }
-
-      consola.success(
-        "Updated tsconfig.json target to esnext to support Drizzle-Kit."
-      );
-    });
+    replaceFile(tsConfigPath, updatedContent);
+    consola.success(
+      "Updated tsconfig.json target to esnext to support Drizzle-Kit."
+    );
   });
 }
 

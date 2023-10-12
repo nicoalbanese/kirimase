@@ -14,7 +14,7 @@ import {
   toNormalEnglish,
 } from "../utils.js";
 
-export const scaffoldViewsAndComponents = (schema: Schema) => {
+export const scaffoldViewsAndComponents = async (schema: Schema) => {
   const { hasSrc, packages } = readConfigFile();
   const { tableNameCamelCase, tableNameSingularCapitalised } = formatTableName(
     schema.tableName
@@ -65,7 +65,7 @@ export const scaffoldViewsAndComponents = (schema: Schema) => {
     ).length > 0
       ? baseComponents.push("popover", "calendar")
       : null;
-    installShadcnUIComponents(baseComponents);
+    await installShadcnUIComponents(baseComponents);
   } else {
     addPackage();
   }
