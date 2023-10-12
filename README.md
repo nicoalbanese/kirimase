@@ -119,6 +119,15 @@ Kirimase generates:
 
 Keen on enhancing Kirimase? Contributions, bug reports, and feature requests are always welcome. Feel free to open an issue or submit a pull request.
 
+To run locally:
+
+```sh
+pnpm i
+pnpm run dev
+# in a second terminal:
+pnpm run dev2 # with Kirimase options eg. "pnpm run dev2 init"
+```
+
 ## License
 
 [MIT](LICENSE)
