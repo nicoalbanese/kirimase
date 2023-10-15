@@ -1,12 +1,32 @@
-# Kirimase CLI for Next.js
+<p align="center">
+  <picture>
+  <img src="https://github.com/nicoalbanese/gifs_for_demos/blob/main/samurai-helmet.png?raw=true" width="130" alt="Logo for Kirimase">
+</picture>
+</p>
 
-![npm](https://img.shields.io/npm/v/kirimase?style=flat-square)
+<h1 align="center">
+  Kirimase
+</h1>
+<p align="center">
+<img src="https://img.shields.io/npm/v/kirimase?style=flat-square" alt="npm_version">
+</p>
 
-Kirimase is a command-line tool for **building full-stack Next.js apps faster**. It supercharges your development workflow, allowing you to quickly integrate essential packages and scaffold resources for your application with best practices in mind.
+
+<p align="center">Kirimase is a command-line tool for <strong>building full-stack Next.js apps fasterx</strong>. It supercharges your development workflow, allowing you to quickly integrate packages and scaffold resources for your application with best practices in mind.</p>
 
 <br />
+<a href="https://twitter.com/nicoalbanese10/status/1704848924576821605" target="_blank">
+  <p align="center">
+    <img src="https://github.com/nicoalbanese/gifs_for_demos/blob/main/Screenshot%202023-10-15%20at%2010.36.02.png?raw=true" alt="Kirimase Demo" width="420" />
+  </p>
+</a>
+<a href="https://twitter.com/nicoalbanese10/status/1704848924576821605" target="_blank">
+  <p align="center">Watch the most recent demo here</p>
+</a>
 
-[DEMO](https://www.loom.com/share/cb329939c83b4c9eb6a56abfd2638bd4?sid=6d902fcc-3ef6-4436-bf7d-9d0c2943812f)
+<a href="https://www.loom.com/share/cb329939c83b4c9eb6a56abfd2638bd4?sid=6d902fcc-3ef6-4436-bf7d-9d0c2943812f" target="_blank">
+  <p align="center">Longer demo here</p>
+</a>
 
 ## Features
 
