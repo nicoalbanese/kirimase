@@ -11,8 +11,7 @@
 <img src="https://img.shields.io/npm/v/kirimase?style=flat-square" alt="npm_version">
 </p>
 
-
-<p align="center">Kirimase is a command-line tool for <strong>building full-stack Next.js apps fasterx</strong>. It supercharges your development workflow, allowing you to quickly integrate packages and scaffold resources for your application with best practices in mind.</p>
+<p align="center">Kirimase is a command-line tool for <strong>building full-stack Next.js apps faster</strong>. It supercharges your development workflow, allowing you to quickly integrate packages and scaffold resources for your application with best practices in mind.</p>
 
 <br />
 <a href="https://twitter.com/nicoalbanese10/status/1704848924576821605" target="_blank">
@@ -46,6 +45,12 @@ npm install -g kirimase
 <br />
 
 If you don't already have a Nextjs app, run create-next-app with your preferred package manager.
+
+Then run the following command within the directory of your project:
+
+```bash
+kirimase init
+```
 
 # Commands
 
