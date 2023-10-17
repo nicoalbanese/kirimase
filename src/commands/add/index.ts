@@ -17,6 +17,7 @@ import {
 import { addClerk } from "./auth/clerk/index.js";
 import { addResend } from "./misc/resend/index.js";
 import { addLucia } from "./auth/lucia/index.js";
+import { createAccountSettingsPage } from "./auth/shared/index.js";
 
 export const addPackage = async () => {
   const config = readConfigFile();
@@ -63,6 +64,7 @@ export const addPackage = async () => {
         updateConfigFile({ auth: null });
       } else {
         // add account page
+        createAccountSettingsPage();
       }
     }
 
