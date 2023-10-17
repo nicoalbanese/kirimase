@@ -21,9 +21,9 @@ export const Packages: {
   ],
   misc: [
     { name: "TRPC", value: "trpc" },
-    { name: "Shadcn UI", value: "shadcn-ui" },
     { name: "Resend", value: "resend" },
   ],
+  componentLib: [{ name: "Shadcn UI", value: "shadcn-ui" }],
 };
 
 export const addContextProviderToLayout = (

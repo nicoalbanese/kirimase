@@ -51,10 +51,10 @@ export const addTrpc = async () => {
   // create trpc utils file lib/trpc/utils.ts
   createFile(`${rootPath}lib/trpc/utils.ts`, libTrpcUtilsTs());
 
-  // 8. Install Packages: @tanstack/react-query, @trpc/client, @trpc/react-query, @trpc/server
+  // 8. Install Packages: @tanstack/react-query (5.0 causing known issue, downgrading for now TODO), @trpc/client, @trpc/react-query, @trpc/server
   await installPackages(
     {
-      regular: `@tanstack/react-query @trpc/client @trpc/react-query @trpc/server @trpc/next superjson${
+      regular: `@tanstack/react-query@4.32.1 @trpc/client @trpc/react-query @trpc/server @trpc/next superjson${
         !packages.includes("drizzle") ? " zod@3.21.4" : ""
       }`,
       dev: "",

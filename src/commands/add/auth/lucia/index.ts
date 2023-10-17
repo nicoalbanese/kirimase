@@ -22,16 +22,23 @@ import fs from "fs";
 
 export const addLucia = async () => {
   // get dbtype and provider
-  const { orm, provider, preferredPackageManager, packages, rootPath, driver } =
-    readConfigFile();
+  const {
+    orm,
+    provider,
+    preferredPackageManager,
+    // packages,
+    rootPath,
+    driver,
+    componentLib,
+  } = readConfigFile();
   // ask whether want to use shadcnui
   consola.info(
     "Kirimase generates views and components for authenticating using Lucia."
   );
-  const installShadCn = await confirm({
-    message: "Would you like to install Shadcn-UI?",
-    default: true,
-  });
+  // const installShadCn = await confirm({
+  //   message: "Would you like to install Shadcn-UI?",
+  //   default: true,
+  // });
 
   const {
     generateViewsAndComponents,
@@ -50,8 +57,8 @@ export const addLucia = async () => {
     loadingPage: string;
   };
 
-  if (installShadCn) {
-    await installShadcnUI(packages);
+  if (componentLib === "shadcn-ui") {
+    // await installShadcnUI(packages);
     await installShadcnUIComponents(["input", "label"]);
     viewsAndComponents = generateViewsAndComponents(true);
   } else {

@@ -8,7 +8,12 @@ import { installShadcnUI } from "./misc/shadcn-ui/index.js";
 import { consola } from "consola";
 import { initProject } from "../init/index.js";
 import { addPrisma } from "./orm/prisma/index.js";
-import { AuthType, ORMType, PackageChoice } from "../../types.js";
+import {
+  AuthType,
+  ComponentLibType,
+  ORMType,
+  PackageChoice,
+} from "../../types.js";
 import { addClerk } from "./auth/clerk/index.js";
 import { addResend } from "./misc/resend/index.js";
 import { addLucia } from "./auth/lucia/index.js";
@@ -17,9 +22,21 @@ export const addPackage = async () => {
   const config = readConfigFile();
 
   if (config) {
-    const { packages, orm, auth } = config;
+    const { packages, orm, auth, componentLib } = config;
 
     const nullOption = { name: "None", value: null };
+
+    if (componentLib === undefined) {
+      const componentLibToInstall = (await select({
+        message: "Select a component library to use:",
+        choices: [...Packages.componentLib, new Separator(), nullOption],
+      })) as ComponentLibType | null;
+
+      if (componentLibToInstall === "shadcn-ui") await installShadcnUI([]);
+      if (componentLibToInstall === null)
+        updateConfigFile({ componentLib: null });
+    }
+
     // check if orm
     if (orm === undefined) {
       const ormToInstall = (await select({
@@ -42,7 +59,11 @@ export const addPackage = async () => {
       if (authToInstall === "next-auth") await addNextAuth();
       if (authToInstall === "clerk") await addClerk();
       if (authToInstall === "lucia") await addLucia();
-      if (authToInstall === null) updateConfigFile({ auth: null });
+      if (authToInstall === null) {
+        updateConfigFile({ auth: null });
+      } else {
+        // add account page
+      }
     }
 
     // check if misc

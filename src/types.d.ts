@@ -71,10 +71,11 @@ export type AvailablePackage =
   | "resend"
   | "lucia";
 
-export type PackageType = "orm" | "auth" | "misc";
+export type PackageType = "orm" | "auth" | "componentLib" | "misc";
+export type ComponentLibType = "shadcn-ui";
 export type ORMType = "drizzle" | "prisma";
 export type AuthType = "next-auth" | "clerk" | "lucia";
-export type MiscType = "shadcn-ui" | "trpc" | "resend";
+export type MiscType = "trpc" | "resend";
 
 export type Config = {
   hasSrc: boolean;
@@ -84,6 +85,7 @@ export type Config = {
   packages: AvailablePackage[];
   orm: ORMType | null;
   auth: AuthType | null;
+  componentLib: ComponentLibType | null;
 };
 
 export type UpdateConfig = Partial<Config>;

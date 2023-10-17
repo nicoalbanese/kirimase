@@ -9,6 +9,7 @@ import {
   // pmInstallCommand,
   readConfigFile,
   replaceFile,
+  updateConfigFile,
 } from "../../../../utils.js";
 import { AvailablePackage, PMType } from "../../../../types.js";
 import { addContextProviderToLayout } from "../../utils.js";
@@ -62,6 +63,7 @@ export const installShadcnUI = async (
   if (existsSync(filePath)) {
     consola.info("Shadcn is already installed. Adding Shadcn UI to config...");
     addPackageToConfig("shadcn-ui");
+    updateConfigFile({ componentLib: "shadcn-ui" });
   } else {
     try {
       // await execa(pmInstallCommand[preferredPackageManager], installArgs, {
@@ -70,6 +72,7 @@ export const installShadcnUI = async (
       await manualInstallShadCn(preferredPackageManager, rootPath);
       consola.success("Shadcn initialized successfully.");
       addPackageToConfig("shadcn-ui");
+      updateConfigFile({ componentLib: "shadcn-ui" });
     } catch (error) {
       consola.error(`Failed to initialize Shadcn: ${error.message}`);
     }

@@ -7,7 +7,7 @@ import { addPackage } from "./commands/add/index.js";
 import { updateConfigFileAfterUpdate } from "./utils.js";
 
 const program = new Command();
-program.name("kirimase").description("Kirimase CLI").version("0.0.18");
+program.name("kirimase").description("Kirimase CLI").version("0.0.19");
 
 program
   .command("init")
