@@ -20,7 +20,7 @@ import {
 import { AuthDriver, AuthProvider, AuthProviders } from "./utils.js";
 import { checkbox } from "@inquirer/prompts";
 import { addContextProviderToLayout } from "../../utils.js";
-import { updateSignInComponentWithShadcnUI } from "../../misc/shadcn-ui/index.js";
+import { updateSignInComponentWithShadcnUI } from "../../componentLib/shadcn-ui/index.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import { addToPrismaSchema } from "../../../generate/utils.js";
 import { prismaGenerate } from "../../orm/utils.js";

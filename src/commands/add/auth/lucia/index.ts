@@ -9,7 +9,7 @@ import {
   updateConfigFile,
 } from "../../../../utils.js";
 import { consola } from "consola";
-import { installShadcnUI } from "../../misc/shadcn-ui/index.js";
+import { installShadcnUI } from "../../componentLib/shadcn-ui/index.js";
 import { luciaGenerators } from "./generators.js";
 import {
   DrizzleAdapterDriverMappings,

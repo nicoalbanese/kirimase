@@ -4,7 +4,7 @@ import { readConfigFile, updateConfigFile } from "../../utils.js";
 import { addDrizzle } from "./orm/drizzle/index.js";
 import { addNextAuth } from "./auth/next-auth/index.js";
 import { addTrpc } from "./misc/trpc/index.js";
-import { installShadcnUI } from "./misc/shadcn-ui/index.js";
+import { installShadcnUI } from "./componentLib/shadcn-ui/index.js";
 import { consola } from "consola";
 import { initProject } from "../init/index.js";
 import { addPrisma } from "./orm/prisma/index.js";
