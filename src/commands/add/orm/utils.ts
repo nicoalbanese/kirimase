@@ -46,34 +46,26 @@ export const prismaFormat = async (packageManager: PMType) => {
   }
 };
 
-export function updateTsConfigPrismaTypeAlias() {
+export async function updateTsConfigPrismaTypeAlias() {
   // Define the path to the tsconfig.json file
   const tsConfigPath = path.join(process.cwd(), "tsconfig.json");
 
   // Read the file
-  fs.readFile(tsConfigPath, "utf8", (err, data) => {
-    if (err) {
-      console.error(
-        `An error occurred while reading the tsconfig.json file: ${err}`
-      );
-      return;
-    }
+  const data = fs.readFileSync(tsConfigPath, "utf8");
+  // Parse the content as JSON
+  const tsConfig = JSON.parse(data);
 
-    // Parse the content as JSON
-    const tsConfig = JSON.parse(data);
+  // Modify the target property
+  tsConfig.compilerOptions.paths["@/zodAutoGenSchemas"] = [
+    "./prisma/zod/index",
+  ];
 
-    // Modify the target property
-    tsConfig.compilerOptions.paths["@/zodAutoGenSchemas"] = [
-      "./prisma/zod/index",
-    ];
+  tsConfig.compilerOptions.baseUrl = "./";
 
-    tsConfig.compilerOptions.baseUrl = "./";
+  // Convert the modified object back to a JSON string
+  const updatedContent = JSON.stringify(tsConfig, null, 2); // 2 spaces indentation
 
-    // Convert the modified object back to a JSON string
-    const updatedContent = JSON.stringify(tsConfig, null, 2); // 2 spaces indentation
-
-    // Write the updated content back to the file
-    replaceFile(tsConfigPath, updatedContent);
-    consola.success("Updated tsconfig.json to support zod-prisma type alias.");
-  });
+  // Write the updated content back to the file
+  replaceFile(tsConfigPath, updatedContent);
+  consola.success("Updated tsconfig.json to support zod-prisma type alias.");
 }

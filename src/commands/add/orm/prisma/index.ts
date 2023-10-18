@@ -80,7 +80,7 @@ export const addPrisma = async () => {
   createFile(`${rootPath}lib/db/index.ts`, generatePrismaDbInstance());
 
   // update tsconfig with import alias for prisma types
-  updateTsConfigPrismaTypeAlias();
+  await updateTsConfigPrismaTypeAlias();
 
   const includeExampleModel = await confirm({
     message:
