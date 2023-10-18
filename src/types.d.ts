@@ -69,13 +69,14 @@ export type AvailablePackage =
   | "prisma"
   | "clerk"
   | "resend"
-  | "lucia";
+  | "lucia"
+  | "stripe";
 
 export type PackageType = "orm" | "auth" | "componentLib" | "misc";
 export type ComponentLibType = "shadcn-ui";
 export type ORMType = "drizzle" | "prisma";
 export type AuthType = "next-auth" | "clerk" | "lucia";
-export type MiscType = "trpc" | "resend";
+export type MiscType = "trpc" | "stripe" | "resend";
 
 export type Config = {
   hasSrc: boolean;
