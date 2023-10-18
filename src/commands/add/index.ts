@@ -34,13 +34,14 @@ export const addPackage = async () => {
       })) as ComponentLibType | null;
 
       if (componentLibToInstall === "shadcn-ui") await installShadcnUI([]);
-      if (componentLibToInstall === null)
+      if (componentLibToInstall === null) {
         replaceFile(
           rootPath.concat("app/globals.css"),
           `@tailwind base;\n@tailwind components;\n@tailwind utilities;
 `
         );
-      updateConfigFile({ componentLib: null });
+        updateConfigFile({ componentLib: null });
+      }
     }
 
     // check if orm

@@ -34,7 +34,7 @@ export const createAccountSettingsPage = () => {
 
 export const scaffoldAccountSettingsUI = (
   rootPath: string,
-  withShadCn = false
+  withShadCn: boolean
 ) => {
   // create updatenamecard
   createFile(

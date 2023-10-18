@@ -428,7 +428,7 @@ export async function PUT(request: Request) {
   }
 };
 
-export const createNavbar = (withShadcn = false) => {
+export const createNavbar = (withShadcn: boolean) => {
   if (withShadcn) {
     return `import { getUserAuth } from "@/lib/auth/utils";
 import Link from "next/link";
