@@ -39,7 +39,7 @@ export function replaceFile(filePath: string, content: string, log = true) {
   }
 }
 
-export function createFolder(relativePath: string, log = true) {
+export function createFolder(relativePath: string, log = false) {
   const fullPath = path.join(process.cwd(), relativePath);
   fs.mkdirSync(fullPath, { recursive: true });
   if (log) {

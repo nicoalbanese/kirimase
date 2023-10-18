@@ -32,6 +32,8 @@ export const addContextProviderToLayout = (
     | "TrpcProvider"
     | "ShadcnToast"
     | "ClerkProvider"
+    | "Navbar"
+    | "ThemeProvider"
 ) => {
   const { hasSrc } = readConfigFile();
   const path = `${hasSrc ? "src/" : ""}app/layout.tsx`;
@@ -59,6 +61,13 @@ export const addContextProviderToLayout = (
     case "ClerkProvider":
       importStatement = 'import { ClerkProvider } from "@clerk/nextjs";';
       break;
+    case "Navbar":
+      importStatement = 'import Navbar from "@/components/Navbar";';
+      break;
+    case "ThemeProvider":
+      importStatement =
+        'import { ThemeProvider } from "@/components/ThemeProvider";';
+      break;
   }
 
   // check if the provider already exists
@@ -68,12 +77,32 @@ export const addContextProviderToLayout = (
   }
   const modifiedImportContent = `${beforeImport}${importStatement}\n${afterImport}`;
 
-  const newLayoutContent =
-    provider === "ShadcnToast"
-      ? modifiedImportContent.replace("{children}", "{children}\n<Toaster />\n")
-      : modifiedImportContent.replace(
-          "{children}",
-          `\n<${provider}>{children}</${provider}>\n`
-        );
+  const navbarExists = fileContent.includes("<Navbar />");
+  const rootChildrenText = !navbarExists
+    ? "{children}"
+    : `<main className="max-w-3xl mx-auto md:p-0 p-6">\n<Navbar />\n{children}\n</main>`;
+  let replacementText = "";
+  switch (provider) {
+    case "ShadcnToast":
+      replacementText = `${rootChildrenText}\n<Toaster />\n`;
+      break;
+    case "Navbar":
+      replacementText = `<main className="max-w-3xl mx-auto md:p-0 p-6">\n<Navbar />\n{children}\n</main>`;
+      break;
+    case "ThemeProvider":
+      replacementText = `\n<${provider} attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>${rootChildrenText}</${provider}>\n`;
+      break;
+    default:
+      replacementText = `\n<${provider}>${rootChildrenText}</${provider}>\n`;
+      break;
+  }
+
+  const searchValue = !navbarExists
+    ? "{children}"
+    : `<main className="max-w-3xl mx-auto md:p-0 p-6">\n<Navbar />\n{children}\n</main>`;
+  const newLayoutContent = modifiedImportContent.replace(
+    searchValue,
+    replacementText
+  );
   replaceFile(path, newLayoutContent);
 };

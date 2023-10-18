@@ -426,7 +426,7 @@ export default async function Home() {
   return (
     <main className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold my-2">Profile</h1>
-      <pre className="bg-slate-100 p-6 rounded-lg my-2">
+      <pre className="bg-slate-100 dark:bg-slate-800 p-6 rounded-lg my-2">
         {JSON.stringify(session, null, 2)}
       </pre>
       <AuthForm action="/api/sign-out" />

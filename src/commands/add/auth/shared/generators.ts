@@ -218,7 +218,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
         body: JSON.stringify({ email }),
         headers: { "Content-Type": "application/json" },
       });
-      if (res.status === 200) alert("Successfully updated name!");
+      if (res.status === 200) alert("Successfully updated email!");
       router.refresh();
     });
   };
@@ -258,7 +258,9 @@ export default function UpdateEmailCard({ email }: { email: string }) {
 
 export const createAccountCardComponent = (withShadCn = false) => {
   if (withShadCn) {
-    return `interface AccountCardProps {
+    return `import { Card } from "@/components/ui/card";
+
+interface AccountCardProps {
   params: {
     header: string;
     description: string;
@@ -270,13 +272,13 @@ export const createAccountCardComponent = (withShadCn = false) => {
 export function AccountCard({ params, children }: AccountCardProps) {
   const { header, description } = params;
   return (
-    <div className="border rounded-lg">
+    <Card>
       <div id="body" className="p-4 ">
         <h3 className="text-xl font-semibold">{header}</h3>
         <p className="text-muted-foreground">{description}</p>
       </div>
       {children}
-    </div>
+    </Card>
   );
 }
 
@@ -303,9 +305,7 @@ export function AccountCardFooter({
 }
 `;
   } else {
-    return `import { Card } from "@/components/ui/card";
-
-interface AccountCardProps {
+    return `interface AccountCardProps {
   params: {
     header: string;
     description: string;
@@ -317,13 +317,13 @@ interface AccountCardProps {
 export function AccountCard({ params, children }: AccountCardProps) {
   const { header, description } = params;
   return (
-    <Card className="">
+    <div className="bg-white border-slate-200 border rounded-lg">
       <div id="body" className="p-4 ">
         <h3 className="text-xl font-semibold">{header}</h3>
         <p className="text-slate-500">{description}</p>
       </div>
       {children}
-    </Card>
+    </div>
   );
 }
 
@@ -430,8 +430,123 @@ export async function PUT(request: Request) {
 
 export const createNavbar = (withShadcn = false) => {
   if (withShadcn) {
-    return ``;
+    return `import { getUserAuth } from "@/lib/auth/utils";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import SignOutBtn from "@/components/auth/SignOutBtn";
+import { ModeToggle } from "@/components/ui/ThemeToggle";
+
+export default async function Navbar() {
+  const { session } = await getUserAuth();
+  const nameExists =
+    !!session?.user.name &&
+    session?.user.name.length > 5 &&
+    session?.user.name.indexOf(" ") > 0;
+  if (session?.user) {
+    return (
+      <nav className="py-2 flex items-center justify-between transition-all duration-300">
+        <h1 className="font-semibold hover:opacity-75 transition-hover cursor-pointer">
+          <Link href="/">Logo</Link>
+        </h1>
+        <div className="space-x-2 flex items-center">
+          <ModeToggle />
+          {session ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Avatar>
+                  <AvatarFallback>
+                    {nameExists
+                      ? session.user.name
+                          ?.split(" ")
+                          .map((word) => word[0].toUpperCase())
+                          .join("")
+                      : "~"}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <span className="font-semibold">
+                    {nameExists ? session.user.name : "New User"}
+                  </span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <Link href="/account">
+                  <DropdownMenuItem className="cursor-pointer">
+                    Account
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuItem>
+                  <SignOutBtn />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link href="/sign-in">Sign in</Link>
+          )}
+        </div>
+      </nav>
+    );
+  } else return null;
+}
+`;
   } else {
-    return ``;
+    return `import { getUserAuth } from "@/lib/auth/utils";
+import Link from "next/link";
+
+export default async function Navbar() {
+  const { session } = await getUserAuth();
+  if (session?.user) {
+    return (
+      <nav className="py-2 flex items-center justify-between transition-all duration-300">
+        <h1 className="font-semibold hover:opacity-75 transition-hover cursor-pointer">
+          <Link href="/">Logo</Link>
+        </h1>
+        <Link href="/account">
+          <div className="w-8 h-8 bg-slate-100 rounded-full text-slate-600 flex items-center justify-center hover:opacity-75 transition-all duration-300 cursor-pointer hover:ring-1 ring-zinc-300">
+            {session?.user?.name ? session.user.name.slice(0, 1) : "~"}
+          </div>
+        </Link>
+      </nav>
+    );
+  } else return null;
+}
+`;
   }
+};
+
+export const createSignOutBtn = () => {
+  return `"use client";
+
+import { useRouter } from "next/navigation";
+
+export default function SignOutBtn() {
+  const router = useRouter();
+  const handleSignOut = async () => {
+    const response = await fetch("/api/sign-out", {
+      method: "POST",
+      redirect: "manual",
+    });
+
+    if (response.status === 0) {
+      // redirected
+      // when using \`redirect: "manual"\`, response status 0 is returned
+      return router.refresh();
+    }
+  };
+  return (
+    <button onClick={handleSignOut} className="w-full text-left">
+      Sign out
+    </button>
+  );
+}
+`;
 };

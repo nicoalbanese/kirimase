@@ -1,6 +1,6 @@
 import { checkbox, select, Separator } from "@inquirer/prompts";
 import { Packages } from "./utils.js";
-import { readConfigFile, updateConfigFile } from "../../utils.js";
+import { readConfigFile, replaceFile, updateConfigFile } from "../../utils.js";
 import { addDrizzle } from "./orm/drizzle/index.js";
 import { addNextAuth } from "./auth/next-auth/index.js";
 import { addTrpc } from "./misc/trpc/index.js";
@@ -23,7 +23,7 @@ export const addPackage = async () => {
   const config = readConfigFile();
 
   if (config) {
-    const { packages, orm, auth, componentLib } = config;
+    const { packages, orm, auth, componentLib, rootPath } = config;
 
     const nullOption = { name: "None", value: null };
 
@@ -35,7 +35,12 @@ export const addPackage = async () => {
 
       if (componentLibToInstall === "shadcn-ui") await installShadcnUI([]);
       if (componentLibToInstall === null)
-        updateConfigFile({ componentLib: null });
+        replaceFile(
+          rootPath.concat("app/globals.css"),
+          `@tailwind base;\n@tailwind components;\n@tailwind utilities;
+`
+        );
+      updateConfigFile({ componentLib: null });
     }
 
     // check if orm

@@ -24,13 +24,15 @@ const manualInstallShadCn = async (
     generateGlobalsCss,
     generateLibUtilsTs,
     generateTailwindConfig,
+    generateThemeProvider,
+    generateThemeToggler,
   } = shadcnGenerators;
   // add deps (tailwindcss-animate class-variance-authority clsx tailwind-merge lucide-react)
   await installPackages(
     {
       dev: "",
       regular:
-        "tailwindcss-animate class-variance-authority clsx tailwind-merge lucide-react",
+        "tailwindcss-animate class-variance-authority clsx tailwind-merge lucide-react next-themes",
     },
     preferredPackageManager
   );
@@ -42,6 +44,20 @@ const manualInstallShadCn = async (
   createFile(rootPath.concat("lib/utils.ts"), generateLibUtilsTs());
   // create components.json
   createFile("components.json", generateComponentsJson(rootPath));
+
+  // todo: install theme switcher
+  // create theme provider
+  createFile(
+    rootPath.concat("components/ThemeProvider.tsx"),
+    generateThemeProvider()
+  );
+  //generate theme toggler
+  createFile(
+    rootPath.concat("components/ui/ThemeToggle.tsx"),
+    generateThemeToggler()
+  );
+  // add context provider to layout
+  addContextProviderToLayout("ThemeProvider");
 };
 
 export const installShadcnUI = async (
@@ -77,8 +93,14 @@ export const installShadcnUI = async (
       consola.error(`Failed to initialize Shadcn: ${error.message}`);
     }
   }
-  await installShadcnUIComponents(["button", "toast"]);
+  await installShadcnUIComponents([
+    "button",
+    "toast",
+    "avatar",
+    "dropdown-menu",
+  ]);
   addContextProviderToLayout("ShadcnToast");
+
   if (packages.includes("next-auth")) updateSignInComponentWithShadcnUI();
 };
 

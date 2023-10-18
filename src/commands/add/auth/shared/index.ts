@@ -1,4 +1,5 @@
 import { createFile, readConfigFile } from "../../../../utils.js";
+import { addContextProviderToLayout } from "../../utils.js";
 import {
   createAccountApiTs,
   createAccountCardComponent,
@@ -7,6 +8,7 @@ import {
   createUpdateNameCard,
   createUpdateEmailCard,
   createNavbar,
+  createSignOutBtn,
 } from "./generators.js";
 
 export const createAccountSettingsPage = () => {
@@ -52,8 +54,17 @@ export const scaffoldAccountSettingsUI = (
     createAccountCardComponent(withShadCn)
   );
 
-  // createFile(
-  //   rootPath.concat("components/Navbar.tsx"),
-  //   createNavbar(withShadCn)
-  // );
+  // create navbar component
+  createFile(
+    rootPath.concat("components/Navbar.tsx"),
+    createNavbar(withShadCn)
+  );
+  if (withShadCn) {
+    createFile(
+      rootPath.concat("components/auth/SignOutBtn.tsx"),
+      createSignOutBtn()
+    );
+  }
+  // add navbar to root layout
+  addContextProviderToLayout("Navbar");
 };

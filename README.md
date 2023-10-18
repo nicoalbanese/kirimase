@@ -52,6 +52,8 @@ Then run the following command within the directory of your project:
 kirimase init
 ```
 
+Note: Kirimase is not compatible with the the pages directory.
+
 # Commands
 
 Run these commands within the directory of your Nextjs app:
