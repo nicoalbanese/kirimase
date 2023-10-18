@@ -424,7 +424,7 @@ export default async function Home() {
   const { session } = await getUserAuth();
   if (!session) redirect("/sign-up");
   return (
-    <main className="max-w-2xl mx-auto">
+    <main className="">
       <h1 className="text-2xl font-bold my-2">Profile</h1>
       <pre className="bg-slate-100 dark:bg-slate-800 p-6 rounded-lg my-2">
         {JSON.stringify(session, null, 2)}

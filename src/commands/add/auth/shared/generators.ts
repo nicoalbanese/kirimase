@@ -20,7 +20,7 @@ export default function UserSettings({
 `;
 };
 
-export const createUpdateNameCard = (withShadCn = false) => {
+export const createUpdateNameCard = (withShadCn = false, disabled = false) => {
   if (withShadCn) {
     return `"use client";
 import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
@@ -69,10 +69,14 @@ export default function UpdateNameCard({ name }: { name: string }) {
     >
       <form onSubmit={handleSubmit}>
         <AccountCardBody>
-          <Input defaultValue={name ?? ""} name="name" disabled={isPending} />
+          <Input defaultValue={name ?? ""} name="name" disabled={${
+            disabled ? "true" : "isPending"
+          }} />
         </AccountCardBody>
         <AccountCardFooter description="64 characters maximum">
-          <Button disabled={isPending}>Update Name</Button>
+          <Button disabled={${
+            disabled ? "true" : "isPending"
+          }}>Update Name</Button>
         </AccountCardFooter>
       </form>
     </AccountCard>
@@ -118,14 +122,14 @@ export default function UpdateNameCard({ name }: { name: string }) {
           <input
             defaultValue={name ?? ""}
             name="name"
-            disabled={isPending}
+            disabled={${disabled ? "true" : "isPending"}}
             className="block text-sm w-full px-3 py-2 rounded-md border border-slate-200 focus:outline-slate-700"
           />
         </AccountCardBody>
         <AccountCardFooter description="64 characters maximum">
           <button
             className={\`bg-slate-900 py-2.5 px-3.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed\`}
-            disabled={isPending}
+            disabled={${disabled ? "true" : "isPending"}}
           >
             Update Name
           </button>
@@ -138,7 +142,7 @@ export default function UpdateNameCard({ name }: { name: string }) {
   }
 };
 
-export const createUpdateEmailCard = (withShadCn = false) => {
+export const createUpdateEmailCard = (withShadCn = false, disabled = false) => {
   if (withShadCn) {
     return `import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
 import { Button } from "@/components/ui/button";
@@ -172,7 +176,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
         headers: { "Content-Type": "application/json" },
       });
       if (res.status === 200)
-        toast({ description: "Successfully updated name!" });
+        toast({ description: "Successfully updated email!" });
       router.refresh();
     });
   };
@@ -187,10 +191,14 @@ export default function UpdateEmailCard({ email }: { email: string }) {
     >
       <form onSubmit={handleSubmit}>
         <AccountCardBody>
-          <Input defaultValue={email ?? ""} name="email" disabled={isPending} />
+          <Input defaultValue={email ?? ""} name="email" disabled={${
+            disabled ? "true" : "isPending"
+          }} />
         </AccountCardBody>
         <AccountCardFooter description="We will email vou to verify the change.">
-          <Button disabled={isPending}>Update Email</Button>
+          <Button disabled={${
+            disabled ? "true" : "isPending"
+          }}>Update Email</Button>
         </AccountCardFooter>
       </form>
     </AccountCard>
@@ -236,13 +244,13 @@ export default function UpdateEmailCard({ email }: { email: string }) {
           <input
             defaultValue={email ?? ""}
             name="email"
-            disabled={isPending}
+            disabled={${disabled ? "true" : "isPending"}}
             className="block text-sm w-full px-3 py-2 rounded-md border border-slate-200 focus:outline-slate-700"
           />
         </AccountCardBody>
         <AccountCardFooter description="We will email vou to verify the change.">
           <button
-            disabled={isPending}
+            disabled={${disabled ? "true" : "isPending"}}
             className={\`bg-slate-900 py-2.5 px-3.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed\`}
           >
             Update Email
@@ -428,11 +436,13 @@ export async function PUT(request: Request) {
   }
 };
 
-export const createNavbar = (withShadcn: boolean) => {
+export const createNavbar = (withShadcn: boolean, usingClerk = false) => {
   if (withShadcn) {
     return `import { getUserAuth } from "@/lib/auth/utils";
-import Link from "next/link";
-import {
+import Link from "next/link";${
+      usingClerk
+        ? '\nimport { UserButton } from "@clerk/nextjs";'
+        : `\nimport {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -442,14 +452,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import SignOutBtn from "@/components/auth/SignOutBtn";
+`
+    }
 import { ModeToggle } from "@/components/ui/ThemeToggle";
 
 export default async function Navbar() {
-  const { session } = await getUserAuth();
-  const nameExists =
+  const { session } = await getUserAuth();${
+    usingClerk
+      ? ""
+      : `\n  const nameExists =
     !!session?.user.name &&
-    session?.user.name.length > 5 &&
-    session?.user.name.indexOf(" ") > 0;
+    session?.user.name.length > 5;
+`
+  }
+
   if (session?.user) {
     return (
       <nav className="py-2 flex items-center justify-between transition-all duration-300">
@@ -457,8 +473,10 @@ export default async function Navbar() {
           <Link href="/">Logo</Link>
         </h1>
         <div className="space-x-2 flex items-center">
-          <ModeToggle />
-          {session ? (
+          <ModeToggle />${
+            usingClerk
+              ? `\n          <UserButton afterSignOutUrl="/" />`
+              : `\n          {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Avatar>
@@ -492,6 +510,8 @@ export default async function Navbar() {
           ) : (
             <Link href="/sign-in">Sign in</Link>
           )}
+`
+          }
         </div>
       </nav>
     );
@@ -500,7 +520,9 @@ export default async function Navbar() {
 `;
   } else {
     return `import { getUserAuth } from "@/lib/auth/utils";
-import Link from "next/link";
+import Link from "next/link";${
+      usingClerk ? `\nimport { UserButton } from "@clerk/nextjs";` : ""
+    }
 
 export default async function Navbar() {
   const { session } = await getUserAuth();
@@ -510,11 +532,15 @@ export default async function Navbar() {
         <h1 className="font-semibold hover:opacity-75 transition-hover cursor-pointer">
           <Link href="/">Logo</Link>
         </h1>
-        <Link href="/account">
+        ${
+          usingClerk
+            ? `<UserButton afterSignOutUrl="/" />`
+            : `<Link href="/account">
           <div className="w-8 h-8 bg-slate-100 rounded-full text-slate-600 flex items-center justify-center hover:opacity-75 transition-all duration-300 cursor-pointer hover:ring-1 ring-zinc-300">
             {session?.user?.name ? session.user.name.slice(0, 1) : "~"}
           </div>
-        </Link>
+        </Link>`
+        }
       </nav>
     );
   } else return null;

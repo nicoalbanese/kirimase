@@ -4,6 +4,7 @@ import {
   createFile,
   installPackages,
   readConfigFile,
+  replaceFile,
   updateConfigFile,
 } from "../../../../utils.js";
 import {
@@ -13,6 +14,7 @@ import {
   createSignInComponent,
   enableSessionInContext,
   enableSessionInTRPCApi,
+  generateUpdatedRootRoute,
   libAuthProviderTsx,
   libAuthUtilsTs,
   updateTrpcTs,
@@ -86,6 +88,8 @@ export const addNextAuth = async () => {
     enableSessionInContext();
     enableSessionInTRPCApi();
   }
+
+  replaceFile(rootPath.concat("app/page.tsx"), generateUpdatedRootRoute());
 
   // add to env
   addToDotEnv(

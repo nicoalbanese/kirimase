@@ -440,3 +440,16 @@ model VerificationToken {
   @@unique([identifier, token])
 }`;
 };
+
+export const generateUpdatedRootRoute = () => {
+  return `import SignIn from "@/components/auth/SignIn";
+
+export default function Home() {
+  return (
+    <main className="pt-4">
+      <SignIn />
+    </main>
+  );
+}
+`;
+};

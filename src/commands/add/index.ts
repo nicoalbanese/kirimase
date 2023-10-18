@@ -70,7 +70,7 @@ export const addPackage = async () => {
         updateConfigFile({ auth: null });
       } else {
         // add account page
-        createAccountSettingsPage();
+        await createAccountSettingsPage();
       }
     }
 

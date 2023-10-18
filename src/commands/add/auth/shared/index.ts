@@ -1,4 +1,9 @@
-import { createFile, readConfigFile } from "../../../../utils.js";
+import { consola } from "consola";
+import {
+  createFile,
+  installShadcnUIComponents,
+  readConfigFile,
+} from "../../../../utils.js";
 import { addContextProviderToLayout } from "../../utils.js";
 import {
   createAccountApiTs,
@@ -10,9 +15,10 @@ import {
   createNavbar,
   createSignOutBtn,
 } from "./generators.js";
+import { AuthType, ORMType } from "../../../../types.js";
 
-export const createAccountSettingsPage = () => {
-  const { orm, rootPath, componentLib } = readConfigFile();
+export const createAccountSettingsPage = async () => {
+  const { orm, rootPath, componentLib, auth } = readConfigFile();
   const withShadCn = componentLib === "shadcn-ui" ? true : false;
   // create account api
   createFile(
@@ -29,23 +35,24 @@ export const createAccountSettingsPage = () => {
     createUserSettingsComponent()
   );
 
-  scaffoldAccountSettingsUI(rootPath, withShadCn);
+  await scaffoldAccountSettingsUI(rootPath, withShadCn, auth);
 };
 
-export const scaffoldAccountSettingsUI = (
+export const scaffoldAccountSettingsUI = async (
   rootPath: string,
-  withShadCn: boolean
+  withShadCn: boolean,
+  auth: AuthType
 ) => {
   // create updatenamecard
   createFile(
     rootPath.concat("app/account/UpdateNameCard.tsx"),
-    createUpdateNameCard(withShadCn)
+    createUpdateNameCard(withShadCn, auth !== "lucia")
   );
 
   // create updatenamecard
   createFile(
     rootPath.concat("app/account/UpdateEmailCard.tsx"),
-    createUpdateEmailCard(withShadCn)
+    createUpdateEmailCard(withShadCn, auth !== "lucia")
   );
 
   // create accountcard components
@@ -57,7 +64,7 @@ export const scaffoldAccountSettingsUI = (
   // create navbar component
   createFile(
     rootPath.concat("components/Navbar.tsx"),
-    createNavbar(withShadCn)
+    createNavbar(withShadCn, auth === "clerk")
   );
   if (withShadCn) {
     createFile(
@@ -67,4 +74,9 @@ export const scaffoldAccountSettingsUI = (
   }
   // add navbar to root layout
   addContextProviderToLayout("Navbar");
+
+  if (withShadCn) {
+    consola.start("Installing Card component for account page...");
+    await installShadcnUIComponents(["card", "input", "label"]);
+  }
 };
