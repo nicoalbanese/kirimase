@@ -21,6 +21,7 @@ export const Packages: {
   ],
   misc: [
     { name: "TRPC", value: "trpc" },
+    { name: "stripe", value: "stripe" },
     { name: "Resend", value: "resend" },
   ],
   componentLib: [{ name: "Shadcn UI", value: "shadcn-ui" }],
