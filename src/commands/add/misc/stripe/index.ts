@@ -73,19 +73,23 @@ export const addStripe = async () => {
     switch (driver) {
       case "pg":
         keysToAdd = `  
-  stripeCustomerId: text("stripe_customer_id").unique(),
-  stripeSubscriptionId: text("stripe_subscription_id").unique(),
-  stripePriceId: text("stripe_price_id"),
-  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end")
+  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
+  stripeSubscriptionId: varchar("stripe_subscription_id", {
+    length: 255,
+  }).unique(),
+  stripePriceId: varchar("stripe_price_id", { length: 255 }),
+  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
 `;
         additionalCoreTypesToImport = ["timestamp"];
         break;
       case "mysql":
         keysToAdd = `  
-  stripeCustomerId: text("stripe_customer_id").unique(),
-  stripeSubscriptionId: text("stripe_subscription_id").unique(),
-  stripePriceId: text("stripe_price_id"),
-  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end")
+  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
+  stripeSubscriptionId: varchar("stripe_subscription_id", {
+    length: 255,
+  }).unique(),
+  stripePriceId: varchar("stripe_price_id", { length: 255 }),
+  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
 `;
         additionalCoreTypesToImport = ["timestamp"];
         break;

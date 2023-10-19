@@ -41,7 +41,7 @@ const getDrizzleModelStartAndEnd = (schema: string, modelName: string) => {
   if (modelStart === -1) {
     modelExists = false;
   }
-  const modelEnd = schema.indexOf("}", modelStart);
+  const modelEnd = schema.indexOf("});", modelStart);
   if (modelEnd === -1) {
     modelExists = false;
   }

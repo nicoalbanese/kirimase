@@ -167,8 +167,8 @@ export const keys = mysqlTable("user_key", {
 	userId: varchar("user_id", {
 		length: 15
 	})
-		.notNull()
-		.references(() => users.id),
+		.notNull(),
+		// .references(() => users.id),
 	hashedPassword: varchar("hashed_password", {
 		length: 255
 	})
@@ -181,8 +181,8 @@ export const sessions = mysqlTable("user_session", {
 	userId: varchar("user_id", {
 		length: 15
 	})
-		.notNull()
-		.references(() => users.id),
+		.notNull(),
+		// .references(() => users.id),
 	activeExpires: bigint("active_expires", {
 		mode: "number"
 	}).notNull(),
