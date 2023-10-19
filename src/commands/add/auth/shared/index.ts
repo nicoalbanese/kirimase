@@ -1,4 +1,9 @@
-import { createFile, readConfigFile } from "../../../../utils.js";
+import { consola } from "consola";
+import {
+  createFile,
+  installShadcnUIComponents,
+  readConfigFile,
+} from "../../../../utils.js";
 import { addContextProviderToLayout } from "../../utils.js";
 import {
   createAccountApiTs,
@@ -11,7 +16,7 @@ import {
   createSignOutBtn,
 } from "./generators.js";
 
-export const createAccountSettingsPage = () => {
+export const createAccountSettingsPage = async () => {
   const { orm, rootPath, componentLib } = readConfigFile();
   const withShadCn = componentLib === "shadcn-ui" ? true : false;
   // create account api
@@ -29,10 +34,10 @@ export const createAccountSettingsPage = () => {
     createUserSettingsComponent()
   );
 
-  scaffoldAccountSettingsUI(rootPath, withShadCn);
+  await scaffoldAccountSettingsUI(rootPath, withShadCn);
 };
 
-export const scaffoldAccountSettingsUI = (
+export const scaffoldAccountSettingsUI = async (
   rootPath: string,
   withShadCn: boolean
 ) => {
@@ -67,4 +72,8 @@ export const scaffoldAccountSettingsUI = (
   }
   // add navbar to root layout
   addContextProviderToLayout("Navbar");
+  if (withShadCn) {
+    consola.start("Installing Card component for account page...");
+    await installShadcnUIComponents(["card", "input", "label"]);
+  }
 };

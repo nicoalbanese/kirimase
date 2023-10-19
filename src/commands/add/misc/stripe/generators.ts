@@ -15,7 +15,7 @@ export const generateStripeSubscriptionTs = () => {
   let userSelect: string;
   switch (orm) {
     case "drizzle":
-      userSelect = `select().from(users).where(eq( users.id, session.user.id ))`;
+      userSelect = `db.select().from(users).where(eq( users.id, session.user.id ))`;
       break;
     case "prisma":
       userSelect = `db.user.findFirst({
@@ -41,7 +41,7 @@ export async function getUserSubscriptionPlan() {
     throw new Error("User not found.");
   }
 
-  const user = await ${userSelect}
+  const ${orm === "drizzle" ? "[user]" : "user"} = await ${userSelect}
 
   if (!user) {
     throw new Error("User not found.");
@@ -469,7 +469,7 @@ export const generateBillingPage = () => {
   const { componentLib } = readConfigFile();
   if (componentLib === "shadcn-ui") {
     return `import SuccessToast from "./SuccessToast";
-import { ManageUserSubscriptionButton } from "./ManageUserSubscription";
+import { ManageUserSubscriptionButton } from "./ManageSubscription";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -705,12 +705,13 @@ export const generateStripeWebhook = () => {
     case "drizzle":
       dbCalls.one = `db.update(users).set(updatedData).where(eq(users.id, session.metadata.userId))`;
       dbCalls.two = `db.update(users).set(updatedData).where(eq(users.stripeCustomerId, session.customer))`;
-      dbCalls.two = `db.update(users).set({
+      dbCalls.three = `db.update(users).set({
         stripePriceId: subscription.items.data[0].price.id,
         stripeCurrentPeriodEnd: new Date(
           subscription.current_period_end * 1000
         )
       }).where(eq(users.stripeSubscriptionId, subscription.id))`;
+      break;
     case "prisma":
       dbCalls.one = `db.user.update({
         where: { id: session.metadata.userId },
@@ -731,6 +732,7 @@ export const generateStripeWebhook = () => {
         ),
       },
     });`;
+      break;
   }
 
   return `import { db } from "@/lib/db";

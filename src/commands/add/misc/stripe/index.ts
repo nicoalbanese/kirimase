@@ -23,7 +23,10 @@ import {
 import { consola } from "consola";
 import fs from "fs";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
-import { addToPrismaModel } from "../../../generate/utils.js";
+import {
+  addToPrismaModel,
+  addToPrismaModelBulk,
+} from "../../../generate/utils.js";
 import { addToDrizzleModel } from "../../orm/drizzle/utils.js";
 import {
   generateAccountPage,
@@ -42,7 +45,6 @@ import { addPackage } from "../../index.js";
 export const addStripe = async () => {
   const { componentLib, preferredPackageManager, rootPath, orm, driver } =
     readConfigFile();
-  console.log(orm);
 
   if (orm === null || orm === undefined) {
     await addPackage();
@@ -55,15 +57,16 @@ export const addStripe = async () => {
   );
 
   // add attributes to usermodel
-  if (orm === "prisma") consola.box("adding to prisma schema");
-  addToPrismaModel(
-    "User",
-    `  stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
+  if (orm === "prisma") {
+    addToPrismaModelBulk(
+      "User",
+      `\nstripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
   stripePriceId          String?   @map(name: "stripe_price_id")
   stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
 `
-  );
+    );
+  }
   if (orm === "drizzle") {
     let keysToAdd: string;
     let additionalCoreTypesToImport: string[];
@@ -121,13 +124,13 @@ export const addStripe = async () => {
   );
   // components: create manage subscription button
   createFile(
-    rootPath.concat("app/account/ManageSubscription.tsx"),
+    rootPath.concat("app/account/billing/ManageSubscription.tsx"),
     generateManageSubscriptionButton()
   );
   // components: create success toast
   if (componentLib === "shadcn-ui")
     createFile(
-      rootPath.concat("app/account/SuccessToast.tsx"),
+      rootPath.concat("app/account/billing/SuccessToast.tsx"),
       generateSuccessToast()
     );
 

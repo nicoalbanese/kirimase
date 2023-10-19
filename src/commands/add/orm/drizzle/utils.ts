@@ -9,7 +9,7 @@ export function addToDrizzleModel(
 ) {
   const { rootPath } = readConfigFile();
   const modelToSearch =
-    modelName === "auth" || modelName === "users" ? "users" : modelName;
+    modelName === "auth" || modelName === "users" ? "auth" : modelName;
   const pathToModel = rootPath.concat(`lib/db/schema/${modelToSearch}.ts`);
   const hasSchema = existsSync(pathToModel);
   if (!hasSchema) {
@@ -17,10 +17,7 @@ export function addToDrizzleModel(
     return;
   }
   const schema = readFileSync(pathToModel, "utf-8");
-  if (
-    !schema.includes(attributesToAdd.split(" ")[1]) &&
-    schema.includes(modelName)
-  ) {
+  if (schema.includes(modelName)) {
     // Find the start and end positions of the specified model
     const { modelEnd } = getDrizzleModelStartAndEnd(schema, modelName);
     // Split the schema and insert the attributes at the right position
