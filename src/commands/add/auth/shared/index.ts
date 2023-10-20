@@ -17,8 +17,8 @@ import {
 } from "./generators.js";
 import { AuthType } from "../../../../types.js";
 
-export const createAccountSettingsPage = async (auth: AuthType) => {
-  const { orm, rootPath, componentLib } = readConfigFile();
+export const createAccountSettingsPage = async () => {
+  const { orm, rootPath, componentLib, auth } = readConfigFile();
   const withShadCn = componentLib === "shadcn-ui" ? true : false;
   // create account api
   if (auth !== "clerk") {
