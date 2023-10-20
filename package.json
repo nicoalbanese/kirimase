@@ -1,7 +1,7 @@
 {
   "name": "kirimase",
-  "version": "0.0.19",
-  "description": "A Rails-like CLI for building full-stack Nextjs apps faster",
+  "version": "0.0.20",
+  "description": "A Rails-like CLI for building full-stack Next.js apps faster",
   "main": "index.js",
   "type": "module",
   "bin": {
