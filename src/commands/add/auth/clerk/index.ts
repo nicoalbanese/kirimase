@@ -20,7 +20,7 @@ import { addContextProviderToLayout } from "../../utils.js";
 import { clerkGenerators } from "./generators.js";
 
 export const addClerk = async () => {
-  const { rootPath, preferredPackageManager } = readConfigFile();
+  const { rootPath, preferredPackageManager, componentLib } = readConfigFile();
   const {
     generateAuthUtilsTs,
     generateMiddlewareTs,
@@ -51,7 +51,10 @@ export const addClerk = async () => {
     generateSignUpPageTs()
   );
 
-  replaceFile(rootPath.concat("app/page.tsx"), homePageWithUserButton());
+  replaceFile(
+    rootPath.concat("app/page.tsx"),
+    homePageWithUserButton(componentLib)
+  );
 
   createFile(rootPath.concat("lib/auth/utils.ts"), generateAuthUtilsTs());
 
