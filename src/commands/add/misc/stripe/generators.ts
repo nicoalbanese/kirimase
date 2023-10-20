@@ -1,4 +1,4 @@
-import { DBType } from "../../../../types.js";
+import { AuthType, DBType } from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
 
 export const generateStripeIndexTs = () => {
@@ -867,7 +867,10 @@ export async function POST(req: Request) {
 `;
 };
 
-export const generateSubscriptionsDrizzleSchema = (driver: DBType) => {
+export const generateSubscriptionsDrizzleSchema = (
+  driver: DBType,
+  auth: AuthType
+) => {
   // add references for pg and sqlite
   switch (driver) {
     case "pg":
@@ -876,15 +879,15 @@ export const generateSubscriptionsDrizzleSchema = (driver: DBType) => {
   primaryKey,
   timestamp,
   varchar,
-} from "drizzle-orm/pg-core";
-import { users } from "./auth";
+} from "drizzle-orm/pg-core";${
+        auth !== "clerk" ? `\nimport { users } from "./auth";` : ""
+      }
 
 export const subscriptions = pgTable(
   "subscriptions",
   {
     userId: varchar("user_id", { length: 255 })
-      .unique()
-      .references(() => users.id),
+      .unique()${auth !== "clerk" ? `\n      .references(() => users.id)` : ""},
     stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
     stripeSubscriptionId: varchar("stripe_subscription_id", {
       length: 255,
@@ -931,15 +934,15 @@ export const subscriptions = mysqlTable(
   primaryKey,
   integer,
   text
-} from "drizzle-orm/sqlite-core";
-import { users } from "./auth";
+} from "drizzle-orm/sqlite-core";${
+        auth !== "clerk" ? `\nimport { users } from "./auth";` : ""
+      }
 
 export const subscriptions = sqliteTable(
   "subscriptions",
   {
     userId: text("user_id")
-      .unique()
-      .references(() => users.id),
+      .unique()${auth !== "clerk" ? `\n      .references(() => users.id)` : ""},
     stripeCustomerId: text("stripe_customer_id").unique(),
     stripeSubscriptionId: text("stripe_subscription_id").unique(),
     stripePriceId: text("stripe_price_id"),

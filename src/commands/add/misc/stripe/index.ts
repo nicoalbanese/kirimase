@@ -24,11 +24,9 @@ import { consola } from "consola";
 import fs from "fs";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import {
-  addToPrismaModel,
   addToPrismaModelBulk,
   addToPrismaSchema,
 } from "../../../generate/utils.js";
-import { addToDrizzleModel } from "../../orm/drizzle/utils.js";
 import {
   generateAccountPage,
   generateBillingCard,
@@ -128,7 +126,7 @@ export const addStripe = async () => {
     //     addToDrizzleModel("users", keysToAdd, additionalCoreTypesToImport); // HERE
     createFile(
       rootPath.concat("lib/db/schema/subscriptions.ts"),
-      generateSubscriptionsDrizzleSchema(driver)
+      generateSubscriptionsDrizzleSchema(driver, auth)
     );
   }
 
