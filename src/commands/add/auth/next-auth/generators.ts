@@ -6,7 +6,7 @@ import {
   capitalised,
 } from "./utils.js";
 import fs from "fs";
-import { DBType, ORMType } from "../../../../types.js";
+import { ComponentLibType, DBType, ORMType } from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
 
 // 1. Create app/api/auth/[...nextauth].ts
@@ -306,8 +306,41 @@ export const verificationTokens = sqliteTable(
 };
 
 // 5. create components/auth/SignIn.tsx
-export const createSignInComponent = () => {
-  return `"use client";
+export const createSignInComponent = (componentLib: ComponentLibType) => {
+  if (componentLib === "shadcn-ui") {
+    return `"use client";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { Button } from "../ui/button";
+
+export default function SignIn() {
+  const { data: session, status } = useSession();
+
+  if (status === "loading") return <div>Loading...</div>;
+
+  if (session) {
+    return (
+      <div className="space-y-3">
+        <p>
+          Signed in as{" "}
+          <span className="font-medium">{session.user?.email}</span>
+        </p>
+        <Button variant={"destructive"} onClick={() => signOut()}>
+          Sign out
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-3">
+      <p>Not signed in </p>
+      <Button onClick={() => signIn()}>Sign in</Button>
+    </div>
+  );
+}
+`;
+  } else {
+    return `
+"use client";
 import { useSession, signIn, signOut } from "next-auth/react";
 
 export default function SignIn() {
@@ -317,20 +350,34 @@ export default function SignIn() {
 
   if (session) {
     return (
-      <>
-        Signed in as {session.user?.email} <br />
-        <button onClick={() => signOut()}>Sign out</button>
-      </>
+      <div className="space-y-3">
+        <p>
+          Signed in as{" "}
+          <span className="font-medium">{session.user?.email}</span>
+        </p>
+        <button
+          onClick={() => signOut()}
+          className="py-2.5 px-3.5 rounded-md bg-red-500 text-white hover:opacity-80 text-sm"
+        >
+          Sign out
+        </button>
+      </div>
     );
   }
   return (
-    <>
-      Not signed in <br />
-      <button onClick={() => signIn()}>Sign in</button>
-    </>
+    <div className="space-y-3">
+      <p>Not signed in </p>
+      <button
+        onClick={() => signIn()}
+        className="bg-slate-900 py-2.5 px-3.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity"
+      >
+        Sign in
+      </button>
+    </div>
   );
 }
 `;
+  }
 };
 
 // 6. updateTrpcTs
@@ -442,11 +489,19 @@ model VerificationToken {
 };
 
 export const generateUpdatedRootRoute = () => {
-  return `import SignIn from "@/components/auth/SignIn";
+  return `
+import SignIn from "@/components/auth/SignIn";
+import { getUserAuth } from "@/lib/auth/utils";
 
-export default function Home() {
+export default async function Home() {
+  const { session } = await getUserAuth();
   return (
-    <main className="pt-4">
+    <main className="space-y-4 pt-2">
+      {session ? (
+        <pre className="bg-slate-100 dark:bg-slate-800 p-6">
+          {JSON.stringify(session, null, 2)}
+        </pre>
+      ) : null}
       <SignIn />
     </main>
   );

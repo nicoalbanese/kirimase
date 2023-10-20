@@ -1,4 +1,4 @@
-import { ORMType } from "../../../../types.js";
+import { AuthType, ORMType } from "../../../../types.js";
 
 export const createUserSettingsComponent = () => {
   return `"use client";
@@ -436,7 +436,11 @@ export async function PUT(request: Request) {
   }
 };
 
-export const createNavbar = (withShadcn: boolean, usingClerk = false) => {
+export const createNavbar = (
+  withShadcn: boolean,
+  usingClerk = false,
+  auth: AuthType
+) => {
   if (withShadcn) {
     return `import { getUserAuth } from "@/lib/auth/utils";
 import Link from "next/link";${
@@ -450,8 +454,11 @@ import Link from "next/link";${
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import SignOutBtn from "@/components/auth/SignOutBtn";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";${
+            auth === "next-auth"
+              ? ""
+              : `\nimport SignOutBtn from "@/components/auth/SignOutBtn";`
+          }
 `
     }
 import { ModeToggle } from "@/components/ui/ThemeToggle";
@@ -502,9 +509,17 @@ export default async function Navbar() {
                     Account
                   </DropdownMenuItem>
                 </Link>
-                <DropdownMenuItem>
-                  <SignOutBtn />
-                </DropdownMenuItem>
+                ${
+                  auth === "next-auth"
+                    ? `<Link href="/api/auth/signout">
+                  <DropdownMenuItem className="cursor-pointer">
+                    Sign out
+                  </DropdownMenuItem>
+                </Link>`
+                    : `<DropdownMenuItem>
+                  <SignOutBtn />  
+                </DropdownMenuItem>`
+                }
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (

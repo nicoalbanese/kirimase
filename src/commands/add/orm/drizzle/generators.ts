@@ -431,9 +431,7 @@ export const addScriptsToPackageJson = (
 
   const newItems = {
     "db:generate": `drizzle-kit generate:${driver}`,
-    "db:migrate": `${
-      preferredPackageManager === "bun" ? "bun run" : "tsx"
-    } ${libPath}/db/migrate.ts`,
+    "db:migrate": `tsx ${libPath}/db/migrate.ts`,
     "db:drop": `drizzle-kit drop`,
     "db:pull": `drizzle-kit introspect:${driver}`,
     ...(driver !== "pg" ? { "db:push": `drizzle-kit push:${driver}` } : {}),

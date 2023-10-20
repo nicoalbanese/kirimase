@@ -66,7 +66,7 @@ export const scaffoldAccountSettingsUI = async (
   // create navbar component
   createFile(
     rootPath.concat("components/Navbar.tsx"),
-    createNavbar(withShadCn, auth === "clerk")
+    createNavbar(withShadCn, auth === "clerk", auth)
   );
   if (withShadCn) {
     createFile(

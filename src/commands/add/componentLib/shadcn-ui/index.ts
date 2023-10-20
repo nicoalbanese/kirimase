@@ -101,7 +101,7 @@ export const installShadcnUI = async (
   ]);
   addContextProviderToLayout("ShadcnToast");
 
-  if (packages.includes("next-auth")) updateSignInComponentWithShadcnUI();
+  // if (packages.includes("next-auth")) updateSignInComponentWithShadcnUI();
 };
 
 export const updateSignInComponentWithShadcnUI = () => {

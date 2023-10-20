@@ -41,6 +41,7 @@ export const addNextAuth = async () => {
     driver,
     packages,
     orm,
+    componentLib,
     provider: dbProvider,
   } = readConfigFile();
   const rootPath = `${hasSrc ? "src/" : ""}`;
@@ -73,14 +74,10 @@ export const addNextAuth = async () => {
   }
 
   // 5. create components/auth/SignIn.tsx
-  if (packages.includes("shadcn-ui")) {
-    updateSignInComponentWithShadcnUI();
-  } else {
-    createFile(
-      rootPath.concat("components/auth/SignIn.tsx"),
-      createSignInComponent()
-    );
-  }
+  createFile(
+    rootPath.concat("components/auth/SignIn.tsx"),
+    createSignInComponent(componentLib)
+  );
 
   // 6. If trpc installed, add protectedProcedure
   if (packages.includes("trpc")) {
