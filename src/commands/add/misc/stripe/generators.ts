@@ -1,3 +1,4 @@
+import { DBType } from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
 
 export const generateStripeIndexTs = () => {
@@ -10,7 +11,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
 `;
 };
 
-export const generateStripeSubscriptionTs = () => {
+export const generateStripeSubscriptionTsOld = () => {
   const { orm } = readConfigFile();
   let userSelect: string;
   switch (orm) {
@@ -582,7 +583,7 @@ export default async function Billing() {
 }
 `;
   } else {
-    return `import { ManageUserSubscriptionButton } from "./ManageUserSubscription";
+    return `import { ManageUserSubscriptionButton } from "./ManageSubscription";
 import { storeSubscriptionPlans } from "@/config/subscriptions";
 import { checkAuth, getUserAuth } from "@/lib/auth/utils";
 import { getUserSubscriptionPlan } from "@/lib/stripe/subscription";
@@ -696,7 +697,7 @@ export default async function Billing() {
   }
 };
 
-export const generateStripeWebhook = () => {
+export const generateStripeWebhookOld = () => {
   const { orm } = readConfigFile();
 
   let dbCalls = { one: "", two: "", three: "" };
@@ -862,6 +863,317 @@ export async function POST(req: Request) {
   return new Response(JSON.stringify({ url: stripeSession.url }), {
     status: 200,
   });
+}
+`;
+};
+
+export const generateSubscriptionsDrizzleSchema = (driver: DBType) => {
+  // add references for pg and sqlite
+  switch (driver) {
+    case "pg":
+      return `import {
+  pgTable,
+  primaryKey,
+  timestamp,
+  varchar,
+} from "drizzle-orm/pg-core";
+import { users } from "./auth";
+
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    userId: varchar("user_id", { length: 255 })
+      .unique()
+      .references(() => users.id),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
+    stripeSubscriptionId: varchar("stripe_subscription_id", {
+      length: 255,
+    }).unique(),
+    stripePriceId: varchar("stripe_price_id", { length: 255 }),
+    stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
+  },
+  (table) => {
+    return {
+      pk: primaryKey(table.userId, table.stripeCustomerId),
+    };
+  }
+);
+`;
+    case "mysql":
+      return `import {
+  mysqlTable,
+  primaryKey,
+  timestamp,
+  varchar,
+} from "drizzle-orm/mysql-core";
+
+export const subscriptions = mysqlTable(
+  "subscriptions",
+  {
+    userId: varchar("user_id", { length: 255 }).unique(),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
+    stripeSubscriptionId: varchar("stripe_subscription_id", {
+      length: 255,
+    }).unique(),
+    stripePriceId: varchar("stripe_price_id", { length: 255 }),
+    stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
+  },
+  (table) => {
+    return {
+      pk: primaryKey(table.userId, table.stripeCustomerId),
+    };
+  }
+);
+`;
+    case "sqlite":
+      return `import {
+  sqliteTable,
+  primaryKey,
+  integer,
+  text
+} from "drizzle-orm/sqlite-core";
+import { users } from "./auth";
+
+export const subscriptions = sqliteTable(
+  "subscriptions",
+  {
+    userId: text("user_id")
+      .unique()
+      .references(() => users.id),
+    stripeCustomerId: text("stripe_customer_id").unique(),
+    stripeSubscriptionId: text("stripe_subscription_id").unique(),
+    stripePriceId: text("stripe_price_id"),
+    stripeCurrentPeriodEnd: integer("stripe_current_period_end", {
+       mode: "timestamp",
+    }),
+  },
+  (table) => {
+    return {
+      pk: primaryKey(table.userId, table.stripeCustomerId),
+    };
+  }
+);
+`;
+  }
+};
+
+export const generateStripeWebhook = () => {
+  const { orm } = readConfigFile();
+
+  let dbCalls = { one: "", two: "", three: "" };
+
+  switch (orm) {
+    case "drizzle":
+      dbCalls.one = `const [sub] = await db
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.userId, session.metadata.userId));
+      if (sub != undefined) {
+        await db
+          .update(subscriptions)
+          .set(updatedData)
+          .where(eq(subscriptions.userId, sub.userId!));
+      } else {
+        await db
+          .insert(subscriptions)
+          .values({ ...updatedData, userId: session.metadata.userId });
+      }
+`;
+      dbCalls.two = `await db
+        .update(subscriptions)
+        .set(updatedData)
+        .where(eq(subscriptions.stripeCustomerId, session.customer));
+`;
+      dbCalls.three = `await db
+      .update(subscriptions)
+      .set({
+        stripePriceId: subscription.items.data[0].price.id,
+        stripeCurrentPeriodEnd: new Date(
+          subscription.current_period_end * 1000
+        ),
+      })
+      .where(eq(subscriptions.stripeSubscriptionId, subscription.id));
+`;
+      break;
+    case "prisma":
+      dbCalls.one = `await db.subscription.upsert({
+        where: { userId: session.metadata.userId },
+        update: { ...updatedData, userId: session.metadata.userId },
+        create: { ...updatedData, userId: session.metadata.userId },
+      });`;
+      dbCalls.two = `await db.subscription.update({
+        where: { stripeCustomerId: session.customer },
+        data: updatedData,
+      });`;
+      dbCalls.three = `await db.subscription.update({
+      where: {
+        stripeSubscriptionId: subscription.id,
+      },
+      data: {
+        stripePriceId: subscription.items.data[0].price.id,
+        stripeCurrentPeriodEnd: new Date(
+          subscription.current_period_end * 1000
+        ),
+      },
+    });`;
+      break;
+  }
+
+  return `import { db } from "@/lib/db";
+import { stripe } from "@/lib/stripe";
+import { headers } from "next/headers";
+import type Stripe from "stripe";${
+    orm === "drizzle"
+      ? '\nimport { subscriptions } from "@/lib/db/schema/subscriptions";\nimport { eq } from "drizzle-orm";'
+      : ""
+  }
+
+export async function POST(request: Request) {
+  const body = await request.text();
+  const signature = headers().get("Stripe-Signature") ?? "";
+
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET || ""
+    );
+    console.log(event.type);
+  } catch (err) {
+    return new Response(
+      \`Webhook Error: \${err instanceof Error ? err.message : "Unknown Error"}\`,
+      { status: 400 }
+    );
+  }
+
+  const session = event.data.object as Stripe.Checkout.Session;
+  // console.log("this is the session metadata -> ", session);
+
+  if (!session?.metadata?.userId && session.customer == null) {
+    console.error("session customer", session.customer);
+    console.error("no metadata for userid");
+    return new Response(null, {
+      status: 200,
+    });
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const subscription = await stripe.subscriptions.retrieve(
+      session.subscription as string
+    );
+    const updatedData = {
+      stripeSubscriptionId: subscription.id,
+      stripeCustomerId: subscription.customer as string,
+      stripePriceId: subscription.items.data[0].price.id,
+      stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+    };
+
+    if (session?.metadata?.userId != null) {
+      ${dbCalls.one}
+    } else if (
+      typeof session.customer === "string" &&
+      session.customer != null
+    ) {
+      ${dbCalls.two}
+    }
+  }
+
+  if (event.type === "invoice.payment_succeeded") {
+    // Retrieve the subscription details from Stripe.
+    const subscription = await stripe.subscriptions.retrieve(
+      session.subscription as string
+    );
+
+    // Update the price id and set the new period end.
+    ${dbCalls.three}
+  }
+
+  return new Response(null, { status: 200 });
+}
+`;
+};
+
+export const generateStripeSubscriptionTs = () => {
+  const { orm } = readConfigFile();
+  let subSelect: string;
+  switch (orm) {
+    case "drizzle":
+      subSelect = `db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.userId, session.user.id));`;
+      break;
+    case "prisma":
+      subSelect = `db.subscription.findFirst({
+    where: {
+      userId: session.user.id,
+    },
+  });`;
+  }
+
+  return `import { storeSubscriptionPlans } from "@/config/subscriptions";
+import { db } from "@/lib/db";${
+    orm === "drizzle"
+      ? '\nimport { subscriptions } from "@/lib/db/schema/subscriptions";\nimport { eq } from "drizzle-orm";'
+      : ""
+  }
+import { stripe } from "@/lib/stripe";
+import { getUserAuth } from "../auth/utils";
+
+export async function getUserSubscriptionPlan() {
+  const { session } = await getUserAuth();
+
+  if (!session || !session.user) {
+    throw new Error("User not found.");
+  }
+
+  const ${
+    orm === "drizzle" ? "[ subscription ]" : "subscription"
+  } = await ${subSelect}
+
+  if (!subscription)
+    return {
+      id: undefined,
+      name: undefined,
+      description: undefined,
+      stripePriceId: undefined,
+      price: undefined,
+      stripeSubscriptionId: undefined,
+      stripeCurrentPeriodEnd: undefined,
+      stripeCustomerId: undefined,
+      isSubscribed: false,
+      isCanceled: false,
+    };
+
+  const isSubscribed =
+    subscription.stripePriceId &&
+    subscription.stripeCurrentPeriodEnd &&
+    subscription.stripeCurrentPeriodEnd.getTime() + 86_400_000 > Date.now();
+
+  const plan = isSubscribed
+    ? storeSubscriptionPlans.find(
+        (plan) => plan.stripePriceId === subscription.stripePriceId
+      )
+    : null;
+
+  let isCanceled = false;
+  if (isSubscribed && subscription.stripeSubscriptionId) {
+    const stripePlan = await stripe.subscriptions.retrieve(
+      subscription.stripeSubscriptionId
+    );
+    isCanceled = stripePlan.cancel_at_period_end;
+  }
+
+  return {
+    ...plan,
+    stripeSubscriptionId: subscription.stripeSubscriptionId,
+    stripeCurrentPeriodEnd: subscription.stripeCurrentPeriodEnd,
+    stripeCustomerId: subscription.stripeCustomerId,
+    isSubscribed,
+    isCanceled,
+  };
 }
 `;
 };

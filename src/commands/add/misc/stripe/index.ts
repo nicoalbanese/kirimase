@@ -1,13 +1,13 @@
 // STRIPE
 // Add attributes to user model [done]
-// create stripe/index file
-// create stripe/subscription file
-// create config/subscriptions.ts
-// add billingcard to accountpage with billing card
-// create api/webhooks/route.ts
-// create api/billing/manage-subscription/route.ts
-// update account/page.tsx
-// create account/billing/page.tsx
+// create stripe/index file [done]
+// create stripe/subscription file [done]
+// create config/subscriptions.ts [done]
+// add billingcard to accountpage with billing card [done]
+// create api/webhooks/route.ts [done]
+// create api/billing/manage-subscription/route.ts [done]
+// update account/page.tsx [done]
+// create account/billing/page.tsx [done]
 // add package json script [done]
 // add to .env (STRIPE_SECRET_KEY,NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,STRIPE_WEBHOOK_SECRET,NEXT_PUBLIC_STRIPE_MOBILE_PRICE_ID) [done]
 // install packages [done]
@@ -26,6 +26,7 @@ import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import {
   addToPrismaModel,
   addToPrismaModelBulk,
+  addToPrismaSchema,
 } from "../../../generate/utils.js";
 import { addToDrizzleModel } from "../../orm/drizzle/utils.js";
 import {
@@ -38,12 +39,14 @@ import {
   generateStripeIndexTs,
   generateStripeSubscriptionTs,
   generateStripeWebhook,
+  generateSubscriptionsDrizzleSchema,
   generateSuccessToast,
 } from "./generators.js";
 import { addPackage } from "../../index.js";
+import { updateClerkMiddlewareForStripe } from "../../auth/clerk/utils.js";
 
 export const addStripe = async () => {
-  const { componentLib, preferredPackageManager, rootPath, orm, driver } =
+  const { componentLib, preferredPackageManager, rootPath, orm, driver, auth } =
     readConfigFile();
 
   if (orm === null || orm === undefined) {
@@ -56,57 +59,77 @@ export const addStripe = async () => {
     preferredPackageManager
   );
 
+  if (auth === "clerk") {
+    updateClerkMiddlewareForStripe(rootPath);
+  }
+
   // add attributes to usermodel
   if (orm === "prisma") {
-    addToPrismaModelBulk(
-      "User",
-      `\nstripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
+    addToPrismaSchema(
+      `model Subscription {
+  userId                 String    @unique${
+    auth !== "clerk"
+      ? `\n  user                   User      @relation(fields: [userId], references: [id])`
+      : ""
+  }
+  stripeCustomerId       String    @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
   stripePriceId          String?   @map(name: "stripe_price_id")
   stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
-`
+
+  @@id([userId, stripeCustomerId])
+}
+`,
+      "Subscription"
     );
+    if (auth !== "clerk") {
+      addToPrismaModelBulk("User", "\n  subscription Subscription?");
+    }
   }
   if (orm === "drizzle") {
-    let keysToAdd: string;
-    let additionalCoreTypesToImport: string[];
-    switch (driver) {
-      case "pg":
-        keysToAdd = `  
-  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
-  stripeSubscriptionId: varchar("stripe_subscription_id", {
-    length: 255,
-  }).unique(),
-  stripePriceId: varchar("stripe_price_id", { length: 255 }),
-  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
-`;
-        additionalCoreTypesToImport = ["timestamp"];
-        break;
-      case "mysql":
-        keysToAdd = `  
-  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
-  stripeSubscriptionId: varchar("stripe_subscription_id", {
-    length: 255,
-  }).unique(),
-  stripePriceId: varchar("stripe_price_id", { length: 255 }),
-  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
-`;
-        additionalCoreTypesToImport = ["timestamp"];
-        break;
-      case "sqlite":
-        keysToAdd = `
-  stripeCustomerId: text("stripe_customer_id").unique(),
-  stripeSubscriptionId: text("stripe_subscription_id").unique(),
-  stripePriceId: text("stripe_price_id"),
-  stripeCurrentPeriodEnd: integer("stripe_current_period_end", {
-    mode: "timestamp",
-  }),
-`;
-        additionalCoreTypesToImport = ["integer"];
-        break;
-    }
-
-    addToDrizzleModel("users", keysToAdd, additionalCoreTypesToImport); // HERE
+    //     let keysToAdd: string;
+    //     let additionalCoreTypesToImport: string[];
+    //     switch (driver) {
+    //       case "pg":
+    //         keysToAdd = `
+    //   stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
+    //   stripeSubscriptionId: varchar("stripe_subscription_id", {
+    //     length: 255,
+    //   }).unique(),
+    //   stripePriceId: varchar("stripe_price_id", { length: 255 }),
+    //   stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
+    // `;
+    //         additionalCoreTypesToImport = ["timestamp"];
+    //         break;
+    //       case "mysql":
+    //         keysToAdd = `
+    //   stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
+    //   stripeSubscriptionId: varchar("stripe_subscription_id", {
+    //     length: 255,
+    //   }).unique(),
+    //   stripePriceId: varchar("stripe_price_id", { length: 255 }),
+    //   stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
+    // `;
+    //         additionalCoreTypesToImport = ["timestamp"];
+    //         break;
+    //       case "sqlite":
+    //         keysToAdd = `
+    //   stripeCustomerId: text("stripe_customer_id").unique(),
+    //   stripeSubscriptionId: text("stripe_subscription_id").unique(),
+    //   stripePriceId: text("stripe_price_id"),
+    //   stripeCurrentPeriodEnd: integer("stripe_current_period_end", {
+    //     mode: "timestamp",
+    //   }),
+    // `;
+    //         additionalCoreTypesToImport = ["integer"];
+    //         break;
+    //     }
+    //
+    //     addToDrizzleModel("users", keysToAdd, additionalCoreTypesToImport); // HERE
+    createFile(
+      rootPath.concat("lib/db/schema/subscriptions.ts"),
+      generateSubscriptionsDrizzleSchema(driver)
+    );
   }
 
   // create stripe/index file
