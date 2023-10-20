@@ -21,10 +21,12 @@ export const createAccountSettingsPage = async () => {
   const { orm, rootPath, componentLib, auth } = readConfigFile();
   const withShadCn = componentLib === "shadcn-ui" ? true : false;
   // create account api
-  createFile(
-    rootPath.concat("app/api/account/route.ts"),
-    createAccountApiTs(orm)
-  );
+  if (auth !== "clerk") {
+    createFile(
+      rootPath.concat("app/api/account/route.ts"),
+      createAccountApiTs(orm)
+    );
+  }
 
   // create account page
   createFile(rootPath.concat("app/account/page.tsx"), createAccountPage());
@@ -74,7 +76,6 @@ export const scaffoldAccountSettingsUI = async (
   }
   // add navbar to root layout
   addContextProviderToLayout("Navbar");
-
   if (withShadCn) {
     consola.start("Installing Card component for account page...");
     await installShadcnUIComponents(["card", "input", "label"]);
