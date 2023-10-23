@@ -129,6 +129,7 @@ import {
 } from "./AccountCard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { AuthSession } from "@/lib/auth/utils";
 
 interface PlanSettingsProps {
   stripeSubscriptionId: string | null;
@@ -144,10 +145,10 @@ interface PlanSettingsProps {
 }
 export default function PlanSettings({
   subscriptionPlan,
-  user,
+  session,
 }: {
   subscriptionPlan: PlanSettingsProps;
-  user: { name?: string; id: string; email?: string };
+  session: AuthSession["session"];
 }) {
   return (
     <AccountCard
@@ -156,7 +157,7 @@ export default function PlanSettings({
         description: subscriptionPlan.isSubscribed
           ? \`You are currently on the \${subscriptionPlan.name} plan.\`
           : \`You are not subscribed to any plan.\`.concat(
-              !user.email || user.email.length < 5
+              !session?.user?.email || session?.user?.email.length < 5
                 ? " Please add your email to upgrade your account."
                 : ""
             ),

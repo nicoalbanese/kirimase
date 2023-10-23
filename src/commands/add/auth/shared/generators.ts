@@ -4,16 +4,17 @@ export const createUserSettingsComponent = () => {
   return `"use client";
 import UpdateNameCard from "./UpdateNameCard";
 import UpdateEmailCard from "./UpdateEmailCard";
+import { AuthSession } from "@/lib/auth/utils";
 
 export default function UserSettings({
-  user,
+  session,
 }: {
-  user: { name?: string; email?: string };
+  session: AuthSession["session"];
 }) {
   return (
     <>
-      <UpdateNameCard name={user.name ?? ""} />
-      <UpdateEmailCard email={user.email ?? ""} />
+      <UpdateNameCard name={session?.user.name ?? ""} />
+      <UpdateEmailCard email={session?.user.email ?? ""} />
     </>
   );
 }
@@ -385,7 +386,7 @@ export default async function Account() {
         withStripe
           ? `\n        <PlanSettings
           subscriptionPlan={subscriptionPlan}
-          user={session?.user!}
+          session={session}
         />
 `
           : ""
