@@ -19,7 +19,7 @@
     <img src="https://github.com/nicoalbanese/gifs_for_demos/blob/main/Screenshot%202023-10-15%20at%2010.36.02.png?raw=true" alt="Kirimase Demo" width="420" />
   </p>
 </a>
-<a href="https://twitter.com/nicoalbanese10/status/1704848924576821605" target="_blank">
+<a href="https://twitter.com/nicoalbanese10/status/1716505867107938392" target="_blank">
   <p align="center">Watch the most recent demo here</p>
 </a>
 
