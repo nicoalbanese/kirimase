@@ -28,6 +28,7 @@ import {
   addToPrismaSchema,
 } from "../../../generate/utils.js";
 import {
+  createAccountTRPCRouter,
   generateAccountPage,
   generateBillingCard,
   generateBillingPage,
