@@ -384,11 +384,7 @@ export default async function Account() {
       <h1 className="text-3xl font-semibold my-6">Account</h1>
       <div className="space-y-6">${
         withStripe
-          ? `\n        <PlanSettings
-          subscriptionPlan={subscriptionPlan}
-          session={session}
-        />
-`
+          ? `\n        <PlanSettings subscriptionPlan={subscriptionPlan} session={session} />`
           : ""
       }
         <UserSettings session={session} />

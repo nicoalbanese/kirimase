@@ -13,7 +13,7 @@ const generateViewsAndComponents = (withShadCn: boolean) => {
   const loadingPage = generateLoadingPage();
   return { signUpPage, signInPage, authFormComponent, homePage, loadingPage };
 };
-const generateLoadingPage = () => {
+export const generateLoadingPage = () => {
   return `export default function Loading() {
   return (
     <div className="grid place-items-center animate-pulse text-zinc-300 pt-4">

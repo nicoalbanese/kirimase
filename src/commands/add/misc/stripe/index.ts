@@ -45,6 +45,7 @@ import { addPackage } from "../../index.js";
 import { updateClerkMiddlewareForStripe } from "../../auth/clerk/utils.js";
 import { AvailablePackage } from "../../../../types.js";
 import { updateTRPCRouter } from "../../../generate/generators/trpcRoute.js";
+import { createAccountPage } from "../../auth/shared/generators.js";
 
 export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   const {
@@ -172,7 +173,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     );
 
   // add billingcard to accountpage with billing card TODO
-  replaceFile(rootPath.concat("app/account/page.tsx"), generateAccountPage());
+  replaceFile(rootPath.concat("app/account/page.tsx"), createAccountPage(true));
   // create account/billing/page.tsx
   createFile(
     rootPath.concat("app/account/billing/page.tsx"),

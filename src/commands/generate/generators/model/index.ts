@@ -40,30 +40,30 @@ export async function scaffoldModel(
   createFile(mutationPath, generateMutationContent(schema, driver, orm));
 
   // migrate db
-  const migrate = await confirm({
-    message: "Would you like to generate the migration and migrate the DB?",
-  });
-  if (!migrate) return;
-  if (orm === "drizzle") {
-    await runCommand(preferredPackageManager, ["run", "db:generate"]);
-    driver === "sqlite"
-      ? await runCommand(preferredPackageManager, ["run", "db:push"])
-      : await runCommand(preferredPackageManager, ["run", "db:migrate"]);
-  }
-  if (orm === "prisma") {
-    driver === "sqlite"
-      ? await runCommand(preferredPackageManager, [
-          "run",
-          "prisma",
-          "db",
-          "push",
-        ])
-      : await runCommand(preferredPackageManager, [
-          "run",
-          "prisma",
-          "migrate",
-          "dev",
-        ]);
-  }
+  // const migrate = await confirm({
+  //   message: "Would you like to generate the migration and migrate the DB?",
+  // });
+  // if (!migrate) return;
+  // if (orm === "drizzle") {
+  //   await runCommand(preferredPackageManager, ["run", "db:generate"]);
+  //   driver === "sqlite"
+  //     ? await runCommand(preferredPackageManager, ["run", "db:push"])
+  //     : await runCommand(preferredPackageManager, ["run", "db:migrate"]);
+  // }
+  // if (orm === "prisma") {
+  //   driver === "sqlite"
+  //     ? await runCommand(preferredPackageManager, [
+  //         "run",
+  //         "prisma",
+  //         "db",
+  //         "push",
+  //       ])
+  //     : await runCommand(preferredPackageManager, [
+  //         "run",
+  //         "prisma",
+  //         "migrate",
+  //         "dev",
+  //       ]);
+  // }
   consola.success("Successfully added model to your database!");
 }

@@ -457,9 +457,9 @@ export default async function Account() {
       <div className="space-y-6">
         <PlanSettings
           subscriptionPlan={subscriptionPlan}
-          user={session?.user!}
+          session={session}
         />
-        <UserSettings user={session?.user!} />
+        <UserSettings session={session} />
       </div>
     </main>
   );

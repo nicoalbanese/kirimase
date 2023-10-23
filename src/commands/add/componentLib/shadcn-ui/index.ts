@@ -14,6 +14,7 @@ import {
 import { AvailablePackage, PMType } from "../../../../types.js";
 import { addContextProviderToLayout } from "../../utils.js";
 import { shadcnGenerators } from "./generators.js";
+import { generateLoadingPage } from "../../auth/lucia/generators.js";
 
 const manualInstallShadCn = async (
   preferredPackageManager: PMType,
@@ -44,6 +45,8 @@ const manualInstallShadCn = async (
   createFile(rootPath.concat("lib/utils.ts"), generateLibUtilsTs());
   // create components.json
   createFile("components.json", generateComponentsJson(rootPath));
+
+  createFile(rootPath.concat("app/loading.tsx"), generateLoadingPage());
 
   // todo: install theme switcher
   // create theme provider
