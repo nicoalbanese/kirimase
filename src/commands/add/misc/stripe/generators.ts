@@ -5,7 +5,7 @@ export const generateStripeIndexTs = () => {
   return `import Stripe from "stripe";
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2023-08-16",
+  apiVersion: "2023-10-16",
   typescript: true,
 });
 `;
@@ -1143,9 +1143,9 @@ export async function getUserSubscriptionPlan() {
       description: undefined,
       stripePriceId: undefined,
       price: undefined,
-      stripeSubscriptionId: undefined,
-      stripeCurrentPeriodEnd: undefined,
-      stripeCustomerId: undefined,
+      stripeSubscriptionId: null,
+      stripeCurrentPeriodEnd: null,
+      stripeCustomerId: null,
       isSubscribed: false,
       isCanceled: false,
     };
@@ -1178,5 +1178,22 @@ export async function getUserSubscriptionPlan() {
     isCanceled,
   };
 }
+`;
+};
+
+export const createAccountTRPCRouter = () => {
+  return `import { getUserAuth } from "@/lib/auth/utils";
+import { publicProcedure, router } from "../trpc";
+import { getUserSubscriptionPlan } from "@/lib/stripe/subscription";
+export const accountRouter = router({
+  getUser: publicProcedure.query(async () => {
+    const { session } = await getUserAuth();
+    return session;
+  }),
+  getSubscription: publicProcedure.query(async () => {
+    const sub = await getUserSubscriptionPlan();
+    return sub;
+  }),
+});
 `;
 };

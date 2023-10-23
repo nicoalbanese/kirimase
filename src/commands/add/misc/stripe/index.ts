@@ -42,10 +42,21 @@ import {
 } from "./generators.js";
 import { addPackage } from "../../index.js";
 import { updateClerkMiddlewareForStripe } from "../../auth/clerk/utils.js";
+import { AvailablePackage } from "../../../../types.js";
+import { updateTRPCRouter } from "../../../generate/generators/trpcRoute.js";
 
-export const addStripe = async () => {
-  const { componentLib, preferredPackageManager, rootPath, orm, driver, auth } =
-    readConfigFile();
+export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
+  const {
+    componentLib,
+    preferredPackageManager,
+    rootPath,
+    orm,
+    driver,
+    auth,
+    packages: installedPackages,
+  } = readConfigFile();
+
+  const packages = packagesBeingInstalled.concat(installedPackages);
 
   if (orm === null || orm === undefined) {
     await addPackage();
@@ -195,6 +206,15 @@ export const addStripe = async () => {
   // misc script updates
   addListenScriptToPackageJson();
   addPackageToConfig("stripe");
+
+  if (packages.includes("trpc")) {
+    createFile(
+      rootPath.concat("lib/server/routers/account.ts"),
+      createAccountTRPCRouter()
+    );
+    // add to main trpc router
+    updateTRPCRouter("account");
+  }
 };
 
 const addListenScriptToPackageJson = () => {

@@ -98,7 +98,8 @@ export const addPackage = async () => {
         await installShadcnUI(packageToInstall);
       if (packageToInstall.includes("resend"))
         await addResend(packageToInstall);
-      if (packageToInstall.includes("stripe")) await addStripe();
+      if (packageToInstall.includes("stripe"))
+        await addStripe(packageToInstall);
     } else {
       consola.info("All available packages are already installed");
     }

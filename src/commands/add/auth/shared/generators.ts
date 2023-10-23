@@ -390,7 +390,7 @@ export default async function Account() {
 `
           : ""
       }
-        <UserSettings user={session?.user!} />
+        <UserSettings session={session} />
       </div>
     </main>
   );

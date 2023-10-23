@@ -42,7 +42,7 @@ export const scaffoldTRPCRoute = async (schema: Schema) => {
 //   consola.success(`Added ${routerName} router to root router successfully.`);
 // }
 
-function updateTRPCRouter(routerName: string): void {
+export function updateTRPCRouter(routerName: string): void {
   const { hasSrc } = readConfigFile();
   const filePath = `${hasSrc ? "src/" : ""}lib/server/routers/_app.ts`;
 
