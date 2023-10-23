@@ -14,7 +14,7 @@
 <p align="center">Kirimase is a command-line tool for <strong>building full-stack Next.js apps faster</strong>. It supercharges your development workflow, allowing you to quickly integrate packages and scaffold resources for your application with best practices in mind.</p>
 
 <br />
-<a href="https://twitter.com/nicoalbanese10/status/1704848924576821605" target="_blank">
+<a href="https://twitter.com/nicoalbanese10/status/1716505867107938392" target="_blank">
   <p align="center">
     <img src="https://github.com/nicoalbanese/gifs_for_demos/blob/main/Screenshot%202023-10-15%20at%2010.36.02.png?raw=true" alt="Kirimase Demo" width="420" />
   </p>
