@@ -51,7 +51,8 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
       createModalComponent(schema)
     );
     // install shadcn packages (button, dialog, form, input, label) - exec script: pnpm dlx shadcn-ui@latest add _
-    const baseComponents = ["button", "dialog", "form", "input", "label"];
+    // const baseComponents = ["button", "dialog", "form", "input", "label"];
+    const baseComponents = ["dialog", "form"];
     schema.fields.filter((field) => field.type === "boolean").length > 0
       ? baseComponents.push("checkbox")
       : null;

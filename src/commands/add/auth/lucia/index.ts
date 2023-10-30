@@ -60,7 +60,7 @@ export const addLucia = async () => {
 
   if (componentLib === "shadcn-ui") {
     // await installShadcnUI(packages);
-    await installShadcnUIComponents(["input", "label"]);
+    // await installShadcnUIComponents(["input", "label"]);
     viewsAndComponents = generateViewsAndComponents(true);
   } else {
     viewsAndComponents = generateViewsAndComponents(false);

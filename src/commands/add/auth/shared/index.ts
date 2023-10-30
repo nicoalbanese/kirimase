@@ -78,6 +78,6 @@ export const scaffoldAccountSettingsUI = async (
   addContextProviderToLayout("Navbar");
   if (withShadCn) {
     consola.start("Installing Card component for account page...");
-    await installShadcnUIComponents(["card", "input", "label"]);
+    await installShadcnUIComponents(["card"]);
   }
 };

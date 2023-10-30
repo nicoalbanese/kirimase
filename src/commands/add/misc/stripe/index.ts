@@ -238,7 +238,6 @@ const addListenScriptToPackageJson = () => {
     ...packageJson.scripts,
     ...newItems,
   };
-  console.log("package json from listen script function", packageJson);
 
   // Stringify the updated content
   const updatedPackageJsonData = JSON.stringify(packageJson, null, 2);
