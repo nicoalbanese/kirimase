@@ -36,13 +36,13 @@ export const DrizzleAdapterDriverMappings: {
       import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "@/lib/db/index"`,
     },
     supabase: {
-      adapter: `adapter: pg(pool, {
+      adapter: `adapter: pg(db, {
 		user: "auth_user",
 		key: "user_key",
 		session: "user_session"
 	})`,
       adapterPackage: "@lucia-auth/adapter-postgresql",
-      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "@/lib/db/index"`,
+      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { db } from "@/lib/db/index"`,
     },
     postgresjs: {
       adapter: `adapter: postgresAdapter(client, {
