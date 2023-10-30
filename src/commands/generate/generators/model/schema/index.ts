@@ -240,7 +240,7 @@ const generatePrismaSchema = (
   }${generateIndexFields(schema, relations, usingPlanetscale)}
 }`;
   addToPrismaSchema(prismaSchemaContent, tableNameSingularCapitalised);
-  if (authType !== "clerk")
+  if (schema.belongsToUser && authType !== "clerk")
     addToPrismaModel(
       "User",
       `${tableNameCamelCase} ${tableNameSingularCapitalised}[]`
