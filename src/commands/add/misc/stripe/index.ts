@@ -204,7 +204,6 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   // misc script updates
   addListenScriptToPackageJson();
   // install packages
-  consola.info("INSTALLING PACKAGES FOR STRIPE");
   await installPackages(
     { dev: "", regular: "stripe @stripe/stripe-js lucide-react" },
     preferredPackageManager
