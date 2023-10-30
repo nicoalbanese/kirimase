@@ -1,7 +1,6 @@
 import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { consola } from "consola";
 import {
-  BuildOptions,
   DBField,
   DBType,
   DrizzleColumnType,
@@ -30,77 +29,63 @@ function provideInstructions() {
   );
 }
 
-async function askForResourceType(buildOptions?: BuildOptions) {
+async function askForResourceType() {
   const { packages, orm } = readConfigFile();
 
-  const resourcesRequested =
-    buildOptions?.resources ||
-    (await checkbox({
-      message: "Please select the resources you would like to generate:",
-      choices: [
-        {
-          name: "Model",
-          value: "model",
-          disabled:
-            orm === null
-              ? "[You need to have an orm installed. Run 'kirimase add']"
-              : false,
-        },
-        { name: "API Route", value: "api_route" },
-        {
-          name: "TRPC Route",
-          value: "trpc_route",
-          disabled: !packages.includes("trpc")
-            ? "[You need to have trpc installed. Run 'kirimase add']"
+  const resourcesRequested = await checkbox({
+    message: "Please select the resources you would like to generate:",
+    choices: [
+      {
+        name: "Model",
+        value: "model",
+        disabled:
+          orm === null
+            ? "[You need to have an orm installed. Run 'kirimase add']"
             : false,
-        },
-        {
-          name: "Views + Components (with Shadcn UI, requires TRPC route)",
-          value: "views_and_components",
-          disabled:
-            !packages.includes("shadcn-ui") || !packages.includes("trpc")
-              ? "[You need to have shadcn-ui and trpc installed. Run 'kirimase add']"
-              : false,
-        },
-      ],
-    }));
+      },
+      { name: "API Route", value: "api_route" },
+      {
+        name: "TRPC Route",
+        value: "trpc_route",
+        disabled: !packages.includes("trpc")
+          ? "[You need to have trpc installed. Run 'kirimase add']"
+          : false,
+      },
+      {
+        name: "Views + Components (with Shadcn UI, requires TRPC route)",
+        value: "views_and_components",
+        disabled:
+          !packages.includes("shadcn-ui") || !packages.includes("trpc")
+            ? "[You need to have shadcn-ui and trpc installed. Run 'kirimase add']"
+            : false,
+      },
+    ],
+  });
   return resourcesRequested;
 }
 
-async function askForTable(buildOptions?: BuildOptions) {
-  const tableName =
-    buildOptions?.table ||
-    (await input({
-      message: "Please enter the table name (plural and in snake_case):",
-      validate: (input) =>
-        input.match(/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/)
-          ? true
-          : "Table name must be in snake_case if more than one word, and plural.",
-    }));
+async function askForTable() {
+  const tableName = await input({
+    message: "Please enter the table name (plural and in snake_case):",
+    validate: (input) =>
+      input.match(/^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/)
+        ? true
+        : "Table name must be in snake_case if more than one word, and plural.",
+  });
   return tableName;
 }
 
-async function askIfBelongsToUser(buildOptions?: BuildOptions) {
-  const belongsToUser =
-    typeof buildOptions?.belongsToUser === "string"
-      ? buildOptions.belongsToUser === "yes"
-      : await confirm({
-          message: "Does this model belong to the user?",
-          default: true,
-        });
+async function askIfBelongsToUser() {
+  const belongsToUser = await confirm({
+    message: "Does this model belong to the user?",
+    default: true,
+  });
   return belongsToUser;
 }
 
-async function askForFields(
-  orm: ORMType,
-  dbType: DBType,
-  tableName: string,
-  buildOptions?: BuildOptions
-) {
+async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
   const fields: DBField[] = [];
   let addMore = true;
-
-  if (buildOptions?.field?.length) return buildOptions.field;
 
   while (addMore) {
     const currentSchemas = getCurrentSchemas();
@@ -179,14 +164,14 @@ async function askForFields(
   return fields;
 }
 
-async function askForIndex(fields: DBField[], buildOptions?: BuildOptions) {
-  const useIndex = typeof buildOptions?.index === 'string' || await confirm({
+async function askForIndex(fields: DBField[]) {
+  const useIndex = await confirm({
     message: "Would you like to set up an index?",
     default: false,
   });
 
   if (useIndex) {
-    const fieldToIndex = buildOptions?.index || await select({
+    const fieldToIndex = await select({
       message: "Which field would you like to index?",
       choices: fields.map((field) => {
         return {
@@ -214,7 +199,7 @@ export function preBuild() {
   return true;
 }
 
-export async function buildSchema(options: BuildOptions) {
+export async function buildSchema() {
   const ready = preBuild();
 
   if (!ready) return;
@@ -226,13 +211,13 @@ export async function buildSchema(options: BuildOptions) {
 
   if (orm !== null) {
     provideInstructions();
-    const resourceType = await askForResourceType(options);
-    const tableName = await askForTable(options);
-    const fields = await askForFields(orm, driver, tableName, options);
-    const indexedField = await askForIndex(fields, options);
+    const resourceType = await askForResourceType();
+    const tableName = await askForTable();
+    const fields = await askForFields(orm, driver, tableName);
+    const indexedField = await askForIndex(fields);
     let schema: Schema;
     if (resourceType.includes("model") && auth !== null) {
-      const belongsToUser = await askIfBelongsToUser(options);
+      const belongsToUser = await askIfBelongsToUser();
       schema = {
         tableName,
         fields,
@@ -248,7 +233,7 @@ export async function buildSchema(options: BuildOptions) {
       };
     }
 
-    if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc, options);
+    if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
     if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
     if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
     if (resourceType.includes("views_and_components"))

@@ -30,10 +30,12 @@ export const addPackage = async (options?: InitOptions) => {
     const nullOption = { name: "None", value: null };
 
     if (componentLib === undefined) {
-      const componentLibToInstall = (await select({
-        message: "Select a component library to use:",
-        choices: [...Packages.componentLib, new Separator(), nullOption],
-      })) as ComponentLibType | null;
+      const componentLibToInstall =
+        options?.componentLib ||
+        ((await select({
+          message: "Select a component library to use:",
+          choices: [...Packages.componentLib, new Separator(), nullOption],
+        })) as ComponentLibType | null);
 
       if (componentLibToInstall === "shadcn-ui") await installShadcnUI([]);
       if (componentLibToInstall === null) {
@@ -94,7 +96,7 @@ export const addPackage = async (options?: InitOptions) => {
     }
     if (uninstalledPackages.length > 0) {
       const packageToInstall =
-        options?.packages ||
+        options?.miscPackages ||
         (await checkbox({
           message: "Select any miscellaneous packages to add:",
           choices: uninstalledPackages,

@@ -1,5 +1,5 @@
 import { consola } from "consola";
-import { BuildOptions, DBType } from "../../../../types.js";
+import { DBType } from "../../../../types.js";
 import { createFile, readConfigFile, runCommand } from "../../../../utils.js";
 import { prismaFormat, prismaGenerate } from "../../../add/orm/utils.js";
 import { Schema } from "../../types.js";
@@ -12,8 +12,7 @@ import { confirm } from "@inquirer/prompts";
 export async function scaffoldModel(
   schema: Schema,
   dbType: DBType,
-  hasSrc: boolean,
-  buildOptions?: BuildOptions
+  hasSrc: boolean
 ) {
   const { tableName } = schema;
   const { orm, preferredPackageManager, driver } = readConfigFile();

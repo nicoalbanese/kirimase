@@ -17,28 +17,28 @@ addCommonOptions(program.command("init"))
 program
   .command("generate")
   .description("Generate a new resource")
-  .option("-r, --resources <resources...>", "resources")
-  .option("-t, --table <table>", "table")
-  .option("-b, --belongs-to-user <belongs-to-user>", "belongs to user")
-  .option("-i, --index <index>", "index")
-  .option("-m, --migrate <migrate>", "migrate")
-  .option(
-    "-f, --field <field>",
-    "fields. Format: name:type:references:not-null:cascade. Example: blog:string::true:true",
-    (value, previous) => {
-      const [name, type, references, notNull, cascade] = value.split(":");
-      const field: DBField = {
-        name,
-        type: type as ColumnType,
-        references,
-        notNull: notNull === "true",
-        cascade: cascade === "true",
-      };
-      previous.push(field);
-      return previous;
-    },
-    []
-  )
+  // .option("-r, --resources <resources...>", "resources")
+  // .option("-t, --table <table>", "table")
+  // .option("-b, --belongs-to-user <belongs-to-user>", "belongs to user")
+  // .option("-i, --index <index>", "index")
+  // .option("-m, --migrate <migrate>", "migrate")
+  // .option(
+  //   "-f, --field <field>",
+  //   "fields. Format: name:type:references:not-null:cascade. Example: blog:string::true:true",
+  //   (value, previous) => {
+  //     const [name, type, references, notNull, cascade] = value.split(":");
+  //     const field: DBField = {
+  //       name,
+  //       type: type as ColumnType,
+  //       references,
+  //       notNull: notNull === "true",
+  //       cascade: cascade === "true",
+  //     };
+  //     previous.push(field);
+  //     return previous;
+  //   },
+  //   []
+  // )
   .action(buildSchema);
 
 addCommonOptions(program.command("add"))
@@ -55,11 +55,27 @@ program.parse(process.argv);
 function addCommonOptions(command: Command) {
   return command
     .option("-sf, --has-src-folder <has>", "has a src folder")
-    .option("-pm, --package-manager <pm>", "preferred package manager")
-    .option("-o, --orm <orm>", "preferred orm")
-    .option("-db, --db <db>", "preferred database")
-    .option("-a, --auth <auth>", "preferred auth")
-    .option("-ap, --auth-providers <auth-providers...>", "auth providers")
-    .option("-p, --packages <packages...>", "packages")
-    .option("-ie, --include-example <include>", "include example");
+    .option(
+      "-pm, --package-manager <pm>",
+      "preferred package manager (npm, yarn, pnpm, bun)"
+    )
+    .option(
+      "-cl, --component-lib <component-lib>",
+      "preferred component library (shadcn-ui)"
+    )
+    .option("-o, --orm <orm>", "preferred orm (prisma, drizzle)")
+    .option("-db, --db <db>", "preferred database (pg, mysql, sqlite)")
+    .option("-a, --auth <auth>", "preferred auth (next-auth, clerk, lucia)")
+    .option(
+      "-ap, --auth-providers <auth-providers...>",
+      "auth providers (if using next-auth - discord, google, github, apple)"
+    )
+    .option(
+      "-mp, --misc-packages <packages...>",
+      "misc packages (resend, stripe, trpc)"
+    )
+    .option(
+      "-ie, --include-example <include>",
+      "include example model in schema"
+    );
 }
