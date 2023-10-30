@@ -1,5 +1,5 @@
 import { confirm, select } from "@inquirer/prompts";
-import { DBProvider, DBType } from "../../../../types.js";
+import { DBProvider, DBType, InitOptions } from "../../../../types.js";
 import {
   addPackageToConfig,
   createFolder,
@@ -21,13 +21,13 @@ import {
 } from "./generators.js";
 import { DBProviders } from "../../../init/utils.js";
 
-export const addDrizzle = async () => {
+export const addDrizzle = async (initOptions?: InitOptions) => {
   const { preferredPackageManager, hasSrc, rootPath } = readConfigFile();
 
   let libPath = "";
   hasSrc ? (libPath = "src/lib") : (libPath = "lib");
 
-  const dbType = (await select({
+  const dbType = initOptions.db || (await select({
     message: "Please choose your DB type",
     choices: [
       { name: "Postgres", value: "pg" },
@@ -74,11 +74,13 @@ export const addDrizzle = async () => {
   if (dbProvider === "neon")
     databaseUrl = databaseUrl.concat("?sslmode=require");
 
-  const includeExampleModel = await confirm({
-    message:
-      "Would you like to include an example model? (suggested for new users)",
-    default: true,
-  });
+  const includeExampleModel = typeof initOptions?.includeExample === 'string' ?
+    initOptions.includeExample === 'yes' :
+    await confirm({
+      message:
+        "Would you like to include an example model? (suggested for new users)",
+      default: true,
+    });
 
   // create all the files here
 

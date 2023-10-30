@@ -10,20 +10,22 @@
 
 import { select } from "@inquirer/prompts";
 import { createConfigFile } from "../../utils.js";
-import { PMType } from "../../types.js";
+import { InitOptions, PMType } from "../../types.js";
 import { consola } from "consola";
 import { addPackage } from "../add/index.js";
 
-export async function initProject() {
-  const srcExists = await select({
-    message: "Are you using a 'src' folder?",
-    choices: [
-      { name: "Yes", value: true },
-      { name: "No", value: false },
-    ],
-  });
+export async function initProject(options?: InitOptions) {
+  const srcExists = typeof options?.hasSrcFolder === 'string' ?
+    options.hasSrcFolder === 'yes' :
+    await select({
+      message: "Are you using a 'src' folder?",
+      choices: [
+        { name: "Yes", value: true },
+        { name: "No", value: false },
+      ],
+    });
 
-  const preferredPackageManager = (await select({
+  const preferredPackageManager = options?.packageManager || (await select({
     message: "Please pick your preferred package manager",
     choices: [
       { name: "NPM", value: "npm" },
@@ -45,5 +47,5 @@ export async function initProject() {
   });
   consola.success("Kirimase initialized!");
   consola.info("You can now add packages.");
-  addPackage();
+  addPackage(options);
 }

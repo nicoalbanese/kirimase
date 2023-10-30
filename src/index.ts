@@ -5,22 +5,43 @@ import { initProject } from "./commands/init/index.js";
 import { buildSchema } from "./commands/generate/index.js";
 import { addPackage } from "./commands/add/index.js";
 import { updateConfigFileAfterUpdate } from "./utils.js";
+import { ColumnType, DBField } from "./types.js";
 
 const program = new Command();
 program.name("kirimase").description("Kirimase CLI").version("0.0.22");
 
-program
-  .command("init")
+addCommonOptions(program.command("init"))
   .description("initialise and configure kirimase within directory")
   .action(initProject);
 
 program
   .command("generate")
   .description("Generate a new resource")
+  .option("-r, --resources <resources...>", "resources")
+  .option("-t, --table <table>", "table")
+  .option("-b, --belongs-to-user <belongs-to-user>", "belongs to user")
+  .option("-i, --index <index>", "index")
+  .option("-m, --migrate <migrate>", "migrate")
+  .option(
+    "-f, --field <field>",
+    "fields. Format: name:type:references:not-null:cascade. Example: blog:string::true:true",
+    (value, previous) => {
+      const [name, type, references, notNull, cascade] = value.split(":");
+      const field: DBField = {
+        name,
+        type: type as ColumnType,
+        references,
+        notNull: notNull === "true",
+        cascade: cascade === "true",
+      };
+      previous.push(field);
+      return previous;
+    },
+    []
+  )
   .action(buildSchema);
 
-program
-  .command("add")
+addCommonOptions(program.command("add"))
   .description("Add and setup additional packages")
   .action(addPackage);
 
@@ -30,3 +51,15 @@ program
   .action(updateConfigFileAfterUpdate);
 
 program.parse(process.argv);
+
+function addCommonOptions(command: Command) {
+  return command
+    .option("-sf, --has-src-folder <has>", "has a src folder")
+    .option("-pm, --package-manager <pm>", "preferred package manager")
+    .option("-o, --orm <orm>", "preferred orm")
+    .option("-db, --db <db>", "preferred database")
+    .option("-a, --auth <auth>", "preferred auth")
+    .option("-ap, --auth-providers <auth-providers...>", "auth providers")
+    .option("-p, --packages <packages...>", "packages")
+    .option("-ie, --include-example <include>", "include example");
+}

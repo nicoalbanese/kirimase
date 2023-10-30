@@ -1,5 +1,5 @@
 import { confirm, select } from "@inquirer/prompts";
-import { DBType } from "../../../../types.js";
+import { DBType, InitOptions } from "../../../../types.js";
 import {
   addPackageToConfig,
   createFile,
@@ -24,11 +24,11 @@ import {
 import { consola } from "consola";
 import { addToPrismaSchema } from "../../../generate/utils.js";
 
-export const addPrisma = async () => {
+export const addPrisma = async (initOptions?: InitOptions) => {
   const { preferredPackageManager, hasSrc } = readConfigFile();
   const rootPath = hasSrc ? "src/" : "";
   // ask for db type
-  const dbType = (await select({
+  const dbType = initOptions?.db || (await select({
     message: "Please choose your DB type",
     choices: [
       { name: "Postgres", value: "pg" },
@@ -82,11 +82,13 @@ export const addPrisma = async () => {
   // update tsconfig with import alias for prisma types
   await updateTsConfigPrismaTypeAlias();
 
-  const includeExampleModel = await confirm({
-    message:
-      "Would you like to include an example model? (suggested for new users)",
-    default: true,
-  });
+  const includeExampleModel = typeof initOptions?.includeExample === 'string' ?
+    initOptions.includeExample === 'yes' :
+    await confirm({
+      message:
+        "Would you like to include an example model? (suggested for new users)",
+      default: true,
+    });
 
   // create all the files here
 

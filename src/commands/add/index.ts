@@ -13,6 +13,7 @@ import {
   ComponentLibType,
   ORMType,
   PackageChoice,
+  InitOptions,
 } from "../../types.js";
 import { addClerk } from "./auth/clerk/index.js";
 import { addResend } from "./misc/resend/index.js";
@@ -20,7 +21,7 @@ import { addLucia } from "./auth/lucia/index.js";
 import { createAccountSettingsPage } from "./auth/shared/index.js";
 import { addStripe } from "./misc/stripe/index.js";
 
-export const addPackage = async () => {
+export const addPackage = async (options?: InitOptions) => {
   const config = readConfigFile();
 
   if (config) {
@@ -47,24 +48,28 @@ export const addPackage = async () => {
 
     // check if orm
     if (orm === undefined) {
-      const ormToInstall = (await select({
-        message: "Select an ORM to use:",
-        choices: [...Packages.orm, new Separator(), nullOption],
-      })) as ORMType | null;
+      const ormToInstall =
+        options?.orm ||
+        ((await select({
+          message: "Select an ORM to use:",
+          choices: [...Packages.orm, new Separator(), nullOption],
+        })) as ORMType | null);
 
-      if (ormToInstall === "drizzle") await addDrizzle();
-      if (ormToInstall === "prisma") await addPrisma();
+      if (ormToInstall === "drizzle") await addDrizzle(options);
+      if (ormToInstall === "prisma") await addPrisma(options);
       if (ormToInstall === null)
         updateConfigFile({ orm: null, driver: null, provider: null });
     }
     // check if auth
     if (auth === undefined) {
-      const authToInstall = (await select({
-        message: "Select an authentication package to use:",
-        choices: [...Packages.auth, new Separator(), nullOption],
-      })) as AuthType | null;
+      const authToInstall =
+        options?.auth ||
+        ((await select({
+          message: "Select an authentication package to use:",
+          choices: [...Packages.auth, new Separator(), nullOption],
+        })) as AuthType | null);
 
-      if (authToInstall === "next-auth") await addNextAuth();
+      if (authToInstall === "next-auth") await addNextAuth(options);
       if (authToInstall === "clerk") await addClerk();
       if (authToInstall === "lucia") await addLucia();
       if (authToInstall === null) {
@@ -88,10 +93,12 @@ export const addPackage = async () => {
       );
     }
     if (uninstalledPackages.length > 0) {
-      const packageToInstall = await checkbox({
-        message: "Select any miscellaneous packages to add:",
-        choices: uninstalledPackages,
-      });
+      const packageToInstall =
+        options?.packages ||
+        (await checkbox({
+          message: "Select any miscellaneous packages to add:",
+          choices: uninstalledPackages,
+        }));
 
       if (packageToInstall.includes("trpc")) await addTrpc();
       if (packageToInstall.includes("shadcn-ui"))
@@ -105,6 +112,6 @@ export const addPackage = async () => {
     }
   } else {
     consola.warn("No config file found, initializing project...");
-    initProject();
+    initProject(options);
   }
 };

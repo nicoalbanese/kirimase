@@ -146,6 +146,27 @@ Kirimase generates:
 
 - Scaffolds views using Shadcn-UI to enable immediate CRUD operations (including select fields for adding relations and datepickers for dates).
 
+## Run in non-interactive mode
+
+You can run Kirimase entirely via the command line as follows:
+
+```sh
+kirimase init -sf no -pm pnpm --orm prisma -db pg -a next-auth -ap github discord -p trpc shadcn-ui resend -ie yes
+kirimase generate -r model api_route -t blog -b yes -f "title:String::yes:yes" -f "content:String::yes:yes" -i title -m yes
+```
+
+| Command | Short Flag | Long Option       | Description                              | Argument      |
+| ------- | ---------- | ----------------- | ---------------------------------------- | ------------- |
+| init    | -          | -                 | initialise and configure kirimase        | -             |
+| -       | -sf        | --src-folder      | use a src folder                         | `yes` or `no` |
+| -       | -pm        | --package-manager | package manager                          | `<pm>`        |
+| -       | -o         | --orm             | orm                                      | `<orm>`       |
+| -       | -db        | --db              | database ("pg", "mysql", "sqlite")       | `<db>`        |
+| -       | -a         | --auth            | auth                                     | `<auth>`      |
+| -       | -ap        | --auth-providers  | auth providers                           | `<providers>` |
+| -       | -p         | --packages        | packages ("trpc", "shadcn-ui", "resend") | `<packages>`  |
+| -       | -ie        | --include-example | include example                          | `yes` or `no` |
+
 ## Contributing
 
 Keen on enhancing Kirimase? Contributions, bug reports, and feature requests are always welcome. Feel free to open an issue or submit a pull request.
