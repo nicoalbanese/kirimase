@@ -47,7 +47,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   // 6. Add items to .env
   addToDotEnv([{ key: "RESEND_API_KEY", value: "" }], rootPath, true);
   // 7. Install packages (resend)
-  installPackages(
+  await installPackages(
     {
       regular: `resend${orm === null ? " zod@3.21.4 @t3-oss/env-nextjs" : ""}`,
       dev: "",

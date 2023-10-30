@@ -1,3 +1,4 @@
+import { consola } from "consola";
 import { DBProvider, DBType, ORMType } from "../../../../types.js";
 import {
   DrizzleAdapterDriverMappings,

@@ -148,24 +148,25 @@ Kirimase generates:
 
 ## Run in non-interactive mode
 
-You can run Kirimase entirely via the command line as follows:
+As of v0.0.22, you can run `kirimase init` and `kirimase add` entirely via the command line as follows:
 
 ```sh
-kirimase init -sf no -pm pnpm --orm prisma -db pg -a next-auth -ap github discord -p trpc shadcn-ui resend -ie yes
-kirimase generate -r model api_route -t blog -b yes -f "title:String::yes:yes" -f "content:String::yes:yes" -i title -m yes
+kirimase init -sf yes -pm bun --orm prisma -db pg -a next-auth -ap github discord -mp trpc stripe resend -cl shadcn-ui -ie yes
 ```
 
-| Command | Short Flag | Long Option       | Description                              | Argument      |
-| ------- | ---------- | ----------------- | ---------------------------------------- | ------------- |
-| init    | -          | -                 | initialise and configure kirimase        | -             |
-| -       | -sf        | --src-folder      | use a src folder                         | `yes` or `no` |
-| -       | -pm        | --package-manager | package manager                          | `<pm>`        |
-| -       | -o         | --orm             | orm                                      | `<orm>`       |
-| -       | -db        | --db              | database ("pg", "mysql", "sqlite")       | `<db>`        |
-| -       | -a         | --auth            | auth                                     | `<auth>`      |
-| -       | -ap        | --auth-providers  | auth providers                           | `<providers>` |
-| -       | -p         | --packages        | packages ("trpc", "shadcn-ui", "resend") | `<packages>`  |
-| -       | -ie        | --include-example | include example                          | `yes` or `no` |
+| Command | Short Flag | Long Option       | Description                                    | Argument          |
+| ------- | ---------- | ----------------- | ---------------------------------------------- | ----------------- |
+| init    | -          | -                 | initialise and configure kirimase              | -                 |
+| -       | -sf        | --src-folder      | use a src folder                               | `yes` or `no`     |
+| -       | -pm        | --package-manager | package manager                                | `<pm>`            |
+| -       | -cl        | --component-lib   | component library                              | `<component-lib>` |
+| -       | -o         | --orm             | orm                                            | `<orm>`           |
+| -       | -db        | --db              | database ("pg", "mysql", "sqlite")             | `<db>`            |
+| -       | -dbp       | --db-provider     | database provider - important if using drizzle | `<dbp>`           |
+| -       | -a         | --auth            | auth                                           | `<auth>`          |
+| -       | -ap        | --auth-providers  | auth providers (if using next-auth)            | `<providers>`     |
+| -       | -mp        | --misc-packages   | packages ("trpc", "shadcn-ui", "resend")       | `<packages>`      |
+| -       | -ie        | --include-example | include example                                | `yes` or `no`     |
 
 ## Contributing
 

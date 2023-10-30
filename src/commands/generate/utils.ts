@@ -61,6 +61,7 @@ export const formatTableName = (tableName: string) => {
     true,
     false
   );
+  const tableNameKebabCase = snakeToKebab(tableName);
 
   return {
     tableNameCamelCase,
@@ -72,6 +73,7 @@ export const formatTableName = (tableName: string) => {
     tableNameNormalEnglishSingular,
     tableNameNormalEnglishLowerCase,
     tableNameNormalEnglishSingularLowerCase,
+    tableNameKebabCase,
   };
 };
 

@@ -54,7 +54,8 @@ export const addPackage = async (options?: InitOptions) => {
         options?.orm ||
         ((await select({
           message: "Select an ORM to use:",
-          choices: [...Packages.orm, new Separator(), nullOption],
+          // choices: [...Packages.orm, new Separator(), nullOption],
+          choices: [...Packages.orm],
         })) as ORMType | null);
 
       if (ormToInstall === "drizzle") await addDrizzle(options);
@@ -64,6 +65,19 @@ export const addPackage = async (options?: InitOptions) => {
     }
     // check if auth
     if (auth === undefined) {
+      const { orm: ormPostPrompt } = readConfigFile();
+      if (ormPostPrompt === undefined) {
+        consola.warn(
+          "You cannot install an authentication package without an ORM."
+        );
+        consola.info("Please run `kirimase init` again.");
+        consola.info(
+          "If you are seeing this message, it is likely because you misspelled your 'orm' option."
+        );
+        consola.info("Your requested option: -o", options.orm);
+        consola.info("Available options: -o prisma, -o drizzle");
+        process.exit(0);
+      }
       const authToInstall =
         options?.auth ||
         ((await select({

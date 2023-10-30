@@ -31,6 +31,7 @@ export const addLucia = async () => {
     driver,
     componentLib,
   } = readConfigFile();
+  const config = readConfigFile();
   // ask whether want to use shadcnui
   consola.info(
     "Kirimase generates views and components for authenticating using Lucia."

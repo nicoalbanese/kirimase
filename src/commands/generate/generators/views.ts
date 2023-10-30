@@ -16,15 +16,17 @@ import {
 
 export const scaffoldViewsAndComponents = async (schema: Schema) => {
   const { hasSrc, packages } = readConfigFile();
-  const { tableNameCamelCase, tableNameSingularCapitalised } = formatTableName(
-    schema.tableName
-  );
+  const {
+    tableNameCamelCase,
+    tableNameSingularCapitalised,
+    tableNameKebabCase,
+  } = formatTableName(schema.tableName);
   // require trpc for these views
   if (packages.includes("trpc") && packages.includes("shadcn-ui")) {
     // create view - tableName/page.tsx
     const rootPath = hasSrc ? "src/" : "";
     createFile(
-      rootPath.concat(`app/${tableNameCamelCase}/page.tsx`),
+      rootPath.concat(`app/${tableNameKebabCase}/page.tsx`),
       generateView(schema)
     );
     // create components/tableName/TableNameList.tsx

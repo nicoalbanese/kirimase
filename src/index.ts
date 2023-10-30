@@ -65,6 +65,7 @@ function addCommonOptions(command: Command) {
     )
     .option("-o, --orm <orm>", "preferred orm (prisma, drizzle)")
     .option("-db, --db <db>", "preferred database (pg, mysql, sqlite)")
+    .option("-dbp, --db-provider <db>", "database provider (pg, mysql, sqlite)")
     .option("-a, --auth <auth>", "preferred auth (next-auth, clerk, lucia)")
     .option(
       "-ap, --auth-providers <auth-providers...>",

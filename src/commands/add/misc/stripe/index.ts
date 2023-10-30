@@ -61,14 +61,10 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   const packages = packagesBeingInstalled.concat(installedPackages);
 
   if (orm === null || orm === undefined) {
+    consola.warn("You cannot install Stripe without an ORM installed.");
     await addPackage();
     return;
   }
-  // install packages
-  await installPackages(
-    { dev: "", regular: "stripe @stripe/stripe-js lucide-react" },
-    preferredPackageManager
-  );
 
   if (auth === "clerk") {
     updateClerkMiddlewareForStripe(rootPath);
@@ -207,6 +203,12 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
 
   // misc script updates
   addListenScriptToPackageJson();
+  // install packages
+  consola.info("INSTALLING PACKAGES FOR STRIPE");
+  await installPackages(
+    { dev: "", regular: "stripe @stripe/stripe-js lucide-react" },
+    preferredPackageManager
+  );
   addPackageToConfig("stripe");
 
   if (packages.includes("trpc")) {
@@ -237,12 +239,13 @@ const addListenScriptToPackageJson = () => {
     ...packageJson.scripts,
     ...newItems,
   };
+  console.log("package json from listen script function", packageJson);
 
   // Stringify the updated content
   const updatedPackageJsonData = JSON.stringify(packageJson, null, 2);
 
   // Write the updated content back to package.json
-  fs.writeFileSync(packageJsonPath, updatedPackageJsonData);
+  replaceFile(packageJsonPath, updatedPackageJsonData);
 
   consola.success("Stripe listen script added to package.json");
 };

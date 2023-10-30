@@ -13,27 +13,38 @@ import { createConfigFile } from "../../utils.js";
 import { InitOptions, PMType } from "../../types.js";
 import { consola } from "consola";
 import { addPackage } from "../add/index.js";
+import { existsSync } from "fs";
 
 export async function initProject(options?: InitOptions) {
-  const srcExists = typeof options?.hasSrcFolder === 'string' ?
-    options.hasSrcFolder === 'yes' :
-    await select({
-      message: "Are you using a 'src' folder?",
-      choices: [
-        { name: "Yes", value: true },
-        { name: "No", value: false },
-      ],
-    });
+  const nextjsProjectExists = existsSync("package.json");
+  if (!nextjsProjectExists) {
+    consola.fatal(
+      "No Next.js project detected. Please create a Next.js project and then run `kirimase init` within that directory."
+    );
+    process.exit(0);
+  }
+  const srcExists =
+    typeof options?.hasSrcFolder === "string"
+      ? options.hasSrcFolder === "yes"
+      : await select({
+          message: "Are you using a 'src' folder?",
+          choices: [
+            { name: "Yes", value: true },
+            { name: "No", value: false },
+          ],
+        });
 
-  const preferredPackageManager = options?.packageManager || (await select({
-    message: "Please pick your preferred package manager",
-    choices: [
-      { name: "NPM", value: "npm" },
-      { name: "Yarn", value: "yarn" },
-      { name: "PNPM", value: "pnpm" },
-      { name: "Bun", value: "bun" },
-    ],
-  })) as PMType;
+  const preferredPackageManager =
+    options?.packageManager ||
+    ((await select({
+      message: "Please pick your preferred package manager",
+      choices: [
+        { name: "NPM", value: "npm" },
+        { name: "Yarn", value: "yarn" },
+        { name: "PNPM", value: "pnpm" },
+        { name: "Bun", value: "bun" },
+      ],
+    })) as PMType);
   // console.log("installing dependencies with", preferredPackageManager);
   createConfigFile({
     driver: undefined,

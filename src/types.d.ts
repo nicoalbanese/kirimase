@@ -98,6 +98,7 @@ export type InitOptions = {
   packageManager?: PMType;
   orm?: ORMType;
   db?: DBType;
+  dbProvider?: DBProvider;
   auth?: AuthType;
   authProviders?: AuthProvider[];
   miscPackages?: AvailablePackage[];
