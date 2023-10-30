@@ -14,12 +14,12 @@ generator client {
 
 generator zod {
   provider              = "zod-prisma"
-  output                = "./zod" // (default) the directory where generated zod schemas will be saved
-  relationModel         = true // (default) Create and export both plain and related models.
-  modelCase             = "camelCase" // Output models using camel case (ex. userModel, postModel)
-  modelSuffix           = "Schema" // (default) Suffix to apply to your prisma models when naming Zod schemas
-  useDecimalJs          = true // represent the prisma Decimal type using Decimal.js (as Prisma does)
-  prismaJsonNullability = true // (default) uses prisma's scheme for JSON field nullability
+  output                = "./zod" 
+  relationModel         = true 
+  modelCase             = "camelCase" 
+  modelSuffix           = "Schema" 
+  useDecimalJs          = true 
+  prismaJsonNullability = true 
 }
 
 datasource db {
