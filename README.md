@@ -148,7 +148,7 @@ Kirimase generates:
 
 ## Run in non-interactive mode
 
-As of v0.0.22, you can run `kirimase init` and `kirimase add` entirely via the command line as follows:
+As of v0.0.23, you can run `kirimase init` and `kirimase add` entirely via the command line as follows:
 
 ```sh
 kirimase init -sf yes -pm bun --orm prisma -db pg -a next-auth -ap github discord -mp trpc stripe resend -cl shadcn-ui -ie yes
