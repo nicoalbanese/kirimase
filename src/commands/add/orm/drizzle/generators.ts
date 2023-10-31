@@ -476,7 +476,7 @@ export const installDependencies = async (
   if (dbSpecificPackage) {
     await installPackages(
       {
-        regular: `drizzle-orm drizzle-zod @t3-oss/env-nextjs zod@3.21.4 ${dbSpecificPackage.regular}`,
+        regular: `drizzle-orm drizzle-zod @t3-oss/env-nextjs zod ${dbSpecificPackage.regular}`,
         dev: `drizzle-kit tsx dotenv ${dbSpecificPackage.dev}`,
       },
       preferredPackageManager
