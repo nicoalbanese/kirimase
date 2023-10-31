@@ -20,12 +20,14 @@ import { addResend } from "./misc/resend/index.js";
 import { addLucia } from "./auth/lucia/index.js";
 import { createAccountSettingsPage } from "./auth/shared/index.js";
 import { addStripe } from "./misc/stripe/index.js";
+import { checkForExistingPackages } from "../init/utils.js";
 
 export const addPackage = async (options?: InitOptions) => {
   const config = readConfigFile();
 
   if (config) {
-    const { packages, orm, auth, componentLib, rootPath } = config;
+    checkForExistingPackages();
+    const { packages, orm, auth, componentLib, rootPath } = readConfigFile();
 
     const nullOption = { name: "None", value: null };
 
