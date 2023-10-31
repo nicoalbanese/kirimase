@@ -55,6 +55,7 @@ export async function initProject(options?: InitOptions) {
     orm: undefined,
     auth: undefined,
     componentLib: undefined,
+    t3: false,
   });
   consola.success("Kirimase initialized!");
   consola.info("You can now add packages.");

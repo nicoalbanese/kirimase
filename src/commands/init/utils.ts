@@ -8,6 +8,7 @@ import {
 } from "../../types.js";
 import { updateConfigFile, wrapInParenthesis } from "../../utils.js";
 import { consola } from "consola";
+// test
 
 export const DBProviders: DBProviderOptions = {
   pg: [
@@ -32,7 +33,7 @@ export const DBProviders: DBProviderOptions = {
   ],
 };
 
-export const checkForExistingPackages = () => {
+export const checkForExistingPackages = (rootPath: string) => {
   consola.start("Checking project for existing packages...");
   // get package json
   const packageJsonInitText = readFileSync("package.json", "utf-8");
@@ -128,13 +129,48 @@ export const checkForExistingPackages = () => {
       configObj.driver = providerDriverMappings[key];
     }
   }
-  consola.success(
-    "Successfully searched project and found the following packages already installed:"
-  );
-  consola.box(configObj);
-  updateConfigFile(configObj);
 
-  // for each item, confirm with user that it is actually installed
-  // for shadcn, check if components.json exists
+  // check if t3 project
+  const trpcApiPath = rootPath.concat("server/api/trpc.ts");
+  const trpcApiExists = existsSync(trpcApiPath);
+  if (trpcApiExists) {
+    const trpcApiContent = readFileSync(trpcApiPath, "utf-8");
+    trpcApiContent.includes("create.t3.gg")
+      ? (configObj.t3 = true)
+      : (configObj.t3 = false);
+  }
+
+  if (configObj.packages.length > 0) {
+    consola.success(
+      "Successfully searched project and found the following packages already installed:"
+    );
+    consola.info(configObj.packages.map((pkg) => pkg).join(", "));
+  } else {
+    consola.success(
+      "Successfully searched project and found no additional packages."
+    );
+  }
+
+  // if (prisma) check db driver
+  if (configObj.orm === "prisma") {
+    const schemaFile = readFileSync("prisma/schema.prisma");
+    schemaFile.includes(`provider = "sqlite"`)
+      ? (configObj.driver = "sqlite")
+      : null;
+
+    schemaFile.includes(`provider = "postgresql"`)
+      ? (configObj.driver = "pg")
+      : null;
+
+    if (schemaFile.includes(`provider = "mysql"`)) {
+      configObj.driver = "mysql";
+      if (schemaFile.includes(`relationMode = "prisma"`))
+        configObj.provider = "planetscale";
+    }
+  }
+
   // if (drizzle), check if using one schema file or schema directory - perhaps just force users?
+
+  // update config file
+  updateConfigFile(configObj);
 };

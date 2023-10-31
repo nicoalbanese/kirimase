@@ -26,7 +26,8 @@ export const addPackage = async (options?: InitOptions) => {
   const config = readConfigFile();
 
   if (config) {
-    checkForExistingPackages();
+    if (config.packages?.length === 0)
+      checkForExistingPackages(config.rootPath);
     const { packages, orm, auth, componentLib, rootPath } = readConfigFile();
 
     const nullOption = { name: "None", value: null };

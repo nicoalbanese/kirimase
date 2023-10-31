@@ -55,6 +55,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     orm,
     driver,
     auth,
+    t3,
     packages: installedPackages,
   } = readConfigFile();
 
@@ -212,7 +213,9 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
 
   if (packages.includes("trpc")) {
     createFile(
-      rootPath.concat("lib/server/routers/account.ts"),
+      rootPath.concat(
+        t3 ? "server/api/routers/account.ts" : "lib/server/routers/account.ts"
+      ),
       createAccountTRPCRouter()
     );
     // add to main trpc router

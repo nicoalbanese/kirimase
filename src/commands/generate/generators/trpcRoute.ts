@@ -43,8 +43,10 @@ export const scaffoldTRPCRoute = async (schema: Schema) => {
 // }
 
 export function updateTRPCRouter(routerName: string): void {
-  const { hasSrc } = readConfigFile();
-  const filePath = `${hasSrc ? "src/" : ""}lib/server/routers/_app.ts`;
+  const { hasSrc, t3, rootPath } = readConfigFile();
+  const filePath = rootPath.concat(
+    t3 ? `server/api/root.ts` : `lib/server/routers/_app.ts`
+  );
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
 
@@ -58,7 +60,9 @@ export function updateTRPCRouter(routerName: string): void {
       fileContent.indexOf("\n", importInsertionPoint) + 1;
     const beforeImport = fileContent.slice(0, nextLineAfterLastImport);
     const afterImport = fileContent.slice(nextLineAfterLastImport);
-    const newImportStatement = `import { ${routerName}Router } from "./${routerName}";\n`;
+    const newImportStatement = `import { ${routerName}Router } from "./${
+      t3 ? "routers/" : ""
+    }${routerName}";\n`;
     const withNewImport = `${beforeImport}${newImportStatement}${afterImport}`;
 
     let modifiedRouterContent = "";
