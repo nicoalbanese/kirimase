@@ -1,5 +1,11 @@
 import { existsSync, readFileSync } from "fs";
-import { AvailablePackage, Config, DBProviderOptions } from "../../types.js";
+import {
+  AvailablePackage,
+  Config,
+  DBProvider,
+  DBProviderOptions,
+  DBType,
+} from "../../types.js";
 import { updateConfigFile, wrapInParenthesis } from "../../utils.js";
 import { consola } from "consola";
 
@@ -80,9 +86,48 @@ export const checkForExistingPackages = () => {
     if (existsInProject) configObj.packages.push(key as AvailablePackage);
   }
 
+  // check for shadcn ui
   const hasComponentsJson = existsSync("components.json");
   if (hasComponentsJson) configObj.componentLib = "shadcn-ui";
 
+  // check for driver
+  // prisma: check schema for provider value
+  // drizzle: check package json
+  const providerMappings: Record<DBProvider, string> = {
+    aws: "",
+    neon: "@neondatabase/serverless",
+    supabase: "pg", // fix later
+    "mysql-2": "mysql2",
+    postgresjs: "postgres",
+    "node-postgres": "pg",
+    "vercel-pg": "@vercel/postgres",
+    planetscale: "@planetscale/database",
+    "better-sqlite3": "better-sqlite3",
+  };
+  const providerDriverMappings: Record<DBProvider, DBType> = {
+    aws: "pg",
+    neon: "pg",
+    supabase: "pg", // fix later
+    "mysql-2": "mysql",
+    postgresjs: "pg",
+    "node-postgres": "pg",
+    "vercel-pg": "pg",
+    planetscale: "mysql",
+    "better-sqlite3": "sqlite",
+  };
+  for (const [key, term] of Object.entries(providerMappings)) {
+    // console.log(key, terms);
+    if (!term) continue;
+
+    // Loop over each term in the array
+    let existsInProject = false;
+
+    if (packageJsonInitText.includes(term)) existsInProject = true;
+    if (existsInProject && providerMappings[key] !== null) {
+      configObj.provider = key as DBProvider;
+      configObj.driver = providerDriverMappings[key];
+    }
+  }
   consola.success(
     "Successfully searched project and found the following packages already installed:"
   );

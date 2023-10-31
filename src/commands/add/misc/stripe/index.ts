@@ -60,7 +60,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
 
   const packages = packagesBeingInstalled.concat(installedPackages);
 
-  if (orm === null || orm === undefined) {
+  if (orm === null || orm === undefined || driver === undefined) {
     consola.warn("You cannot install Stripe without an ORM installed.");
     await addPackage();
     return;
