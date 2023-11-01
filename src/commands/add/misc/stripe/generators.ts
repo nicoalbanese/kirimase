@@ -880,6 +880,7 @@ export const generateSubscriptionsDrizzleSchema = (
   primaryKey,
   timestamp,
   varchar,
+  uuid,
 } from "drizzle-orm/pg-core";${
         auth !== "clerk" ? `\nimport { users } from "./auth";` : ""
       }
@@ -887,7 +888,7 @@ export const generateSubscriptionsDrizzleSchema = (
 export const subscriptions = pgTable(
   "subscriptions",
   {
-    userId: varchar("user_id", { length: 255 })
+    userId: uuid("user_id")
       .unique()${auth !== "clerk" ? `\n      .references(() => users.id)` : ""},
     stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
     stripeSubscriptionId: varchar("stripe_subscription_id", {

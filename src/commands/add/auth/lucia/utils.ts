@@ -106,7 +106,7 @@ export const DrizzleAdapterDriverMappings: {
 };
 
 export const DrizzleLuciaSchema: { [k in DBType]: string } = {
-  pg: `import { pgTable, bigint, varchar } from "drizzle-orm/pg-core";
+  pg: `import { pgTable, bigint, varchar, uuid } from "drizzle-orm/pg-core";
 
 export const users = pgTable("auth_user", {
 	id: varchar("id", {
@@ -122,9 +122,7 @@ export const sessions = pgTable("user_session", {
 	id: varchar("id", {
 		length: 128
 	}).primaryKey(),
-	userId: varchar("user_id", {
-		length: 15
-	})
+	userId: uuid("user_id")
 		.notNull()
 		.references(() => users.id),
 	activeExpires: bigint("active_expires", {
@@ -139,9 +137,7 @@ export const keys = pgTable("user_key", {
 	id: varchar("id", {
 		length: 255
 	}).primaryKey(),
-	userId: varchar("user_id", {
-		length: 15
-	})
+	userId: uuid("user_id")
 		.notNull()
 		.references(() => users.id),
 	hashedPassword: varchar("hashed_password", {
