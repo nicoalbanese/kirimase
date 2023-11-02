@@ -24,7 +24,6 @@ type Paths = {
     };
   };
   "next-auth": {
-    envMjs: string;
     nextAuthApiRoute: string;
     authProviderComponent: string;
     signOutButtonComponent: string;
@@ -36,7 +35,7 @@ type Paths = {
   };
   lucia: {
     signInPage: string;
-    singUpPage: string;
+    signUpPage: string;
     authFormComponent: string;
     signInApiRoute: string;
     signUpApiRoute: string;
