@@ -16,6 +16,7 @@ import path from "path";
 import {
   addPackageToConfig,
   createFile,
+  getFileLocations,
   installPackages,
   readConfigFile,
   replaceFile,
@@ -55,9 +56,9 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     orm,
     driver,
     auth,
-    t3,
     packages: installedPackages,
   } = readConfigFile();
+  const { trpcRootDir } = getFileLocations();
 
   const packages = packagesBeingInstalled.concat(installedPackages);
 
@@ -213,9 +214,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
 
   if (packages.includes("trpc")) {
     createFile(
-      rootPath.concat(
-        t3 ? "server/api/routers/account.ts" : "lib/server/routers/account.ts"
-      ),
+      rootPath.concat(`${trpcRootDir}routers/account.ts`),
       createAccountTRPCRouter()
     );
     // add to main trpc router

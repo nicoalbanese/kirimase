@@ -13,7 +13,7 @@ import { createConfigFile } from "../../utils.js";
 import { InitOptions, PMType } from "../../types.js";
 import { consola } from "consola";
 import { addPackage } from "../add/index.js";
-import { existsSync } from "fs";
+import { existsSync, readFileSync, readSync } from "fs";
 
 export async function initProject(options?: InitOptions) {
   const nextjsProjectExists = existsSync("package.json");
@@ -46,6 +46,14 @@ export async function initProject(options?: InitOptions) {
       ],
     })) as PMType);
   // console.log("installing dependencies with", preferredPackageManager);
+
+  const tsConfigExists = existsSync("tsconfig.json");
+  if (!tsConfigExists) consola.fatal("No TSConfig found...");
+  const tsConfigString = readFileSync("tsconfig.json", "utf-8");
+  let alias: string;
+  if (tsConfigString.includes("@/*")) alias = "@";
+  if (tsConfigString.includes("~/*")) alias = "~";
+
   createConfigFile({
     driver: undefined,
     hasSrc: srcExists,
@@ -56,6 +64,7 @@ export async function initProject(options?: InitOptions) {
     auth: undefined,
     componentLib: undefined,
     t3: false,
+    alias,
   });
   consola.success("Kirimase initialized!");
   consola.info("You can now add packages.");

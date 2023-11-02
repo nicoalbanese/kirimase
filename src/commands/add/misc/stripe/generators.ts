@@ -1,5 +1,5 @@
 import { AuthType, DBType } from "../../../../types.js";
-import { readConfigFile } from "../../../../utils.js";
+import { getFileLocations, readConfigFile } from "../../../../utils.js";
 
 export const generateStripeIndexTs = () => {
   return `import Stripe from "stripe";
@@ -1183,10 +1183,12 @@ export async function getUserSubscriptionPlan() {
 };
 
 export const createAccountTRPCRouter = () => {
-  return `import { getUserAuth } from "@/lib/auth/utils";
-import { publicProcedure, router } from "../trpc";
-import { getUserSubscriptionPlan } from "@/lib/stripe/subscription";
-export const accountRouter = router({
+  const { alias } = readConfigFile();
+  const { createRouterInvokcation } = getFileLocations();
+  return `import { getUserAuth } from "${alias}/lib/auth/utils";
+import { publicProcedure, ${createRouterInvokcation} } from "../trpc";
+import { getUserSubscriptionPlan } from "${alias}/lib/stripe/subscription";
+export const accountRouter = ${createRouterInvokcation}({
   getUser: publicProcedure.query(async () => {
     const { session } = await getUserAuth();
     return session;

@@ -198,21 +198,25 @@ type T3Deltas = {
   alias: string;
   trpcRootDir: string;
   createRouterInvokcation: string;
-  rootRouterPath: string;
+  rootRouterRelativePath: string;
+  rootRouterName: string;
 };
-export const getFileLocations = (): { t3: T3Deltas; regular: T3Deltas } => {
-  return {
-    t3: {
-      alias: "~",
-      trpcRootDir: "server/",
-      createRouterInvokcation: "createTRPCRouter",
-      rootRouterPath: "root.ts",
-    },
-    regular: {
-      alias: "@",
-      trpcRootDir: "lib/server/",
-      createRouterInvokcation: "router",
-      rootRouterPath: "routers/_app.ts",
-    },
+export const getFileLocations = (): T3Deltas => {
+  const { t3 } = readConfigFile();
+  const t3Locations: T3Deltas = {
+    alias: "~",
+    trpcRootDir: "server/api/",
+    createRouterInvokcation: "createTRPCRouter",
+    rootRouterRelativePath: "root.ts",
+    rootRouterName: "root.ts",
   };
+  const regularLocations: T3Deltas = {
+    alias: "@",
+    trpcRootDir: "lib/server/",
+    createRouterInvokcation: "router",
+    rootRouterRelativePath: "routers/_app.ts",
+    rootRouterName: "_app.ts",
+  };
+  if (t3) return t3Locations;
+  else return regularLocations;
 };

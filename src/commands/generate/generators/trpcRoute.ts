@@ -1,5 +1,10 @@
 import { consola } from "consola";
-import { createFile, readConfigFile, replaceFile } from "../../../utils.js";
+import {
+  createFile,
+  getFileLocations,
+  readConfigFile,
+  replaceFile,
+} from "../../../utils.js";
 import { Schema } from "../types.js";
 import { formatTableName } from "../utils.js";
 import fs from "fs";
@@ -44,9 +49,8 @@ export const scaffoldTRPCRoute = async (schema: Schema) => {
 
 export function updateTRPCRouter(routerName: string): void {
   const { hasSrc, t3, rootPath } = readConfigFile();
-  const filePath = rootPath.concat(
-    t3 ? `server/api/root.ts` : `lib/server/routers/_app.ts`
-  );
+  const { trpcRootDir, rootRouterRelativePath } = getFileLocations();
+  const filePath = rootPath.concat(`${trpcRootDir}${rootRouterRelativePath}`);
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
 
@@ -117,17 +121,19 @@ const generateRouteContent = (schema: Schema) => {
     tableNameCamelCase,
     tableNameCapitalised,
   } = formatTableName(tableName);
+  const { alias } = readConfigFile();
+  const { createRouterInvokcation } = getFileLocations();
 
-  return `import { get${tableNameSingularCapitalised}ById, get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";
-import { publicProcedure, router } from "../trpc";
+  return `import { get${tableNameSingularCapitalised}ById, get${tableNameCapitalised} } from "${alias}/lib/api/${tableNameCamelCase}/queries";
+import { publicProcedure, ${createRouterInvokcation} } from "../trpc";
 import {
   ${tableNameSingular}IdSchema,
   insert${tableNameSingularCapitalised}Params,
   update${tableNameSingularCapitalised}Params,
-} from "@/lib/db/schema/${tableNameCamelCase}";
-import { create${tableNameSingularCapitalised}, delete${tableNameSingularCapitalised}, update${tableNameSingularCapitalised} } from "@/lib/api/${tableNameCamelCase}/mutations";
+} from "${alias}/lib/db/schema/${tableNameCamelCase}";
+import { create${tableNameSingularCapitalised}, delete${tableNameSingularCapitalised}, update${tableNameSingularCapitalised} } from "${alias}/lib/api/${tableNameCamelCase}/mutations";
 
-export const ${tableNameCamelCase}Router = router({
+export const ${tableNameCamelCase}Router = ${createRouterInvokcation}({
   get${tableNameCapitalised}: publicProcedure.query(async () => {
     return get${tableNameCapitalised}();
   }),
