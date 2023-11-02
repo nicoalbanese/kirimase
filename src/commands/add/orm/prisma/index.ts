@@ -28,20 +28,22 @@ export const addPrisma = async (initOptions?: InitOptions) => {
   const { preferredPackageManager, hasSrc } = readConfigFile();
   const rootPath = hasSrc ? "src/" : "";
   // ask for db type
-  const dbType = initOptions?.db || (await select({
-    message: "Please choose your DB type",
-    choices: [
-      { name: "Postgres", value: "pg" },
-      {
-        name: "MySQL",
-        value: "mysql",
-      },
-      {
-        name: "SQLite",
-        value: "sqlite",
-      },
-    ],
-  })) as DBType;
+  const dbType =
+    initOptions?.db ||
+    ((await select({
+      message: "Please choose your DB type",
+      choices: [
+        { name: "Postgres", value: "pg" },
+        {
+          name: "MySQL",
+          value: "mysql",
+        },
+        {
+          name: "SQLite",
+          value: "sqlite",
+        },
+      ],
+    })) as DBType);
 
   // if mysql, ask if planetscale
   if (dbType === "mysql") {
@@ -82,13 +84,14 @@ export const addPrisma = async (initOptions?: InitOptions) => {
   // update tsconfig with import alias for prisma types
   await updateTsConfigPrismaTypeAlias();
 
-  const includeExampleModel = typeof initOptions?.includeExample === 'string' ?
-    initOptions.includeExample === 'yes' :
-    await confirm({
-      message:
-        "Would you like to include an example model? (suggested for new users)",
-      default: true,
-    });
+  const includeExampleModel =
+    typeof initOptions?.includeExample === "string"
+      ? initOptions.includeExample === "yes"
+      : await confirm({
+          message:
+            "Would you like to include an example model? (suggested for new users)",
+          default: true,
+        });
 
   // create all the files here
 
@@ -123,7 +126,7 @@ export const addPrisma = async (initOptions?: InitOptions) => {
 
   // install packages: regular: [] dev: [prisma, zod-prisma]
   await installPackages(
-    { regular: "zod@3.21.4 @t3-oss/env-nextjs", dev: "prisma zod-prisma" },
+    { regular: "zod @t3-oss/env-nextjs", dev: "prisma zod-prisma" },
     preferredPackageManager
   );
 
