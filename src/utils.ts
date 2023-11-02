@@ -193,3 +193,26 @@ export const updateConfigFileAfterUpdate = () => {
     consola.info("Config file already up to date.");
   }
 };
+
+type T3Deltas = {
+  alias: string;
+  trpcRootDir: string;
+  createRouterInvokcation: string;
+  rootRouterPath: string;
+};
+export const getFileLocations = (): { t3: T3Deltas; regular: T3Deltas } => {
+  return {
+    t3: {
+      alias: "~",
+      trpcRootDir: "server/",
+      createRouterInvokcation: "createTRPCRouter",
+      rootRouterPath: "root.ts",
+    },
+    regular: {
+      alias: "@",
+      trpcRootDir: "lib/server/",
+      createRouterInvokcation: "router",
+      rootRouterPath: "routers/_app.ts",
+    },
+  };
+};
