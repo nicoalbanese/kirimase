@@ -8,7 +8,7 @@ import { updateConfigFileAfterUpdate } from "./utils.js";
 import { ColumnType, DBField } from "./types.js";
 
 const program = new Command();
-program.name("kirimase").description("Kirimase CLI").version("0.0.23");
+program.name("kirimase").description("Kirimase CLI").version("0.0.24");
 
 addCommonOptions(program.command("init"))
   .description("initialise and configure kirimase within directory")
