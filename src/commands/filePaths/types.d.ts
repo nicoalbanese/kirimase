@@ -53,6 +53,7 @@ type Paths = {
   };
   trpc: {
     rootRouter: string;
+    routerDir: string;
     serverTrpc: string;
     trpcApiRoute: string;
     trpcClient: string;

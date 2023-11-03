@@ -8,14 +8,18 @@ import {
 import { Schema } from "../types.js";
 import { formatTableName } from "../utils.js";
 import fs from "fs";
+import { formatFilePath, getFilePaths } from "../../filePaths/index.js";
 
 export const scaffoldTRPCRoute = async (schema: Schema) => {
   const { hasSrc } = readConfigFile();
   const { tableName } = schema;
   const { tableNameCamelCase } = formatTableName(tableName);
-  const path = `${
-    hasSrc ? "src/" : ""
-  }lib/server/routers/${tableNameCamelCase}.ts`;
+  const { trpc } = getFilePaths();
+
+  const path = `${formatFilePath(trpc.routerDir, {
+    prefix: "rootPath",
+    removeExtension: false,
+  })}/${tableNameCamelCase}.ts`;
   createFile(path, generateRouteContent(schema));
 
   updateTRPCRouter(tableNameCamelCase);
@@ -123,15 +127,28 @@ const generateRouteContent = (schema: Schema) => {
   } = formatTableName(tableName);
   const { alias } = readConfigFile();
   const { createRouterInvokcation } = getFileLocations();
+  const { shared, trpc } = getFilePaths();
 
-  return `import { get${tableNameSingularCapitalised}ById, get${tableNameCapitalised} } from "${alias}/lib/api/${tableNameCamelCase}/queries";
-import { publicProcedure, ${createRouterInvokcation} } from "../trpc";
+  return `import { get${tableNameSingularCapitalised}ById, get${tableNameCapitalised} } from "${formatFilePath(
+    shared.orm.servicesDir,
+    { prefix: "alias", removeExtension: false }
+  )}/${tableNameCamelCase}/queries";
+import { publicProcedure, ${createRouterInvokcation} } from "${formatFilePath(
+    trpc.serverTrpc,
+    { prefix: "alias", removeExtension: true }
+  )}";
 import {
   ${tableNameSingular}IdSchema,
   insert${tableNameSingularCapitalised}Params,
   update${tableNameSingularCapitalised}Params,
-} from "${alias}/lib/db/schema/${tableNameCamelCase}";
-import { create${tableNameSingularCapitalised}, delete${tableNameSingularCapitalised}, update${tableNameSingularCapitalised} } from "${alias}/lib/api/${tableNameCamelCase}/mutations";
+} from "${formatFilePath(shared.orm.schemaDir, {
+    prefix: "alias",
+    removeExtension: false,
+  })}/${tableNameCamelCase}";
+import { create${tableNameSingularCapitalised}, delete${tableNameSingularCapitalised}, update${tableNameSingularCapitalised} } from "${formatFilePath(
+    shared.orm.servicesDir,
+    { prefix: "alias", removeExtension: false }
+  )}/${tableNameCamelCase}/mutations";
 
 export const ${tableNameCamelCase}Router = ${createRouterInvokcation}({
   get${tableNameCapitalised}: publicProcedure.query(async () => {

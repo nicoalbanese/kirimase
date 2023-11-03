@@ -6,6 +6,7 @@ import {
   readConfigFile,
 } from "../../../utils.js";
 import { addPackage } from "../../add/index.js";
+import { formatFilePath, getFilePaths } from "../../filePaths/index.js";
 import { Schema } from "../types.js";
 import {
   defaultValueMappings,
@@ -81,11 +82,18 @@ const generateView = (schema: Schema) => {
     tableNameCapitalised,
     tableNameNormalEnglishCapitalised,
   } = formatTableName(schema.tableName);
+  const { shared } = getFilePaths();
   return `import ${tableNameSingularCapitalised}List from "@/components/${tableNameCamelCase}/${tableNameSingularCapitalised}List";
 import New${tableNameSingularCapitalised}Modal from "@/components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal";
-import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";${
+import { get${tableNameCapitalised} } from "${formatFilePath(
+    shared.orm.servicesDir,
+    { prefix: "alias", removeExtension: false }
+  )}/${tableNameCamelCase}/queries";${
     schema.belongsToUser
-      ? '\nimport { checkAuth } from "@/lib/auth/utils";'
+      ? `\nimport { checkAuth } from "${formatFilePath(shared.auth.authUtils, {
+          prefix: "alias",
+          removeExtension: true,
+        })}";`
       : ""
   }
 
@@ -108,8 +116,12 @@ export default async function ${tableNameCapitalised}() {
 };
 
 const queryHasJoins = (tableName: string) => {
-  const { hasSrc } = readConfigFile();
-  const path = `${hasSrc ? "src/" : ""}lib/api/${tableName}/queries.ts`;
+  // const { hasSrc } = readConfigFile();
+  const { shared } = getFilePaths();
+  const path = `${formatFilePath(shared.orm.servicesDir, {
+    prefix: "rootPath",
+    removeExtension: false,
+  })}/${tableName}/queries.ts`;
   const queryContent = getFileContents(path);
   return queryContent.includes("Join");
 };
@@ -127,10 +139,18 @@ const createListComponent = (schema: Schema) => {
   const relations = schema.fields.filter(
     (field) => field.type === "references"
   );
+  const { t3 } = readConfigFile();
+  const { shared, trpc } = getFilePaths();
 
   return `"use client";
-import { Complete${tableNameSingularCapitalised} } from "@/lib/db/schema/${tableNameCamelCase}";
-import { trpc } from "@/lib/trpc/client";
+import { Complete${tableNameSingularCapitalised} } from "${formatFilePath(
+    shared.orm.servicesDir,
+    { prefix: "alias", removeExtension: false }
+  )}/${tableNameCamelCase}";
+import { ${t3 ? "api as " : ""}trpc } from "${formatFilePath(trpc.trpcClient, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 import ${tableNameSingularCapitalised}Modal from "./${tableNameSingularCapitalised}Modal";
 
 
@@ -287,14 +307,18 @@ const createFormComponent = (schema: Schema) => {
     tableNameCapitalised,
     tableNameNormalEnglishSingular,
   } = formatTableName(schema.tableName);
-  const { packages, driver } = readConfigFile();
+  const { packages, driver, alias, t3 } = readConfigFile();
   const relations = schema.fields.filter(
     (field) => field.type.toLowerCase() === "references"
   );
+  const { shared, trpc } = getFilePaths();
 
   return `"use client";
 
-import { ${tableNameSingularCapitalised}, New${tableNameSingularCapitalised}Params, insert${tableNameSingularCapitalised}Params } from "@/lib/db/schema/${tableNameCamelCase}";
+import { ${tableNameSingularCapitalised}, New${tableNameSingularCapitalised}Params, insert${tableNameSingularCapitalised}Params } from "${formatFilePath(
+    shared.orm.schemaDir,
+    { prefix: "alias", removeExtension: false }
+  )}/${tableNameCamelCase}";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -305,18 +329,21 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { trpc } from "@/lib/trpc/client";
-import { Button } from "../ui/button";
+} from "${alias}/components/ui/form";
+import { Input } from "${alias}/components/ui/input";
+import { ${t3 ? "api as " : ""}trpc } from "${formatFilePath(trpc.trpcClient, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import { Button } from "${alias}/components/ui/button";
 import { z } from "zod";${
     schema.fields.filter((field) => field.type.toLowerCase() === "boolean")
       .length > 0
-      ? '\nimport { Checkbox } from "../ui/checkbox";'
+      ? `\nimport { Checkbox } from "${alias}/components/ui/checkbox";`
       : ""
   }${
     relations.length > 0
-      ? '\nimport { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";'
+      ? `\nimport { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "${alias}/components/ui/select";`
       : ""
   }${
     schema.fields.filter(
@@ -325,16 +352,19 @@ import { z } from "zod";${
         field.type === "timestamp" ||
         field.type === "DateTime"
     ).length > 0
-      ? `import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+      ? `import { Popover, PopoverContent, PopoverTrigger } from "${alias}/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { Calendar } from "${alias}/components/ui/calendar";
+import { cn } from "${formatFilePath(shared.init.libUtils, {
+          prefix: "alias",
+          removeExtension: true,
+        })}";
 import { format } from "date-fns";`
       : ""
   }
 import { useRouter } from "next/navigation";${
     packages.includes("shadcn-ui")
-      ? `\nimport { useToast } from "@/components/ui/use-toast";`
+      ? `\nimport { useToast } from "${alias}/components/ui/use-toast";`
       : ""
   }
 
@@ -473,10 +503,12 @@ export const createModalComponent = (schema: Schema) => {
     tableNameSingularCapitalised,
     tableNameNormalEnglishSingular,
   } = formatTableName(schema.tableName);
+  const { alias } = readConfigFile();
+  const { shared } = getFilePaths();
   return `"use client";
 
 import { useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "${alias}/component/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -485,7 +517,10 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import ${tableNameSingularCapitalised}Form from "./${tableNameSingularCapitalised}Form";
-import { ${tableNameSingularCapitalised} } from "@/lib/db/schema/${tableNameCamelCase}";
+import { ${tableNameSingularCapitalised} } from "${formatFilePath(
+    shared.orm.schemaDir,
+    { prefix: "alias", removeExtension: false }
+  )}/${tableNameCamelCase}";
 
 export default function ${tableNameSingularCapitalised}Modal({ 
   ${tableNameSingular},
