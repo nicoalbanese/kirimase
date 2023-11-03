@@ -16,6 +16,7 @@ import {
 } from "../../../../types.js";
 import {
   formatFilePath,
+  getDbIndexPath,
   getFilePaths,
   removeFileExtension,
 } from "../../../filePaths/index.js";
@@ -70,10 +71,10 @@ export const createIndexTs = (
 ) => {
   const {
     shared: {
-      orm: { dbIndex },
       init: { envMjs },
     },
   } = getFilePaths();
+  const dbIndex = getDbIndexPath();
   let indexTS = "";
   switch (dbProvider) {
     case "postgresjs":
@@ -698,11 +699,7 @@ export function createQueriesAndMutationsFolders(
   libPath: string,
   driver: DBType
 ) {
-  const {
-    shared: {
-      orm: { dbIndex },
-    },
-  } = getFilePaths();
+  const dbIndex = getDbIndexPath();
   // create computers queries
   const query = `import { db } from "${formatFilePath(dbIndex, {
     removeExtension: true,

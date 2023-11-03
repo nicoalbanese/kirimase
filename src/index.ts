@@ -9,7 +9,7 @@ import { ColumnType, DBField } from "./types.js";
 import { checkForExistingPackages } from "./commands/init/utils.js";
 
 const program = new Command();
-program.name("kirimase").description("Kirimase CLI").version("0.0.26");
+program.name("kirimase").description("Kirimase CLI").version("0.0.27");
 
 addCommonOptions(program.command("init"))
   .description("initialise and configure kirimase within directory")

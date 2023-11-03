@@ -7,6 +7,7 @@ import {
   ORMType,
 } from "../../../../../types.js";
 import { readConfigFile } from "../../../../../utils.js";
+import { formatFilePath, getFilePaths } from "../../../../filePaths/index.js";
 import { Schema, TypeMap } from "../../../types.js";
 import {
   addToPrismaModel,
@@ -62,9 +63,12 @@ const generateImportStatement = (
   dbType?: DBType,
   provider?: DBProvider
 ) => {
+  const { alias } = readConfigFile();
   const { fields, belongsToUser, tableName } = schema;
   const { tableNameCamelCase, tableNameCapitalised, tableNameSingular } =
     formatTableName(tableName);
+  const { shared } = getFilePaths();
+
   if (orm === "drizzle") {
     const usedTypes = getUsedTypes(fields, mappings);
     const referenceImports = getReferenceImports(fields);
@@ -78,15 +82,24 @@ const generateImportStatement = (
       referenceImports.length > 0 ? referenceImports.join("\n") : ""
     }${
       belongsToUser && provider !== "planetscale" && authType !== "clerk"
-        ? '\nimport { users } from "./auth";'
+        ? `\nimport { users } from "${formatFilePath(shared.auth.authSchema, {
+            prefix: "alias",
+            removeExtension: true,
+          })}";`
         : ""
     }
-import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";`;
+import { get${tableNameCapitalised} } from "${formatFilePath(
+      shared.orm.servicesDir,
+      { prefix: "alias", removeExtension: false }
+    )}/${tableNameCamelCase}/queries";`;
   }
   if (orm === "prisma")
-    return `import { ${tableNameSingular}Schema } from "@/zodAutoGenSchemas";
+    return `import { ${tableNameSingular}Schema } from "${alias}/zodAutoGenSchemas";
 import { z } from "zod";
-import { get${tableNameCapitalised} } from "@/lib/api/${tableNameCamelCase}/queries";
+import { get${tableNameCapitalised} } from "${formatFilePath(
+      shared.orm.servicesDir,
+      { prefix: "alias", removeExtension: false }
+    )}/${tableNameCamelCase}/queries";
 `;
 };
 

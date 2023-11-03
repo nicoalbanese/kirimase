@@ -6,8 +6,15 @@ import {
   DBProviderOptions,
   DBType,
 } from "../../types.js";
-import { updateConfigFile, wrapInParenthesis } from "../../utils.js";
+import {
+  installPackages,
+  readConfigFile,
+  replaceFile,
+  updateConfigFile,
+  wrapInParenthesis,
+} from "../../utils.js";
 import { consola } from "consola";
+import { updateTsConfigPrismaTypeAlias } from "../add/orm/utils.js";
 // test
 
 export const DBProviders: DBProviderOptions = {
@@ -33,9 +40,10 @@ export const DBProviders: DBProviderOptions = {
   ],
 };
 
-export const checkForExistingPackages = (rootPath: string) => {
+export const checkForExistingPackages = async (rootPath: string) => {
   consola.start("Checking project for existing packages...");
   // get package json
+  const { preferredPackageManager } = readConfigFile();
   const packageJsonInitText = readFileSync("package.json", "utf-8");
 
   let configObj: Partial<Config> = {
@@ -169,8 +177,56 @@ export const checkForExistingPackages = (rootPath: string) => {
     }
   }
 
+  if (configObj.t3 === true) {
+    if (configObj.orm === "prisma") {
+      // add zod generator to schema to schema.prisma
+      consola.start(
+        "Installing zod-prisma for use with Kirimase's generate function."
+      );
+      await installPackages(
+        { regular: "", dev: "zod-prisma" },
+        preferredPackageManager
+      );
+      addZodGeneratorToPrismaSchema();
+      consola.success("Successfully installed!");
+
+      await updateTsConfigPrismaTypeAlias();
+    } else if (configObj.orm === "drizzle") {
+      consola.start(
+        "Installing drizzle-zod for use with Kirimase's generate function."
+      );
+      await installPackages(
+        { regular: "drizzle-zod", dev: "" },
+        preferredPackageManager
+      );
+      consola.success("Successfully installed!");
+    }
+  }
   // if (drizzle), check if using one schema file or schema directory - perhaps just force users?
 
   // update config file
   updateConfigFile(configObj);
+};
+
+const addZodGeneratorToPrismaSchema = () => {
+  const hasSchema = existsSync("prisma/schema.prisma");
+  if (!hasSchema) {
+    console.error("Prisma schema not found!");
+    return;
+  }
+  const schema = readFileSync("prisma/schema.prisma", "utf-8");
+  const newSchema = schema.concat(`
+generator zod {
+  provider              = "zod-prisma"
+  output                = "./zod"
+  relationModel         = true
+  modelCase             = "camelCase"
+  modelSuffix           = "Schema"
+  useDecimalJs          = true
+  prismaJsonNullability = true
+}
+`);
+
+  replaceFile("prisma/schema.prisma", newSchema);
+  consola.info("Updated Prisma schema");
 };

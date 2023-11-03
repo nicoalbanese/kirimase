@@ -1,6 +1,10 @@
 import { DBType } from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
-import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
 import { prismaDbTypeMappings } from "./utils.js";
 
 export const generatePrismaSchema = (
@@ -82,10 +86,10 @@ export type ComputerId = z.infer<typeof computerIdSchema>["id"];
 };
 
 export const generatePrismaComputerQueries = () => {
-  const { shared } = getFilePaths();
   const { alias } = readConfigFile();
+  const dbIndex = getDbIndexPath();
   return `import { ComputerId, computerIdSchema } from "${alias}/lib/db/schema/computers";
-import { db } from "${formatFilePath(shared.orm.dbIndex, {
+import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
     removeExtension: true,
   })}";
@@ -103,9 +107,9 @@ export const getComputerById = async (id: ComputerId) => {
 };
 
 export const generatePrismaComputerMutations = () => {
-  const { shared } = getFilePaths();
   const { alias } = readConfigFile();
-  return `import { db } from "${formatFilePath(shared.orm.dbIndex, {
+  const dbIndex = getDbIndexPath();
+  return `import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
     removeExtension: true,
   })}";

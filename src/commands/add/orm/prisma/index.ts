@@ -23,11 +23,11 @@ import {
 } from "../utils.js";
 import { consola } from "consola";
 import { addToPrismaSchema } from "../../../generate/utils.js";
-import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import { formatFilePath, getDbIndexPath } from "../../../filePaths/index.js";
 
 export const addPrisma = async (initOptions?: InitOptions) => {
   const { preferredPackageManager, hasSrc } = readConfigFile();
-  const { prisma, shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
   const rootPath = hasSrc ? "src/" : "";
   // ask for db type
   const dbType =
@@ -82,7 +82,7 @@ export const addPrisma = async (initOptions?: InitOptions) => {
 
   // generate prisma global instance
   createFile(
-    formatFilePath(shared.orm.dbIndex, {
+    formatFilePath(dbIndex, {
       prefix: "rootPath",
       removeExtension: false,
     }),

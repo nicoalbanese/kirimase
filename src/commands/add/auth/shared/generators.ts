@@ -1,6 +1,10 @@
 import { AuthType, ORMType } from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
-import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
 
 export const createUserSettingsComponent = () => {
   const { shared } = getFilePaths();
@@ -413,13 +417,14 @@ export default async function Account() {
 
 export const createAccountApiTs = (orm: ORMType) => {
   const { shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
   switch (orm) {
     case "drizzle":
       return `import { getUserAuth } from "${formatFilePath(
         shared.auth.authUtils,
         { prefix: "alias", removeExtension: true }
       )}";
-import { db } from "${formatFilePath(shared.orm.dbIndex, {
+import { db } from "${formatFilePath(dbIndex, {
         prefix: "alias",
         removeExtension: true,
       })}";
@@ -444,7 +449,7 @@ export async function PUT(request: Request) {
         shared.auth.authUtils,
         { prefix: "alias", removeExtension: true }
       )}";
-import { db } from "${formatFilePath(shared.orm.dbIndex, {
+import { db } from "${formatFilePath(dbIndex, {
         prefix: "alias",
         removeExtension: true,
       })}";
@@ -487,7 +492,7 @@ import Link from "next/link";${
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "${alias}/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "${alias}/components/ui/avatar";${
             auth === "next-auth"
               ? ""

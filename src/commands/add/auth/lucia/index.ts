@@ -16,7 +16,11 @@ import {
 } from "./utils.js";
 
 import fs from "fs";
-import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
 
 export const addLucia = async () => {
   // get dbtype and provider
@@ -46,6 +50,7 @@ export const addLucia = async () => {
   } = luciaGenerators;
 
   const { lucia, shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
 
   // create auth form component
   // generate sign-in and sign-up pages
@@ -172,7 +177,7 @@ export const addLucia = async () => {
 
   // if using neon, add to db/index.ts
   if (provider === "neon" && orm === "drizzle") {
-    const dbTsPath = formatFilePath(shared.orm.dbIndex, {
+    const dbTsPath = formatFilePath(dbIndex, {
       prefix: "rootPath",
       removeExtension: false,
     });

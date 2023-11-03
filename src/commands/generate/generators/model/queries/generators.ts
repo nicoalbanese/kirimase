@@ -1,5 +1,9 @@
 import { DBField } from "../../../../../types.js";
-import { formatFilePath, getFilePaths } from "../../../../filePaths/index.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../../filePaths/index.js";
 import { Schema } from "../../../types.js";
 import { formatTableName, toCamelCase } from "../../../utils.js";
 import { generateAuthCheck } from "../utils.js";
@@ -12,7 +16,8 @@ const generateDrizzleImports = (schema: Schema, relations: DBField[]) => {
     tableNameCamelCase,
   } = formatTableName(tableName);
   const { shared } = getFilePaths();
-  return `import { db } from "${formatFilePath(shared.orm.dbIndex, {
+  const dbIndex = getDbIndexPath();
+  return `import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
     removeExtension: true,
   })}";
@@ -51,7 +56,8 @@ const generatePrismaImports = (schema: Schema) => {
     tableNameCamelCase,
   } = formatTableName(tableName);
   const { shared } = getFilePaths();
-  return `import { db } from "${formatFilePath(shared.orm.dbIndex, {
+  const dbIndex = getDbIndexPath();
+  return `import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
     removeExtension: true,
   })}";${

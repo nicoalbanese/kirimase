@@ -1,6 +1,10 @@
 import { AuthType, DBType } from "../../../../types.js";
 import { getFileLocations, readConfigFile } from "../../../../utils.js";
-import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
 
 export const generateStripeIndexTs = () => {
   return `import Stripe from "stripe";
@@ -15,6 +19,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
 export const generateStripeSubscriptionTsOld = () => {
   const { orm } = readConfigFile();
   const { stripe, shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
   let userSelect: string;
   switch (orm) {
     case "drizzle":
@@ -32,7 +37,7 @@ export const generateStripeSubscriptionTsOld = () => {
     stripe.configSubscription,
     { prefix: "alias", removeExtension: true }
   )}";
-import { db } from "${formatFilePath(shared.orm.dbIndex, {
+import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
     removeExtension: true,
   })}";${
@@ -749,6 +754,7 @@ export default async function Billing() {
 export const generateStripeWebhookOld = () => {
   const { orm } = readConfigFile();
   const { shared, stripe } = getFilePaths();
+  const dbIndex = getDbIndexPath();
 
   let dbCalls = { one: "", two: "", three: "" };
 
@@ -786,7 +792,7 @@ export const generateStripeWebhookOld = () => {
       break;
   }
 
-  return `import { db } from "${formatFilePath(shared.orm.dbIndex, {
+  return `import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
     removeExtension: true,
   })}";
@@ -1029,6 +1035,7 @@ export const subscriptions = sqliteTable(
 export const generateStripeWebhook = () => {
   const { orm } = readConfigFile();
   const { shared, stripe } = getFilePaths();
+  const dbIndex = getDbIndexPath();
 
   let dbCalls = { one: "", two: "", three: "" };
 
@@ -1089,7 +1096,7 @@ export const generateStripeWebhook = () => {
       break;
   }
 
-  return `import { db } from "${formatFilePath(shared.orm.dbIndex, {
+  return `import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
     removeExtension: true,
   })}";
@@ -1100,7 +1107,10 @@ import { stripe } from "${formatFilePath(stripe.stripeIndex, {
 import { headers } from "next/headers";
 import type Stripe from "stripe";${
     orm === "drizzle"
-      ? '\nimport { subscriptions } from "@/lib/db/schema/subscriptions";\nimport { eq } from "drizzle-orm";'
+      ? `\nimport { subscriptions } from "${formatFilePath(
+          stripe.subscriptionSchema,
+          { prefix: "alias", removeExtension: true }
+        )}";\nimport { eq } from "drizzle-orm";`
       : ""
   }
 
@@ -1174,6 +1184,8 @@ export async function POST(request: Request) {
 export const generateStripeSubscriptionTs = () => {
   const { orm } = readConfigFile();
   const { stripe, shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
+
   let subSelect: string;
   switch (orm) {
     case "drizzle":
@@ -1194,7 +1206,7 @@ export const generateStripeSubscriptionTs = () => {
     stripe.configSubscription,
     { prefix: "alias", removeExtension: true }
   )}";
-import { db } from "${formatFilePath(shared.orm.dbIndex, {
+import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
     removeExtension: true,
   })}";${

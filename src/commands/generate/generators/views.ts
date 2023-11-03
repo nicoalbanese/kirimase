@@ -83,8 +83,10 @@ const generateView = (schema: Schema) => {
     tableNameNormalEnglishCapitalised,
   } = formatTableName(schema.tableName);
   const { shared } = getFilePaths();
-  return `import ${tableNameSingularCapitalised}List from "@/components/${tableNameCamelCase}/${tableNameSingularCapitalised}List";
-import New${tableNameSingularCapitalised}Modal from "@/components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal";
+  const { alias } = readConfigFile();
+
+  return `import ${tableNameSingularCapitalised}List from "${alias}/components/${tableNameCamelCase}/${tableNameSingularCapitalised}List";
+import New${tableNameSingularCapitalised}Modal from "${alias}/components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal";
 import { get${tableNameCapitalised} } from "${formatFilePath(
     shared.orm.servicesDir,
     { prefix: "alias", removeExtension: false }
@@ -508,7 +510,7 @@ export const createModalComponent = (schema: Schema) => {
   return `"use client";
 
 import { useState } from "react";
-import { Button } from "${alias}/component/ui/button";
+import { Button } from "${alias}/components/ui/button";
 import {
   Dialog,
   DialogContent,

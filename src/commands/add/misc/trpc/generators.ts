@@ -61,7 +61,7 @@ export const publicProcedure = t.procedure;`;
 // 3. create server/router/users.ts directory and maybe a users file
 export const serverRouterComputersTs = () => {
   const { hasSrc } = readConfigFile();
-  const { trpc } = getFilePaths();
+  const { trpc, shared } = getFilePaths();
   // check if file exists at src/lib/db/schema/computers.ts
   const schemaPath = `${hasSrc ? "src/" : ""}lib/db/schema/computers.ts`;
   const schemaExists = existsSync(schemaPath);
@@ -70,7 +70,10 @@ export const serverRouterComputersTs = () => {
     { prefix: "alias", removeExtension: true }
   )}";${
     schemaExists
-      ? '\nimport { getComputers } from "@/lib/api/computers/queries"'
+      ? `\nimport { getComputers } from "${formatFilePath(
+          shared.orm.servicesDir,
+          { prefix: "alias", removeExtension: false }
+        )}/computers/queries"`
       : ""
   }
 export const computersRouter = router({

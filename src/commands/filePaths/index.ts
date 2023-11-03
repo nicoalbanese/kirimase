@@ -5,11 +5,11 @@ export const paths: { t3: Paths; normal: Paths } = {
   normal: {
     drizzle: {
       dbMigrate: "lib/db/migrate.ts",
+      dbIndex: "lib/db/index.ts",
       migrationsDir: "lib/db/migrations",
     },
     shared: {
       orm: {
-        dbIndex: "lib/db/index.ts",
         servicesDir: "lib/api",
         schemaDir: "lib/db/schema",
       },
@@ -25,9 +25,13 @@ export const paths: { t3: Paths; normal: Paths } = {
         updateNameCardComponent: "app/account/UpdateNameCard.tsx",
         updateEmailCardComponent: "app/account/UpdateEmailCard.tsx",
       },
-      init: { envMjs: "lib/env.mjs", libUtils: "lib/utils.ts" },
+      init: {
+        envMjs: "lib/env.mjs",
+        libUtils: "lib/utils.ts",
+        globalCss: "app/globals.css",
+      },
     },
-    prisma: {},
+    prisma: { dbIndex: "lib/db/index.ts" },
     trpc: {
       trpcApiTs: "lib/trpc/api.ts",
       trpcUtils: "lib/trpc/utils.ts",
@@ -87,11 +91,11 @@ export const paths: { t3: Paths; normal: Paths } = {
     drizzle: {
       dbMigrate: "server/db/migrate.ts",
       schemaTs: "server/db/schema.ts",
+      dbIndex: "server/db/index.ts",
       migrationsDir: "server/db/migrations",
     },
     shared: {
       orm: {
-        dbIndex: "server/db/index.ts",
         servicesDir: "lib/api",
         schemaDir: "lib/db/schema",
       },
@@ -107,9 +111,13 @@ export const paths: { t3: Paths; normal: Paths } = {
         updateNameCardComponent: "app/account/UpdateNameCard.tsx",
         updateEmailCardComponent: "app/account/UpdateEmailCard.tsx",
       },
-      init: { envMjs: "env.mjs", libUtils: "lib/utils.ts" },
+      init: {
+        envMjs: "env.mjs",
+        libUtils: "lib/utils.ts",
+        globalCss: "styles/globals.css",
+      },
     },
-    prisma: {},
+    prisma: { dbIndex: "server/db.ts" },
     trpc: {
       trpcApiTs: "trpc/server.ts",
       trpcUtils: "trpc/shared.ts",
@@ -205,7 +213,14 @@ export const generateServiceFileNames = (newModel: string) => {
   const { rootPath } = readConfigFile();
   const rootDir = rootPath.concat(shared.orm.servicesDir);
   return {
-    queriesPath: `${rootDir}${newModel}/queries.ts`,
-    mutationsPath: `${rootDir}${newModel}/mutations.ts`,
+    queriesPath: `${rootDir}/${newModel}/queries.ts`,
+    mutationsPath: `${rootDir}/${newModel}/mutations.ts`,
   };
+};
+
+export const getDbIndexPath = () => {
+  const { drizzle, prisma } = getFilePaths();
+  const { orm } = readConfigFile();
+  if (orm === "prisma") return prisma.dbIndex;
+  if (orm === "drizzle") return drizzle.dbIndex;
 };

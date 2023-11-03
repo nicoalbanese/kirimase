@@ -14,7 +14,11 @@ import { existsSync, readFileSync } from "fs";
 import { DBProvider, DBType } from "../../../../types.js";
 import { replaceFile } from "../../../../utils.js";
 import { consola } from "consola";
-import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
 
 export type LuciaAdapterInfo = {
   import: string;
@@ -23,7 +27,7 @@ export type LuciaAdapterInfo = {
 };
 
 export const generateDrizzleAdapterDriverMappings = () => {
-  const { shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
   const DrizzleAdapterDriverMappings: {
     [k in DBType]: Partial<{
       [k in DBProvider]: LuciaAdapterInfo;
@@ -38,7 +42,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 	})`,
         adapterPackage: "@lucia-auth/adapter-postgresql",
         import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
-          shared.orm.dbIndex,
+          dbIndex,
           { removeExtension: true, prefix: "alias" }
         )}"`,
       },
@@ -50,7 +54,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 	})`,
         adapterPackage: "@lucia-auth/adapter-postgresql",
         import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
-          shared.orm.dbIndex,
+          dbIndex,
           { removeExtension: true, prefix: "alias" }
         )}"`,
       },
@@ -62,7 +66,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 	})`,
         adapterPackage: "@lucia-auth/adapter-postgresql",
         import: `import { postgres as postgresAdapter } from "@lucia-auth/adapter-postgresql";\nimport { client } from "${formatFilePath(
-          shared.orm.dbIndex,
+          dbIndex,
           { removeExtension: true, prefix: "alias" }
         )}"`,
       },
@@ -74,7 +78,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 	})`,
         adapterPackage: "@lucia-auth/adapter-postgresql",
         import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
-          shared.orm.dbIndex,
+          dbIndex,
           { removeExtension: true, prefix: "alias" }
         )}"`,
       },
@@ -86,7 +90,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 	})`,
         adapterPackage: "@lucia-auth/adapter-postgresql",
         import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
-          shared.orm.dbIndex,
+          dbIndex,
           { removeExtension: true, prefix: "alias" }
         )}"`,
       },
@@ -100,13 +104,13 @@ export const generateDrizzleAdapterDriverMappings = () => {
 	})`,
         adapterPackage: "@lucia-auth/adapter-mysql",
         import: `import { mysql2 } from "@lucia-auth/adapter-mysql";\nimport { poolConnection } from "${formatFilePath(
-          shared.orm.dbIndex,
+          dbIndex,
           { removeExtension: true, prefix: "alias" }
         )}"`,
       },
       planetscale: {
         import: `import { planetscale } from "@lucia-auth/adapter-mysql";\nimport { connection } from "${formatFilePath(
-          shared.orm.dbIndex,
+          dbIndex,
           { removeExtension: true, prefix: "alias" }
         )}"`,
         adapterPackage: "@lucia-auth/adapter-mysql",
@@ -126,7 +130,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 	})`,
         adapterPackage: "@lucia-auth/adapter-sqlite",
         import: `import { betterSqlite3 } from "@lucia-auth/adapter-sqlite";\nimport { sqlite } from "${formatFilePath(
-          shared.orm.dbIndex,
+          dbIndex,
           { removeExtension: true, prefix: "alias" }
         )}"`,
       },
@@ -284,10 +288,10 @@ model Key {
 }`;
 
 export const generatePrismaAdapterDriverMappings = () => {
-  const { shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
   const PrismaAdapterDriverMappings: LuciaAdapterInfo = {
     import: `import { prisma } from "@lucia-auth/adapter-prisma";\nimport { db } from "${formatFilePath(
-      shared.orm.dbIndex,
+      dbIndex,
       { removeExtension: true, prefix: "alias" }
     )}";`,
     adapter: `adapter: prisma(db)`,

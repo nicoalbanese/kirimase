@@ -8,7 +8,11 @@ import {
 import fs from "fs";
 import { ComponentLibType, DBType, ORMType } from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
-import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
 
 // 1. Create app/api/auth/[...nextauth].ts
 export const apiAuthNextAuthTs = (
@@ -16,7 +20,8 @@ export const apiAuthNextAuthTs = (
   dbType: DBType | null,
   orm: ORMType
 ) => {
-  const { "next-auth": nextAuth, shared } = getFilePaths();
+  const { shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
   const providersToUse = providers.map((provider) => {
     return {
       name: provider,
@@ -27,7 +32,10 @@ export const apiAuthNextAuthTs = (
 
   return `${
     dbType !== null
-      ? `import { db } from "@/lib/db";
+      ? `import { db } from "${formatFilePath(dbIndex, {
+          prefix: "alias",
+          removeExtension: true,
+        })}";
 ${AuthDriver[orm].import}`
       : ""
   }

@@ -15,6 +15,7 @@ import { AvailablePackage, PMType } from "../../../../types.js";
 import { addContextProviderToLayout } from "../../utils.js";
 import { shadcnGenerators } from "./generators.js";
 import { generateLoadingPage } from "../../auth/lucia/generators.js";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 const manualInstallShadCn = async (
   preferredPackageManager: PMType,
@@ -28,6 +29,7 @@ const manualInstallShadCn = async (
     generateThemeProvider,
     generateThemeToggler,
   } = shadcnGenerators;
+  const { shared } = getFilePaths();
   // add deps (tailwindcss-animate class-variance-authority clsx tailwind-merge lucide-react)
   await installPackages(
     {
@@ -40,7 +42,13 @@ const manualInstallShadCn = async (
   // add tailwind.config.js
   createFile("tailwind.config.js", generateTailwindConfig(rootPath));
   // update globals.css
-  replaceFile(rootPath.concat("app/globals.css"), generateGlobalsCss());
+  replaceFile(
+    formatFilePath(shared.init.globalCss, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    generateGlobalsCss()
+  );
   // add cn helper (lib/utils.ts)
   createFile(rootPath.concat("lib/utils.ts"), generateLibUtilsTs());
   // create components.json

@@ -1,19 +1,18 @@
-import { Packages } from "../add/utils.ts";
-
-type Paths = {
+export type Paths = {
   drizzle: {
     dbMigrate: string;
     migrationsDir: string;
+    dbIndex: string;
     schemaTs?: string;
   };
-  prisma: {};
+  prisma: { dbIndex: string };
   shared: {
     init: {
       envMjs: string;
       libUtils: string;
+      globalCss: string;
     };
     orm: {
-      dbIndex: string;
       servicesDir: string;
       schemaDir?: string;
     };
