@@ -1,7 +1,7 @@
 import { Packages } from "../add/utils.ts";
 
 type Paths = {
-  drizzle: { dbMigrate: string };
+  drizzle: { dbMigrate: string; migrationsDir: string };
   prisma: {};
   shared: {
     init: {

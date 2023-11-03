@@ -14,7 +14,11 @@ import {
   ORMType,
   PMType,
 } from "../../../../types.js";
-import { getFilePaths, removeFileExtension } from "../../../filePaths/index.js";
+import {
+  formatFilePath,
+  getFilePaths,
+  removeFileExtension,
+} from "../../../filePaths/index.js";
 
 type ConfigDriver = "pg" | "turso" | "libsql" | "mysql" | "better-sqlite";
 
@@ -32,17 +36,17 @@ const configDriverMappings = {
 
 export const createDrizzleConfig = (libPath: string, provider: DBProvider) => {
   const {
-    rootPath: { rootPathWithAlias },
-    paths: {
-      shared: {
-        init: { envMjs },
-      },
+    shared: {
+      init: { envMjs },
     },
   } = getFilePaths();
   createFile(
     "drizzle.config.ts",
     `import type { Config } from "drizzle-kit";
-import { env } from "${rootPathWithAlias}${envMjs}";
+import { env } from "${formatFilePath(envMjs, {
+      removeExtension: false,
+      prefix: "alias",
+    })}";
 
 export default {
   schema: "./${libPath}/db/schema",
@@ -65,12 +69,9 @@ export const createIndexTs = (
   dbProvider: DBProvider
 ) => {
   const {
-    rootPath: { rootPathWithAlias, rootPathWithoutAlias },
-    paths: {
-      shared: {
-        orm: { dbIndex },
-        init: { envMjs },
-      },
+    shared: {
+      orm: { dbIndex },
+      init: { envMjs },
     },
   } = getFilePaths();
   let indexTS = "";
@@ -78,7 +79,10 @@ export const createIndexTs = (
     case "postgresjs":
       indexTS = `import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { env } from "${rootPathWithAlias}${envMjs}";
+import { env } from "${formatFilePath(envMjs, {
+        removeExtension: false,
+        prefix: "alias",
+      })}";
 
 export const client = postgres(env.DATABASE_URL);
 export const db = drizzle(client);`;
@@ -86,7 +90,10 @@ export const db = drizzle(client);`;
     case "node-postgres":
       indexTS = `import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg"
-import { env } from "${rootPathWithAlias}${envMjs}";
+import { env } from "${formatFilePath(envMjs, {
+        removeExtension: false,
+        prefix: "alias",
+      })}";
 
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,
@@ -96,7 +103,10 @@ export const db = drizzle(pool);`;
     case "neon":
       indexTS = `import { neon, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
-import { env } from "${rootPathWithAlias}${envMjs}";
+import { env } from "${formatFilePath(envMjs, {
+        removeExtension: false,
+        prefix: "alias",
+      })}";
 
 neonConfig.fetchConnectionCache = true;
  
@@ -107,7 +117,10 @@ export const db = drizzle(sql);
     case "vercel-pg":
       indexTS = `import { sql } from '@vercel/postgres';
 import { drizzle } from 'drizzle-orm/vercel-postgres';
-import { env } from "${rootPathWithAlias}${envMjs}";
+import { env } from "${formatFilePath(envMjs, {
+        removeExtension: false,
+        prefix: "alias",
+      })}";
  
 export const db = drizzle(sql)
 `;
@@ -115,7 +128,10 @@ export const db = drizzle(sql)
     case "supabase":
       indexTS = `import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
-import { env } from "${rootPathWithAlias}${envMjs}";
+import { env } from "${formatFilePath(envMjs, {
+        removeExtension: false,
+        prefix: "alias",
+      })}";
  
 const connectionString = env.DATABASE_URL
 const client = postgres(connectionString)
@@ -144,7 +160,10 @@ export const db = drizzle(rdsClient, {
     case "planetscale":
       indexTS = `import { drizzle } from "drizzle-orm/planetscale-serverless";
 import { connect } from "@planetscale/database";
-import { env } from "${rootPathWithAlias}${envMjs}";
+import { env } from "${formatFilePath(envMjs, {
+        removeExtension: false,
+        prefix: "alias",
+      })}";
  
 // create the connection
 export const connection = connect({
@@ -157,7 +176,10 @@ export const db = drizzle(connection);
     case "mysql-2":
       indexTS = `import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import { env } from "${rootPathWithAlias}${envMjs}";
+import { env } from "${formatFilePath(envMjs, {
+        removeExtension: false,
+        prefix: "alias",
+      })}";
  
 export const poolConnection = mysql.createPool(env.DATABASE_URL);
  
@@ -184,7 +206,10 @@ export const db: BetterSQLite3Database = drizzle(sqlite);
       break;
   }
 
-  createFile(`${rootPathWithoutAlias}${dbIndex}`, indexTS);
+  createFile(
+    formatFilePath(dbIndex, { prefix: "rootPath", removeExtension: false }),
+    indexTS
+  );
 };
 
 export const createMigrateTs = (
@@ -193,12 +218,9 @@ export const createMigrateTs = (
   dbProvider: DBProvider
 ) => {
   const {
-    rootPath: { rootPathWithAlias, rootPathWithoutAlias },
-    paths: {
-      drizzle: { dbMigrate },
-      shared: {
-        init: { envMjs },
-      },
+    drizzle: { dbMigrate, migrationsDir },
+    shared: {
+      init: { envMjs },
     },
   } = getFilePaths();
   let imports = "";
@@ -331,7 +353,10 @@ const db: BetterSQLite3Database = drizzle(sqlite);
     default:
       break;
   }
-  const template = `import { env } from "${rootPathWithAlias}${envMjs}";
+  const template = `import { env } from "${formatFilePath(envMjs, {
+    removeExtension: false,
+    prefix: "alias",
+  })}";
   ${imports}
 
 const runMigrate = async () => {
@@ -345,7 +370,10 @@ const runMigrate = async () => {
 
   const start = Date.now();
 
-  await migrate(db, { migrationsFolder: '${rootPathWithoutAlias}lib/db/migrations' });
+  await migrate(db, { migrationsFolder: '${formatFilePath(migrationsDir, {
+    removeExtension: false,
+    prefix: "rootPath",
+  })}' });
 
   const end = Date.now();
 
@@ -360,17 +388,17 @@ runMigrate().catch((err) => {
   process.exit(1);
 });`;
 
-  createFile(`${rootPathWithoutAlias}${dbMigrate}`, template);
+  createFile(
+    formatFilePath(dbMigrate, { prefix: "rootPath", removeExtension: false }),
+    template
+  );
 };
 
 export const createInitSchema = (libPath?: string, dbType?: DBType) => {
-  const { packages, driver } = readConfigFile();
+  const { packages, driver, rootPath } = readConfigFile();
   const {
-    rootPath,
-    paths: {
-      shared: {
-        auth: { authSchema },
-      },
+    shared: {
+      auth: { authSchema },
     },
   } = getFilePaths();
   const path = `${rootPath}lib/db/schema/computers.ts`;
@@ -380,9 +408,10 @@ export const createInitSchema = (libPath?: string, dbType?: DBType) => {
     case "pg":
       initModel = `import { pgTable, serial, text, integer } from "drizzle-orm/pg-core";${
         packages.includes("next-auth")
-          ? `\nimport { users } from "${rootPath}${removeFileExtension(
-              authSchema
-            )}";`
+          ? `\nimport { users } from "${formatFilePath(authSchema, {
+              removeExtension: true,
+              prefix: "alias",
+            })}";`
           : ""
       }
 
@@ -400,9 +429,10 @@ export const computers = pgTable("computers", {
     case "mysql":
       initModel = `import { mysqlTable, serial, varchar, int } from "drizzle-orm/mysql-core";${
         packages.includes("next-auth")
-          ? `\nimport { users } from "${rootPath}${removeFileExtension(
-              authSchema
-            )}";`
+          ? `\nimport { users } from "${formatFilePath(authSchema, {
+              removeExtension: true,
+              prefix: "alias",
+            })}";`
           : ""
       }
 
@@ -419,9 +449,10 @@ export const computers = mysqlTable("computers", {
     case "sqlite":
       initModel = `import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";${
         packages.includes("next-auth")
-          ? `\nimport { users } from "${rootPath}${removeFileExtension(
-              authSchema
-            )}";`
+          ? `\nimport { users } from "${formatFilePath(authSchema, {
+              removeExtension: true,
+              prefix: "alias",
+            })}";`
           : ""
       }
 
@@ -531,7 +562,9 @@ export const createDotEnv = (
   rootPathOld: string = ""
 ) => {
   const {
-    rootPath: { rootPathWithoutAlias },
+    shared: {
+      init: { envMjs },
+    },
   } = getFilePaths();
   const dburl =
     databaseUrl ?? "postgresql://postgres:postgres@localhost:5432/{DB_NAME}";
@@ -548,13 +581,13 @@ export const createDotEnv = (
       }DATABASE_URL=${dburl}`
     );
 
-  const envmjsfilePath = rootPathWithoutAlias.concat("lib/env.mjs");
+  const envmjsfilePath = formatFilePath(envMjs, {
+    prefix: "rootPath",
+    removeExtension: false,
+  });
   const envMjsExists = fs.existsSync(envmjsfilePath);
   if (!envMjsExists)
-    createFile(
-      `${rootPathWithoutAlias}lib/env.mjs`,
-      generateEnvMjs(preferredPackageManager, orm)
-    );
+    createFile(envmjsfilePath, generateEnvMjs(preferredPackageManager, orm));
 };
 
 export const addToDotEnv = (
@@ -564,11 +597,8 @@ export const addToDotEnv = (
 ) => {
   const { orm, preferredPackageManager } = readConfigFile();
   const {
-    rootPath: { rootPathWithoutAlias: rootPath },
-    paths: {
-      shared: {
-        init: { envMjs },
-      },
+    shared: {
+      init: { envMjs },
     },
   } = getFilePaths();
   // handling dotenv
@@ -583,7 +613,10 @@ export const addToDotEnv = (
     fs.writeFileSync(envPath, newData);
   }
   // handling env.mjs
-  const envmjsfilePath = rootPath.concat(envMjs);
+  const envmjsfilePath = formatFilePath(envMjs, {
+    removeExtension: false,
+    prefix: "rootPath",
+  });
   const envMjsExists = fs.existsSync(envmjsfilePath);
   if (!envMjsExists)
     createFile(
@@ -666,19 +699,20 @@ export function createQueriesAndMutationsFolders(
   driver: DBType
 ) {
   const {
-    paths: {
-      shared: {
-        orm: { dbIndex },
-      },
+    shared: {
+      orm: { dbIndex },
     },
-    rootPath: { rootPathWithAlias },
   } = getFilePaths();
   // create computers queries
-  const query = `import { db } from "${rootPathWithAlias}${removeFileExtension(
-    dbIndex
-  )}";
+  const query = `import { db } from "${formatFilePath(dbIndex, {
+    removeExtension: true,
+    prefix: "alias",
+  })}";
 import { eq } from "drizzle-orm";
-import { computerIdSchema, computers, ComputerId } from "${rootPathWithAlias}/lib/db/schema/computers";
+import { computerIdSchema, computers, ComputerId } from "${formatFilePath(
+    "lib/db/schema/computers.ts",
+    { removeExtension: true, prefix: "alias" }
+  )}";
 
 export const getComputers = async () => {
   const c = await db.select().from(computers);
@@ -692,9 +726,15 @@ export const getComputerById = async (id: ComputerId) => {
   return { computer: c };
 };`;
 
-  const mutation = `import { db } from "@/lib/db";
+  const mutation = `import { db } from "${formatFilePath(dbIndex, {
+    removeExtension: true,
+    prefix: "alias",
+  })}";
 import { eq } from "drizzle-orm";
-import { NewComputer, insertComputerSchema, computers, computerIdSchema, ComputerId } from "@/lib/db/schema/computers";
+import { NewComputer, insertComputerSchema, computers, computerIdSchema, ComputerId } from "${formatFilePath(
+    "lib/db/schema/computers.ts",
+    { removeExtension: true, prefix: "alias" }
+  )}";
 
 export const createComputer = async (computer: NewComputer) => {
   const newComputer = insertComputerSchema.parse(computer);
@@ -748,8 +788,20 @@ export const deleteComputer = async (id: ComputerId) => {
     return { error: message };
   }
 };`;
-  createFile(`${libPath}/api/computers/queries.ts`, query);
-  createFile(`${libPath}/api/computers/mutations.ts`, mutation);
+  createFile(
+    formatFilePath(`lib/api/computers/queries.ts`, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    query
+  );
+  createFile(
+    formatFilePath(`lib/api/computers/mutations.ts`, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    mutation
+  );
 }
 
 const generateEnvMjs = (

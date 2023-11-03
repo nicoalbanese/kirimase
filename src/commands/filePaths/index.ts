@@ -3,7 +3,10 @@ import { Paths } from "./types.js";
 
 export const paths: { t3: Paths; normal: Paths } = {
   normal: {
-    drizzle: { dbMigrate: "lib/db/migrate.ts" },
+    drizzle: {
+      dbMigrate: "lib/db/migrate.ts",
+      migrationsDir: "lib/db/migrations",
+    },
     shared: {
       orm: { dbIndex: "lib/db/index.ts" },
       auth: {
@@ -76,7 +79,10 @@ export const paths: { t3: Paths; normal: Paths } = {
     },
   },
   t3: {
-    drizzle: { dbMigrate: "lib/db/migrate.ts" },
+    drizzle: {
+      dbMigrate: "lib/db/migrate.ts",
+      migrationsDir: "lib/db/migrations",
+    },
     shared: {
       orm: { dbIndex: "lib/db/index.ts" },
       auth: {
@@ -151,12 +157,8 @@ export const paths: { t3: Paths; normal: Paths } = {
 };
 export const getFilePaths = () => {
   const { t3, rootPath, alias } = readConfigFile();
-  const rootPathFormatted = {
-    rootPathWithoutAlias: rootPath,
-    rootPathWithAlias: alias.concat(rootPath),
-  };
-  if (t3) return { rootPath: rootPathFormatted, paths: paths.t3 };
-  else return { rootPath: rootPathFormatted, paths: paths.normal };
+  if (t3) return paths.t3;
+  else return paths.normal;
 };
 
 export function removeFileExtension(filePath: string): string {
@@ -172,3 +174,17 @@ export function removeFileExtension(filePath: string): string {
   // Return the original filePath if no extension was found
   return filePath;
 }
+
+export const formatFilePath = (
+  filePath: string,
+  opts: {
+    prefix: "alias" | "rootPath";
+    removeExtension: boolean;
+  }
+) => {
+  const { alias, rootPath } = readConfigFile();
+  const formattedFP = opts.removeExtension
+    ? removeFileExtension(filePath)
+    : filePath;
+  return `${opts.prefix === "alias" ? alias : rootPath}${formattedFP}`;
+};
