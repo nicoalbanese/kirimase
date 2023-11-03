@@ -1,7 +1,11 @@
 import { Packages } from "../add/utils.ts";
 
 type Paths = {
-  drizzle: { dbMigrate: string; migrationsDir: string; schemaTs?: string };
+  drizzle: {
+    dbMigrate: string;
+    migrationsDir: string;
+    schemaTs?: string;
+  };
   prisma: {};
   shared: {
     init: {
@@ -10,6 +14,8 @@ type Paths = {
     };
     orm: {
       dbIndex: string;
+      servicesDir: string;
+      schemaDir?: string;
     };
     auth: {
       authUtils: string;

@@ -8,7 +8,11 @@ export const paths: { t3: Paths; normal: Paths } = {
       migrationsDir: "lib/db/migrations",
     },
     shared: {
-      orm: { dbIndex: "lib/db/index.ts" },
+      orm: {
+        dbIndex: "lib/db/index.ts",
+        servicesDir: "lib/api",
+        schemaDir: "lib/db/schema",
+      },
       auth: {
         authUtils: "lib/auth/utils.ts",
         accountPage: "app/account/page.tsx",
@@ -85,7 +89,11 @@ export const paths: { t3: Paths; normal: Paths } = {
       migrationsDir: "server/db/migrations",
     },
     shared: {
-      orm: { dbIndex: "server/db/index.ts" },
+      orm: {
+        dbIndex: "server/db/index.ts",
+        servicesDir: "lib/api",
+        schemaDir: "lib/db/schema",
+      },
       auth: {
         authUtils: "lib/auth/utils.ts",
         accountPage: "app/account/page.tsx",
@@ -188,4 +196,14 @@ export const formatFilePath = (
     ? removeFileExtension(filePath)
     : filePath;
   return `${opts.prefix === "alias" ? `${alias}/` : rootPath}${formattedFP}`;
+};
+
+export const generateServiceFileNames = (newModel: string) => {
+  const { shared } = getFilePaths();
+  const { rootPath } = readConfigFile();
+  const rootDir = rootPath.concat(shared.orm.servicesDir);
+  return {
+    queriesPath: `${rootDir}${newModel}/queries.ts`,
+    mutationsPath: `${rootDir}${newModel}/mutations.ts`,
+  };
 };

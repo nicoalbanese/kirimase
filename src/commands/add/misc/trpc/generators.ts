@@ -115,7 +115,10 @@ export const libTrpcClientTs = () => {
   const { trpc } = getFilePaths();
   return `import { createTRPCReact } from "@trpc/react-query";
 
-import { type AppRouter } from "${trpc.rootRouter}";
+import { type AppRouter } from "${formatFilePath(trpc.rootRouter, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 
 export const trpc = createTRPCReact<AppRouter>({});`;
 };

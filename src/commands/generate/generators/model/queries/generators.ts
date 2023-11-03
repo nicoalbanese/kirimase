@@ -1,4 +1,5 @@
 import { DBField } from "../../../../../types.js";
+import { formatFilePath, getFilePaths } from "../../../../filePaths/index.js";
 import { Schema } from "../../../types.js";
 import { formatTableName, toCamelCase } from "../../../utils.js";
 import { generateAuthCheck } from "../utils.js";
@@ -10,18 +11,33 @@ const generateDrizzleImports = (schema: Schema, relations: DBField[]) => {
     tableNameSingularCapitalised,
     tableNameCamelCase,
   } = formatTableName(tableName);
-  return `import { db } from "@/lib/db";
+  const { shared } = getFilePaths();
+  return `import { db } from "${formatFilePath(shared.orm.dbIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 import { eq${belongsToUser ? ", and" : ""} } from "drizzle-orm";${
-    belongsToUser ? '\nimport { getUserAuth } from "@/lib/auth/utils";' : ""
+    belongsToUser
+      ? `\nimport { getUserAuth } from "${formatFilePath(
+          shared.auth.authUtils,
+          { prefix: "alias", removeExtension: true }
+        )}";`
+      : ""
   }
-import { type ${tableNameSingularCapitalised}Id, ${tableNameSingular}IdSchema, ${tableNameCamelCase} } from "@/lib/db/schema/${tableNameCamelCase}";
+import { type ${tableNameSingularCapitalised}Id, ${tableNameSingular}IdSchema, ${tableNameCamelCase} } from "${formatFilePath(
+    shared.orm.schemaDir,
+    { prefix: "alias", removeExtension: false }
+  )}/${tableNameCamelCase}";
 ${
   relations.length > 0
     ? relations.map(
         (relation) =>
           `import { ${toCamelCase(
             relation.references
-          )} } from "@/lib/db/schema/${toCamelCase(relation.references)}";\n`
+          )} } from "${formatFilePath(shared.orm.schemaDir, {
+            prefix: "alias",
+            removeExtension: false,
+          })}/${toCamelCase(relation.references)}";\n`
       )
     : ""
 }`;
@@ -34,10 +50,22 @@ const generatePrismaImports = (schema: Schema) => {
     tableNameSingularCapitalised,
     tableNameCamelCase,
   } = formatTableName(tableName);
-  return `import { db } from "@/lib/db";${
-    belongsToUser ? '\nimport { getUserAuth } from "@/lib/auth/utils";' : ""
+  const { shared } = getFilePaths();
+  return `import { db } from "${formatFilePath(shared.orm.dbIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";${
+    belongsToUser
+      ? `\nimport { getUserAuth } from "${formatFilePath(
+          shared.auth.authUtils,
+          { prefix: "alias", removeExtension: true }
+        )}";`
+      : ""
   }
-import { type ${tableNameSingularCapitalised}Id, ${tableNameSingular}IdSchema } from "@/lib/db/schema/${tableNameCamelCase}";
+import { type ${tableNameSingularCapitalised}Id, ${tableNameSingular}IdSchema } from "${formatFilePath(
+    shared.orm.schemaDir,
+    { removeExtension: false, prefix: "alias" }
+  )}/${tableNameCamelCase}";
 `;
 };
 
