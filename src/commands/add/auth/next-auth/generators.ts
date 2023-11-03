@@ -320,7 +320,7 @@ export const createSignInComponent = (componentLib: ComponentLibType) => {
   if (componentLib === "shadcn-ui") {
     return `"use client";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { Button } from "${alias}components/ui/button";
+import { Button } from "${alias}/components/ui/button";
 
 export default function SignIn() {
   const { data: session, status } = useSession();

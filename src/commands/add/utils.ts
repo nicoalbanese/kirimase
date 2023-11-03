@@ -2,6 +2,7 @@ import { consola } from "consola";
 import { AvailablePackage, PackageType } from "../../types.js";
 import { readConfigFile, replaceFile } from "../../utils.js";
 import fs from "fs";
+import { formatFilePath, getFilePaths } from "../filePaths/index.js";
 
 export const Packages: {
   [key in PackageType]: {
@@ -36,7 +37,7 @@ export const addContextProviderToLayout = (
     | "Navbar"
     | "ThemeProvider"
 ) => {
-  const { hasSrc } = readConfigFile();
+  const { hasSrc, alias } = readConfigFile();
   const path = `${hasSrc ? "src/" : ""}app/layout.tsx`;
 
   const fileContent = fs.readFileSync(path, "utf-8");
@@ -48,26 +49,36 @@ export const addContextProviderToLayout = (
   const beforeImport = fileContent.slice(0, nextLineAfterLastImport);
   const afterImport = fileContent.slice(nextLineAfterLastImport);
 
+  const { trpc, "next-auth": nextAuth, shared } = getFilePaths();
+
   let importStatement: string;
   switch (provider) {
     case "NextAuthProvider":
-      importStatement = `import NextAuthProvider from "@/lib/auth/Provider";`;
+      importStatement = `import NextAuthProvider from "${formatFilePath(
+        nextAuth.authProviderComponent,
+        { prefix: "alias", removeExtension: true }
+      )}";`;
       break;
     case "TrpcProvider":
-      importStatement = `import TrpcProvider from "@/lib/trpc/Provider";`;
+      importStatement = `import TrpcProvider from "${formatFilePath(
+        trpc.trpcProvider,
+        { removeExtension: true, prefix: "alias" }
+      )}";`;
       break;
     case "ShadcnToast":
-      importStatement = `import { Toaster } from "@/components/ui/toaster";`;
+      importStatement = `import { Toaster } from "${alias}/components/ui/toaster";`;
       break;
     case "ClerkProvider":
       importStatement = 'import { ClerkProvider } from "@clerk/nextjs";';
       break;
     case "Navbar":
-      importStatement = 'import Navbar from "@/components/Navbar";';
+      importStatement = `import Navbar from "${formatFilePath(
+        shared.auth.navbarComponent,
+        { prefix: "alias", removeExtension: true }
+      )}";`;
       break;
     case "ThemeProvider":
-      importStatement =
-        'import { ThemeProvider } from "@/components/ThemeProvider";';
+      importStatement = `import { ThemeProvider } from "${alias}/components/ThemeProvider";`;
       break;
   }
 

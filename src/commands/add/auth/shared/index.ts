@@ -16,24 +16,38 @@ import {
   createSignOutBtn,
 } from "./generators.js";
 import { AuthType, ORMType } from "../../../../types.js";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 export const createAccountSettingsPage = async () => {
   const { orm, rootPath, componentLib, auth } = readConfigFile();
+  const { shared } = getFilePaths();
   const withShadCn = componentLib === "shadcn-ui" ? true : false;
   // create account api
   if (auth !== "clerk") {
     createFile(
-      rootPath.concat("app/api/account/route.ts"),
+      formatFilePath(shared.auth.accountApiRoute, {
+        prefix: "rootPath",
+        removeExtension: false,
+      }),
       createAccountApiTs(orm)
     );
   }
 
   // create account page
-  createFile(rootPath.concat("app/account/page.tsx"), createAccountPage());
+  createFile(
+    formatFilePath(shared.auth.accountPage, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    createAccountPage()
+  );
 
   // create usersettings component
   createFile(
-    rootPath.concat("app/account/UserSettings.tsx"),
+    formatFilePath(shared.auth.userSettingsComponent, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
     createUserSettingsComponent()
   );
 
@@ -45,32 +59,48 @@ export const scaffoldAccountSettingsUI = async (
   withShadCn: boolean,
   auth: AuthType
 ) => {
+  const { shared, lucia } = getFilePaths();
   // create updatenamecard
   createFile(
-    rootPath.concat("app/account/UpdateNameCard.tsx"),
+    formatFilePath(shared.auth.updateNameCardComponent, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
     createUpdateNameCard(withShadCn, auth !== "lucia")
   );
 
   // create updatenamecard
   createFile(
-    rootPath.concat("app/account/UpdateEmailCard.tsx"),
+    formatFilePath(shared.auth.updateEmailCardComponent, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
     createUpdateEmailCard(withShadCn, auth !== "lucia")
   );
 
   // create accountcard components
   createFile(
-    rootPath.concat("app/account/AccountCard.tsx"),
+    formatFilePath(shared.auth.accountCardComponent, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
     createAccountCardComponent(withShadCn)
   );
 
   // create navbar component
   createFile(
-    rootPath.concat("components/Navbar.tsx"),
+    formatFilePath(shared.auth.navbarComponent, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
     createNavbar(withShadCn, auth === "clerk", auth)
   );
   if (withShadCn) {
     createFile(
-      rootPath.concat("components/auth/SignOutBtn.tsx"),
+      formatFilePath(lucia.signOutButtonComponent, {
+        prefix: "rootPath",
+        removeExtension: false,
+      }),
       createSignOutBtn()
     );
   }

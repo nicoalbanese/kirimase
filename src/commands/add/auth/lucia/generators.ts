@@ -57,8 +57,8 @@ import { getPageSession } from "${formatFilePath(lucia.libAuthLucia, {
       removeExtension: true,
     })}";
 import { redirect } from "next/navigation";
-import { Input } from "${alias}components/ui/input";
-import { Label } from "${alias}components/ui/label";
+import { Input } from "${alias}/components/ui/input";
+import { Label } from "${alias}/components/ui/label";
 
 const Page = async () => {
   const session = await getPageSession();
@@ -158,8 +158,8 @@ const generateSignInPage = (withShadCn: boolean) => {
       removeExtension: true,
       prefix: "alias",
     })}";
-import { Input } from "${alias}components/ui/input";
-import { Label } from "${alias}components/ui/label";
+import { Input } from "${alias}/components/ui/input";
+import { Label } from "${alias}/components/ui/label";
 import { getPageSession } from "${formatFilePath(lucia.libAuthLucia, {
       prefix: "alias",
       removeExtension: true,
@@ -271,7 +271,7 @@ const generateAuthFormComponent = (withShadCn: boolean) => {
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "${alias}components/ui/button";
+import { Button } from "${alias}/components/ui/button";
 
 type Action = "/api/sign-in" | "/api/sign-up" | "/api/sign-out";
 

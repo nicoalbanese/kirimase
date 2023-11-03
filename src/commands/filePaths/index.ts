@@ -186,5 +186,5 @@ export const formatFilePath = (
   const formattedFP = opts.removeExtension
     ? removeFileExtension(filePath)
     : filePath;
-  return `${opts.prefix === "alias" ? alias : rootPath}${formattedFP}`;
+  return `${opts.prefix === "alias" ? `${alias}/` : rootPath}${formattedFP}`;
 };
