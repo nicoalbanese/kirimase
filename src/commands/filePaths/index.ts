@@ -21,7 +21,7 @@ export const paths: { t3: Paths; normal: Paths } = {
         updateNameCardComponent: "app/account/UpdateNameCard.tsx",
         updateEmailCardComponent: "app/account/UpdateEmailCard.tsx",
       },
-      init: { envMjs: "lib/env.mjs" },
+      init: { envMjs: "lib/env.mjs", libUtils: "lib/utils.ts" },
     },
     prisma: {},
     trpc: {
@@ -97,7 +97,7 @@ export const paths: { t3: Paths; normal: Paths } = {
         updateNameCardComponent: "app/account/UpdateNameCard.tsx",
         updateEmailCardComponent: "app/account/UpdateEmailCard.tsx",
       },
-      init: { envMjs: "lib/env.mjs" },
+      init: { envMjs: "lib/env.mjs", libUtils: "lib/utils.ts" },
     },
     prisma: {},
     trpc: {

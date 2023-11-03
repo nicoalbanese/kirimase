@@ -6,6 +6,7 @@ type Paths = {
   shared: {
     init: {
       envMjs: string;
+      libUtils: string;
     };
     orm: {
       dbIndex: string;
