@@ -18,38 +18,86 @@ import {
 } from "./generators.js";
 import { addContextProviderToLayout } from "../../utils.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 export const addTrpc = async () => {
   const { hasSrc, preferredPackageManager, packages } = readConfigFile();
+  const { trpc, shared } = getFilePaths();
   const rootPath = `${hasSrc ? "src/" : ""}`;
   // 1. Create lib/server/index.ts
-  createFile(`${rootPath}lib/server/routers/_app.ts`, rootRouterTs());
+  createFile(
+    formatFilePath(trpc.rootRouter, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    rootRouterTs()
+  );
 
   // 2. create lib/server/trpc.ts
-  createFile(`${rootPath}lib/server/trpc.ts`, serverTrpcTs());
+  createFile(
+    formatFilePath(trpc.serverTrpc, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    serverTrpcTs()
+  );
   // 3. create lib/server/router/ directory and maybe a users file
+  // TODO : T3 COMPATABILITY
   createFile(
     `${rootPath}lib/server/routers/computers.ts`,
     serverRouterComputersTs()
   );
   // 4. create app/api/trpc/[trpc]/route.ts
-  createFile(`${rootPath}app/api/trpc/[trpc]/route.ts`, apiTrpcRouteTs());
+  createFile(
+    formatFilePath(trpc.trpcApiRoute, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    apiTrpcRouteTs()
+  );
   // 5. create lib/trpc/client.ts
-  createFile(`${rootPath}lib/trpc/client.ts`, libTrpcClientTs());
+  createFile(
+    formatFilePath(trpc.trpcClient, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    libTrpcClientTs()
+  );
   // 6. create lib/trpc/Provider.tsx
-  createFile(`${rootPath}lib/trpc/Provider.tsx`, libTrpcProviderTsx());
+  createFile(
+    formatFilePath(trpc.trpcProvider, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    libTrpcProviderTsx()
+  );
   // 7. create lib/trpc/serverClient.ts -> updated to lib/trpc/api.ts using server invoker
   // createFile(`${rootPath}/lib/trpc/serverClient.ts`, libTrpcServerClientTs());
-  createFile(`${rootPath}lib/trpc/api.ts`, libTrpcApiTs());
+  createFile(
+    formatFilePath(trpc.trpcApiTs, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    libTrpcApiTs()
+  );
 
   // 7.5. create context file and update to include context file above
   createFile(
-    `${rootPath}lib/trpc/context.ts`,
+    formatFilePath(trpc.trpcContext, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
     libTrpcContextTs(packages.includes("next-auth"))
   );
 
   // create trpc utils file lib/trpc/utils.ts
-  createFile(`${rootPath}lib/trpc/utils.ts`, libTrpcUtilsTs());
+  createFile(
+    formatFilePath(trpc.trpcUtils, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    libTrpcUtilsTs()
+  );
 
   // 8. Install Packages: @tanstack/react-query (5.0 causing known issue, downgrading for now TODO), @trpc/client, @trpc/react-query, @trpc/server
   await installPackages(
