@@ -19,7 +19,7 @@ export async function scaffoldModel(
   hasSrc: boolean
 ) {
   const { tableName } = schema;
-  const { orm, preferredPackageManager, driver } = readConfigFile();
+  const { orm, preferredPackageManager, driver, t3 } = readConfigFile();
   const { shared } = getFilePaths();
   const serviceFileNames = generateServiceFileNames(toCamelCase(tableName));
 
