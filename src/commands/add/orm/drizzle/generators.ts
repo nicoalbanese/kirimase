@@ -618,11 +618,11 @@ export const addToDotEnv = (
     prefix: "rootPath",
   });
   const envMjsExists = fs.existsSync(envmjsfilePath);
-  if (!envMjsExists)
-    createFile(
-      envmjsfilePath,
-      generateEnvMjs(preferredPackageManager, orm, excludeDbUrlIfBlank)
-    );
+  if (!envMjsExists) console.log("doesn't exist");
+  createFile(
+    envmjsfilePath,
+    generateEnvMjs(preferredPackageManager, orm, excludeDbUrlIfBlank)
+  );
   let envmjsfileContents = fs.readFileSync(envmjsfilePath, "utf-8");
 
   const formatItemForDotEnvMjs = (item: DotEnvItem) =>
@@ -809,6 +809,7 @@ const generateEnvMjs = (
   ormType: ORMType,
   blank = false
 ) => {
+  console.log("trying to make");
   return `import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";${
     preferredPackageManager !== "bun" && ormType === "drizzle"

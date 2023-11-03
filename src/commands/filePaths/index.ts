@@ -81,6 +81,7 @@ export const paths: { t3: Paths; normal: Paths } = {
   t3: {
     drizzle: {
       dbMigrate: "server/db/migrate.ts",
+      schemaTs: "server/db/schema.ts",
       migrationsDir: "server/db/migrations",
     },
     shared: {

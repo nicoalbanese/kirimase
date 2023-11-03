@@ -22,6 +22,7 @@ import { Schema } from "./types.js";
 import { scaffoldViewsAndComponents } from "./generators/views.js";
 import { getCurrentSchemas, toCamelCase } from "./utils.js";
 import { scaffoldModel } from "./generators/model/index.js";
+import { checkForExistingPackages } from "../init/utils.js";
 
 function provideInstructions() {
   consola.info(
