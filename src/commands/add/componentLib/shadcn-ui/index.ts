@@ -110,11 +110,11 @@ export const installShadcnUI = async (
 };
 
 export const updateSignInComponentWithShadcnUI = () => {
-  const { hasSrc } = readConfigFile();
+  const { hasSrc, alias } = readConfigFile();
   const filepath = "components/auth/SignIn.tsx";
   const updatedContent = `"use client";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { Button } from "../ui/button";
+import { Button } from "${alias}/components/ui/button";
 
 export default function SignIn() {
   const { data: session, status } = useSession();
