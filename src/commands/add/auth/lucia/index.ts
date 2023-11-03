@@ -9,9 +9,9 @@ import {
 import { consola } from "consola";
 import { luciaGenerators } from "./generators.js";
 import {
-  DrizzleAdapterDriverMappings,
+  generateDrizzleAdapterDriverMappings,
   DrizzleLuciaSchema,
-  PrismaAdapterDriverMappings,
+  generatePrismaAdapterDriverMappings,
   addLuciaToPrismaSchema,
 } from "./utils.js";
 
@@ -193,6 +193,8 @@ export const addLucia = async () => {
   }
 
   // install packages (lucia, and adapter) will have to pull in specific package
+  const PrismaAdapterDriverMappings = generatePrismaAdapterDriverMappings();
+  const DrizzleAdapterDriverMappings = generateDrizzleAdapterDriverMappings();
   const adapterPackage =
     orm === "prisma"
       ? PrismaAdapterDriverMappings.adapterPackage

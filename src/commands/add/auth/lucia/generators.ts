@@ -2,9 +2,9 @@ import { DBProvider, DBType, ORMType } from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import {
-  DrizzleAdapterDriverMappings,
+  generateDrizzleAdapterDriverMappings,
   LuciaAdapterInfo,
-  PrismaAdapterDriverMappings,
+  generatePrismaAdapterDriverMappings,
 } from "./utils.js";
 
 const generateViewsAndComponents = (withShadCn: boolean) => {
@@ -715,6 +715,9 @@ const generateAuthDirFiles = (
 ) => {
   const { lucia } = getFilePaths();
   let mappings: LuciaAdapterInfo;
+  const DrizzleAdapterDriverMappings = generateDrizzleAdapterDriverMappings();
+  const PrismaAdapterDriverMappings = generatePrismaAdapterDriverMappings();
+
   if (orm === "drizzle")
     mappings = DrizzleAdapterDriverMappings[dbType][provider];
   if (orm === "prisma") mappings = PrismaAdapterDriverMappings;

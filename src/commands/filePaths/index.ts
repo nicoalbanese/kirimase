@@ -156,7 +156,8 @@ export const paths: { t3: Paths; normal: Paths } = {
   },
 };
 export const getFilePaths = () => {
-  const { t3, rootPath, alias } = readConfigFile();
+  console.log("here");
+  const { t3 } = readConfigFile();
   if (t3) return paths.t3;
   else return paths.normal;
 };
