@@ -80,15 +80,15 @@ export const paths: { t3: Paths; normal: Paths } = {
   },
   t3: {
     drizzle: {
-      dbMigrate: "lib/db/migrate.ts",
-      migrationsDir: "lib/db/migrations",
+      dbMigrate: "server/db/migrate.ts",
+      migrationsDir: "server/db/migrations",
     },
     shared: {
-      orm: { dbIndex: "lib/db/index.ts" },
+      orm: { dbIndex: "server/db/index.ts" },
       auth: {
         authUtils: "lib/auth/utils.ts",
         accountPage: "app/account/page.tsx",
-        authSchema: "lib/db/schema/auth.ts",
+        authSchema: "server/schema/auth.ts",
         accountApiRoute: "app/api/account/route.ts",
         navbarComponent: "components/Navbar.tsx",
         signInComponent: "components/auth/SignIn.tsx",
@@ -97,18 +97,18 @@ export const paths: { t3: Paths; normal: Paths } = {
         updateNameCardComponent: "app/account/UpdateNameCard.tsx",
         updateEmailCardComponent: "app/account/UpdateEmailCard.tsx",
       },
-      init: { envMjs: "lib/env.mjs", libUtils: "lib/utils.ts" },
+      init: { envMjs: "env.mjs", libUtils: "lib/utils.ts" },
     },
     prisma: {},
     trpc: {
-      trpcApiTs: "lib/trpc/api.ts",
-      trpcUtils: "lib/trpc/utils.ts",
-      rootRouter: "lib/server/routers/_app.ts",
-      serverTrpc: "lib/server/trpc.ts",
-      trpcClient: "lib/trpc/client.ts",
-      trpcContext: "lib/trpc/context.ts",
+      trpcApiTs: "trpc/server.ts",
+      trpcUtils: "trpc/shared.ts",
+      rootRouter: "server/api/root.ts",
+      serverTrpc: "server/api/trpc.ts",
+      trpcClient: "trpc/react.tsx",
+      trpcContext: "server/api/trpc.ts",
       trpcApiRoute: "app/api/trpc/[trpc]/route.ts",
-      trpcProvider: "lib/trpc/Provider.tsx",
+      trpcProvider: "trpc/react.tsx",
     },
     clerk: {
       middleware: "middleware.ts",
@@ -138,9 +138,9 @@ export const paths: { t3: Paths; normal: Paths } = {
       accountBillingPage: "app/account/billing/page.tsx",
       configSubscription: "config/subscriptions.ts",
       stripeSubscription: "lib/stripe/subscription.ts",
-      accountRouterTrpc: "lib/server/routers/account.ts",
+      accountRouterTrpc: "server/api/routers/account.ts",
       billingSuccessToast: "app/account/billing/SuccessToast.tsx",
-      subscriptionSchema: "lib/db/schema/subscriptions.ts",
+      subscriptionSchema: "server/db/schema/subscriptions.ts",
       stripeWebhooksApiRoute: "app/api/webhooks/stripe/route.ts",
       manageSubscriptionApiRoute:
         "app/api/billing/manage-subscription/route.ts",
@@ -156,7 +156,6 @@ export const paths: { t3: Paths; normal: Paths } = {
   },
 };
 export const getFilePaths = () => {
-  console.log("here");
   const { t3 } = readConfigFile();
   if (t3) return paths.t3;
   else return paths.normal;
