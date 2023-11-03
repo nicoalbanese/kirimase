@@ -14,12 +14,14 @@ import { existsSync, readFileSync } from "fs";
 import { DBProvider, DBType } from "../../../../types.js";
 import { replaceFile } from "../../../../utils.js";
 import { consola } from "consola";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 export type LuciaAdapterInfo = {
   import: string;
   adapter: string;
   adapterPackage: string;
 };
+const { shared } = getFilePaths();
 export const DrizzleAdapterDriverMappings: {
   [k in DBType]: Partial<{
     [k in DBProvider]: LuciaAdapterInfo;
@@ -33,7 +35,10 @@ export const DrizzleAdapterDriverMappings: {
 		session: "user_session"
 	})`,
       adapterPackage: "@lucia-auth/adapter-postgresql",
-      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "@/lib/db/index"`,
+      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
+        shared.orm.dbIndex,
+        { removeExtension: true, prefix: "alias" }
+      )}"`,
     },
     supabase: {
       adapter: `adapter: pg(pool, {
@@ -42,7 +47,10 @@ export const DrizzleAdapterDriverMappings: {
 		session: "user_session"
 	})`,
       adapterPackage: "@lucia-auth/adapter-postgresql",
-      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "@/lib/db/index"`,
+      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
+        shared.orm.dbIndex,
+        { removeExtension: true, prefix: "alias" }
+      )}"`,
     },
     postgresjs: {
       adapter: `adapter: postgresAdapter(client, {
@@ -51,7 +59,10 @@ export const DrizzleAdapterDriverMappings: {
 		session: "user_session"
 	})`,
       adapterPackage: "@lucia-auth/adapter-postgresql",
-      import: `import { postgres as postgresAdapter } from "@lucia-auth/adapter-postgresql";\nimport { client } from "@/lib/db/index"`,
+      import: `import { postgres as postgresAdapter } from "@lucia-auth/adapter-postgresql";\nimport { client } from "${formatFilePath(
+        shared.orm.dbIndex,
+        { removeExtension: true, prefix: "alias" }
+      )}"`,
     },
     "node-postgres": {
       adapter: `adapter: pg(pool, {
@@ -60,7 +71,10 @@ export const DrizzleAdapterDriverMappings: {
 		session: "user_session"
 	})`,
       adapterPackage: "@lucia-auth/adapter-postgresql",
-      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "@/lib/db/index"`,
+      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
+        shared.orm.dbIndex,
+        { removeExtension: true, prefix: "alias" }
+      )}"`,
     },
     "vercel-pg": {
       adapter: `adapter: pg(pool, {
@@ -69,7 +83,10 @@ export const DrizzleAdapterDriverMappings: {
 		session: "user_session"
 	})`,
       adapterPackage: "@lucia-auth/adapter-postgresql",
-      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "@/lib/db/index"`,
+      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
+        shared.orm.dbIndex,
+        { removeExtension: true, prefix: "alias" }
+      )}"`,
     },
   },
   mysql: {
@@ -80,10 +97,16 @@ export const DrizzleAdapterDriverMappings: {
 		session: "user_session"
 	})`,
       adapterPackage: "@lucia-auth/adapter-mysql",
-      import: `import { mysql2 } from "@lucia-auth/adapter-mysql";\nimport { poolConnection } from "@/lib/db/index"`,
+      import: `import { mysql2 } from "@lucia-auth/adapter-mysql";\nimport { poolConnection } from "${formatFilePath(
+        shared.orm.dbIndex,
+        { removeExtension: true, prefix: "alias" }
+      )}"`,
     },
     planetscale: {
-      import: `import { planetscale } from "@lucia-auth/adapter-mysql";\nimport { connection } from "@/lib/db/index"`,
+      import: `import { planetscale } from "@lucia-auth/adapter-mysql";\nimport { connection } from "${formatFilePath(
+        shared.orm.dbIndex,
+        { removeExtension: true, prefix: "alias" }
+      )}"`,
       adapterPackage: "@lucia-auth/adapter-mysql",
       adapter: `adapter: planetscale(connection, {
 		user: "auth_user",
@@ -100,7 +123,10 @@ export const DrizzleAdapterDriverMappings: {
 		session: "user_session"
 	})`,
       adapterPackage: "@lucia-auth/adapter-sqlite",
-      import: `import { betterSqlite3 } from "@lucia-auth/adapter-sqlite";\nimport { sqlite } from "@/lib/db/index"`,
+      import: `import { betterSqlite3 } from "@lucia-auth/adapter-sqlite";\nimport { sqlite } from "${formatFilePath(
+        shared.orm.dbIndex,
+        { removeExtension: true, prefix: "alias" }
+      )}"`,
     },
   },
 };
@@ -254,7 +280,10 @@ model Key {
 }`;
 
 export const PrismaAdapterDriverMappings: LuciaAdapterInfo = {
-  import: `import { prisma } from "@lucia-auth/adapter-prisma";\nimport { db } from "@/lib/db/index";`,
+  import: `import { prisma } from "@lucia-auth/adapter-prisma";\nimport { db } from "${formatFilePath(
+    shared.orm.dbIndex,
+    { removeExtension: true, prefix: "alias" }
+  )}";`,
   adapter: `adapter: prisma(db)`,
   adapterPackage: `@lucia-auth/adapter-prisma`,
 };

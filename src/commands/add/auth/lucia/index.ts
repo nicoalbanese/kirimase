@@ -1,15 +1,12 @@
-import { confirm } from "@inquirer/prompts";
 import {
   addPackageToConfig,
   createFile,
   installPackages,
-  installShadcnUIComponents,
   readConfigFile,
   replaceFile,
   updateConfigFile,
 } from "../../../../utils.js";
 import { consola } from "consola";
-import { installShadcnUI } from "../../componentLib/shadcn-ui/index.js";
 import { luciaGenerators } from "./generators.js";
 import {
   DrizzleAdapterDriverMappings,
@@ -19,6 +16,7 @@ import {
 } from "./utils.js";
 
 import fs from "fs";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 export const addLucia = async () => {
   // get dbtype and provider
@@ -31,7 +29,6 @@ export const addLucia = async () => {
     driver,
     componentLib,
   } = readConfigFile();
-  const config = readConfigFile();
   // ask whether want to use shadcnui
   consola.info(
     "Kirimase generates views and components for authenticating using Lucia."
@@ -47,6 +44,8 @@ export const addLucia = async () => {
     generateAppDTs,
     generateAuthDirFiles,
   } = luciaGenerators;
+
+  const { lucia, shared } = getFilePaths();
 
   // create auth form component
   // generate sign-in and sign-up pages
@@ -66,15 +65,24 @@ export const addLucia = async () => {
     viewsAndComponents = generateViewsAndComponents(false);
   }
   createFile(
-    rootPath.concat("app/sign-in/page.tsx"),
+    formatFilePath(lucia.signInPage, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
     viewsAndComponents.signInPage
   );
   createFile(
-    rootPath.concat("app/sign-up/page.tsx"),
+    formatFilePath(lucia.signUpPage, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
     viewsAndComponents.signUpPage
   );
   createFile(
-    rootPath.concat("components/auth/Form.tsx"),
+    formatFilePath(lucia.authFormComponent, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
     viewsAndComponents.authFormComponent
   );
   replaceFile(rootPath.concat("app/page.tsx"), viewsAndComponents.homePage);
@@ -85,28 +93,55 @@ export const addLucia = async () => {
   // add API routes
   const apiRoutes = generateApiRoutes();
   createFile(
-    rootPath.concat("app/api/sign-in/route.ts"),
+    formatFilePath(lucia.signInApiRoute, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
     apiRoutes.signInRoute
   );
   createFile(
-    rootPath.concat("app/api/sign-up/route.ts"),
+    formatFilePath(lucia.signUpApiRoute, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
     apiRoutes.signUpRoute
   );
   createFile(
-    rootPath.concat("app/api/sign-out/route.ts"),
+    formatFilePath(lucia.signOutApiRoute, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
     apiRoutes.signOutRoute
   );
 
   // add app.d.ts
   const appDTs = generateAppDTs();
-  createFile("app.d.ts", appDTs);
+  createFile(
+    formatFilePath(lucia.appDTs, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    appDTs
+  );
 
   const authDirFiles = generateAuthDirFiles(orm, driver, provider);
   // create auth/utils.ts
-  createFile(rootPath.concat("lib/auth/utils.ts"), authDirFiles.utilsTs);
+  createFile(
+    formatFilePath(shared.auth.authUtils, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    authDirFiles.utilsTs
+  );
 
   // create auth/lucia.ts
-  createFile(rootPath.concat("lib/auth/lucia.ts"), authDirFiles.luciaTs);
+  createFile(
+    formatFilePath(lucia.libAuthLucia, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    authDirFiles.luciaTs
+  );
 
   // add db schema based on orm (pulled in from config file)
   if (orm === "prisma") await addLuciaToPrismaSchema();
@@ -118,17 +153,29 @@ export const addLucia = async () => {
         ""
       );
       createFile(
-        rootPath.concat("lib/db/schema/auth.ts"),
+        formatFilePath(shared.auth.authSchema, {
+          removeExtension: false,
+          prefix: "rootPath",
+        }),
         schemaWithoutReferences
       );
     } else {
-      createFile(rootPath.concat("lib/db/schema/auth.ts"), schema);
+      createFile(
+        formatFilePath(shared.auth.authSchema, {
+          removeExtension: false,
+          prefix: "rootPath",
+        }),
+        schema
+      );
     }
   }
 
   // if using neon, add to db/index.ts
   if (provider === "neon" && orm === "drizzle") {
-    const dbTsPath = rootPath.concat("lib/db/index.ts");
+    const dbTsPath = formatFilePath(shared.orm.dbIndex, {
+      prefix: "rootPath",
+      removeExtension: false,
+    });
     const dbTsExists = fs.existsSync(dbTsPath);
     if (!dbTsExists) return;
 
