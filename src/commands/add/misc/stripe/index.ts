@@ -22,7 +22,7 @@ import {
   replaceFile,
 } from "../../../../utils.js";
 import { consola } from "consola";
-import fs from "fs";
+import fs, { existsSync } from "fs";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import {
   addToPrismaModelBulk,
@@ -48,6 +48,7 @@ import { AvailablePackage } from "../../../../types.js";
 import { updateTRPCRouter } from "../../../generate/generators/trpcRoute.js";
 import { createAccountPage } from "../../auth/shared/generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import { libAuthUtilsTs } from "../../auth/next-auth/generators.js";
 
 export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   const {
@@ -58,9 +59,9 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     driver,
     auth,
     packages: installedPackages,
+    t3,
   } = readConfigFile();
-  const { trpcRootDir } = getFileLocations();
-  const { trpc, stripe, shared } = getFilePaths();
+  const { stripe, shared } = getFilePaths();
 
   const packages = packagesBeingInstalled.concat(installedPackages);
 
@@ -68,6 +69,17 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     consola.warn("You cannot install Stripe without an ORM installed.");
     await addPackage();
     return;
+  }
+  if (t3 && auth === "next-auth") {
+    const authUtilsPath = formatFilePath(shared.auth.authUtils, {
+      prefix: "rootPath",
+      removeExtension: false,
+    });
+
+    const authUtilsExist = existsSync(authUtilsPath);
+    if (!authUtilsExist) {
+      createFile(authUtilsPath, libAuthUtilsTs());
+    }
   }
 
   if (auth === "clerk") {
