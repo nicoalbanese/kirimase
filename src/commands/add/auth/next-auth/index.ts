@@ -22,19 +22,21 @@ import {
 import { AuthDriver, AuthProvider, AuthProviders } from "./utils.js";
 import { checkbox } from "@inquirer/prompts";
 import { addContextProviderToLayout } from "../../utils.js";
-import { updateSignInComponentWithShadcnUI } from "../../componentLib/shadcn-ui/index.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import { addToPrismaSchema } from "../../../generate/utils.js";
 import { prismaGenerate } from "../../orm/utils.js";
 import { InitOptions } from "../../../../types.js";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 export const addNextAuth = async (options?: InitOptions) => {
-  const providers = options?.authProviders || (await checkbox({
-    message: "Select a provider to add",
-    choices: Object.keys(AuthProviders).map((p) => {
-      return { name: p, value: p };
-    }),
-  })) as AuthProvider[];
+  const providers =
+    options?.authProviders ||
+    ((await checkbox({
+      message: "Select a provider to add",
+      choices: Object.keys(AuthProviders).map((p) => {
+        return { name: p, value: p };
+      }),
+    })) as AuthProvider[]);
 
   const {
     hasSrc,
@@ -46,23 +48,43 @@ export const addNextAuth = async (options?: InitOptions) => {
     provider: dbProvider,
   } = readConfigFile();
   const rootPath = `${hasSrc ? "src/" : ""}`;
+  const { "next-auth": nextAuth, shared } = getFilePaths();
+
   // 1. Create app/api/auth/[...nextauth].ts
   createFile(
-    rootPath.concat("app/api/auth/[...nextauth]/route.ts"),
+    formatFilePath(nextAuth.nextAuthApiRoute, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
     apiAuthNextAuthTs(providers, driver, orm)
   );
 
   // 2. create lib/auth/Provider.tsx
-  createFile(rootPath.concat("lib/auth/Provider.tsx"), libAuthProviderTsx());
+  createFile(
+    formatFilePath(nextAuth.authProviderComponent, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    libAuthProviderTsx()
+  );
 
   // 3. create lib/auth/utils.ts
-  createFile(rootPath.concat("lib/auth/utils.ts"), libAuthUtilsTs());
+  createFile(
+    formatFilePath(shared.auth.authUtils, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    libAuthUtilsTs()
+  );
 
   // 4. create lib/db/schema/auth.ts
   if (orm !== null) {
     if (orm === "drizzle") {
       createFile(
-        rootPath.concat("lib/db/schema/auth.ts"),
+        formatFilePath(shared.auth.authSchema, {
+          removeExtension: false,
+          prefix: "rootPath",
+        }),
         createDrizzleAuthSchema(driver)
       );
     }
@@ -74,9 +96,12 @@ export const addNextAuth = async (options?: InitOptions) => {
     }
   }
 
-  // 5. create components/auth/SignIn.tsx
+  // 5. create components/auth/SignIn.tsx - TODO - may be causing problems
   createFile(
-    rootPath.concat("components/auth/SignIn.tsx"),
+    formatFilePath(shared.auth.signInComponent, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
     createSignInComponent(componentLib)
   );
 
