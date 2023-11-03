@@ -36,8 +36,8 @@ export const paths: { t3: Paths; normal: Paths } = {
     },
     clerk: {
       middleware: "middleware.ts",
-      signInApiRoute: "app/sign-in/[[...sign-in]]/page.tsx",
-      signUpApiRoute: "app/sign-up/[[...sign-in]]/page.tsx",
+      signInPage: "app/sign-in/[[...sign-in]]/page.tsx",
+      signUpPage: "app/sign-up/[[...sign-in]]/page.tsx",
     },
     lucia: {
       signUpApiRoute: "app/api/sign-up/route.ts",
@@ -112,8 +112,8 @@ export const paths: { t3: Paths; normal: Paths } = {
     },
     clerk: {
       middleware: "middleware.ts",
-      signInApiRoute: "app/sign-in/[[...sign-in]]/page.tsx",
-      signUpApiRoute: "app/sign-up/[[...sign-in]]/page.tsx",
+      signInPage: "app/sign-in/[[...sign-in]]/page.tsx",
+      signUpPage: "app/sign-up/[[...sign-in]]/page.tsx",
     },
     lucia: {
       signUpApiRoute: "app/api/sign-up/route.ts",

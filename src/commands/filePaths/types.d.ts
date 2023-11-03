@@ -30,8 +30,8 @@ type Paths = {
   };
   clerk: {
     middleware: string;
-    signInApiRoute: string;
-    signUpApiRoute: string;
+    signInPage: string;
+    signUpPage: string;
   };
   lucia: {
     signInPage: string;
