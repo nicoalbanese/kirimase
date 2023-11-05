@@ -24,7 +24,7 @@ export const Packages: {
     { name: "Stripe", value: "stripe" },
     { name: "Resend", value: "resend" },
   ],
-  componentLib: [{ name: "Shadcn UI", value: "shadcn-ui" }],
+  componentLib: [{ name: "Shadcn UI (with next-themes)", value: "shadcn-ui" }],
 };
 
 export const addContextProviderToLayout = (
