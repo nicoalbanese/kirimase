@@ -1,6 +1,6 @@
 import { consola } from "consola";
 import { DBType } from "../../../../types.js";
-import { createFile, readConfigFile } from "../../../../utils.js";
+import { createFile, readConfigFile, replaceFile } from "../../../../utils.js";
 import { prismaFormat, prismaGenerate } from "../../../add/orm/utils.js";
 import { Schema } from "../../types.js";
 import { toCamelCase } from "../../utils.js";
@@ -12,6 +12,7 @@ import {
   generateServiceFileNames,
   getFilePaths,
 } from "../../../filePaths/index.js";
+import { existsSync, readFileSync } from "fs";
 
 export async function scaffoldModel(
   schema: Schema,
@@ -20,15 +21,19 @@ export async function scaffoldModel(
 ) {
   const { tableName } = schema;
   const { orm, preferredPackageManager, driver, t3 } = readConfigFile();
-  const { shared } = getFilePaths();
+  const { shared, drizzle } = getFilePaths();
   const serviceFileNames = generateServiceFileNames(toCamelCase(tableName));
 
-  // create model file if non-t3
   const modelPath = `${formatFilePath(shared.orm.schemaDir, {
     prefix: "rootPath",
     removeExtension: false,
   })}/${toCamelCase(tableName)}.ts`;
   createFile(modelPath, generateModelContent(schema, dbType));
+
+  if (t3) {
+    updateRootSchema(tableName);
+  }
+
   if (orm === "prisma") {
     await prismaFormat(preferredPackageManager);
     await prismaGenerate(preferredPackageManager);
@@ -99,3 +104,67 @@ export async function scaffoldModel(
   // }
   consola.success("Successfully added model to your database!");
 }
+
+const updateRootSchema = (tableName: string) => {
+  const tableNameCC = toCamelCase(tableName);
+  const { drizzle } = getFilePaths();
+  const rootSchemaPath = formatFilePath(drizzle.schemaAggregator, {
+    prefix: "rootPath",
+    removeExtension: false,
+  });
+  // check if schema/_root.ts exists
+  const rootSchemaExists = existsSync(rootSchemaPath);
+  if (rootSchemaExists) {
+    // if yes, import new model from model path and add to export -> perhaps replace 'export {' with 'export { new_model,'
+    const rootSchemaContents = readFileSync(rootSchemaPath, "utf-8");
+    const rootSchemaWithNewExport = rootSchemaContents.replace(
+      "export {",
+      `export { ${tableNameCC}, `
+    );
+
+    const importInsertionPoint = rootSchemaWithNewExport.lastIndexOf("import");
+    const nextLineAfterLastImport =
+      rootSchemaWithNewExport.indexOf("\n", importInsertionPoint) + 1;
+    const beforeImport = rootSchemaWithNewExport.slice(
+      0,
+      nextLineAfterLastImport
+    );
+    const afterImport = rootSchemaWithNewExport.slice(nextLineAfterLastImport);
+    const newImportStatement = `import { ${tableNameCC} } from "./${tableNameCC}";\n`;
+    const withNewImport = `${beforeImport}${newImportStatement}${afterImport}`;
+    replaceFile(rootSchemaPath, withNewImport);
+  } else {
+    // if not create schema/_root.ts -> then do same import as above
+    createFile(
+      rootSchemaPath,
+      `import {${tableNameCC}} from "./${tableNameCC}"
+
+export { ${tableNameCC} }`
+    );
+    // and also update db/index.ts to add extended model import
+    const indexDbPath = formatFilePath(drizzle.dbIndex, {
+      removeExtension: false,
+      prefix: "rootPath",
+    });
+    const indexDbContents = readFileSync(indexDbPath, "utf-8");
+    const updatedContentsWithImport = indexDbContents.replace(
+      `import * as schema from "./schema";`,
+      `import * as schema from "./schema";
+import * as extended from "~/server/db/schema/_root";`
+    );
+    const updatedContentsFinal = updatedContentsWithImport.replace(
+      `{ schema }`,
+      `{ schema: { ...schema, ...extended } }`
+    );
+    replaceFile(indexDbPath, updatedContentsFinal);
+
+    // update drizzle config file to add all in server/db/*
+    const drizzleConfigPath = "drizzle.config.ts";
+    const dConfigContents = readFileSync(drizzleConfigPath, "utf-8");
+    const updatedContents = dConfigContents.replace(
+      `schema: "./src/server/db/schema.ts",`,
+      `schema: "./src/server/db/*",`
+    );
+    replaceFile(drizzleConfigPath, updatedContents);
+  }
+};

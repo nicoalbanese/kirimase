@@ -146,7 +146,7 @@ const createListComponent = (schema: Schema) => {
 
   return `"use client";
 import { Complete${tableNameSingularCapitalised} } from "${formatFilePath(
-    shared.orm.servicesDir,
+    shared.orm.schemaDir,
     { prefix: "alias", removeExtension: false }
   )}/${tableNameCamelCase}";
 import { ${t3 ? "api as " : ""}trpc } from "${formatFilePath(trpc.trpcClient, {

@@ -4,6 +4,7 @@ export type Paths = {
     migrationsDir: string;
     dbIndex: string;
     schemaTs?: string;
+    schemaAggregator?: string;
   };
   prisma: { dbIndex: string };
   shared: {

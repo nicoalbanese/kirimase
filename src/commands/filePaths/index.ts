@@ -93,11 +93,12 @@ export const paths: { t3: Paths; normal: Paths } = {
       schemaTs: "server/db/schema.ts",
       dbIndex: "server/db/index.ts",
       migrationsDir: "server/db/migrations",
+      schemaAggregator: "server/db/schema/_root.ts",
     },
     shared: {
       orm: {
         servicesDir: "lib/api",
-        schemaDir: "lib/db/schema",
+        schemaDir: "server/db/schema",
       },
       auth: {
         authUtils: "lib/auth/utils.ts",
