@@ -20,7 +20,7 @@ import { addContextProviderToLayout } from "../../utils.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 
 export const addTrpc = async () => {
-  const { hasSrc, preferredPackageManager, packages } = readConfigFile();
+  const { hasSrc, preferredPackageManager, packages, orm } = readConfigFile();
   const rootPath = `${hasSrc ? "src/" : ""}`;
   // 1. Create lib/server/index.ts
   createFile(`${rootPath}lib/server/routers/_app.ts`, rootRouterTs());
@@ -55,7 +55,7 @@ export const addTrpc = async () => {
   await installPackages(
     {
       regular: `@tanstack/react-query@^4.32.6 @trpc/client@^10.37.1 @trpc/react-query@^10.37.1 @trpc/server@^10.37.1 @trpc/next@^10.37.1 superjson${
-        !packages.includes("drizzle") ? " zod" : ""
+        orm === null ? " zod" : ""
       }`,
       dev: "",
     },

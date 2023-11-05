@@ -535,6 +535,9 @@ export const addToDotEnv = (
   // handling env.mjs
   const envmjsfilePath = rootPath.concat("lib/env.mjs");
   const envMjsExists = fs.existsSync(envmjsfilePath);
+  if (!envMjsExists && orm === null) {
+    return;
+  }
   if (!envMjsExists)
     createFile(
       `${rootPath}lib/env.mjs`,

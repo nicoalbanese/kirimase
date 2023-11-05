@@ -19,6 +19,7 @@ import {
   installPackages,
   readConfigFile,
   replaceFile,
+  updateConfigFile,
 } from "../../../../utils.js";
 import { consola } from "consola";
 import fs from "fs";
@@ -62,6 +63,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
 
   if (orm === null || orm === undefined) {
     consola.warn("You cannot install Stripe without an ORM installed.");
+    updateConfigFile({ orm: undefined });
     await addPackage();
     return;
   }

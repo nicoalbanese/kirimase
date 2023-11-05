@@ -54,8 +54,8 @@ export const addPackage = async (options?: InitOptions) => {
         options?.orm ||
         ((await select({
           message: "Select an ORM to use:",
-          // choices: [...Packages.orm, new Separator(), nullOption],
-          choices: [...Packages.orm],
+          choices: [...Packages.orm, new Separator(), nullOption],
+          // choices: [...Packages.orm],
         })) as ORMType | null);
 
       if (ormToInstall === "drizzle") await addDrizzle(options);
