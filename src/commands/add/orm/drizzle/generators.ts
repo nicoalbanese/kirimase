@@ -81,7 +81,7 @@ import { drizzle } from 'drizzle-orm/neon-http';
 import { env } from "@/lib/env.mjs";
 
 neonConfig.fetchConnectionCache = true;
- 
+
 export const sql = neon(env.DATABASE_URL);
 export const db = drizzle(sql);
 `;
@@ -90,7 +90,7 @@ export const db = drizzle(sql);
       indexTS = `import { sql } from '@vercel/postgres';
 import { drizzle } from 'drizzle-orm/vercel-postgres';
 import { env } from "@/lib/env.mjs";
- 
+
 export const db = drizzle(sql)
 `;
       break;
@@ -98,7 +98,7 @@ export const db = drizzle(sql)
       indexTS = `import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import { env } from "@/lib/env.mjs";
- 
+
 const connectionString = env.DATABASE_URL
 const client = postgres(connectionString)
 export const db = drizzle(client);
@@ -110,12 +110,12 @@ import { RDSDataClient } from '@aws-sdk/client-rds-data';
 import { fromIni } from '@aws-sdk/credential-providers';
 import "dotenv/config";
 
- 
+
 const rdsClient = new RDSDataClient({
   	credentials: fromIni({ profile: env['PROFILE'] }),
 		region: 'us-east-1',
 });
- 
+
 export const db = drizzle(rdsClient, {
   database: env['DATABASE']!,
   secretArn: env['SECRET_ARN']!,
@@ -127,12 +127,12 @@ export const db = drizzle(rdsClient, {
       indexTS = `import { drizzle } from "drizzle-orm/planetscale-serverless";
 import { connect } from "@planetscale/database";
 import { env } from "@/lib/env.mjs";
- 
+
 // create the connection
 export const connection = connect({
   url: env.DATABASE_URL
 });
- 
+
 export const db = drizzle(connection);
 `;
       break;
@@ -140,16 +140,16 @@ export const db = drizzle(connection);
       indexTS = `import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import { env } from "@/lib/env.mjs";
- 
+
 export const poolConnection = mysql.createPool(env.DATABASE_URL);
- 
+
 export const db = drizzle(poolConnection);
 `;
       break;
     case "better-sqlite3":
       indexTS = `import { drizzle, BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
- 
+
 export const sqlite = new Database('sqlite.db');
 export const db: BetterSQLite3Database = drizzle(sqlite);
 `;
@@ -216,7 +216,7 @@ import { neon, neonConfig } from '@neondatabase/serverless';
 `;
       connectionLogic = `
 neonConfig.fetchConnectionCache = true;
- 
+
 const sql = neon(env.DATABASE_URL);
 const db = drizzle(sql);
 `;
@@ -257,7 +257,7 @@ const rdsClient = new RDSDataClient({
   	credentials: fromIni({ profile: process.env['PROFILE'] }),
 		region: 'us-east-1',
 });
- 
+
 const db = drizzle(rdsClient, {
   database: process.env['DATABASE']!,
   secretArn: process.env['SECRET_ARN']!,
@@ -274,7 +274,7 @@ import { connect } from "@planetscale/database";
 `;
       connectionLogic = `
 const connection = connect({ url: env.DATABASE_URL });
- 
+
 const db = drizzle(connection);
 `;
       break;
@@ -345,7 +345,7 @@ export const createInitSchema = (libPath?: string, dbType?: DBType) => {
   let initModel = "";
   switch (dbDriver) {
     case "pg":
-      initModel = `import { pgTable, serial, text, integer } from "drizzle-orm/pg-core";${
+      initModel = `import { pgTable, serial, text, integer, uuid } from "drizzle-orm/pg-core";${
         packages.includes("next-auth")
           ? '\nimport { users } from "./auth";'
           : ""
@@ -356,7 +356,7 @@ export const computers = pgTable("computers", {
   brand: text("brand").notNull(),
   cores: integer("cores").notNull(),${
     packages.includes("next-auth")
-      ? '\nuserId: integer("user_id").notNull().references(() => users.id)'
+      ? '\nuserId: uuid("user_id").notNull().references(() => users.id)'
       : ""
   }
 });`;
