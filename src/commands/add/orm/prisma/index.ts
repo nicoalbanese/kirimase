@@ -23,9 +23,11 @@ import {
 } from "../utils.js";
 import { consola } from "consola";
 import { addToPrismaSchema } from "../../../generate/utils.js";
+import { formatFilePath, getDbIndexPath } from "../../../filePaths/index.js";
 
 export const addPrisma = async (initOptions?: InitOptions) => {
   const { preferredPackageManager, hasSrc } = readConfigFile();
+  const dbIndex = getDbIndexPath("prisma");
   const rootPath = hasSrc ? "src/" : "";
   // ask for db type
   const dbType =
@@ -79,7 +81,13 @@ export const addPrisma = async (initOptions?: InitOptions) => {
   // create .env with database_url
 
   // generate prisma global instance
-  createFile(`${rootPath}lib/db/index.ts`, generatePrismaDbInstance());
+  createFile(
+    formatFilePath(dbIndex, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    generatePrismaDbInstance()
+  );
 
   // update tsconfig with import alias for prisma types
   await updateTsConfigPrismaTypeAlias();

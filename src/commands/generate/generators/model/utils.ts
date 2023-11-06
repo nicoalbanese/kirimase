@@ -1,10 +1,13 @@
-import { readConfigFile } from "../../../../utils.js";
+import { existsSync, readFileSync } from "fs";
+import { createFile, readConfigFile, replaceFile } from "../../../../utils.js";
 import { ORMTypeMap, TypeMap } from "../../types.js";
 import {
   formatTableName,
   getReferenceFieldType,
   toCamelCase,
 } from "../../utils.js";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import { AuthType } from "../../../../types.js";
 
 export const prismaMappings = {
   typeMappings: {
@@ -134,4 +137,89 @@ export const generateAuthCheck = (belongsToUser: boolean) => {
 
 export const authForWhereClausePrisma = (belongsToUser: boolean) => {
   return belongsToUser ? ", userId: session?.user.id!" : "";
+};
+
+export const updateRootSchema = (
+  tableName: string,
+  usingAuth?: boolean,
+  auth?: AuthType
+) => {
+  const tableNameCC = toCamelCase(tableName);
+  const { drizzle } = getFilePaths();
+  const rootSchemaPath = formatFilePath(drizzle.schemaAggregator, {
+    prefix: "rootPath",
+    removeExtension: false,
+  });
+
+  let tableNames = "";
+  switch (auth) {
+    case "next-auth":
+      tableNames = "users, accounts, sessions, verificationTokens";
+      break;
+    case "clerk":
+      break;
+    case "lucia":
+      tableNames = "keys, users, sessions";
+      break;
+  }
+
+  const newImportStatement = usingAuth
+    ? `import { ${tableNames} } from "./auth"`
+    : `import { ${tableNameCC} } from "./${tableNameCC}";\n`;
+
+  // check if schema/_root.ts exists
+  const rootSchemaExists = existsSync(rootSchemaPath);
+  if (rootSchemaExists) {
+    // if yes, import new model from model path and add to export -> perhaps replace 'export {' with 'export { new_model,'
+    const rootSchemaContents = readFileSync(rootSchemaPath, "utf-8");
+    const rootSchemaWithNewExport = rootSchemaContents.replace(
+      "export {",
+      `export { ${tableNameCC},`
+    );
+
+    const importInsertionPoint = rootSchemaWithNewExport.lastIndexOf("import");
+    const nextLineAfterLastImport =
+      rootSchemaWithNewExport.indexOf("\n", importInsertionPoint) + 1;
+    const beforeImport = rootSchemaWithNewExport.slice(
+      0,
+      nextLineAfterLastImport
+    );
+    const afterImport = rootSchemaWithNewExport.slice(nextLineAfterLastImport);
+
+    const withNewImport = `${beforeImport}${newImportStatement}${afterImport}`;
+    replaceFile(rootSchemaPath, withNewImport);
+  } else {
+    // if not create schema/_root.ts -> then do same import as above
+    createFile(
+      rootSchemaPath,
+      `${newImportStatement}
+
+export { ${usingAuth ? tableNames : tableNameCC} }`
+    );
+    // and also update db/index.ts to add extended model import
+    const indexDbPath = formatFilePath(drizzle.dbIndex, {
+      removeExtension: false,
+      prefix: "rootPath",
+    });
+    const indexDbContents = readFileSync(indexDbPath, "utf-8");
+    const updatedContentsWithImport = indexDbContents.replace(
+      `import * as schema from "./schema";`,
+      `import * as schema from "./schema";
+import * as extended from "~/server/db/schema/_root";`
+    );
+    const updatedContentsFinal = updatedContentsWithImport.replace(
+      `{ schema }`,
+      `{ schema: { ...schema, ...extended } }`
+    );
+    replaceFile(indexDbPath, updatedContentsFinal);
+
+    // update drizzle config file to add all in server/db/*
+    const drizzleConfigPath = "drizzle.config.ts";
+    const dConfigContents = readFileSync(drizzleConfigPath, "utf-8");
+    const updatedContents = dConfigContents.replace(
+      `schema: "./src/server/db/schema.ts",`,
+      `schema: "./src/server/db/*",`
+    );
+    replaceFile(drizzleConfigPath, updatedContents);
+  }
 };

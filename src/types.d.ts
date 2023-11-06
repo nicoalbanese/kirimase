@@ -89,6 +89,8 @@ export type Config = {
   orm: ORMType | null;
   auth: AuthType | null;
   componentLib: ComponentLibType | null;
+  t3: boolean;
+  alias: string;
 };
 
 export type UpdateConfig = Partial<Config>;

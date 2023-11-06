@@ -1,4 +1,5 @@
 import { ComponentLibType } from "../../../../types.js";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 const generateMiddlewareTs = () => {
   return `import { authMiddleware } from "@clerk/nextjs";
@@ -35,9 +36,20 @@ export default function Page() {
 }`;
 };
 const homePageWithUserButton = (componentLib: ComponentLibType) => {
+  const {
+    shared: {
+      auth: { authUtils },
+    },
+  } = getFilePaths();
   if (componentLib === "shadcn-ui") {
-    return `import { Button } from "@/components/ui/button";
-import { getUserAuth } from "@/lib/auth/utils";
+    return `import { Button } from "${formatFilePath(
+      "components/ui/button.tsx",
+      { prefix: "alias", removeExtension: true }
+    )}";
+import { getUserAuth } from "${formatFilePath(authUtils, {
+      removeExtension: true,
+      prefix: "alias",
+    })}";
 import Link from "next/link";
 
 export default async function Home() {
@@ -55,7 +67,10 @@ export default async function Home() {
 }
 `;
   } else {
-    return `import { getUserAuth } from "@/lib/auth/utils";
+    return `import { getUserAuth } from "${formatFilePath(authUtils, {
+      removeExtension: true,
+      prefix: "alias",
+    })}";
 import Link from "next/link";
 
 export default async function Home() {

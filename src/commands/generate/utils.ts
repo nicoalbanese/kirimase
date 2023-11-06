@@ -8,6 +8,7 @@ import {
 import { readConfigFile, replaceFile } from "../../utils.js";
 import fs, { existsSync, readFileSync } from "fs";
 import { consola } from "consola";
+import { formatFilePath, getFilePaths } from "../filePaths/index.js";
 
 export function toCamelCase(input: string): string {
   return input
@@ -256,8 +257,12 @@ export function toNormalEnglish(
 
 export function getCurrentSchemas() {
   const { hasSrc, orm } = readConfigFile();
+  const { shared } = getFilePaths();
   if (orm === "drizzle") {
-    const directory = `${hasSrc ? "src/" : ""}lib/db/schema`;
+    const directory = formatFilePath(shared.orm.schemaDir, {
+      removeExtension: false,
+      prefix: "rootPath",
+    });
 
     try {
       // Read the directory content
@@ -268,9 +273,11 @@ export function getCurrentSchemas() {
         .filter((file) => path.extname(file) === ".ts")
         .map((file) => path.basename(file, ".ts"));
 
-      return schemaNames.filter((schema) => schema !== "auth");
+      return schemaNames.filter(
+        (schema) => schema !== "auth" && schema !== "_root"
+      );
     } catch (error) {
-      console.error(`Error reading schemas ${directory}:`, error);
+      // console.error(`Error reading schemas ${directory}:`, error);
       return [];
     }
   }

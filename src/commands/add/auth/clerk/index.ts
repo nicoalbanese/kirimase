@@ -18,9 +18,17 @@ import {
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import { addContextProviderToLayout } from "../../utils.js";
 import { clerkGenerators } from "./generators.js";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import { libAuthUtilsTs } from "../next-auth/generators.js";
 
 export const addClerk = async () => {
   const { rootPath, preferredPackageManager, componentLib } = readConfigFile();
+  const {
+    clerk: { middleware, signInPage, signUpPage },
+    shared: {
+      auth: { authUtils },
+    },
+  } = getFilePaths();
   const {
     generateAuthUtilsTs,
     generateMiddlewareTs,
@@ -40,14 +48,17 @@ export const addClerk = async () => {
     ],
     rootPath
   );
-  createFile(rootPath.concat("middleware.ts"), generateMiddlewareTs());
+  createFile(
+    formatFilePath(middleware, { prefix: "rootPath", removeExtension: false }),
+    generateMiddlewareTs()
+  );
 
   createFile(
-    rootPath.concat("app/sign-in/[[...sign-in]]/page.tsx"),
+    formatFilePath(signInPage, { removeExtension: false, prefix: "rootPath" }),
     generateSignInPageTs()
   );
   createFile(
-    rootPath.concat("app/sign-up/[[...sign-up]]/page.tsx"),
+    formatFilePath(signUpPage, { removeExtension: false, prefix: "rootPath" }),
     generateSignUpPageTs()
   );
 
@@ -56,7 +67,13 @@ export const addClerk = async () => {
     homePageWithUserButton(componentLib)
   );
 
-  createFile(rootPath.concat("lib/auth/utils.ts"), generateAuthUtilsTs());
+  createFile(
+    formatFilePath(authUtils, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    generateAuthUtilsTs()
+  );
 
   await installPackages(
     { regular: "@clerk/nextjs", dev: "" },

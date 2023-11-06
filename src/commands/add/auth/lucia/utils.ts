@@ -14,95 +14,130 @@ import { existsSync, readFileSync } from "fs";
 import { DBProvider, DBType } from "../../../../types.js";
 import { replaceFile } from "../../../../utils.js";
 import { consola } from "consola";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
+import { updateRootSchema } from "../../../generate/generators/model/utils.js";
 
 export type LuciaAdapterInfo = {
   import: string;
   adapter: string;
   adapterPackage: string;
 };
-export const DrizzleAdapterDriverMappings: {
-  [k in DBType]: Partial<{
-    [k in DBProvider]: LuciaAdapterInfo;
-  }>;
-} = {
-  pg: {
-    neon: {
-      adapter: `adapter: pg(pool, {
+
+export const generateDrizzleAdapterDriverMappings = () => {
+  const dbIndex = getDbIndexPath();
+  const DrizzleAdapterDriverMappings: {
+    [k in DBType]: Partial<{
+      [k in DBProvider]: LuciaAdapterInfo;
+    }>;
+  } = {
+    pg: {
+      neon: {
+        adapter: `adapter: pg(pool, {
 		user: "auth_user",
 		key: "user_key",
 		session: "user_session"
 	})`,
-      adapterPackage: "@lucia-auth/adapter-postgresql",
-      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "@/lib/db/index"`,
-    },
-    supabase: {
-      adapter: `adapter: pg(pool, {
+        adapterPackage: "@lucia-auth/adapter-postgresql",
+        import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
+          dbIndex,
+          { removeExtension: true, prefix: "alias" }
+        )}"`,
+      },
+      supabase: {
+        adapter: `adapter: pg(pool, {
 		user: "auth_user",
 		key: "user_key",
 		session: "user_session"
 	})`,
-      adapterPackage: "@lucia-auth/adapter-postgresql",
-      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "@/lib/db/index"`,
-    },
-    postgresjs: {
-      adapter: `adapter: postgresAdapter(client, {
+        adapterPackage: "@lucia-auth/adapter-postgresql",
+        import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
+          dbIndex,
+          { removeExtension: true, prefix: "alias" }
+        )}"`,
+      },
+      postgresjs: {
+        adapter: `adapter: postgresAdapter(client, {
 		user: "auth_user",
 		key: "user_key",
 		session: "user_session"
 	})`,
-      adapterPackage: "@lucia-auth/adapter-postgresql",
-      import: `import { postgres as postgresAdapter } from "@lucia-auth/adapter-postgresql";\nimport { client } from "@/lib/db/index"`,
-    },
-    "node-postgres": {
-      adapter: `adapter: pg(pool, {
+        adapterPackage: "@lucia-auth/adapter-postgresql",
+        import: `import { postgres as postgresAdapter } from "@lucia-auth/adapter-postgresql";\nimport { client } from "${formatFilePath(
+          dbIndex,
+          { removeExtension: true, prefix: "alias" }
+        )}"`,
+      },
+      "node-postgres": {
+        adapter: `adapter: pg(pool, {
 		user: "auth_user",
 		key: "user_key",
 		session: "user_session"
 	})`,
-      adapterPackage: "@lucia-auth/adapter-postgresql",
-      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "@/lib/db/index"`,
-    },
-    "vercel-pg": {
-      adapter: `adapter: pg(pool, {
+        adapterPackage: "@lucia-auth/adapter-postgresql",
+        import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
+          dbIndex,
+          { removeExtension: true, prefix: "alias" }
+        )}"`,
+      },
+      "vercel-pg": {
+        adapter: `adapter: pg(pool, {
 		user: "auth_user",
 		key: "user_key",
 		session: "user_session"
 	})`,
-      adapterPackage: "@lucia-auth/adapter-postgresql",
-      import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "@/lib/db/index"`,
+        adapterPackage: "@lucia-auth/adapter-postgresql",
+        import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
+          dbIndex,
+          { removeExtension: true, prefix: "alias" }
+        )}"`,
+      },
     },
-  },
-  mysql: {
-    "mysql-2": {
-      adapter: `adapter: mysql2(poolConnection, {
+    mysql: {
+      "mysql-2": {
+        adapter: `adapter: mysql2(poolConnection, {
 		user: "user",
 		key: "user_key",
 		session: "user_session"
 	})`,
-      adapterPackage: "@lucia-auth/adapter-mysql",
-      import: `import { mysql2 } from "@lucia-auth/adapter-mysql";\nimport { poolConnection } from "@/lib/db/index"`,
-    },
-    planetscale: {
-      import: `import { planetscale } from "@lucia-auth/adapter-mysql";\nimport { connection } from "@/lib/db/index"`,
-      adapterPackage: "@lucia-auth/adapter-mysql",
-      adapter: `adapter: planetscale(connection, {
+        adapterPackage: "@lucia-auth/adapter-mysql",
+        import: `import { mysql2 } from "@lucia-auth/adapter-mysql";\nimport { poolConnection } from "${formatFilePath(
+          dbIndex,
+          { removeExtension: true, prefix: "alias" }
+        )}"`,
+      },
+      planetscale: {
+        import: `import { planetscale } from "@lucia-auth/adapter-mysql";\nimport { connection } from "${formatFilePath(
+          dbIndex,
+          { removeExtension: true, prefix: "alias" }
+        )}"`,
+        adapterPackage: "@lucia-auth/adapter-mysql",
+        adapter: `adapter: planetscale(connection, {
 		user: "auth_user",
 		key: "user_key",
 		session: "user_session"
 	})`,
+      },
     },
-  },
-  sqlite: {
-    "better-sqlite3": {
-      adapter: `adapter: betterSqlite3(sqlite, {
+    sqlite: {
+      "better-sqlite3": {
+        adapter: `adapter: betterSqlite3(sqlite, {
 		user: "user",
 		key: "user_key",
 		session: "user_session"
 	})`,
-      adapterPackage: "@lucia-auth/adapter-sqlite",
-      import: `import { betterSqlite3 } from "@lucia-auth/adapter-sqlite";\nimport { sqlite } from "@/lib/db/index"`,
+        adapterPackage: "@lucia-auth/adapter-sqlite",
+        import: `import { betterSqlite3 } from "@lucia-auth/adapter-sqlite";\nimport { sqlite } from "${formatFilePath(
+          dbIndex,
+          { removeExtension: true, prefix: "alias" }
+        )}"`,
+      },
     },
-  },
+  };
+  return DrizzleAdapterDriverMappings;
 };
 
 export const DrizzleLuciaSchema: { [k in DBType]: string } = {
@@ -253,12 +288,18 @@ model Key {
   @@index([user_id])
 }`;
 
-export const PrismaAdapterDriverMappings: LuciaAdapterInfo = {
-  import: `import { prisma } from "@lucia-auth/adapter-prisma";\nimport { db } from "@/lib/db/index";`,
-  adapter: `adapter: prisma(db)`,
-  adapterPackage: `@lucia-auth/adapter-prisma`,
+export const generatePrismaAdapterDriverMappings = () => {
+  const dbIndex = getDbIndexPath();
+  const PrismaAdapterDriverMappings: LuciaAdapterInfo = {
+    import: `import { prisma } from "@lucia-auth/adapter-prisma";\nimport { db } from "${formatFilePath(
+      dbIndex,
+      { removeExtension: true, prefix: "alias" }
+    )}";`,
+    adapter: `adapter: prisma(db)`,
+    adapterPackage: `@lucia-auth/adapter-prisma`,
+  };
+  return PrismaAdapterDriverMappings;
 };
-
 export const addLuciaToPrismaSchema = async () => {
   const schemaPath = "prisma/schema.prisma";
   const schemaExists = existsSync(schemaPath);
@@ -272,4 +313,36 @@ export const addLuciaToPrismaSchema = async () => {
   } else {
     consola.info(`Prisma schema file does not exist`);
   }
+};
+
+export const updateDrizzleDbIndex = (provider: DBProvider) => {
+  const { shared, drizzle } = getFilePaths();
+  // what is it like to type like this'
+  // functions intended use if with t3 so assumed provider is pscale
+  if (provider === "planetscale") {
+    const replacementContent = `import { drizzle } from "drizzle-orm/planetscale-serverless";
+import { connect } from "@planetscale/database";
+import { env } from "${formatFilePath(shared.init.envMjs, {
+      removeExtension: false,
+      prefix: "alias",
+    })}";
+import * as schema from "./schema";
+ 
+// create the connection
+export const connection = connect({
+  url: env.DATABASE_URL
+});
+ 
+export const db = drizzle(connection, { schema });
+`;
+    replaceFile(
+      formatFilePath(drizzle.dbIndex, {
+        prefix: "rootPath",
+        removeExtension: false,
+      }),
+      replacementContent
+    );
+  }
+  // TODO: NOW
+  updateRootSchema("auth", true, "lucia");
 };

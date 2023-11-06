@@ -1,5 +1,6 @@
 import { DBType } from "../../../types.js";
 import { createFile, readConfigFile } from "../../../utils.js";
+import { formatFilePath, getFilePaths } from "../../filePaths/index.js";
 import { Schema } from "../types.js";
 import { formatTableName, toCamelCase } from "../utils.js";
 
@@ -19,6 +20,7 @@ const generateRouteContent = (schema: Schema, driver: DBType) => {
     tableNameSingular,
     tableNameCamelCase,
   } = formatTableName(tableName);
+  const { shared } = getFilePaths();
 
   const template = `import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
@@ -28,12 +30,18 @@ import {
   create${tableNameSingularCapitalised},
   delete${tableNameSingularCapitalised},
   update${tableNameSingularCapitalised},
-} from "@/lib/api/${tableNameCamelCase}/mutations";
+} from "${formatFilePath(shared.orm.servicesDir, {
+    prefix: "alias",
+    removeExtension: false,
+  })}/${tableNameCamelCase}/mutations";
 import { 
   ${tableNameSingular}IdSchema,
   insert${tableNameSingularCapitalised}Params,
   update${tableNameSingularCapitalised}Params 
-} from "@/lib/db/schema/${tableNameCamelCase}";
+} from "${formatFilePath(shared.orm.schemaDir, {
+    prefix: "alias",
+    removeExtension: false,
+  })}/${tableNameCamelCase}";
 
 export async function POST(req: Request) {
   try {

@@ -1,9 +1,10 @@
-import { consola } from "consola";
 import { DBProvider, DBType, ORMType } from "../../../../types.js";
+import { readConfigFile } from "../../../../utils.js";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import {
-  DrizzleAdapterDriverMappings,
+  generateDrizzleAdapterDriverMappings,
   LuciaAdapterInfo,
-  PrismaAdapterDriverMappings,
+  generatePrismaAdapterDriverMappings,
 } from "./utils.js";
 
 const generateViewsAndComponents = (withShadCn: boolean) => {
@@ -43,12 +44,21 @@ export const generateLoadingPage = () => {
 `;
 };
 const generateSignUpPage = (withShadCn: boolean) => {
+  const { lucia, shared } = getFilePaths();
+  const { alias } = readConfigFile();
   if (withShadCn) {
-    return `import AuthForm from "@/components/auth/Form";
-import Link from "next/link"; import { getPageSession } from "@/lib/auth/lucia";
+    return `import AuthForm from "${formatFilePath(lucia.authFormComponent, {
+      removeExtension: true,
+      prefix: "alias",
+    })}";
+import Link from "next/link"; 
+import { getPageSession } from "${formatFilePath(lucia.libAuthLucia, {
+      prefix: "alias",
+      removeExtension: true,
+    })}";
 import { redirect } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from "${alias}/components/ui/input";
+import { Label } from "${alias}/components/ui/label";
 
 const Page = async () => {
   const session = await getPageSession();
@@ -81,10 +91,16 @@ const Page = async () => {
 export default Page;
 `;
   } else {
-    return `import AuthForm from "@/components/auth/Form";
+    return `import AuthForm from "${formatFilePath(lucia.authFormComponent, {
+      removeExtension: true,
+      prefix: "alias",
+    })}";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getUserAuth } from "@/lib/auth/utils";
+import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
+      prefix: "alias",
+      removeExtension: true,
+    })}";
 
 const Page = async () => {
   const { session } = await getUserAuth();
@@ -135,11 +151,19 @@ export default Page;
 };
 
 const generateSignInPage = (withShadCn: boolean) => {
+  const { lucia, shared } = getFilePaths();
+  const { alias } = readConfigFile();
   if (withShadCn) {
-    return `import AuthForm from "@/components/auth/Form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { getPageSession } from "@/lib/auth/lucia";
+    return `import AuthForm from "${formatFilePath(lucia.authFormComponent, {
+      removeExtension: true,
+      prefix: "alias",
+    })}";
+import { Input } from "${alias}/components/ui/input";
+import { Label } from "${alias}/components/ui/label";
+import { getPageSession } from "${formatFilePath(lucia.libAuthLucia, {
+      prefix: "alias",
+      removeExtension: true,
+    })}";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -179,8 +203,14 @@ const Page = async () => {
 export default Page;
 `;
   } else {
-    return `import AuthForm from "@/components/auth/Form";
-import { getUserAuth } from "@/lib/auth/utils";
+    return `import AuthForm from "${formatFilePath(lucia.authFormComponent, {
+      removeExtension: true,
+      prefix: "alias",
+    })}";
+import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
+      prefix: "alias",
+      removeExtension: true,
+    })}";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -235,12 +265,13 @@ export default Page;
 };
 
 const generateAuthFormComponent = (withShadCn: boolean) => {
+  const { alias } = readConfigFile();
   if (withShadCn) {
     return `"use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "${alias}/components/ui/button";
 
 type Action = "/api/sign-in" | "/api/sign-up" | "/api/sign-out";
 
@@ -417,8 +448,15 @@ const SubmitButton = ({
 };
 
 const generateHomePage = () => {
-  return `import AuthForm from "@/components/auth/Form";
-import { getUserAuth } from "@/lib/auth/utils";
+  const { lucia, shared } = getFilePaths();
+  return `import AuthForm from "${formatFilePath(lucia.authFormComponent, {
+    removeExtension: true,
+    prefix: "alias",
+  })}";
+import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
@@ -438,7 +476,11 @@ export default async function Home() {
 };
 
 const generateApiRoutes = () => {
-  const signUpRoute = `import { auth } from "@/lib/auth/lucia";
+  const { lucia } = getFilePaths();
+  const signUpRoute = `import { auth } from "${formatFilePath(
+    lucia.libAuthLucia,
+    { prefix: "alias", removeExtension: true }
+  )}";
 import { LuciaError } from "lucia";
 import * as context from "next/headers";
 import { NextResponse } from "next/server";
@@ -529,7 +571,10 @@ export const POST = async (request: NextRequest) => {
   }
 };
 `;
-  const signInRoute = `import { auth } from "@/lib/auth/lucia";
+  const signInRoute = `import { auth } from "${formatFilePath(
+    lucia.libAuthLucia,
+    { prefix: "alias", removeExtension: true }
+  )}";
 import * as context from "next/headers";
 import { NextResponse } from "next/server";
 import { LuciaError } from "lucia";
@@ -612,7 +657,10 @@ export const POST = async (request: NextRequest) => {
   }
 };
 `;
-  const signOutRoute = `import { auth } from "@/lib/auth/lucia";
+  const signOutRoute = `import { auth } from "${formatFilePath(
+    lucia.libAuthLucia,
+    { prefix: "alias", removeExtension: true }
+  )}";
 import * as context from "next/headers";
 
 import type { NextRequest } from "next/server";
@@ -642,10 +690,14 @@ export const POST = async (request: NextRequest) => {
 };
 
 const generateAppDTs = () => {
+  const { lucia } = getFilePaths();
   return `// app.d.ts
 /// <reference types="lucia" />
 declare namespace Lucia {
-  type Auth = import("@/lib/auth/lucia").Auth;
+  type Auth = import("${formatFilePath(lucia.libAuthLucia, {
+    prefix: "alias",
+    removeExtension: true,
+  })}").Auth;
   type DatabaseUserAttributes = {
     username: string;
     name: string;
@@ -661,13 +713,20 @@ const generateAuthDirFiles = (
   dbType: DBType,
   provider: DBProvider
 ) => {
+  const { lucia } = getFilePaths();
   let mappings: LuciaAdapterInfo;
+  const DrizzleAdapterDriverMappings = generateDrizzleAdapterDriverMappings();
+  const PrismaAdapterDriverMappings = generatePrismaAdapterDriverMappings();
+
   if (orm === "drizzle")
     mappings = DrizzleAdapterDriverMappings[dbType][provider];
   if (orm === "prisma") mappings = PrismaAdapterDriverMappings;
 
   const utilsTs = `import { redirect } from "next/navigation";
-import { getPageSession } from "./lucia";
+import { getPageSession } from "${formatFilePath(lucia.libAuthLucia, {
+    removeExtension: true,
+    prefix: "alias",
+  })}";
 
 export type AuthSession = {
   session: {

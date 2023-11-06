@@ -1,3 +1,5 @@
+import { readConfigFile } from "../../../../utils.js";
+
 const generateTailwindConfig = (rootPath: string) => {
   return `const { fontFamily } = require("tailwindcss/defaultTheme")
 
@@ -174,6 +176,8 @@ export function cn(...inputs: ClassValue[]) {
 };
 
 const generateComponentsJson = (rootPath: string) => {
+  const { alias } = readConfigFile();
+  // TODO: T3 SETUP REQUIRES CHANGE HERE FOR DIFFERENT STYLES DIR
   return `{
   "$schema": "https://ui.shadcn.com/schema.json",
   "style": "default",
@@ -186,8 +190,8 @@ const generateComponentsJson = (rootPath: string) => {
     "cssVariables": true
   },
   "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils"
+    "components": "${alias}/components",
+    "utils": "${alias}/lib/utils"
   }
 }
 `;
@@ -207,19 +211,20 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 };
 
 const generateThemeToggler = () => {
+  const { alias } = readConfigFile();
   return `"use client";
 
 import * as React from "react";
 import { MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "${alias}/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "${alias}/components/ui/dropdown-menu";
 
 export function ModeToggle() {
   const { setTheme } = useTheme();

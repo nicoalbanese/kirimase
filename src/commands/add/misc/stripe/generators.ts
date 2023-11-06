@@ -1,5 +1,10 @@
 import { AuthType, DBType } from "../../../../types.js";
-import { readConfigFile } from "../../../../utils.js";
+import { getFileLocations, readConfigFile } from "../../../../utils.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
 
 export const generateStripeIndexTs = () => {
   return `import Stripe from "stripe";
@@ -13,6 +18,8 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
 
 export const generateStripeSubscriptionTsOld = () => {
   const { orm } = readConfigFile();
+  const { stripe, shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
   let userSelect: string;
   switch (orm) {
     case "drizzle":
@@ -26,14 +33,29 @@ export const generateStripeSubscriptionTsOld = () => {
   });`;
   }
 
-  return `import { storeSubscriptionPlans } from "@/config/subscriptions";
-import { db } from "@/lib/db";${
+  return `import { storeSubscriptionPlans } from "${formatFilePath(
+    stripe.configSubscription,
+    { prefix: "alias", removeExtension: true }
+  )}";
+import { db } from "${formatFilePath(dbIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";${
     orm === "drizzle"
-      ? '\nimport { users } from "@/lib/db/schema/auth";\nimport { eq } from "drizzle-orm";'
+      ? `\nimport { users } from "${formatFilePath(shared.auth.authSchema, {
+          prefix: "alias",
+          removeExtension: true,
+        })}";\nimport { eq } from "drizzle-orm";`
       : ""
   }
-import { stripe } from "@/lib/stripe";
-import { getUserAuth } from "../auth/utils";
+import { stripe } from "${formatFilePath(stripe.stripeIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 
 export async function getUserSubscriptionPlan() {
   const { session } = await getUserAuth();
@@ -119,7 +141,8 @@ export const storeSubscriptionPlans: SubscriptionPlan[] = [
 };
 
 export const generateBillingCard = () => {
-  const { componentLib } = readConfigFile();
+  const { componentLib, alias } = readConfigFile();
+  const { shared } = getFilePaths();
   if (componentLib == "shadcn-ui") {
     return `"use client";
 import {
@@ -127,9 +150,12 @@ import {
   AccountCardBody,
   AccountCardFooter,
 } from "./AccountCard";
-import { Button } from "@/components/ui/button";
+import { Button } from "${alias}/components/ui/button";
 import Link from "next/link";
-import { AuthSession } from "@/lib/auth/utils";
+import { AuthSession } from "${formatFilePath(shared.auth.authUtils, {
+      prefix: "alias",
+      removeExtension: true,
+    })}";
 
 interface PlanSettingsProps {
   stripeSubscriptionId: string | null;
@@ -274,13 +300,13 @@ export default function PlanSettings({
 };
 
 export const generateManageSubscriptionButton = () => {
-  const { componentLib } = readConfigFile();
+  const { componentLib, alias } = readConfigFile();
   if (componentLib === "shadcn-ui") {
     return `"use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "${alias}/components/ui/button";
 import React from "react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "${alias}/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 
 interface ManageUserSubscriptionButtonProps {
@@ -418,9 +444,10 @@ export function ManageUserSubscriptionButton({
 };
 
 export const generateSuccessToast = () => {
+  const { alias } = readConfigFile();
   return `"use client";
 
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "${alias}/components/ui/use-toast";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
@@ -441,10 +468,17 @@ export default function SuccessToast() {
 };
 
 export const generateAccountPage = () => {
+  const { shared, stripe } = getFilePaths();
   return `import UserSettings from "./UserSettings";
 import PlanSettings from "./PlanSettings";
-import { checkAuth, getUserAuth } from "@/lib/auth/utils";
-import { getUserSubscriptionPlan } from "@/lib/stripe/subscription";
+import { checkAuth, getUserAuth } from "${formatFilePath(
+    shared.auth.authUtils,
+    { prefix: "alias", removeExtension: true }
+  )}";
+import { getUserSubscriptionPlan } from "${formatFilePath(
+    stripe.stripeSubscription,
+    { prefix: "alias", removeExtension: true }
+  )}";
 
 export default async function Account() {
   await checkAuth();
@@ -468,11 +502,12 @@ export default async function Account() {
 };
 
 export const generateBillingPage = () => {
-  const { componentLib } = readConfigFile();
+  const { componentLib, alias } = readConfigFile();
+  const { stripe, shared } = getFilePaths();
   if (componentLib === "shadcn-ui") {
     return `import SuccessToast from "./SuccessToast";
 import { ManageUserSubscriptionButton } from "./ManageSubscription";
-import { Button } from "@/components/ui/button";
+import { Button } from "${alias}/components/ui/button";
 import {
   Card,
   CardContent,
@@ -480,10 +515,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { storeSubscriptionPlans } from "@/config/subscriptions";
-import { checkAuth, getUserAuth } from "@/lib/auth/utils";
-import { getUserSubscriptionPlan } from "@/lib/stripe/subscription";
+} from "${alias}/components/ui/card";
+import { storeSubscriptionPlans } from "${formatFilePath(
+      stripe.configSubscription,
+      { prefix: "alias", removeExtension: true }
+    )}";
+import { checkAuth, getUserAuth } from "${formatFilePath(
+      shared.auth.authUtils,
+      { prefix: "alias", removeExtension: true }
+    )}";
+import { getUserSubscriptionPlan } from "${formatFilePath(
+      stripe.stripeSubscription,
+      { prefix: "alias", removeExtension: true }
+    )}";
 import { CheckCircle2Icon } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -585,9 +629,18 @@ export default async function Billing() {
 `;
   } else {
     return `import { ManageUserSubscriptionButton } from "./ManageSubscription";
-import { storeSubscriptionPlans } from "@/config/subscriptions";
-import { checkAuth, getUserAuth } from "@/lib/auth/utils";
-import { getUserSubscriptionPlan } from "@/lib/stripe/subscription";
+import { storeSubscriptionPlans } from "${formatFilePath(
+      stripe.configSubscription,
+      { prefix: "alias", removeExtension: true }
+    )}";
+import { checkAuth, getUserAuth } from "${formatFilePath(
+      shared.auth.authUtils,
+      { prefix: "alias", removeExtension: true }
+    )}";
+import { getUserSubscriptionPlan } from "${formatFilePath(
+      stripe.stripeSubscription,
+      { prefix: "alias", removeExtension: true }
+    )}";
 import { CheckCircle2Icon } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -700,6 +753,8 @@ export default async function Billing() {
 
 export const generateStripeWebhookOld = () => {
   const { orm } = readConfigFile();
+  const { shared, stripe } = getFilePaths();
+  const dbIndex = getDbIndexPath();
 
   let dbCalls = { one: "", two: "", three: "" };
 
@@ -737,12 +792,21 @@ export const generateStripeWebhookOld = () => {
       break;
   }
 
-  return `import { db } from "@/lib/db";
-import { stripe } from "@/lib/stripe";
+  return `import { db } from "${formatFilePath(dbIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import { stripe } from "${formatFilePath(stripe.stripeIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 import { headers } from "next/headers";
 import type Stripe from "stripe";${
     orm === "drizzle"
-      ? '\nimport { users } from "@/lib/db/schema/auth";\nimport { eq } from "drizzle-orm";'
+      ? `\nimport { users } from "${formatFilePath(shared.auth.authSchema, {
+          prefix: "alias",
+          removeExtension: true,
+        })}";\nimport { eq } from "drizzle-orm";`
       : ""
   }
 
@@ -814,8 +878,15 @@ export async function POST(request: Request) {
 };
 
 export const generateManageSubscriptionRoute = () => {
-  return `import { stripe } from "@/lib/stripe";
-import { absoluteUrl } from "@/lib/utils";
+  const { stripe, shared } = getFilePaths();
+  return `import { stripe } from "${formatFilePath(stripe.stripeIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import { absoluteUrl } from "${formatFilePath(shared.init.libUtils, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 
 interface ManageStripeSubscriptionActionProps {
   isSubscribed: boolean;
@@ -963,6 +1034,8 @@ export const subscriptions = sqliteTable(
 
 export const generateStripeWebhook = () => {
   const { orm } = readConfigFile();
+  const { shared, stripe } = getFilePaths();
+  const dbIndex = getDbIndexPath();
 
   let dbCalls = { one: "", two: "", three: "" };
 
@@ -1023,12 +1096,21 @@ export const generateStripeWebhook = () => {
       break;
   }
 
-  return `import { db } from "@/lib/db";
-import { stripe } from "@/lib/stripe";
+  return `import { db } from "${formatFilePath(dbIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import { stripe } from "${formatFilePath(stripe.stripeIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 import { headers } from "next/headers";
 import type Stripe from "stripe";${
     orm === "drizzle"
-      ? '\nimport { subscriptions } from "@/lib/db/schema/subscriptions";\nimport { eq } from "drizzle-orm";'
+      ? `\nimport { subscriptions } from "${formatFilePath(
+          stripe.subscriptionSchema,
+          { prefix: "alias", removeExtension: true }
+        )}";\nimport { eq } from "drizzle-orm";`
       : ""
   }
 
@@ -1101,6 +1183,9 @@ export async function POST(request: Request) {
 
 export const generateStripeSubscriptionTs = () => {
   const { orm } = readConfigFile();
+  const { stripe, shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
+
   let subSelect: string;
   switch (orm) {
     case "drizzle":
@@ -1117,14 +1202,29 @@ export const generateStripeSubscriptionTs = () => {
   });`;
   }
 
-  return `import { storeSubscriptionPlans } from "@/config/subscriptions";
-import { db } from "@/lib/db";${
+  return `import { storeSubscriptionPlans } from "${formatFilePath(
+    stripe.configSubscription,
+    { prefix: "alias", removeExtension: true }
+  )}";
+import { db } from "${formatFilePath(dbIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";${
     orm === "drizzle"
-      ? '\nimport { subscriptions } from "@/lib/db/schema/subscriptions";\nimport { eq } from "drizzle-orm";'
+      ? `\nimport { subscriptions } from "${formatFilePath(
+          stripe.subscriptionSchema,
+          { prefix: "alias", removeExtension: true }
+        )}";\nimport { eq } from "drizzle-orm";`
       : ""
   }
-import { stripe } from "@/lib/stripe";
-import { getUserAuth } from "../auth/utils";
+import { stripe } from "${formatFilePath(stripe.stripeIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 
 export async function getUserSubscriptionPlan() {
   const { session } = await getUserAuth();
@@ -1183,10 +1283,22 @@ export async function getUserSubscriptionPlan() {
 };
 
 export const createAccountTRPCRouter = () => {
-  return `import { getUserAuth } from "@/lib/auth/utils";
-import { publicProcedure, router } from "../trpc";
-import { getUserSubscriptionPlan } from "@/lib/stripe/subscription";
-export const accountRouter = router({
+  const { alias } = readConfigFile();
+  const { stripe, trpc, shared } = getFilePaths();
+  const { createRouterInvokcation } = getFileLocations();
+  return `import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import { publicProcedure, ${createRouterInvokcation} } from "${formatFilePath(
+    trpc.serverTrpc,
+    { prefix: "alias", removeExtension: true }
+  )}";
+import { getUserSubscriptionPlan } from "${formatFilePath(
+    stripe.stripeSubscription,
+    { prefix: "alias", removeExtension: true }
+  )}";
+export const accountRouter = ${createRouterInvokcation}({
   getUser: publicProcedure.query(async () => {
     const { session } = await getUserAuth();
     return session;

@@ -1,17 +1,29 @@
 import { DBType } from "../../../../../types.js";
+import { readConfigFile } from "../../../../../utils.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../../filePaths/index.js";
 import { Schema } from "../../../types.js";
 import { formatTableName } from "../../../utils.js";
 import { authForWhereClausePrisma, generateAuthCheck } from "../utils.js";
 
 const generateDrizzleImports = (schema: Schema) => {
   const { tableName, belongsToUser } = schema;
+  const { orm } = readConfigFile();
   const {
     tableNameSingularCapitalised,
     tableNameCamelCase,
     tableNameSingular,
   } = formatTableName(tableName);
 
-  return `import { db } from "@/lib/db";
+  const { shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
+  return `import { db } from "${formatFilePath(dbIndex, {
+    prefix: "alias",
+    removeExtension: false,
+  })}";
 import { ${belongsToUser ? "and, " : ""}eq } from "drizzle-orm";
 import { 
   ${tableNameSingularCapitalised}Id, 
@@ -21,8 +33,16 @@ import {
   insert${tableNameSingularCapitalised}Schema, 
   ${tableNameCamelCase},
   ${tableNameSingular}IdSchema 
-} from "@/lib/db/schema/${tableNameCamelCase}";${
-    belongsToUser ? '\nimport { getUserAuth } from "@/lib/auth/utils";' : ""
+} from "${formatFilePath(shared.orm.schemaDir, {
+    prefix: "alias",
+    removeExtension: false,
+  })}/${tableNameCamelCase}";${
+    belongsToUser
+      ? `\nimport { getUserAuth } from "${formatFilePath(
+          shared.auth.authUtils,
+          { prefix: "alias", removeExtension: true }
+        )}";`
+      : ""
   }
 `;
 };
@@ -143,8 +163,13 @@ const generatePrismaImports = (schema: Schema) => {
     tableNameCamelCase,
     tableNameSingular,
   } = formatTableName(tableName);
+  const { shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
 
-  return `import { db } from "@/lib/db";
+  return `import { db } from "${formatFilePath(dbIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 import { 
   ${tableNameSingularCapitalised}Id, 
   New${tableNameSingularCapitalised}Params,
@@ -152,8 +177,16 @@ import {
   update${tableNameSingularCapitalised}Schema,
   insert${tableNameSingularCapitalised}Schema, 
   ${tableNameSingular}IdSchema 
-} from "@/lib/db/schema/${tableNameCamelCase}";${
-    belongsToUser ? '\nimport { getUserAuth } from "@/lib/auth/utils";' : ""
+} from "${formatFilePath(shared.orm.schemaDir, {
+    prefix: "alias",
+    removeExtension: false,
+  })}/${tableNameCamelCase}";${
+    belongsToUser
+      ? `\nimport { getUserAuth } from "${formatFilePath(
+          shared.auth.authUtils,
+          { prefix: "alias", removeExtension: true }
+        )}";`
+      : ""
   }
 `;
 };

@@ -4,10 +4,16 @@
 // 4. Add email utils
 // 4. Add email index.ts
 
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+
 const generateResendPage = () => {
+  const { resend } = getFilePaths();
   return `"use client";
 import Link from "next/link"
-import { emailSchema } from "@/lib/email/utils";
+import { emailSchema } from "${formatFilePath(resend.emailUtils, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 import { useRef, useState } from "react";
 import { z } from "zod";
 
@@ -164,9 +170,19 @@ export const EmailTemplate: React.FC<Readonly<EmailTemplateProps>> = ({
 };
 
 const generateApiRoute = () => {
-  return `import { EmailTemplate } from "@/components/emails/FirstEmail";
-import { resend } from "@/lib/email";
-import { emailSchema } from "@/lib/email/utils";
+  const { resend } = getFilePaths();
+  return `import { EmailTemplate } from "${formatFilePath(
+    resend.firstEmailComponent,
+    { prefix: "alias", removeExtension: true }
+  )}";
+import { resend } from "${formatFilePath(resend.libEmailIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import { emailSchema } from "${formatFilePath(resend.emailUtils, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -190,8 +206,14 @@ export async function POST(request: Request) {
 };
 
 const generateEmailIndexTs = () => {
+  const {
+    shared: { init },
+  } = getFilePaths();
   return `import { Resend } from "resend";
-import { env } from "../env.mjs";
+import { env } from "${formatFilePath(init.envMjs, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 
 export const resend = new Resend(env.RESEND_API_KEY);
 `;

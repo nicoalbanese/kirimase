@@ -1,10 +1,20 @@
 import { AuthType, ORMType } from "../../../../types.js";
+import { readConfigFile } from "../../../../utils.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
 
 export const createUserSettingsComponent = () => {
+  const { shared } = getFilePaths();
   return `"use client";
 import UpdateNameCard from "./UpdateNameCard";
 import UpdateEmailCard from "./UpdateEmailCard";
-import { AuthSession } from "@/lib/auth/utils";
+import { AuthSession } from "${formatFilePath(shared.auth.authUtils, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 
 export default function UserSettings({
   session,
@@ -22,12 +32,13 @@ export default function UserSettings({
 };
 
 export const createUpdateNameCard = (withShadCn = false, disabled = false) => {
+  const { alias } = readConfigFile();
   if (withShadCn) {
     return `"use client";
 import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { Button } from "${alias}/components/ui/button";
+import { Input } from "${alias}/components/ui/input";
+import { useToast } from "${alias}/components/ui/use-toast";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 
@@ -144,11 +155,12 @@ export default function UpdateNameCard({ name }: { name: string }) {
 };
 
 export const createUpdateEmailCard = (withShadCn = false, disabled = false) => {
+  const { alias } = readConfigFile();
   if (withShadCn) {
     return `import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+import { Button } from "${alias}/components/ui/button";
+import { Input } from "${alias}/components/ui/input";
+import { useToast } from "${alias}/components/ui/use-toast";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 
@@ -266,8 +278,9 @@ export default function UpdateEmailCard({ email }: { email: string }) {
 };
 
 export const createAccountCardComponent = (withShadCn = false) => {
+  const { alias } = readConfigFile();
   if (withShadCn) {
-    return `import { Card } from "@/components/ui/card";
+    return `import { Card } from "${alias}/components/ui/card";
 
 interface AccountCardProps {
   params: {
@@ -362,12 +375,19 @@ export function AccountCardFooter({
 };
 
 export const createAccountPage = (withStripe = false) => {
+  const { shared, stripe } = getFilePaths();
   return `import UserSettings from "./UserSettings";${
     withStripe ? '\nimport PlanSettings from "./PlanSettings";' : ""
   }
-import { checkAuth, getUserAuth } from "@/lib/auth/utils";${
+import { checkAuth, getUserAuth } from "${formatFilePath(
+    shared.auth.authUtils,
+    { prefix: "alias", removeExtension: true }
+  )}";${
     withStripe
-      ? '\nimport { getUserSubscriptionPlan } from "@/lib/stripe/subscription";'
+      ? `\nimport { getUserSubscriptionPlan } from "${formatFilePath(
+          stripe.stripeSubscription,
+          { prefix: "alias", removeExtension: true }
+        )}";`
       : ""
   }
 
@@ -396,11 +416,22 @@ export default async function Account() {
 };
 
 export const createAccountApiTs = (orm: ORMType) => {
+  const { shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
   switch (orm) {
     case "drizzle":
-      return `import { getUserAuth } from "@/lib/auth/utils";
-import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema/auth";
+      return `import { getUserAuth } from "${formatFilePath(
+        shared.auth.authUtils,
+        { prefix: "alias", removeExtension: true }
+      )}";
+import { db } from "${formatFilePath(dbIndex, {
+        prefix: "alias",
+        removeExtension: true,
+      })}";
+import { users } from "${formatFilePath(shared.auth.authSchema, {
+        prefix: "alias",
+        removeExtension: true,
+      })}";
 import { revalidatePath } from "next/cache";
 
 export async function PUT(request: Request) {
@@ -414,8 +445,14 @@ export async function PUT(request: Request) {
 }
 `;
     case "prisma":
-      return `import { getUserAuth } from "@/lib/auth/utils";
-import { db } from "@/lib/db";
+      return `import { getUserAuth } from "${formatFilePath(
+        shared.auth.authUtils,
+        { prefix: "alias", removeExtension: true }
+      )}";
+import { db } from "${formatFilePath(dbIndex, {
+        prefix: "alias",
+        removeExtension: true,
+      })}";
 import { revalidatePath } from "next/cache";
 
 export async function PUT(request: Request) {
@@ -438,8 +475,13 @@ export const createNavbar = (
   usingClerk = false,
   auth: AuthType
 ) => {
+  const { shared, "next-auth": nextAuth } = getFilePaths();
+  const { alias } = readConfigFile();
   if (withShadcn) {
-    return `import { getUserAuth } from "@/lib/auth/utils";
+    return `import { getUserAuth } from "${formatFilePath(
+      shared.auth.authUtils,
+      { prefix: "alias", removeExtension: true }
+    )}";
 import Link from "next/link";${
       usingClerk
         ? '\nimport { UserButton } from "@clerk/nextjs";'
@@ -450,15 +492,18 @@ import Link from "next/link";${
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";${
+} from "${alias}/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "${alias}/components/ui/avatar";${
             auth === "next-auth"
               ? ""
-              : `\nimport SignOutBtn from "@/components/auth/SignOutBtn";`
+              : `\nimport SignOutBtn from "${formatFilePath(
+                  nextAuth.signOutButtonComponent,
+                  { prefix: "alias", removeExtension: true }
+                )}";`
           }
 `
     }
-import { ModeToggle } from "@/components/ui/ThemeToggle";
+import { ModeToggle } from "${alias}/components/ui/ThemeToggle";
 
 export default async function Navbar() {
   const { session } = await getUserAuth();${
@@ -531,7 +576,10 @@ export default async function Navbar() {
 }
 `;
   } else {
-    return `import { getUserAuth } from "@/lib/auth/utils";
+    return `import { getUserAuth } from "${formatFilePath(
+      shared.auth.authUtils,
+      { prefix: "alias", removeExtension: true }
+    )}";
 import Link from "next/link";${
       usingClerk ? `\nimport { UserButton } from "@clerk/nextjs";` : ""
     }

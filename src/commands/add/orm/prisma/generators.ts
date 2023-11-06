@@ -1,4 +1,10 @@
 import { DBType } from "../../../../types.js";
+import { readConfigFile } from "../../../../utils.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
 import { prismaDbTypeMappings } from "./utils.js";
 
 export const generatePrismaSchema = (
@@ -52,7 +58,8 @@ if (process.env.NODE_ENV !== "production") global.db = db;
 };
 
 export const generatePrismaComputerModel = () => {
-  return `import { computerSchema } from "@/zodAutoGenSchemas";
+  const { alias } = readConfigFile();
+  return `import { computerSchema } from "${alias}/zodAutoGenSchemas";
 import { z } from "zod";
 
 export const insertComputerSchema = computerSchema;
@@ -79,8 +86,13 @@ export type ComputerId = z.infer<typeof computerIdSchema>["id"];
 };
 
 export const generatePrismaComputerQueries = () => {
-  return `import { ComputerId, computerIdSchema } from "@/lib/db/schema/computers";
-import { db } from "@/lib/db";
+  const { alias } = readConfigFile();
+  const dbIndex = getDbIndexPath("prisma");
+  return `import { ComputerId, computerIdSchema } from "${alias}/lib/db/schema/computers";
+import { db } from "${formatFilePath(dbIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 
 export const getComputers = async () => {
   const c = await db.computer.findMany();
@@ -95,7 +107,12 @@ export const getComputerById = async (id: ComputerId) => {
 };
 
 export const generatePrismaComputerMutations = () => {
-  return `import { db } from "@/lib/db";
+  const { alias } = readConfigFile();
+  const dbIndex = getDbIndexPath("prisma");
+  return `import { db } from "${formatFilePath(dbIndex, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
 import {
   ComputerId,
   NewComputerParams,
@@ -103,7 +120,7 @@ import {
   updateComputerSchema,
   insertComputerSchema,
   computerIdSchema,
-} from "@/lib/db/schema/computers";
+} from "${alias}/lib/db/schema/computers";
 
 export const createComputer = async (computer: NewComputerParams) => {
   const newComputer = insertComputerSchema.parse({

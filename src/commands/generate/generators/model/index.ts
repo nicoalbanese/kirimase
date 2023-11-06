@@ -1,13 +1,19 @@
 import { consola } from "consola";
 import { DBType } from "../../../../types.js";
-import { createFile, readConfigFile, runCommand } from "../../../../utils.js";
+import { createFile, readConfigFile, replaceFile } from "../../../../utils.js";
 import { prismaFormat, prismaGenerate } from "../../../add/orm/utils.js";
 import { Schema } from "../../types.js";
 import { toCamelCase } from "../../utils.js";
 import { generateMutationContent } from "./mutations/index.js";
 import { generateQueryContent } from "./queries/index.js";
 import { generateModelContent } from "./schema/index.js";
-import { confirm } from "@inquirer/prompts";
+import {
+  formatFilePath,
+  generateServiceFileNames,
+  getFilePaths,
+} from "../../../filePaths/index.js";
+import { existsSync, readFileSync } from "fs";
+import { updateRootSchema } from "./utils.js";
 
 export async function scaffoldModel(
   schema: Schema,
@@ -15,29 +21,33 @@ export async function scaffoldModel(
   hasSrc: boolean
 ) {
   const { tableName } = schema;
-  const { orm, preferredPackageManager, driver } = readConfigFile();
+  const { orm, preferredPackageManager, driver, t3 } = readConfigFile();
+  const { shared, drizzle } = getFilePaths();
+  const serviceFileNames = generateServiceFileNames(toCamelCase(tableName));
 
-  // create model file
-  const modelPath = `${hasSrc ? "src/" : ""}lib/db/schema/${toCamelCase(
-    tableName
-  )}.ts`;
+  const modelPath = `${formatFilePath(shared.orm.schemaDir, {
+    prefix: "rootPath",
+    removeExtension: false,
+  })}/${toCamelCase(tableName)}.ts`;
   createFile(modelPath, generateModelContent(schema, dbType));
+
+  if (t3 && orm === "drizzle") {
+    updateRootSchema(tableName);
+  }
+
   if (orm === "prisma") {
     await prismaFormat(preferredPackageManager);
     await prismaGenerate(preferredPackageManager);
   }
 
   // create queryFile
-  const queryPath = `${hasSrc ? "src/" : ""}lib/api/${toCamelCase(
-    tableName
-  )}/queries.ts`;
-  createFile(queryPath, generateQueryContent(schema, orm));
+  createFile(serviceFileNames.queriesPath, generateQueryContent(schema, orm));
 
   // create mutationFile
-  const mutationPath = `${hasSrc ? "src/" : ""}lib/api/${toCamelCase(
-    tableName
-  )}/mutations.ts`;
-  createFile(mutationPath, generateMutationContent(schema, driver, orm));
+  createFile(
+    serviceFileNames.mutationsPath,
+    generateMutationContent(schema, driver, orm)
+  );
 
   // migrate db
   // const migrate = await confirm({

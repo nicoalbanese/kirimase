@@ -20,12 +20,17 @@ import { addResend } from "./misc/resend/index.js";
 import { addLucia } from "./auth/lucia/index.js";
 import { createAccountSettingsPage } from "./auth/shared/index.js";
 import { addStripe } from "./misc/stripe/index.js";
+import { checkForExistingPackages } from "../init/utils.js";
+import { formatFilePath, getFilePaths } from "../filePaths/index.js";
 
 export const addPackage = async (options?: InitOptions) => {
   const config = readConfigFile();
 
   if (config) {
-    const { packages, orm, auth, componentLib, rootPath } = config;
+    if (config.packages?.length === 0)
+      await checkForExistingPackages(config.rootPath);
+    const { packages, orm, auth, componentLib, rootPath } = readConfigFile();
+    const { shared } = getFilePaths();
 
     const nullOption = { name: "None", value: null };
 
@@ -40,7 +45,10 @@ export const addPackage = async (options?: InitOptions) => {
       if (componentLibToInstall === "shadcn-ui") await installShadcnUI([]);
       if (componentLibToInstall === null) {
         replaceFile(
-          rootPath.concat("app/globals.css"),
+          formatFilePath(shared.init.globalCss, {
+            removeExtension: false,
+            prefix: "rootPath",
+          }),
           `@tailwind base;\n@tailwind components;\n@tailwind utilities;
 `
         );
