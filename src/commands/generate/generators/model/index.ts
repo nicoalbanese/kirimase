@@ -31,7 +31,7 @@ export async function scaffoldModel(
   })}/${toCamelCase(tableName)}.ts`;
   createFile(modelPath, generateModelContent(schema, dbType));
 
-  if (t3) {
+  if (t3 && orm === "drizzle") {
     updateRootSchema(tableName);
   }
 

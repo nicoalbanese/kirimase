@@ -408,12 +408,12 @@ const ${tableNameSingularCapitalised}Form = ({
     },
   });
 
-  const onSuccess = (${
+  const onSuccess = async (${
     packages.includes("shadcn-ui")
       ? 'action: "create" | "update" | "delete"'
       : ""
   }) => {
-    utils.${tableNameCamelCase}.get${tableNameCapitalised}.invalidate();
+    await utils.${tableNameCamelCase}.get${tableNameCapitalised}.invalidate();
     router.refresh();
     closeModal();${
       packages.includes("shadcn-ui")
