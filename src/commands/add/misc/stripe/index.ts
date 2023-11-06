@@ -49,6 +49,7 @@ import { updateTRPCRouter } from "../../../generate/generators/trpcRoute.js";
 import { createAccountPage } from "../../auth/shared/generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import { libAuthUtilsTs } from "../../auth/next-auth/generators.js";
+import { updateRootSchema } from "../../../generate/generators/model/utils.js";
 
 export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   const {
@@ -110,45 +111,6 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     }
   }
   if (orm === "drizzle") {
-    //     let keysToAdd: string;
-    //     let additionalCoreTypesToImport: string[];
-    //     switch (driver) {
-    //       case "pg":
-    //         keysToAdd = `
-    //   stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
-    //   stripeSubscriptionId: varchar("stripe_subscription_id", {
-    //     length: 255,
-    //   }).unique(),
-    //   stripePriceId: varchar("stripe_price_id", { length: 255 }),
-    //   stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
-    // `;
-    //         additionalCoreTypesToImport = ["timestamp"];
-    //         break;
-    //       case "mysql":
-    //         keysToAdd = `
-    //   stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).unique(),
-    //   stripeSubscriptionId: varchar("stripe_subscription_id", {
-    //     length: 255,
-    //   }).unique(),
-    //   stripePriceId: varchar("stripe_price_id", { length: 255 }),
-    //   stripeCurrentPeriodEnd: timestamp("stripe_current_period_end"),
-    // `;
-    //         additionalCoreTypesToImport = ["timestamp"];
-    //         break;
-    //       case "sqlite":
-    //         keysToAdd = `
-    //   stripeCustomerId: text("stripe_customer_id").unique(),
-    //   stripeSubscriptionId: text("stripe_subscription_id").unique(),
-    //   stripePriceId: text("stripe_price_id"),
-    //   stripeCurrentPeriodEnd: integer("stripe_current_period_end", {
-    //     mode: "timestamp",
-    //   }),
-    // `;
-    //         additionalCoreTypesToImport = ["integer"];
-    //         break;
-    //     }
-    //
-    //     addToDrizzleModel("users", keysToAdd, additionalCoreTypesToImport); // HERE
     createFile(
       formatFilePath(stripe.subscriptionSchema, {
         prefix: "rootPath",
@@ -156,6 +118,9 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
       }),
       generateSubscriptionsDrizzleSchema(driver, auth)
     );
+    if (t3) {
+      updateRootSchema("subscriptions");
+    }
   }
 
   // create stripe/index file

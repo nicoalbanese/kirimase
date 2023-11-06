@@ -10,11 +10,7 @@ import {
 import { Choice } from "@inquirer/checkbox";
 import { createOrmMappings } from "./generators/model/utils.js";
 import { scaffoldAPIRoute } from "./generators/apiRoute.js";
-import {
-  readConfigFile,
-  runCommand,
-  updateConfigFileAfterUpdate,
-} from "../../utils.js";
+import { readConfigFile, updateConfigFileAfterUpdate } from "../../utils.js";
 import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
 import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
@@ -22,7 +18,6 @@ import { Schema } from "./types.js";
 import { scaffoldViewsAndComponents } from "./generators/views.js";
 import { getCurrentSchemas, toCamelCase } from "./utils.js";
 import { scaffoldModel } from "./generators/model/index.js";
-import { checkForExistingPackages } from "../init/utils.js";
 
 function provideInstructions() {
   consola.info(

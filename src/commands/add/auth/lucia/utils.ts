@@ -19,6 +19,7 @@ import {
   getDbIndexPath,
   getFilePaths,
 } from "../../../filePaths/index.js";
+import { updateRootSchema } from "../../../generate/generators/model/utils.js";
 
 export type LuciaAdapterInfo = {
   import: string;
@@ -312,4 +313,36 @@ export const addLuciaToPrismaSchema = async () => {
   } else {
     consola.info(`Prisma schema file does not exist`);
   }
+};
+
+export const updateDrizzleDbIndex = (provider: DBProvider) => {
+  const { shared, drizzle } = getFilePaths();
+  // what is it like to type like this'
+  // functions intended use if with t3 so assumed provider is pscale
+  if (provider === "planetscale") {
+    const replacementContent = `import { drizzle } from "drizzle-orm/planetscale-serverless";
+import { connect } from "@planetscale/database";
+import { env } from "${formatFilePath(shared.init.envMjs, {
+      removeExtension: false,
+      prefix: "alias",
+    })}";
+import * as schema from "./schema";
+ 
+// create the connection
+export const connection = connect({
+  url: env.DATABASE_URL
+});
+ 
+export const db = drizzle(connection, { schema });
+`;
+    replaceFile(
+      formatFilePath(drizzle.dbIndex, {
+        prefix: "rootPath",
+        removeExtension: false,
+      }),
+      replacementContent
+    );
+  }
+  // TODO: NOW
+  updateRootSchema("auth", true);
 };

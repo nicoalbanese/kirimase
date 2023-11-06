@@ -13,6 +13,7 @@ import {
   DrizzleLuciaSchema,
   generatePrismaAdapterDriverMappings,
   addLuciaToPrismaSchema,
+  updateDrizzleDbIndex,
 } from "./utils.js";
 
 import fs from "fs";
@@ -21,6 +22,7 @@ import {
   getDbIndexPath,
   getFilePaths,
 } from "../../../filePaths/index.js";
+import { createIndexTs } from "../../orm/drizzle/generators.js";
 
 export const addLucia = async () => {
   // get dbtype and provider
@@ -32,6 +34,7 @@ export const addLucia = async () => {
     rootPath,
     driver,
     componentLib,
+    t3,
   } = readConfigFile();
   // ask whether want to use shadcnui
   consola.info(
@@ -49,7 +52,7 @@ export const addLucia = async () => {
     generateAuthDirFiles,
   } = luciaGenerators;
 
-  const { lucia, shared } = getFilePaths();
+  const { lucia, shared, drizzle } = getFilePaths();
   const dbIndex = getDbIndexPath();
 
   // create auth form component
@@ -204,6 +207,12 @@ export const addLucia = async () => {
     orm === "prisma"
       ? PrismaAdapterDriverMappings.adapterPackage
       : DrizzleAdapterDriverMappings[driver][provider].adapterPackage;
+
+  if (t3 && orm === "drizzle") {
+    // replace server/db/index.ts to have connection exported
+    updateDrizzleDbIndex(provider);
+    // updates to make sure shcmea is included in dbindex  too
+  }
 
   await installPackages(
     { regular: `lucia ${adapterPackage}`, dev: "" },

@@ -104,7 +104,7 @@ export const paths: { t3: Paths; normal: Paths } = {
       auth: {
         authUtils: "lib/auth/utils.ts",
         accountPage: "app/account/page.tsx",
-        authSchema: "server/schema/auth.ts",
+        authSchema: "server/db/schema/auth.ts",
         accountApiRoute: "app/api/account/route.ts",
         navbarComponent: "components/Navbar.tsx",
         signInComponent: "components/auth/SignIn.tsx",

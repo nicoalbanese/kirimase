@@ -98,7 +98,7 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
   }
 
   // dependent on dbtype and driver, create
-  createIndexTs(libPath, dbType, dbProvider);
+  createIndexTs(dbProvider);
   createMigrateTs(libPath, dbType, dbProvider);
   createDrizzleConfig(libPath, dbProvider);
 

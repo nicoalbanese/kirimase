@@ -64,15 +64,12 @@ export default {
   );
 };
 
-export const createIndexTs = (
-  libPath: string,
-  dbType: DBType,
-  dbProvider: DBProvider
-) => {
+export const createIndexTs = (dbProvider: DBProvider) => {
   const {
     shared: {
       init: { envMjs },
     },
+    drizzle,
   } = getFilePaths();
   const dbIndex = getDbIndexPath("drizzle");
   let indexTS = "";
