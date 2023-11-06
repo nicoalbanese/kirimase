@@ -616,22 +616,14 @@ export const addToDotEnv = (
     prefix: "rootPath",
   });
   const envMjsExists = fs.existsSync(envmjsfilePath);
-<<<<<<< HEAD
   if (!envMjsExists && orm === null) {
     return;
   }
   if (!envMjsExists)
     createFile(
-      `${rootPath}lib/env.mjs`,
+      envmjsfilePath,
       generateEnvMjs(preferredPackageManager, orm, excludeDbUrlIfBlank)
     );
-=======
-  if (!envMjsExists) console.log("doesn't exist");
-  createFile(
-    envmjsfilePath,
-    generateEnvMjs(preferredPackageManager, orm, excludeDbUrlIfBlank)
-  );
->>>>>>> feat/t3-compatibility
   let envmjsfileContents = fs.readFileSync(envmjsfilePath, "utf-8");
 
   const formatItemForDotEnvMjs = (item: DotEnvItem) =>
