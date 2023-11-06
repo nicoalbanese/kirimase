@@ -27,6 +27,7 @@ import { addToPrismaSchema } from "../../../generate/utils.js";
 import { prismaGenerate } from "../../orm/utils.js";
 import { InitOptions } from "../../../../types.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import { updateRootSchema } from "../../../generate/generators/model/utils.js";
 
 export const addNextAuth = async (options?: InitOptions) => {
   const providers =
@@ -46,6 +47,7 @@ export const addNextAuth = async (options?: InitOptions) => {
     orm,
     componentLib,
     provider: dbProvider,
+    t3,
   } = readConfigFile();
   const rootPath = `${hasSrc ? "src/" : ""}`;
   const { "next-auth": nextAuth, shared } = getFilePaths();
@@ -87,6 +89,9 @@ export const addNextAuth = async (options?: InitOptions) => {
         }),
         createDrizzleAuthSchema(driver)
       );
+      if (t3) {
+        updateRootSchema("auth", true, "next-auth");
+      }
     }
     if (orm === "prisma") {
       addToPrismaSchema(

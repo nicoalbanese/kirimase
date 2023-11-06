@@ -7,6 +7,7 @@ import {
   toCamelCase,
 } from "../../utils.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import { AuthType } from "../../../../types.js";
 
 export const prismaMappings = {
   typeMappings: {
@@ -138,7 +139,11 @@ export const authForWhereClausePrisma = (belongsToUser: boolean) => {
   return belongsToUser ? ", userId: session?.user.id!" : "";
 };
 
-export const updateRootSchema = (tableName: string, isLuciaAuth?: boolean) => {
+export const updateRootSchema = (
+  tableName: string,
+  usingAuth?: boolean,
+  auth?: AuthType
+) => {
   const tableNameCC = toCamelCase(tableName);
   const { drizzle } = getFilePaths();
   const rootSchemaPath = formatFilePath(drizzle.schemaAggregator, {
@@ -146,8 +151,20 @@ export const updateRootSchema = (tableName: string, isLuciaAuth?: boolean) => {
     removeExtension: false,
   });
 
-  const newImportStatement = isLuciaAuth
-    ? `import { keys, users, sessions } from "./auth"`
+  let tableNames = "";
+  switch (auth) {
+    case "next-auth":
+      tableNames = "users, accounts, sessions, verificationTokens";
+      break;
+    case "clerk":
+      break;
+    case "lucia":
+      tableNames = "keys, users, sessions";
+      break;
+  }
+
+  const newImportStatement = usingAuth
+    ? `import { ${tableNames} } from "./auth"`
     : `import { ${tableNameCC} } from "./${tableNameCC}";\n`;
 
   // check if schema/_root.ts exists
@@ -157,7 +174,7 @@ export const updateRootSchema = (tableName: string, isLuciaAuth?: boolean) => {
     const rootSchemaContents = readFileSync(rootSchemaPath, "utf-8");
     const rootSchemaWithNewExport = rootSchemaContents.replace(
       "export {",
-      `export { ${tableNameCC}, `
+      `export { ${tableNameCC},`
     );
 
     const importInsertionPoint = rootSchemaWithNewExport.lastIndexOf("import");
@@ -177,7 +194,7 @@ export const updateRootSchema = (tableName: string, isLuciaAuth?: boolean) => {
       rootSchemaPath,
       `${newImportStatement}
 
-export { ${isLuciaAuth ? `keys, users, sessions` : tableNameCC} }`
+export { ${usingAuth ? tableNames : tableNameCC} }`
     );
     // and also update db/index.ts to add extended model import
     const indexDbPath = formatFilePath(drizzle.dbIndex, {

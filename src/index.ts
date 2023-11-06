@@ -28,11 +28,6 @@ program
   .description("Update Kirimase config file after update")
   .action(updateConfigFileAfterUpdate);
 
-program
-  .command("check-packages")
-  .description("Check for packages")
-  .action(checkForExistingPackages);
-
 program.parse(process.argv);
 
 function addCommonOptions(command: Command) {

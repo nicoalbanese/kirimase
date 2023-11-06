@@ -73,6 +73,12 @@ export const checkForExistingPackages = async (rootPath: string) => {
     drizzle: "orm",
   };
 
+  const pkgDependencies = JSON.parse(packageJsonInitText);
+  const allDependencies = {
+    regular: pkgDependencies.dependencies,
+    dev: pkgDependencies.devDependencies,
+  };
+  const dependenciesStringified = JSON.stringify(allDependencies);
   for (const [key, terms] of Object.entries(packages)) {
     // console.log(key, terms);
     if (!terms) continue;
@@ -81,7 +87,7 @@ export const checkForExistingPackages = async (rootPath: string) => {
     let existsInProject = false;
     for (const term of terms) {
       // Check if the term is present in the text file content
-      if (packageJsonInitText.includes(term)) {
+      if (dependenciesStringified.includes(term)) {
         // set object
         existsInProject = true;
         // if (packageTypeMappings[key] !== null) {

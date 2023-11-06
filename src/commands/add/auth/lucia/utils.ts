@@ -344,5 +344,5 @@ export const db = drizzle(connection, { schema });
     );
   }
   // TODO: NOW
-  updateRootSchema("auth", true);
+  updateRootSchema("auth", true, "lucia");
 };
