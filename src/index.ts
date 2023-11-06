@@ -22,11 +22,6 @@ addCommonOptions(program.command("add"))
   .description("Add and setup additional packages")
   .action(addPackage);
 
-program
-  .command("update-config")
-  .description("Update Kirimase config file after update")
-  .action(updateConfigFileAfterUpdate);
-
 program.parse(process.argv);
 
 function addCommonOptions(command: Command) {

@@ -23,6 +23,12 @@ export async function initProject(options?: InitOptions) {
     );
     process.exit(0);
   }
+  const usingAppDirWithSrc = existsSync("src/app");
+  const usingAppDirWithOutSrc = existsSync("/app");
+  if (!usingAppDirWithOutSrc && !usingAppDirWithSrc) {
+    consola.fatal("Kirimase only works with the Next.js App Directory.");
+    process.exit(0);
+  }
   const srcExists =
     typeof options?.hasSrcFolder === "string"
       ? options.hasSrcFolder === "yes"
