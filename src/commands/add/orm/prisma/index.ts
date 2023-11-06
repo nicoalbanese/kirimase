@@ -27,7 +27,7 @@ import { formatFilePath, getDbIndexPath } from "../../../filePaths/index.js";
 
 export const addPrisma = async (initOptions?: InitOptions) => {
   const { preferredPackageManager, hasSrc } = readConfigFile();
-  const dbIndex = getDbIndexPath();
+  const dbIndex = getDbIndexPath("prisma");
   const rootPath = hasSrc ? "src/" : "";
   // ask for db type
   const dbType =

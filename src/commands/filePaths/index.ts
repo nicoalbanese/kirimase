@@ -1,3 +1,4 @@
+import { ORMType } from "../../types.js";
 import { readConfigFile } from "../../utils.js";
 import { Paths } from "./types.js";
 
@@ -219,9 +220,10 @@ export const generateServiceFileNames = (newModel: string) => {
   };
 };
 
-export const getDbIndexPath = () => {
+export const getDbIndexPath = (ormToBeInstalled?: ORMType) => {
   const { drizzle, prisma } = getFilePaths();
-  const { orm } = readConfigFile();
+  const { orm: ormFromConfig } = readConfigFile();
+  const orm = ormToBeInstalled ? ormToBeInstalled : ormFromConfig;
   if (orm === "prisma") return prisma.dbIndex;
   if (orm === "drizzle") return drizzle.dbIndex;
 };

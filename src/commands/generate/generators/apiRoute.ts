@@ -30,7 +30,7 @@ import {
   create${tableNameSingularCapitalised},
   delete${tableNameSingularCapitalised},
   update${tableNameSingularCapitalised},
-} from "${formatFilePath(shared.orm.schemaDir, {
+} from "${formatFilePath(shared.orm.servicesDir, {
     prefix: "alias",
     removeExtension: false,
   })}/${tableNameCamelCase}/mutations";

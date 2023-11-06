@@ -74,7 +74,7 @@ export const createIndexTs = (
       init: { envMjs },
     },
   } = getFilePaths();
-  const dbIndex = getDbIndexPath();
+  const dbIndex = getDbIndexPath("drizzle");
   let indexTS = "";
   switch (dbProvider) {
     case "postgresjs":
@@ -699,7 +699,7 @@ export function createQueriesAndMutationsFolders(
   libPath: string,
   driver: DBType
 ) {
-  const dbIndex = getDbIndexPath();
+  const dbIndex = getDbIndexPath("drizzle");
   // create computers queries
   const query = `import { db } from "${formatFilePath(dbIndex, {
     removeExtension: true,

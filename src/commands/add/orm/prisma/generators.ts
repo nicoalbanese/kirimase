@@ -87,7 +87,7 @@ export type ComputerId = z.infer<typeof computerIdSchema>["id"];
 
 export const generatePrismaComputerQueries = () => {
   const { alias } = readConfigFile();
-  const dbIndex = getDbIndexPath();
+  const dbIndex = getDbIndexPath("prisma");
   return `import { ComputerId, computerIdSchema } from "${alias}/lib/db/schema/computers";
 import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
@@ -108,7 +108,7 @@ export const getComputerById = async (id: ComputerId) => {
 
 export const generatePrismaComputerMutations = () => {
   const { alias } = readConfigFile();
-  const dbIndex = getDbIndexPath();
+  const dbIndex = getDbIndexPath("prisma");
   return `import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
     removeExtension: true,
