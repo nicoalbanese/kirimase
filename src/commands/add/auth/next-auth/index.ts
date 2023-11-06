@@ -112,9 +112,11 @@ export const addNextAuth = async (options?: InitOptions) => {
 
   // 6. If trpc installed, add protectedProcedure
   if (packages.includes("trpc")) {
-    updateTrpcTs();
-    enableSessionInContext();
-    enableSessionInTRPCApi();
+    if (!t3) {
+      updateTrpcTs();
+      enableSessionInContext();
+      enableSessionInTRPCApi();
+    }
   }
 
   replaceFile(rootPath.concat("app/page.tsx"), generateUpdatedRootRoute());
