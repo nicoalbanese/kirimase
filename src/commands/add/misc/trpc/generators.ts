@@ -258,9 +258,9 @@ export const libTrpcUtilsTs = () => {
   const { shared } = getFilePaths();
   return `import { env } from "${formatFilePath(shared.init.envMjs, {
     prefix: "alias",
-    removeExtension: true,
+    removeExtension: false,
   })}";
-function getBaseUrl() {
+export function getBaseUrl() {
   if (typeof window !== "undefined") return "";
   if (${orm === null ? "process." : ""}env.VERCEL_URL) return \`https://\${${
     orm === null ? "process." : ""
