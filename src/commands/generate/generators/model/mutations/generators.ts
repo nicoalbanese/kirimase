@@ -22,7 +22,7 @@ const generateDrizzleImports = (schema: Schema) => {
   const dbIndex = getDbIndexPath();
   return `import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
-    removeExtension: false,
+    removeExtension: true,
   })}";
 import { ${belongsToUser ? "and, " : ""}eq } from "drizzle-orm";
 import { 
