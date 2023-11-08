@@ -54,7 +54,11 @@ export async function initProject(options?: InitOptions) {
   // console.log("installing dependencies with", preferredPackageManager);
 
   const tsConfigExists = existsSync("tsconfig.json");
-  if (!tsConfigExists) consola.fatal("No TSConfig found...");
+  if (!tsConfigExists) {
+    consola.info("No TSConfig found...");
+    consola.fatal("Kirimase is only compatible with Typescript projects.");
+    process.exit(0);
+  }
   const tsConfigString = readFileSync("tsconfig.json", "utf-8");
   let alias: string;
   if (tsConfigString.includes("@/*")) alias = "@";
