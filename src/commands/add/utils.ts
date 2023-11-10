@@ -1,5 +1,10 @@
 import { consola } from "consola";
-import { AvailablePackage, PackageType } from "../../types.js";
+import {
+  AuthSubType,
+  AuthType,
+  AvailablePackage,
+  PackageType,
+} from "../../types.js";
 import { readConfigFile, replaceFile } from "../../utils.js";
 import fs from "fs";
 import { formatFilePath, getFilePaths } from "../filePaths/index.js";
@@ -19,6 +24,7 @@ export const Packages: {
     { name: "Auth.js (NextAuth)", value: "next-auth" },
     { name: "Clerk", value: "clerk" },
     { name: "Lucia", value: "lucia" },
+    { name: "Kinde", value: "kinde" },
   ],
   misc: [
     { name: "TRPC", value: "trpc" },
@@ -117,4 +123,11 @@ export const addContextProviderToLayout = (
     replacementText
   );
   replaceFile(path, newLayoutContent);
+};
+
+export const AuthSubTypeMapping: Record<AuthType, AuthSubType> = {
+  clerk: "managed",
+  kinde: "managed",
+  "next-auth": "self-hosted",
+  lucia: "managed",
 };

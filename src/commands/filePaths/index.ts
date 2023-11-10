@@ -60,6 +60,9 @@ export const paths: { t3: Paths; normal: Paths } = {
       authFormComponent: "components/auth/Form.tsx",
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
     },
+    kinde: {
+      routeHandler: "app/api/auth/[kindeAuth]/route.ts",
+    },
     resend: {
       emailUtils: "lib/email/utils.ts",
       resendPage: "app/resend/page.tsx",
@@ -146,6 +149,9 @@ export const paths: { t3: Paths; normal: Paths } = {
       libAuthLucia: "lib/auth/lucia.ts",
       authFormComponent: "components/auth/Form.tsx",
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
+    },
+    kinde: {
+      routeHandler: "app/api/auth/[kindeAuth]/route.ts",
     },
     resend: {
       emailUtils: "lib/email/utils.ts",

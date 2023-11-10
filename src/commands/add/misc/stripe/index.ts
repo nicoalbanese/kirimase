@@ -51,6 +51,7 @@ import { createAccountPage } from "../../auth/shared/generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import { libAuthUtilsTs } from "../../auth/next-auth/generators.js";
 import { updateRootSchema } from "../../../generate/generators/model/utils.js";
+import { AuthSubTypeMapping } from "../../utils.js";
 
 export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   const {
@@ -66,6 +67,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   const { stripe, shared } = getFilePaths();
 
   const packages = packagesBeingInstalled.concat(installedPackages);
+  const authSubtype = AuthSubTypeMapping[auth];
 
   if (orm === null || orm === undefined || driver === undefined) {
     consola.warn("You cannot install Stripe without an ORM installed.");
@@ -94,7 +96,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     addToPrismaSchema(
       `model Subscription {
   userId                 String    @unique${
-    auth !== "clerk"
+    authSubtype !== "managed"
       ? `\n  user                   User      @relation(fields: [userId], references: [id])`
       : ""
   }
@@ -108,7 +110,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
 `,
       "Subscription"
     );
-    if (auth !== "clerk") {
+    if (authSubtype !== "managed") {
       addToPrismaModelBulk("User", "\n  subscription Subscription?");
     }
   }

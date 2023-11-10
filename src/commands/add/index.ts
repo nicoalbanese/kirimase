@@ -22,6 +22,7 @@ import { createAccountSettingsPage } from "./auth/shared/index.js";
 import { addStripe } from "./misc/stripe/index.js";
 import { checkForExistingPackages } from "../init/utils.js";
 import { formatFilePath, getFilePaths } from "../filePaths/index.js";
+import { addKinde } from "./auth/kinde/index.js";
 
 export const addPackage = async (options?: InitOptions) => {
   const config = readConfigFile();
@@ -96,6 +97,7 @@ export const addPackage = async (options?: InitOptions) => {
       if (authToInstall === "next-auth") await addNextAuth(options);
       if (authToInstall === "clerk") await addClerk();
       if (authToInstall === "lucia") await addLucia();
+      if (authToInstall === "kinde") await addKinde();
       if (authToInstall === null) {
         updateConfigFile({ auth: null });
       } else {

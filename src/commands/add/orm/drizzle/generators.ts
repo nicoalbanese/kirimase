@@ -590,7 +590,7 @@ export const createDotEnv = (
 
 export const addToDotEnv = (
   items: DotEnvItem[],
-  rootPathOld: string,
+  rootPathOld?: string,
   excludeDbUrlIfBlank = false
 ) => {
   const { orm, preferredPackageManager } = readConfigFile();

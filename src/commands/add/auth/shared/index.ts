@@ -22,7 +22,7 @@ export const createAccountSettingsPage = async () => {
   const { orm, rootPath, componentLib, auth } = readConfigFile();
   const { shared } = getFilePaths();
   const withShadCn = componentLib === "shadcn-ui" ? true : false;
-  // create account api
+  // create account api - clerk has managed component so no need
   if (auth !== "clerk") {
     createFile(
       formatFilePath(shared.auth.accountApiRoute, {

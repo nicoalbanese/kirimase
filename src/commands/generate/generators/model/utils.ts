@@ -158,6 +158,8 @@ export const updateRootSchema = (
       break;
     case "clerk":
       break;
+    case "kinde":
+      break;
     case "lucia":
       tableNames = "keys, users, sessions";
       break;

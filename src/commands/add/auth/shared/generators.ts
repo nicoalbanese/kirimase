@@ -477,6 +477,19 @@ export const createNavbar = (
 ) => {
   const { shared, "next-auth": nextAuth } = getFilePaths();
   const { alias } = readConfigFile();
+  let logOutRoute: string;
+  switch (auth) {
+    case "next-auth":
+      logOutRoute = "/api/auth/signout";
+      break;
+    case "clerk":
+      break;
+    case "lucia":
+      break;
+    case "kinde":
+      logOutRoute = "/api/auth/logout";
+      break;
+  }
   if (withShadcn) {
     return `import { getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
@@ -552,8 +565,8 @@ export default async function Navbar() {
                   </DropdownMenuItem>
                 </Link>
                 ${
-                  auth === "next-auth"
-                    ? `<Link href="/api/auth/signout">
+                  auth === "next-auth" || auth === "kinde"
+                    ? `<Link href="${logOutRoute}">
                   <DropdownMenuItem className="cursor-pointer">
                     Sign out
                   </DropdownMenuItem>

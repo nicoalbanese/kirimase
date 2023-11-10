@@ -51,6 +51,9 @@ export type Paths = {
     libAuthLucia: string;
     signOutButtonComponent: string;
   };
+  kinde: {
+    routeHandler: string;
+  };
   trpc: {
     rootRouter: string;
     routerDir: string;
