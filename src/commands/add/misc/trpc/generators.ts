@@ -254,17 +254,11 @@ export type Context = Awaited<ReturnType<typeof createContext>>;
 };
 
 export const libTrpcUtilsTs = () => {
-  const { orm } = readConfigFile();
-  const { shared } = getFilePaths();
-  return `import { env } from "${formatFilePath(shared.init.envMjs, {
-    prefix: "alias",
-    removeExtension: false,
-  })}";
-export function getBaseUrl() {
+  // const { orm } = readConfigFile();
+  // const { shared } = getFilePaths();
+  return `export function getBaseUrl() {
   if (typeof window !== "undefined") return "";
-  if (${orm === null ? "process." : ""}env.VERCEL_URL) return \`https://\${${
-    orm === null ? "process." : ""
-  }env.VERCEL_URL}\`;
+  if (process.env.VERCEL_URL) return \`https://\${process.env.VERCEL_URL}\`;
   return "http://localhost:3000";
 }
 
@@ -277,7 +271,7 @@ export const libTrpcApiTsBatchLink = () => {
   const { trpc } = getFilePaths();
 
   return `import { cookies } from "next/headers";
-import { type appRouter } from "${formatFilePath(trpc.rootRouter, {
+import { type AppRouter } from "${formatFilePath(trpc.rootRouter, {
     prefix: "alias",
     removeExtension: true,
   })}";
