@@ -272,3 +272,45 @@ export function getUrl() {
   return getBaseUrl() + "/api/trpc";
 }`;
 };
+
+export const libTrpcApiTsBatchLink = () => {
+  const { trpc } = getFilePaths();
+
+  return `import { cookies } from "next/headers";
+import { type appRouter } from "${formatFilePath(trpc.rootRouter, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import { getUrl } from "${formatFilePath(trpc.trpcUtils, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import {
+  createTRPCProxyClient,
+  loggerLink,
+  unstable_httpBatchStreamLink,
+} from "@trpc/client";
+import SuperJSON from "superjson";
+
+export const api = createTRPCProxyClient<AppRouter>({
+  transformer: SuperJSON,
+  links: [
+    loggerLink({
+      enabled: (op) =>
+        process.env.NODE_ENV === "development" ||
+        (op.direction === "down" && op.result instanceof Error),
+    }),
+    unstable_httpBatchStreamLink({
+      url: getUrl(),
+      headers() {
+        return {
+          cookie: cookies().toString(),
+          "x-trpc-source": "rsc",
+        };
+      },
+    }),
+  ],
+});
+
+`;
+};

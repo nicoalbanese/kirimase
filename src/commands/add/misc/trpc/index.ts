@@ -8,6 +8,7 @@ import {
 import {
   apiTrpcRouteTs,
   libTrpcApiTs,
+  libTrpcApiTsBatchLink,
   libTrpcClientTs,
   libTrpcContextTs,
   libTrpcProviderTsx,
@@ -78,7 +79,8 @@ export const addTrpc = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    libTrpcApiTs()
+    // libTrpcApiTs()
+    libTrpcApiTsBatchLink() // moved to batch link which is more stable and used by t3
   );
 
   // 7.5. create context file and update to include context file above
