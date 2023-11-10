@@ -93,6 +93,11 @@ Initializes and configures the following packages for your Next.js project, cate
 - Generates files for [Lucia](https://github.com/lucia-auth/lucia) including all necessary config.
 - Generates UI and API routes for sign-in and sign-up
 
+#### Kinde
+
+- Generates files for [Kinde](https://github.com/kinde-oss/kinde-auth-nextjs) including all necessary config.
+- Generates sign in component and route handler
+
 ---
 
 ### Other
