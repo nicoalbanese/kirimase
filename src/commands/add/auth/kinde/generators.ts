@@ -37,7 +37,7 @@ export const getUserAuth = async () => {
 
 export const checkAuth = async () => {
    const { session } = await getUserAuth();
-   if (session === null) redirect("/sign-in");
+   if (session === null) redirect("/api/auth/login");
 };
 `;
 };
