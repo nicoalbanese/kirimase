@@ -14,6 +14,7 @@ import { InitOptions, PMType } from "../../types.js";
 import { consola } from "consola";
 import { addPackage } from "../add/index.js";
 import { existsSync, readFileSync, readSync } from "fs";
+import path from "path";
 
 export async function initProject(options?: InitOptions) {
   const nextjsProjectExists = existsSync("package.json");
@@ -23,8 +24,8 @@ export async function initProject(options?: InitOptions) {
     );
     process.exit(0);
   }
-  const usingAppDirWithSrc = existsSync("src/app");
-  const usingAppDirWithOutSrc = existsSync("/app");
+  const usingAppDirWithSrc = existsSync(path.join(process.cwd(), "src/app"));
+  const usingAppDirWithOutSrc = existsSync(path.join(process.cwd(), "app"));
   if (!usingAppDirWithOutSrc && !usingAppDirWithSrc) {
     consola.fatal("Kirimase only works with the Next.js App Directory.");
     process.exit(0);
