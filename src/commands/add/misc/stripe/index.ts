@@ -49,7 +49,7 @@ import { AvailablePackage } from "../../../../types.js";
 import { updateTRPCRouter } from "../../../generate/generators/trpcRoute.js";
 import { createAccountPage } from "../../auth/shared/generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
-import { libAuthUtilsTs } from "../../auth/next-auth/generators.js";
+import { libAuthUtilsTsWithoutAuthOptions } from "../../auth/next-auth/generators.js";
 import { updateRootSchema } from "../../../generate/generators/model/utils.js";
 import { AuthSubTypeMapping } from "../../utils.js";
 
@@ -83,7 +83,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
 
     const authUtilsExist = existsSync(authUtilsPath);
     if (!authUtilsExist) {
-      createFile(authUtilsPath, libAuthUtilsTs());
+      createFile(authUtilsPath, libAuthUtilsTsWithoutAuthOptions());
     }
   }
 

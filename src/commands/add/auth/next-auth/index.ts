@@ -58,7 +58,7 @@ export const addNextAuth = async (options?: InitOptions) => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    apiAuthNextAuthTs(providers, driver, orm)
+    apiAuthNextAuthTs()
   );
 
   // 2. create lib/auth/Provider.tsx
@@ -76,7 +76,7 @@ export const addNextAuth = async (options?: InitOptions) => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    libAuthUtilsTs()
+    libAuthUtilsTs(providers, driver, orm)
   );
 
   // 4. create lib/db/schema/auth.ts

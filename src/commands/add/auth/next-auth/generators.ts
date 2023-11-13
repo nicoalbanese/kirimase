@@ -15,7 +15,7 @@ import {
 } from "../../../filePaths/index.js";
 
 // 1. Create app/api/auth/[...nextauth].ts
-export const apiAuthNextAuthTs = (
+export const apiAuthNextAuthTsOld = (
   providers: AuthProvider[],
   dbType: DBType | null,
   orm: ORMType
@@ -84,6 +84,29 @@ export { handler as GET, handler as POST };
 `;
 };
 
+export const apiAuthNextAuthTs = () => {
+  const { shared } = getFilePaths();
+
+  return `import { DefaultSession } from "next-auth";
+import NextAuth from "next-auth/next";
+import { authOptions } from "${formatFilePath(shared.auth.authUtils, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+
+declare module "next-auth" {
+  interface Session {
+    user: DefaultSession["user"] & {
+      id: string;
+    };
+  }
+}
+
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
+`;
+};
+
 // 2. create lib/auth/Provider.tsx
 export const libAuthProviderTsx = () => {
   return `"use client";
@@ -100,7 +123,7 @@ export default function NextAuthProvider({ children }: Props) {
 };
 
 // 3. create lib/auth/utils.ts
-export const libAuthUtilsTs = () => {
+export const libAuthUtilsTsWithoutAuthOptions = () => {
   const { "next-auth": nextAuth } = getFilePaths();
   return `import { authOptions } from "${formatFilePath(
     nextAuth.nextAuthApiRoute,
@@ -111,13 +134,101 @@ import { redirect } from "next/navigation";
 
 export const getUserAuth = async () => {
   const session = await getServerSession(authOptions);
-  return { session };
+  return { session } as AuthSession;
 };
 
 export const checkAuth = async () => {
   const { session } = await getUserAuth();
   if (!session) redirect("/api/auth/signin");
 };
+`;
+};
+
+export const libAuthUtilsTs = (
+  providers: AuthProvider[],
+  dbType: DBType | null,
+  orm: ORMType
+) => {
+  const { shared } = getFilePaths();
+  const dbIndex = getDbIndexPath();
+  const providersToUse = providers.map((provider) => {
+    return {
+      name: provider,
+      providerKey: AuthProviders[provider].code,
+      website: AuthProviders[provider].website,
+    };
+  });
+
+  return `${
+    dbType !== null
+      ? `import { db } from "${formatFilePath(dbIndex, {
+          prefix: "alias",
+          removeExtension: true,
+        })}";
+${AuthDriver[orm].import}`
+      : ""
+  }
+import { DefaultSession, getServerSession, NextAuthOptions } from "next-auth";
+import { redirect } from "next/navigation";
+import { env } from "${formatFilePath(shared.init.envMjs, {
+    prefix: "alias",
+    removeExtension: false,
+  })}"
+${providersToUse
+  .map(
+    (provider) =>
+      `import ${capitalised(provider.name)}Provider from "next-auth/providers/${
+        provider.name
+      }";`
+  )
+  .join("\n")}
+
+declare module "next-auth" {
+  interface Session {
+    user: DefaultSession["user"] & {
+      id: string;
+    };
+  }
+}
+
+export type AuthSession = {
+  session: {
+    user: {
+      id: string;
+      name?: string;
+      email?: string;
+    };
+  } | null;
+};
+
+export const authOptions: NextAuthOptions = {
+  ${
+    dbType !== null
+      ? `adapter: ${AuthDriver[orm].adapter}(db),`
+      : "// adapter: yourDBAdapterHere"
+  }
+  callbacks: {
+    session: ({ session, user }) => {
+      session.user.id = user.id;
+      return session;
+    },
+  },
+  providers: [
+     ${providersToUse.map((provider) => provider.providerKey).join(",\n    ")}
+  ],
+};
+
+
+export const getUserAuth = async () => {
+  const session = await getServerSession(authOptions);
+  return { session } as AuthSession;
+};
+
+export const checkAuth = async () => {
+  const { session } = await getUserAuth();
+  if (!session) redirect("/api/auth/signin");
+};
+
 `;
 };
 
