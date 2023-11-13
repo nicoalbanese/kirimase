@@ -8,6 +8,7 @@ import {
 import { execa } from "execa";
 import fs from "fs";
 import path from "path";
+import stripJsonComments from "strip-json-comments";
 
 export const generateDbUrl = (dbType: DBType, provider?: DBProvider) => {
   let databaseUrl = "";
@@ -58,7 +59,7 @@ export async function updateTsConfigPrismaTypeAlias() {
   // Read the file
   const data = fs.readFileSync(tsConfigPath, "utf8");
   // Parse the content as JSON
-  const tsConfig = JSON.parse(data);
+  const tsConfig = JSON.parse(stripJsonComments(data));
 
   // Modify the target property
   tsConfig.compilerOptions.paths[`${alias}/zodAutoGenSchemas`] = [

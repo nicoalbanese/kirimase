@@ -20,6 +20,7 @@ import {
   getFilePaths,
   removeFileExtension,
 } from "../../../filePaths/index.js";
+import stripJsonComments from "strip-json-comments";
 
 type ConfigDriver = "pg" | "turso" | "libsql" | "mysql" | "better-sqlite";
 
@@ -678,7 +679,7 @@ export async function updateTsConfigTarget() {
     }
 
     // Parse the content as JSON
-    const tsConfig = JSON.parse(data);
+    const tsConfig = JSON.parse(stripJsonComments(data));
 
     // Modify the target property
     tsConfig.compilerOptions.target = "esnext";

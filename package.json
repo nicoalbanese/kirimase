@@ -1,6 +1,6 @@
 {
   "name": "kirimase",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "description": "A Rails-like CLI for building full-stack Next.js apps faster",
   "main": "index.js",
   "type": "module",
@@ -29,7 +29,8 @@
     "@inquirer/prompts": "^3.0.1",
     "commander": "^11.0.0",
     "consola": "^3.2.3",
-    "execa": "^8.0.1"
+    "execa": "^8.0.1",
+    "strip-json-comments": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.4.5",
