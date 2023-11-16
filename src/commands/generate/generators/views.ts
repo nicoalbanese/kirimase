@@ -1,4 +1,5 @@
 import { DBField } from "../../../types.js";
+import pluralize from "pluralize";
 import {
   createFile,
   getFileContents,
@@ -228,7 +229,7 @@ const createformInputComponent = (field: DBField): string => {
               <Checkbox {...field} checked={!!field.value} onCheckedChange={field.onChange} value={""} />
             </FormControl>`;
   if (field.type.toLowerCase() == "references") {
-    const referencesSingular = field.references.slice(0, -1);
+    const referencesSingular = pluralize.singular(field.references);
     const entity = queryHasJoins(toCamelCase(field.references))
       ? `${referencesSingular}.${referencesSingular}`
       : referencesSingular;
