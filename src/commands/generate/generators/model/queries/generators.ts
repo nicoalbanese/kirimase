@@ -1,4 +1,5 @@
 import { DBField } from "../../../../../types.js";
+import pluralize from "pluralize";
 import {
   formatFilePath,
   getDbIndexPath,
@@ -80,11 +81,11 @@ const generateDrizzleGetQuery = (schema: Schema, relations: DBField[]) => {
   const {
     tableNameCamelCase,
     tableNameFirstChar,
-    tableNameSingularCapitalised,
+    tableNamePluralCapitalised,
     tableNameSingular,
   } = formatTableName(tableName);
   const getAuth = generateAuthCheck(schema.belongsToUser);
-  return `export const get${tableNameSingularCapitalised}s = async () => {${getAuth}
+  return `export const get${tableNamePluralCapitalised} = async () => {${getAuth}
   const ${tableNameFirstChar} = await db.select(${
     relations.length > 0
       ? `{ ${tableNameSingular}: ${tableNameCamelCase}, ${relations
@@ -154,17 +155,17 @@ const generatePrismaGetQuery = (schema: Schema, relations: DBField[]) => {
   const {
     tableNameCamelCase,
     tableNameSingular,
-    tableNameSingularCapitalised,
+    tableNamePluralCapitalised,
     tableNameFirstChar,
   } = formatTableName(tableName);
   const getAuth = generateAuthCheck(schema.belongsToUser);
-  return `export const get${tableNameSingularCapitalised}s = async () => {${getAuth}
+  return `export const get${tableNamePluralCapitalised} = async () => {${getAuth}
   const ${tableNameFirstChar} = await db.${tableNameSingular}.findMany({${
     belongsToUser ? ` where: {userId: session?.user.id!}` : ""
   }${belongsToUser && relations.length > 0 ? ", " : ""}${
     relations.length > 0
       ? `include: { ${relations
-          .map((relation) => `${relation.references.slice(0, -1)}: true`)
+          .map((relation) => `${pluralize.singular(relation.references)}: true`)
           .join(", ")}}`
       : ""
   }});

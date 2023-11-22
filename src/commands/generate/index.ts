@@ -1,5 +1,6 @@
 import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { consola } from "consola";
+import pluralize from "pluralize";
 import {
   DBField,
   DBType,
@@ -119,7 +120,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
           }),
       });
 
-      const fieldName = `${referencesTable.slice(0, -1)}_id`;
+      const fieldName = `${pluralize.singular(referencesTable)}_id`;
       const cascade = await confirm({
         message: "Would you like to cascade on delete?",
         default: false,
