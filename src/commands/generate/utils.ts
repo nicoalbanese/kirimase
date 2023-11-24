@@ -1,4 +1,5 @@
 import path from "path";
+import pluralize from "pluralize";
 import {
   DBField,
   DBType,
@@ -30,7 +31,8 @@ export function capitalise(input: string): string {
 }
 
 export function capitaliseForZodSchema(input: string): string {
-  return input.charAt(0).toUpperCase() + input.slice(1, -1);
+  const singularInput = pluralize.singular(input);
+  return singularInput.charAt(0).toUpperCase() + singularInput.slice(1);
 }
 
 export const formatTableName = (tableName: string) => {
@@ -39,7 +41,10 @@ export const formatTableName = (tableName: string) => {
     tableNameCamelCase.charAt(0).toUpperCase() + tableNameCamelCase.slice(1);
   const tableNameSingularCapitalised =
     capitaliseForZodSchema(tableNameCamelCase);
-  const tableNameSingular = tableNameCamelCase.slice(0, -1);
+  const tableNameSingular = pluralize.singular(tableNameCamelCase);
+  const tableNamePlural = pluralize.plural(tableNameCamelCase);
+  const tableNamePluralCapitalised =
+    tableNamePlural.charAt(0).toUpperCase() + tableNamePlural.slice(1);
   const tableNameFirstChar = tableNameCamelCase.charAt(0);
   const tableNameNormalEnglishCapitalised = toNormalEnglish(
     tableName,
@@ -68,6 +73,7 @@ export const formatTableName = (tableName: string) => {
     tableNameCamelCase,
     tableNameSingular,
     tableNameSingularCapitalised,
+    tableNamePluralCapitalised,
     tableNameFirstChar,
     tableNameCapitalised,
     tableNameNormalEnglishCapitalised,
@@ -250,7 +256,7 @@ export function toNormalEnglish(
     .map((word) => capitalise(word))
     .join(" ");
 
-  const newOutput = singular ? output.slice(0, -1) : output;
+  const newOutput = singular ? pluralize.singular(output) : output;
 
   return lowercase ? newOutput.toLowerCase() : newOutput;
 }
@@ -299,7 +305,9 @@ export function getCurrentSchemas() {
         .filter((line) => line.includes("model") && line.includes("{"))
         .map((line) => line.split(" ")[1])
         .filter((item) => !excludedSchemas.includes(item))
-        .map((item) => `${item[0].toLowerCase()}${item.slice(1)}s`);
+        .map((item) =>
+          pluralize.plural(`${item[0].toLowerCase()}${item.slice(1)}`)
+        );
       return schemaNames;
     } else {
       consola.info(`Prisma schema file does not exist`);
@@ -339,8 +347,8 @@ export const addToPrismaSchema = (schema: string, modelName: string) => {
 export const formatPrismaModelName = (name: string) => {
   const lowerCase = name.toLowerCase();
   const firstLetter = lowerCase[0];
-  const plural = name + "s";
-  const pluralLowerCase = lowerCase + "s";
+  const plural = pluralize.plural(name);
+  const pluralLowerCase = pluralize.plural(lowerCase);
 
   return {
     lowerCase,
