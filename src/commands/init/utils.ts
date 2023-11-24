@@ -103,7 +103,10 @@ export const checkForExistingPackages = async (rootPath: string) => {
 
   // check for shadcn ui
   const hasComponentsJson = existsSync("components.json");
-  if (hasComponentsJson) configObj.componentLib = "shadcn-ui";
+  if (hasComponentsJson) {
+    configObj.componentLib = "shadcn-ui";
+    configObj.packages.push("shadcn-ui");
+  }
 
   // check for driver
   // prisma: check schema for provider value
@@ -156,12 +159,12 @@ export const checkForExistingPackages = async (rootPath: string) => {
 
   if (configObj.packages.length > 0) {
     consola.success(
-      "Successfully searched project and found the following packages already installed:"
+      "Successfully searched project and found the following packages already installed:",
     );
     consola.info(configObj.packages.map((pkg) => pkg).join(", "));
   } else {
     consola.success(
-      "Successfully searched project and found no additional packages."
+      "Successfully searched project and found no additional packages.",
     );
   }
 
@@ -187,11 +190,11 @@ export const checkForExistingPackages = async (rootPath: string) => {
     if (configObj.orm === "prisma") {
       // add zod generator to schema to schema.prisma
       consola.start(
-        "Installing zod-prisma for use with Kirimase's generate function."
+        "Installing zod-prisma for use with Kirimase's generate function.",
       );
       await installPackages(
         { regular: "", dev: "zod-prisma" },
-        preferredPackageManager
+        preferredPackageManager,
       );
       addZodGeneratorToPrismaSchema();
       consola.success("Successfully installed!");
@@ -199,11 +202,11 @@ export const checkForExistingPackages = async (rootPath: string) => {
       await updateTsConfigPrismaTypeAlias();
     } else if (configObj.orm === "drizzle") {
       consola.start(
-        "Installing drizzle-zod for use with Kirimase's generate function."
+        "Installing drizzle-zod for use with Kirimase's generate function.",
       );
       await installPackages(
         { regular: "drizzle-zod", dev: "" },
-        preferredPackageManager
+        preferredPackageManager,
       );
       consola.success("Successfully installed!");
     }
