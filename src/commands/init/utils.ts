@@ -147,15 +147,20 @@ export const checkForExistingPackages = async (rootPath: string) => {
     }
   }
 
-  // check if t3 project
-  const trpcApiPath = rootPath.concat("server/api/trpc.ts");
-  const trpcApiExists = existsSync(trpcApiPath);
-  if (trpcApiExists) {
-    const trpcApiContent = readFileSync(trpcApiPath, "utf-8");
-    trpcApiContent.includes("create.t3.gg")
-      ? (configObj.t3 = true)
-      : (configObj.t3 = false);
-  }
+  // check if t3 project -- update 27 nov, with new implementation, this no longer exists
+  // const trpcApiPath = rootPath.concat("server/api/trpc.ts");
+  // const trpcApiExists = existsSync(trpcApiPath);
+  // if (trpcApiExists) {
+  //   const trpcApiContent = readFileSync(trpcApiPath, "utf-8");
+  //   trpcApiContent.includes("create.t3.gg")
+  //     ? (configObj.t3 = true)
+  //     : (configObj.t3 = false);
+  // }
+
+  // updated check (nov 2023) for ct3a
+  packageJsonInitText.includes("ct3aMetadata")
+    ? (configObj.t3 = true)
+    : (configObj.t3 = false);
 
   if (configObj.packages.length > 0) {
     consola.success(
