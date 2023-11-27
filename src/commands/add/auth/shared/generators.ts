@@ -381,12 +381,12 @@ export const createAccountPage = (withStripe = false) => {
   }
 import { checkAuth, getUserAuth } from "${formatFilePath(
     shared.auth.authUtils,
-    { prefix: "alias", removeExtension: true }
+    { prefix: "alias", removeExtension: true },
   )}";${
     withStripe
       ? `\nimport { getUserSubscriptionPlan } from "${formatFilePath(
           stripe.stripeSubscription,
-          { prefix: "alias", removeExtension: true }
+          { prefix: "alias", removeExtension: true },
         )}";`
       : ""
   }
@@ -422,7 +422,7 @@ export const createAccountApiTs = (orm: ORMType) => {
     case "drizzle":
       return `import { getUserAuth } from "${formatFilePath(
         shared.auth.authUtils,
-        { prefix: "alias", removeExtension: true }
+        { prefix: "alias", removeExtension: true },
       )}";
 import { db } from "${formatFilePath(dbIndex, {
         prefix: "alias",
@@ -432,6 +432,7 @@ import { users } from "${formatFilePath(shared.auth.authSchema, {
         prefix: "alias",
         removeExtension: true,
       })}";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 export async function PUT(request: Request) {
@@ -439,7 +440,7 @@ export async function PUT(request: Request) {
   if (!session) return new Response("Error", { status: 400 });
   const body = (await request.json()) as { name?: string; email?: string };
 
-  await db.update(users).set({ ...body });
+  await db.update(users).set({ ...body }).where(eq(users.id, session.user.id));
   revalidatePath("/account");
   return new Response(JSON.stringify({ message: "ok" }), { status: 200 });
 }
@@ -447,7 +448,7 @@ export async function PUT(request: Request) {
     case "prisma":
       return `import { getUserAuth } from "${formatFilePath(
         shared.auth.authUtils,
-        { prefix: "alias", removeExtension: true }
+        { prefix: "alias", removeExtension: true },
       )}";
 import { db } from "${formatFilePath(dbIndex, {
         prefix: "alias",
@@ -473,7 +474,7 @@ export async function PUT(request: Request) {
 export const createNavbar = (
   withShadcn: boolean,
   usingClerk = false,
-  auth: AuthType
+  auth: AuthType,
 ) => {
   const { shared, "next-auth": nextAuth } = getFilePaths();
   const { alias } = readConfigFile();
@@ -493,7 +494,7 @@ export const createNavbar = (
   if (withShadcn) {
     return `import { getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
-      { prefix: "alias", removeExtension: true }
+      { prefix: "alias", removeExtension: true },
     )}";
 import Link from "next/link";${
       usingClerk
@@ -511,7 +512,7 @@ import { Avatar, AvatarFallback } from "${alias}/components/ui/avatar";${
               ? ""
               : `\nimport SignOutBtn from "${formatFilePath(
                   nextAuth.signOutButtonComponent,
-                  { prefix: "alias", removeExtension: true }
+                  { prefix: "alias", removeExtension: true },
                 )}";`
           }
 `
@@ -591,7 +592,7 @@ export default async function Navbar() {
   } else {
     return `import { getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
-      { prefix: "alias", removeExtension: true }
+      { prefix: "alias", removeExtension: true },
     )}";
 import Link from "next/link";${
       usingClerk ? `\nimport { UserButton } from "@clerk/nextjs";` : ""
