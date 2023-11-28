@@ -29,28 +29,28 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
     const rootPath = hasSrc ? "src/" : "";
     createFile(
       rootPath.concat(`app/${tableNameKebabCase}/page.tsx`),
-      generateView(schema)
+      generateView(schema),
     );
     // create components/tableName/TableNameList.tsx
     createFile(
       rootPath.concat(
-        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}List.tsx`
+        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}List.tsx`,
       ),
-      createListComponent(schema)
+      createListComponent(schema),
     );
     // create components/tableName/TableNameForm.tsx
     createFile(
       rootPath.concat(
-        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Form.tsx`
+        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Form.tsx`,
       ),
-      createFormComponent(schema)
+      createFormComponent(schema),
     );
     // create components/tableName/TableNameModal.tsx
     createFile(
       rootPath.concat(
-        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal.tsx`
+        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal.tsx`,
       ),
-      createModalComponent(schema)
+      createModalComponent(schema),
     );
     // install shadcn packages (button, dialog, form, input, label) - exec script: pnpm dlx shadcn-ui@latest add _
     // const baseComponents = ["button", "dialog", "form", "input", "label"];
@@ -66,7 +66,7 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
       (field) =>
         field.type === "date" ||
         field.type === "timestamp" ||
-        field.type === "DateTime"
+        field.type === "DateTime",
     ).length > 0
       ? baseComponents.push("popover", "calendar")
       : null;
@@ -90,7 +90,7 @@ const generateView = (schema: Schema) => {
 import New${tableNameSingularCapitalised}Modal from "${alias}/components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal";
 import { get${tableNameCapitalised} } from "${formatFilePath(
     shared.orm.servicesDir,
-    { prefix: "alias", removeExtension: false }
+    { prefix: "alias", removeExtension: false },
   )}/${tableNameCamelCase}/queries";${
     schema.belongsToUser
       ? `\nimport { checkAuth } from "${formatFilePath(shared.auth.authUtils, {
@@ -106,7 +106,7 @@ export default async function ${tableNameCapitalised}() {
   }const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();  
 
   return (
-    <main className="max-w-3xl mx-auto p-5 md:p-0 sm:pt-4">
+    <main className="max-w-3xl mx-auto p-4 rounded-lg bg-card">
       <div className="flex justify-between">
         <h1 className="font-semibold text-2xl my-2">${tableNameNormalEnglishCapitalised}</h1>
         <New${tableNameSingularCapitalised}Modal />
@@ -140,7 +140,7 @@ const createListComponent = (schema: Schema) => {
     tableNameNormalEnglishLowerCase,
   } = formatTableName(schema.tableName);
   const relations = schema.fields.filter(
-    (field) => field.type === "references"
+    (field) => field.type === "references",
   );
   const { t3 } = readConfigFile();
   const { shared, trpc } = getFilePaths();
@@ -148,7 +148,7 @@ const createListComponent = (schema: Schema) => {
   return `"use client";
 import { Complete${tableNameSingularCapitalised} } from "${formatFilePath(
     shared.orm.schemaDir,
-    { prefix: "alias", removeExtension: false }
+    { prefix: "alias", removeExtension: false },
   )}/${tableNameCamelCase}";
 import { ${t3 ? "api as " : ""}trpc } from "${formatFilePath(trpc.trpcClient, {
     prefix: "alias",
@@ -171,10 +171,10 @@ export default function ${tableNameSingularCapitalised}List({ ${tableNameCamelCa
     <ul>
       {${tableNameFirstChar}.${tableNameCamelCase}.map((${tableNameSingular}) => (
         <${tableNameSingularCapitalised} ${tableNameSingular}={${tableNameSingular}} key={${
-    relations.length > 0
-      ? `${tableNameSingular}.${tableNameSingular}`
-      : tableNameSingular
-  }.id} />
+          relations.length > 0
+            ? `${tableNameSingular}.${tableNameSingular}`
+            : tableNameSingular
+        }.id} />
       ))}
     </ul>
   );
@@ -189,18 +189,18 @@ const ${tableNameSingularCapitalised} = ({ ${tableNameSingular} }: { ${tableName
             ? `${tableNameSingular}.${tableNameSingular}`
             : tableNameSingular
         }.${toCamelCase(schema.fields[0].name)}${
-    schema.fields[0].type === "date" ||
-    schema.fields[0].type === "timestamp" ||
-    schema.fields[0].type === "DateTime"
-      ? ".toString()"
-      : ""
-  }}</div>
+          schema.fields[0].type === "date" ||
+          schema.fields[0].type === "timestamp" ||
+          schema.fields[0].type === "DateTime"
+            ? ".toString()"
+            : ""
+        }}</div>
       </div>
       <${tableNameSingularCapitalised}Modal ${tableNameSingular}={${
-    relations.length > 0
-      ? `${tableNameSingular}.${tableNameSingular}`
-      : tableNameSingular
-  }} />
+        relations.length > 0
+          ? `${tableNameSingular}.${tableNameSingular}`
+          : tableNameSingular
+      }} />
     </li>
   );
 };
@@ -208,8 +208,10 @@ const ${tableNameSingularCapitalised} = ({ ${tableNameSingular} }: { ${tableName
 const EmptyState = () => {
   return (
     <div className="text-center">
-      <h3 className="mt-2 text-sm font-semibold text-gray-900">No ${tableNameNormalEnglishLowerCase}</h3>
-      <p className="mt-1 text-sm text-gray-500">
+      <h3 className="mt-2 text-sm font-semibold text-secondary-foreground">
+        No ${tableNameNormalEnglishLowerCase}
+      </h3>
+      <p className="mt-1 text-sm text-muted-foreground">
         Get started by creating a new ${tableNameNormalEnglishSingularLowerCase}.
       </p>
       <div className="mt-6">
@@ -312,7 +314,7 @@ const createFormComponent = (schema: Schema) => {
   } = formatTableName(schema.tableName);
   const { packages, driver, alias, t3 } = readConfigFile();
   const relations = schema.fields.filter(
-    (field) => field.type.toLowerCase() === "references"
+    (field) => field.type.toLowerCase() === "references",
   );
   const { shared, trpc } = getFilePaths();
 
@@ -320,7 +322,7 @@ const createFormComponent = (schema: Schema) => {
 
 import { ${tableNameSingularCapitalised}, New${tableNameSingularCapitalised}Params, insert${tableNameSingularCapitalised}Params } from "${formatFilePath(
     shared.orm.schemaDir,
-    { prefix: "alias", removeExtension: false }
+    { prefix: "alias", removeExtension: false },
   )}/${tableNameCamelCase}";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -353,7 +355,7 @@ import { z } from "zod";${
       (field) =>
         field.type === "date" ||
         field.type === "timestamp" ||
-        field.type === "DateTime"
+        field.type === "DateTime",
     ).length > 0
       ? `import { Popover, PopoverContent, PopoverTrigger } from "${alias}/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
@@ -403,7 +405,7 @@ const ${tableNameSingularCapitalised}Form = ({
           (field) =>
             `${toCamelCase(field.name)}: ${
               defaultValueMappings[driver][field.type]
-            }`
+            }`,
         )
         .join(",\n     ")}
     },
@@ -469,7 +471,7 @@ const ${tableNameSingularCapitalised}Form = ({
               <FormMessage />
             </FormItem>
           )}
-        />`
+        />`,
           )
           .join("\n        ")}
         <Button
@@ -522,7 +524,7 @@ import {
 import ${tableNameSingularCapitalised}Form from "./${tableNameSingularCapitalised}Form";
 import { ${tableNameSingularCapitalised} } from "${formatFilePath(
     shared.orm.schemaDir,
-    { prefix: "alias", removeExtension: false }
+    { prefix: "alias", removeExtension: false },
   )}/${tableNameCamelCase}";
 
 export default function ${tableNameSingularCapitalised}Modal({ 

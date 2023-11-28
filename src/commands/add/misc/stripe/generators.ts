@@ -36,7 +36,7 @@ export const generateStripeSubscriptionTsOld = () => {
 
   return `import { storeSubscriptionPlans } from "${formatFilePath(
     stripe.configSubscription,
-    { prefix: "alias", removeExtension: true }
+    { prefix: "alias", removeExtension: true },
   )}";
 import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
@@ -270,7 +270,7 @@ export default function PlanSettings({
           </h3>
         ) : null}
         {subscriptionPlan.stripeCurrentPeriodEnd ? (
-          <p className="text-sm mb-4 text-slate-500 ">
+          <p className="text-sm mb-4 text-neutral-500 ">
             Your plan will{" "}
             {!subscriptionPlan.isSubscribed
               ? null
@@ -288,7 +288,7 @@ export default function PlanSettings({
       </AccountCardBody>
       <AccountCardFooter description="Manage your subscription on Stripe.">
         <Link href="/account/billing">
-          <button className="bg-white px-3.5 py-2.5 font-medium text-sm rounded-lg border border-slate-200 hover:bg-slate-100">
+          <button className="bg-white px-3.5 py-2.5 font-medium text-sm rounded-lg border border-neutral-200 hover:bg-neutral-100">
             Go to billing
           </button>
         </Link>
@@ -430,8 +430,8 @@ export function ManageUserSubscriptionButton({
         disabled={isPending}
         className={\`w-full \${
           isCurrentPlan
-            ? "bg-slate-900 py-2.5 px-3.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-            : "text-center w-full hover:bg-slate-100 px-3.5 py-2.5 font-medium text-sm rounded-md border border-slate-300"
+            ? "bg-neutral-900 py-2.5 px-3.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            : "text-center w-full hover:bg-neutral-100 px-3.5 py-2.5 font-medium text-sm rounded-md border border-neutral-300"
         }\`}
       >
         {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -474,11 +474,11 @@ export const generateAccountPage = () => {
 import PlanSettings from "./PlanSettings";
 import { checkAuth, getUserAuth } from "${formatFilePath(
     shared.auth.authUtils,
-    { prefix: "alias", removeExtension: true }
+    { prefix: "alias", removeExtension: true },
   )}";
 import { getUserSubscriptionPlan } from "${formatFilePath(
     stripe.stripeSubscription,
-    { prefix: "alias", removeExtension: true }
+    { prefix: "alias", removeExtension: true },
   )}";
 
 export default async function Account() {
@@ -519,15 +519,15 @@ import {
 } from "${alias}/components/ui/card";
 import { storeSubscriptionPlans } from "${formatFilePath(
       stripe.configSubscription,
-      { prefix: "alias", removeExtension: true }
+      { prefix: "alias", removeExtension: true },
     )}";
 import { checkAuth, getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
-      { prefix: "alias", removeExtension: true }
+      { prefix: "alias", removeExtension: true },
     )}";
 import { getUserSubscriptionPlan } from "${formatFilePath(
       stripe.stripeSubscription,
-      { prefix: "alias", removeExtension: true }
+      { prefix: "alias", removeExtension: true },
     )}";
 import { CheckCircle2Icon } from "lucide-react";
 import Link from "next/link";
@@ -632,15 +632,15 @@ export default async function Billing() {
     return `import { ManageUserSubscriptionButton } from "./ManageSubscription";
 import { storeSubscriptionPlans } from "${formatFilePath(
       stripe.configSubscription,
-      { prefix: "alias", removeExtension: true }
+      { prefix: "alias", removeExtension: true },
     )}";
 import { checkAuth, getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
-      { prefix: "alias", removeExtension: true }
+      { prefix: "alias", removeExtension: true },
     )}";
 import { getUserSubscriptionPlan } from "${formatFilePath(
       stripe.stripeSubscription,
-      { prefix: "alias", removeExtension: true }
+      { prefix: "alias", removeExtension: true },
     )}";
 import { CheckCircle2Icon } from "lucide-react";
 import Link from "next/link";
@@ -662,13 +662,13 @@ export default async function Billing() {
       </Link>
       <h1 className="text-3xl font-semibold mb-4">Billing</h1>
       <div className="p-6 mb-2 rounded-lg border bg-white shadow-sm ">
-        <h3 className="uppercase text-xs font-bold text-slate-500">
+        <h3 className="uppercase text-xs font-bold text-neutral-500">
           Subscription Details
         </h3>
         <p className="text-lg font-semibold leading-none my-2">
           {subscriptionPlan.name}
         </p>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-neutral-500">
           {!subscriptionPlan.isSubscribed
             ? "You are not subscribed to any plan."
             : subscriptionPlan.isCanceled
@@ -683,15 +683,15 @@ export default async function Billing() {
         {storeSubscriptionPlans.map((plan) => (
           <div
             key={plan.id}
-            className={\`rounded-lg border bg-white text-slate-900 shadow-sm  \${
+            className={\`rounded-lg border bg-white text-neutral-900 shadow-sm  \${
               plan.name === subscriptionPlan.name
-                ? "border-slate-900"
-                : "border-slate-300"
+                ? "border-neutral-900"
+                : "border-neutral-300"
             }\`}
           >
             {plan.name === subscriptionPlan.name ? (
               <div className="w-full relative">
-                <div className="text-center px-3 py-1 bg-slate-900 text-slate-100 text-xs  w-fit rounded-l-lg rounded-t-none absolute right-0 font-semibold">
+                <div className="text-center px-3 py-1 bg-neutral-900 text-neutral-100 text-xs  w-fit rounded-l-lg rounded-t-none absolute right-0 font-semibold">
                   Current Plan
                 </div>
               </div>
@@ -700,7 +700,7 @@ export default async function Billing() {
               <div className="text-2xl font-semibold leading-none tracking-tight">
                 {plan.name}
               </div>
-              <div id="description" className="text-sm text-slate-500">
+              <div id="description" className="text-sm text-neutral-500">
                 {plan.description}
               </div>
             </div>
@@ -735,7 +735,7 @@ export default async function Billing() {
               ) : (
                 <div>
                   <Link href="/account">
-                    <button className="text-center w-full hover:bg-slate-100 px-3.5 py-2.5 font-medium text-sm rounded-md">
+                    <button className="text-center w-full hover:bg-neutral-100 px-3.5 py-2.5 font-medium text-sm rounded-md">
                       Add Email to Subscribe
                     </button>
                   </Link>
@@ -942,7 +942,7 @@ export async function POST(req: Request) {
 
 export const generateSubscriptionsDrizzleSchema = (
   driver: DBType,
-  auth: AuthType
+  auth: AuthType,
 ) => {
   const authSubtype = AuthSubTypeMapping[auth];
   // add references for pg and sqlite
@@ -1119,7 +1119,7 @@ import type Stripe from "stripe";${
     orm === "drizzle"
       ? `\nimport { subscriptions } from "${formatFilePath(
           stripe.subscriptionSchema,
-          { prefix: "alias", removeExtension: true }
+          { prefix: "alias", removeExtension: true },
         )}";\nimport { eq } from "drizzle-orm";`
       : ""
   }
@@ -1214,7 +1214,7 @@ export const generateStripeSubscriptionTs = () => {
 
   return `import { storeSubscriptionPlans } from "${formatFilePath(
     stripe.configSubscription,
-    { prefix: "alias", removeExtension: true }
+    { prefix: "alias", removeExtension: true },
   )}";
 import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
@@ -1223,7 +1223,7 @@ import { db } from "${formatFilePath(dbIndex, {
     orm === "drizzle"
       ? `\nimport { subscriptions } from "${formatFilePath(
           stripe.subscriptionSchema,
-          { prefix: "alias", removeExtension: true }
+          { prefix: "alias", removeExtension: true },
         )}";\nimport { eq } from "drizzle-orm";`
       : ""
   }
@@ -1302,11 +1302,11 @@ export const createAccountTRPCRouter = () => {
   })}";
 import { publicProcedure, ${createRouterInvokcation} } from "${formatFilePath(
     trpc.serverTrpc,
-    { prefix: "alias", removeExtension: true }
+    { prefix: "alias", removeExtension: true },
   )}";
 import { getUserSubscriptionPlan } from "${formatFilePath(
     stripe.stripeSubscription,
-    { prefix: "alias", removeExtension: true }
+    { prefix: "alias", removeExtension: true },
   )}";
 export const accountRouter = ${createRouterInvokcation}({
   getUser: publicProcedure.query(async () => {

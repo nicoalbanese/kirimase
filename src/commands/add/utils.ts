@@ -41,7 +41,7 @@ export const addContextProviderToLayout = (
     | "ShadcnToast"
     | "ClerkProvider"
     | "Navbar"
-    | "ThemeProvider"
+    | "ThemeProvider",
 ) => {
   const { hasSrc, alias } = readConfigFile();
   const path = `${hasSrc ? "src/" : ""}app/layout.tsx`;
@@ -62,13 +62,13 @@ export const addContextProviderToLayout = (
     case "NextAuthProvider":
       importStatement = `import NextAuthProvider from "${formatFilePath(
         nextAuth.authProviderComponent,
-        { prefix: "alias", removeExtension: true }
+        { prefix: "alias", removeExtension: true },
       )}";`;
       break;
     case "TrpcProvider":
       importStatement = `import TrpcProvider from "${formatFilePath(
         trpc.trpcProvider,
-        { removeExtension: true, prefix: "alias" }
+        { removeExtension: true, prefix: "alias" },
       )}";`;
       break;
     case "ShadcnToast":
@@ -80,7 +80,7 @@ export const addContextProviderToLayout = (
     case "Navbar":
       importStatement = `import Navbar from "${formatFilePath(
         shared.auth.navbarComponent,
-        { prefix: "alias", removeExtension: true }
+        { prefix: "alias", removeExtension: true },
       )}";`;
       break;
     case "ThemeProvider":
@@ -98,14 +98,14 @@ export const addContextProviderToLayout = (
   const navbarExists = fileContent.includes("<Navbar />");
   const rootChildrenText = !navbarExists
     ? "{children}"
-    : `<main className="max-w-3xl mx-auto md:p-0 p-6">\n<Navbar />\n{children}\n</main>`;
+    : `<div>\n<Navbar />\n<main className="max-w-3xl mx-auto md:p-0 px-4 mt-4">\n{children}\n</main>\n</div>`;
   let replacementText = "";
   switch (provider) {
     case "ShadcnToast":
       replacementText = `${rootChildrenText}\n<Toaster />\n`;
       break;
     case "Navbar":
-      replacementText = `<main className="max-w-3xl mx-auto md:p-0 p-6">\n<Navbar />\n{children}\n</main>`;
+      replacementText = `<div>\n<Navbar />\n<main className="max-w-3xl mx-auto md:p-0 px-4 mt-4">\n{children}\n</main>\n</div>`;
       break;
     case "ThemeProvider":
       replacementText = `\n<${provider} attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>${rootChildrenText}</${provider}>\n`;
@@ -117,10 +117,10 @@ export const addContextProviderToLayout = (
 
   const searchValue = !navbarExists
     ? "{children}"
-    : `<main className="max-w-3xl mx-auto md:p-0 p-6">\n<Navbar />\n{children}\n</main>`;
+    : `<div>\n<Navbar />\n<main className="max-w-3xl mx-auto md:p-0 px-4 mt-4">\n{children}\n</main>\n</div>`;
   const newLayoutContent = modifiedImportContent.replace(
     searchValue,
-    replacementText
+    replacementText,
   );
   replaceFile(path, newLayoutContent);
 };

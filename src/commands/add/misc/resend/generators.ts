@@ -76,13 +76,13 @@ export default function Home() {
           <li>Add and verify your domain</li>
           <li>
             Create an API Key and add to{" "}
-            <span className="ml-1 font-mono font-thin text-zinc-600 bg-zinc-100 p-0.5">
+            <span className="ml-1 font-mono font-thin text-neutral-600 bg-neutral-100 p-0.5">
               .env
             </span>
           </li>
           <li>
             Update &quot;from:&quot; in{" "}
-            <span className="ml-1 font-mono font-thin text-zinc-600 bg-zinc-100 p-0.5">
+            <span className="ml-1 font-mono font-thin text-neutral-600 bg-neutral-100 p-0.5">
               app/api/email/route.ts
             </span>
           </li>
@@ -95,18 +95,18 @@ export default function Home() {
         className="space-y-3 pt-4 border-t mt-4"
       >
         {errors && (
-          <p className="bg-slate-50 p-3">{JSON.stringify(errors, null, 2)}</p>
+          <p className="bg-neutral-50 p-3">{JSON.stringify(errors, null, 2)}</p>
         )}
         <div>
-          <label className="text-zinc-700 text-sm">Name</label>
+          <label className="text-neutral-700 text-sm">Name</label>
           <input
             type="text"
             placeholder="Tim"
             name="name"
             ref={nameInputRef}
             className={\`
-              w-full px-3 py-2 text-sm rounded-md border focus:outline-zinc-700 \${
-                !!errors?.name ? "border-red-700" : "border-zinc-200"
+              w-full px-3 py-2 text-sm rounded-md border focus:outline-neutral-700 \${
+                !!errors?.name ? "border-red-700" : "border-neutral-200"
               }\`}
           />
         </div>
@@ -118,8 +118,8 @@ export default function Home() {
             name="email"
             ref={emailInputRef}
             className={\`
-              w-full px-3 py-2 text-sm rounded-md border focus:outline-zinc-700 \${
-                !!errors?.email ? "border-red-700" : "border-zinc-200"
+              w-full px-3 py-2 text-sm rounded-md border focus:outline-neutral-700 \${
+                !!errors?.email ? "border-red-700" : "border-neutral-200"
               }\`}
           />
         </div>
@@ -173,7 +173,7 @@ const generateApiRoute = () => {
   const { resend } = getFilePaths();
   return `import { EmailTemplate } from "${formatFilePath(
     resend.firstEmailComponent,
-    { prefix: "alias", removeExtension: true }
+    { prefix: "alias", removeExtension: true },
   )}";
 import { resend } from "${formatFilePath(resend.libEmailIndex, {
     prefix: "alias",

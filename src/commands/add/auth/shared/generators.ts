@@ -135,12 +135,12 @@ export default function UpdateNameCard({ name }: { name: string }) {
             defaultValue={name ?? ""}
             name="name"
             disabled={${disabled ? "true" : "isPending"}}
-            className="block text-sm w-full px-3 py-2 rounded-md border border-slate-200 focus:outline-slate-700"
+            className="block text-sm w-full px-3 py-2 rounded-md border border-neutral-200 focus:outline-neutral-700"
           />
         </AccountCardBody>
         <AccountCardFooter description="64 characters maximum">
           <button
-            className={\`bg-slate-900 py-2.5 px-3.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed\`}
+            className={\`bg-neutral-900 py-2.5 px-3.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed\`}
             disabled={${disabled ? "true" : "isPending"}}
           >
             Update Name
@@ -258,13 +258,13 @@ export default function UpdateEmailCard({ email }: { email: string }) {
             defaultValue={email ?? ""}
             name="email"
             disabled={${disabled ? "true" : "isPending"}}
-            className="block text-sm w-full px-3 py-2 rounded-md border border-slate-200 focus:outline-slate-700"
+            className="block text-sm w-full px-3 py-2 rounded-md border border-neutral-200 focus:outline-neutral-700"
           />
         </AccountCardBody>
         <AccountCardFooter description="We will email vou to verify the change.">
           <button
             disabled={${disabled ? "true" : "isPending"}}
-            className={\`bg-slate-900 py-2.5 px-3.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed\`}
+            className={\`bg-neutral-900 py-2.5 px-3.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed\`}
           >
             Update Email
           </button>
@@ -317,7 +317,7 @@ export function AccountCardFooter({
 }) {
   return (
     <div
-      className="bg-primary-foreground dark:bg-slate-900 dark:border-slate-800 p-4 border border-zinc-200 flex justify-between items-center"
+      className="bg-muted p-4 border dark:bg-card flex justify-between items-center rounded-b-lg"
       id="footer"
     >
       <p className="text-muted-foreground text-sm">{description}</p>
@@ -339,10 +339,10 @@ export function AccountCardFooter({
 export function AccountCard({ params, children }: AccountCardProps) {
   const { header, description } = params;
   return (
-    <div className="bg-white border-slate-200 border rounded-lg">
+    <div className="bg-white border-neutral-200 border rounded-lg">
       <div id="body" className="p-4 ">
         <h3 className="text-xl font-semibold">{header}</h3>
-        <p className="text-slate-500">{description}</p>
+        <p className="text-neutral-500">{description}</p>
       </div>
       {children}
     </div>
@@ -362,10 +362,10 @@ export function AccountCardFooter({
 }) {
   return (
     <div
-      className="bg-slate-50 p-4 border border-zinc-200 flex justify-between items-center"
+      className="bg-neutral-50 p-4 border border-neutral-200 flex justify-between items-center rounded-b-lg"
       id="footer"
     >
-      <p className="text-slate-500 text-sm">{description}</p>
+      <p className="text-neutral-500 text-sm">{description}</p>
       {children}
     </div>
   );
@@ -531,7 +531,8 @@ export default async function Navbar() {
 
   if (session?.user) {
     return (
-      <nav className="py-2 flex items-center justify-between transition-all duration-300">
+      <div className="bg-popover border-b mb-2 md:p-0 px-4">
+      <nav className="py-2 flex items-center justify-between transition-all duration-300 max-w-3xl mx-auto">
         <h1 className="font-semibold hover:opacity-75 transition-hover cursor-pointer">
           <Link href="/">Logo</Link>
         </h1>
@@ -585,6 +586,7 @@ export default async function Navbar() {
           }
         </div>
       </nav>
+      </div>
     );
   } else return null;
 }
@@ -610,7 +612,7 @@ export default async function Navbar() {
           usingClerk
             ? `<UserButton afterSignOutUrl="/" />`
             : `<Link href="/account">
-          <div className="w-8 h-8 bg-slate-100 rounded-full text-slate-600 flex items-center justify-center hover:opacity-75 transition-all duration-300 cursor-pointer hover:ring-1 ring-zinc-300">
+          <div className="w-8 h-8 bg-neutral-100 rounded-full text-neutral-600 flex items-center justify-center hover:opacity-75 transition-all duration-300 cursor-pointer hover:ring-1 ring-neutral-300">
             {session?.user?.name ? session.user.name.slice(0, 1) : "~"}
           </div>
         </Link>`

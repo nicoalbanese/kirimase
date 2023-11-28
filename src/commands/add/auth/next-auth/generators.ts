@@ -18,7 +18,7 @@ import {
 export const apiAuthNextAuthTsOld = (
   providers: AuthProvider[],
   dbType: DBType | null,
-  orm: ORMType
+  orm: ORMType,
 ) => {
   const { shared } = getFilePaths();
   const dbIndex = getDbIndexPath();
@@ -50,7 +50,7 @@ ${providersToUse
     (provider) =>
       `import ${capitalised(provider.name)}Provider from "next-auth/providers/${
         provider.name
-      }";`
+      }";`,
   )
   .join("\n")}
 
@@ -127,7 +127,7 @@ export const libAuthUtilsTsWithoutAuthOptions = () => {
   const { "next-auth": nextAuth } = getFilePaths();
   return `import { authOptions } from "${formatFilePath(
     nextAuth.nextAuthApiRoute,
-    { removeExtension: true, prefix: "alias" }
+    { removeExtension: true, prefix: "alias" },
   )}";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -147,7 +147,7 @@ export const checkAuth = async () => {
 export const libAuthUtilsTs = (
   providers: AuthProvider[],
   dbType: DBType | null,
-  orm: ORMType
+  orm: ORMType,
 ) => {
   const { shared } = getFilePaths();
   const dbIndex = getDbIndexPath();
@@ -179,7 +179,7 @@ ${providersToUse
     (provider) =>
       `import ${capitalised(provider.name)}Provider from "next-auth/providers/${
         provider.name
-      }";`
+      }";`,
   )
   .join("\n")}
 
@@ -498,7 +498,7 @@ export default function SignIn() {
       <p>Not signed in </p>
       <button
         onClick={() => signIn()}
-        className="bg-slate-900 py-2.5 px-3.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity"
+        className="bg-neutral-900 py-2.5 px-3.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity"
       >
         Sign in
       </button>
@@ -539,7 +539,7 @@ export const protectedProcedure = t.procedure.use(isAuthed);
   fs.writeFileSync(filePath, modifiedRouterContent);
 
   consola.success(
-    "TRPC Router updated successfully to add protectedProcedure."
+    "TRPC Router updated successfully to add protectedProcedure.",
   );
 };
 
@@ -577,7 +577,7 @@ export const enableSessionInTRPCApi = () => {
 
 export const createPrismaAuthSchema = (
   driver: DBType,
-  usingPlanetScale: boolean
+  usingPlanetScale: boolean,
 ) => {
   return `model Account {
   id                 String  @id @default(cuid())
@@ -644,9 +644,9 @@ import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
 export default async function Home() {
   const { session } = await getUserAuth();
   return (
-    <main className="space-y-4 pt-2">
+    <main className="space-y-4">
       {session ? (
-        <pre className="bg-slate-100 dark:bg-slate-800 p-6">
+        <pre className="bg-card p-4 rounded-sm">
           {JSON.stringify(session, null, 2)}
         </pre>
       ) : null}
