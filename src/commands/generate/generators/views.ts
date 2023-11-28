@@ -83,15 +83,15 @@ const generateView = (schema: Schema) => {
     tableNameCapitalised,
     tableNameNormalEnglishCapitalised,
   } = formatTableName(schema.tableName);
-  const { shared } = getFilePaths();
+  const { shared, trpc } = getFilePaths();
   const { alias } = readConfigFile();
 
   return `import ${tableNameSingularCapitalised}List from "${alias}/components/${tableNameCamelCase}/${tableNameSingularCapitalised}List";
 import New${tableNameSingularCapitalised}Modal from "${alias}/components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal";
-import { get${tableNameCapitalised} } from "${formatFilePath(
-    shared.orm.servicesDir,
-    { prefix: "alias", removeExtension: false },
-  )}/${tableNameCamelCase}/queries";${
+import { api } from "${formatFilePath(trpc.trpcApiTs, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";${
     schema.belongsToUser
       ? `\nimport { checkAuth } from "${formatFilePath(shared.auth.authUtils, {
           prefix: "alias",
@@ -103,7 +103,7 @@ import { get${tableNameCapitalised} } from "${formatFilePath(
 export default async function ${tableNameCapitalised}() {
   ${
     schema.belongsToUser ? "await checkAuth();\n  " : ""
-  }const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();  
+  }const { ${tableNameCamelCase} } = await api.${tableNameCamelCase}.get${tableNameCapitalised}.query();  
 
   return (
     <main className="max-w-3xl mx-auto p-4 rounded-lg bg-card">

@@ -646,7 +646,7 @@ export default async function Home() {
   return (
     <main className="space-y-4">
       {session ? (
-        <pre className="bg-card p-4 rounded-sm">
+        <pre className="bg-card p-4 rounded-sm overflow-hidden">
           {JSON.stringify(session, null, 2)}
         </pre>
       ) : null}

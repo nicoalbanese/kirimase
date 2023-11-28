@@ -69,7 +69,7 @@ export const addContextProviderToLayout = (
       importStatement = `import TrpcProvider from "${formatFilePath(
         trpc.trpcProvider,
         { removeExtension: true, prefix: "alias" },
-      )}";`;
+      )}";\nimport { cookies } from "next/headers";`;
       break;
     case "ShadcnToast":
       importStatement = `import { Toaster } from "${alias}/components/ui/toaster";`;
@@ -109,6 +109,9 @@ export const addContextProviderToLayout = (
       break;
     case "ThemeProvider":
       replacementText = `\n<${provider} attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>${rootChildrenText}</${provider}>\n`;
+      break;
+    case "TrpcProvider":
+      replacementText = `\n<${provider} cookies={cookies().toString()}>${rootChildrenText}</${provider}>\n`;
       break;
     default:
       replacementText = `\n<${provider}>${rootChildrenText}</${provider}>\n`;

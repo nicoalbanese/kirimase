@@ -31,7 +31,7 @@ export const addTrpc = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    rootRouterTs()
+    rootRouterTs(),
   );
 
   // 2. create lib/server/trpc.ts
@@ -40,13 +40,13 @@ export const addTrpc = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    serverTrpcTs()
+    serverTrpcTs(),
   );
   // 3. create lib/server/router/ directory and maybe a users file
   // TODO : T3 COMPATABILITY
   createFile(
     `${rootPath}lib/server/routers/computers.ts`,
-    serverRouterComputersTs()
+    serverRouterComputersTs(),
   );
   // 4. create app/api/trpc/[trpc]/route.ts
   createFile(
@@ -54,7 +54,7 @@ export const addTrpc = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    apiTrpcRouteTs()
+    apiTrpcRouteTs(),
   );
   // 5. create lib/trpc/client.ts
   createFile(
@@ -62,7 +62,7 @@ export const addTrpc = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    libTrpcClientTs()
+    libTrpcClientTs(),
   );
   // 6. create lib/trpc/Provider.tsx
   createFile(
@@ -70,7 +70,7 @@ export const addTrpc = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    libTrpcProviderTsx()
+    libTrpcProviderTsx(),
   );
   // 7. create lib/trpc/serverClient.ts -> updated to lib/trpc/api.ts using server invoker
   // createFile(`${rootPath}/lib/trpc/serverClient.ts`, libTrpcServerClientTs());
@@ -80,7 +80,7 @@ export const addTrpc = async () => {
       removeExtension: false,
     }),
     // libTrpcApiTs()
-    libTrpcApiTsBatchLink() // moved to batch link which is more stable and used by t3
+    libTrpcApiTsBatchLink(), // moved to batch link which is more stable and used by t3
   );
 
   // 7.5. create context file and update to include context file above
@@ -89,7 +89,7 @@ export const addTrpc = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    libTrpcContextTs(packages.includes("next-auth"))
+    libTrpcContextTs(packages.includes("next-auth")),
   );
 
   // create trpc utils file lib/trpc/utils.ts
@@ -98,18 +98,18 @@ export const addTrpc = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    libTrpcUtilsTs()
+    libTrpcUtilsTs(),
   );
 
   // 8. Install Packages: @tanstack/react-query (5.0 causing known issue, downgrading for now TODO), @trpc/client, @trpc/react-query, @trpc/server
   await installPackages(
     {
-      regular: `@tanstack/react-query@^4.32.6 @trpc/client@^10.37.1 @trpc/react-query@^10.37.1 @trpc/server@^10.37.1 @trpc/next@^10.37.1 superjson${
+      regular: `@tanstack/react-query@^4.32.6 @trpc/client@^10.37.1 @trpc/react-query@^10.37.1 @trpc/server@^10.37.1 @trpc/next@^10.37.1 superjson server-only${
         orm === null ? " zod" : ""
       }`,
       dev: "",
     },
-    preferredPackageManager
+    preferredPackageManager,
   );
   addPackageToConfig("trpc");
   // 9. Instruct user to add the <Provider /> to their root layout.

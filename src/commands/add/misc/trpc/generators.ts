@@ -1,6 +1,10 @@
 import { existsSync } from "fs";
 import { readConfigFile } from "../../../../utils.js";
-import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
 
 // 1. Create server/index.ts moved to root router position
 export const rootRouterTs = () => {
@@ -36,16 +40,13 @@ import { ZodError } from "zod";
  */
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
-  errorFormatter(opts) {
-    const { shape, error } = opts;
+  errorFormatter({ shape, error }) {
     return {
       ...shape,
       data: {
         ...shape.data,
         zodError:
-          error.code === "BAD_REQUEST" && error.cause instanceof ZodError
-            ? error.cause.flatten()
-            : null,
+          error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
     };
   },
@@ -67,12 +68,12 @@ export const serverRouterComputersTs = () => {
   const schemaExists = existsSync(schemaPath);
   return `import { publicProcedure, router } from "${formatFilePath(
     trpc.serverTrpc,
-    { prefix: "alias", removeExtension: true }
+    { prefix: "alias", removeExtension: true },
   )}";${
     schemaExists
       ? `\nimport { getComputers } from "${formatFilePath(
           shared.orm.servicesDir,
-          { prefix: "alias", removeExtension: false }
+          { prefix: "alias", removeExtension: false },
         )}/computers/queries"`
       : ""
   }
@@ -90,24 +91,44 @@ export const computersRouter = router({
 
 // 4. create api/trpc/[trpc]/route.ts
 export const apiTrpcRouteTs = () => {
-  const { trpc } = getFilePaths();
+  const { trpc, shared } = getFilePaths();
   return `import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
+import { NextRequest } from "next/server";
 import { appRouter } from "${formatFilePath(trpc.rootRouter, {
     prefix: "alias",
     removeExtension: true,
   })}";
-import { createContext } from "${formatFilePath(trpc.trpcContext, {
+import { createTRPCContext } from "${formatFilePath(trpc.trpcContext, {
     prefix: "alias",
     removeExtension: true,
   })}";
+import { env } from "${formatFilePath(shared.init.envMjs, {
+    prefix: "alias",
+    removeExtension: false,
+  })}";
 
-const handler = (req: Request) =>
+
+const createContext = async (req: NextRequest) => {
+  return createTRPCContext({
+    headers: req.headers,
+  });
+};
+
+const handler = (req: NextRequest) =>
   fetchRequestHandler({
     endpoint: "/api/trpc",
     req,
     router: appRouter,
-    createContext,
+    createContext: () => createContext(req),
+    onError:
+      env.NODE_ENV === "development"
+        ? ({ path, error }) => {
+            console.error(
+              \`❌ tRPC failed on \${path ?? "<no-path>"}: \${error.message}\`,
+            );
+          }
+        : undefined,
   });
 
 export { handler as GET, handler as POST };`;
@@ -129,32 +150,52 @@ export const trpc = createTRPCReact<AppRouter>({});`;
 // 6. create lib/trpc/Provider.tsx
 export const libTrpcProviderTsx = () => {
   return `"use client";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
+import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import React, { useState } from "react";
 
 import { trpc } from "./client";
 import { getUrl } from "./utils";
+
 import SuperJSON from "superjson";
 
-export default function TrpcProvider({ children }: { children: React.ReactNode }) {
+export default function TrpcProvider({
+  children,
+  cookies,
+}: {
+  children: React.ReactNode;
+  cookies: string;
+}) {
   const [queryClient] = useState(() => new QueryClient({}));
   const [trpcClient] = useState(() =>
     trpc.createClient({
       transformer: SuperJSON,
       links: [
-        httpBatchLink({
+        loggerLink({
+          enabled: (op) =>
+            process.env.NODE_ENV === "development" ||
+            (op.direction === "down" && op.result instanceof Error),
+        }),
+        unstable_httpBatchStreamLink({
           url: getUrl(),
+          headers() {
+            return {
+              cookie: cookies,
+              "x-trpc-source": "react",
+            };
+          },
         }),
       ],
-    })
+    }),
   );
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </trpc.Provider>
   );
-}`;
+}
+`;
 };
 
 // 7. create lib/trpc/serverClient.ts
@@ -181,7 +222,8 @@ export const libTrpcApiTs = () => {
   const { packages } = readConfigFile();
   const { trpc, shared } = getFilePaths();
 
-  return `import { cookies } from "next/headers";
+  return `import "server-only";
+
 ${
   packages.includes("next-auth") ? "" : "  //  "
 }import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
@@ -192,64 +234,97 @@ import { appRouter } from "${formatFilePath(trpc.rootRouter, {
     prefix: "alias",
     removeExtension: true,
   })}";
-import { loggerLink } from "@trpc/client";
-import { experimental_createTRPCNextAppDirServer as createTRPCNextAppDirServer } from "@trpc/next/app-dir/server";
-import { experimental_nextCacheLink as nextCacheLink } from "@trpc/next/app-dir/links/nextCache";
+import { env } from "${formatFilePath(shared.init.envMjs, {
+    prefix: "alias",
+    removeExtension: false,
+  })}";
+
+import {
+  createTRPCProxyClient,
+  loggerLink,
+  TRPCClientError,
+} from "@trpc/client";
+import { callProcedure } from "@trpc/server";
+import { type TRPCErrorResponse } from "@trpc/server/rpc";
+import { observable } from "@trpc/server/observable";
+
+import { cache } from "react";
+import { cookies } from "next/headers";
+
 import SuperJSON from "superjson";
 
-/**
- * This client invokes procedures directly on the server without fetching over HTTP.
- */
-export const api = createTRPCNextAppDirServer<typeof appRouter>({
-  config() {
-    return {
-      transformer: SuperJSON,
-      links: [
-        loggerLink({
-          enabled: (op) => true,
+const createContext = cache(() => {
+  return createTRPCContext({
+    headers: new Headers({
+      cookie: cookies().toString(),
+      "x-trpc-source": "rsc",
+    }),
+  });
+});
+
+export const api = createTRPCProxyClient<typeof appRouter>({
+  transformer: SuperJSON,
+  links: [
+    loggerLink({
+      enabled: (op) =>
+        env.NODE_ENV === "development" ||
+        (op.direction === "down" && op.result instanceof Error),
+    }),
+    /**
+     * Custom RSC link that lets us invoke procedures without using http requests. Since Server
+     * Components always run on the server, we can just call the procedure as a function.
+     */
+    () =>
+      ({ op }) =>
+        observable((observer) => {
+          createContext()
+            .then((ctx) => {
+              return callProcedure({
+                procedures: appRouter._def.procedures,
+                path: op.path,
+                rawInput: op.input,
+                ctx,
+                type: op.type,
+              });
+            })
+            .then((data) => {
+              observer.next({ result: { data } });
+              observer.complete();
+            })
+            .catch((cause: TRPCErrorResponse) => {
+              observer.error(TRPCClientError.from(cause));
+            });
         }),
-        nextCacheLink({
-          revalidate: 1,
-          router: appRouter,
-          async createContext() {
-            ${
-              packages.includes("next-auth") ? "" : "  //  "
-            }const { session } = await getUserAuth();
-            return {
-              ${packages.includes("next-auth") ? "" : "  //  "}session,
-              headers: {
-                cookie: cookies().toString(),
-                "x-trpc-source": "rsc-invoke",
-              },
-            };
-          },
-        }),
-      ],
-    };
-  },
+  ],
 });
 `;
 };
 
 // 8. create lib/trpc/context.ts
 export const libTrpcContextTs = (withSession: boolean = false) => {
+  const { orm } = readConfigFile();
+  const dbIndexPath = getDbIndexPath(orm);
   const { trpc, shared } = getFilePaths();
-  return `import { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+  return `import { db } from "${formatFilePath(dbIndexPath, {
+    prefix: "alias",
+    removeExtension: true,
+  })}"
 ${withSession ? "" : " // "}import { getUserAuth } from "${formatFilePath(
     shared.auth.authUtils,
-    { prefix: "alias", removeExtension: true }
+    { prefix: "alias", removeExtension: true },
   )}";
 
-export async function createContext(opts?: FetchCreateContextFnOptions) {
+export async function createTRPCContext(opts: { headers: Headers }) {
 ${withSession ? "" : " // "}const { session } = await getUserAuth();
 
   return {
+    db,
     ${withSession ? "" : "// "} session: session,
-    headers: opts && Object.fromEntries(opts.req.headers),
-  };
+    ...opts,
+  }
 }
 
-export type Context = Awaited<ReturnType<typeof createContext>>;
+export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 `;
 };
 
