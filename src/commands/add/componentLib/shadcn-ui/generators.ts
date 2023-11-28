@@ -154,7 +154,7 @@ const generateGlobalsCss = () => {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-muted text-foreground;
   }
 }
 `;
