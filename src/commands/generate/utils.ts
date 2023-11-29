@@ -30,6 +30,10 @@ export function capitalise(input: string): string {
   return input.charAt(0).toUpperCase() + input.slice(1);
 }
 
+export function camelCaseToSnakeCase(str: string): string {
+  return str.replace(/([a-z])([A-Z])/g, "$1_$2").toLowerCase();
+}
+
 export function capitaliseForZodSchema(input: string): string {
   const singularInput = pluralize.singular(input);
   return singularInput.charAt(0).toUpperCase() + singularInput.slice(1);
@@ -49,23 +53,23 @@ export const formatTableName = (tableName: string) => {
   const tableNameNormalEnglishCapitalised = toNormalEnglish(
     tableName,
     false,
-    false
+    false,
   );
   const tableNameNormalEnglishSingular = toNormalEnglish(
     tableName,
     false,
-    true
+    true,
   );
   const tableNameNormalEnglishSingularLowerCase = toNormalEnglish(
     tableName,
     true,
-    true
+    true,
   );
 
   const tableNameNormalEnglishLowerCase = toNormalEnglish(
     tableName,
     true,
-    false
+    false,
   );
   const tableNameKebabCase = snakeToKebab(tableName);
 
@@ -249,7 +253,7 @@ export const defaultValueMappings: Record<
 export function toNormalEnglish(
   input: string,
   lowercase?: boolean,
-  singular?: boolean
+  singular?: boolean,
 ): string {
   const output = input
     .split("_")
@@ -280,7 +284,7 @@ export function getCurrentSchemas() {
         .map((file) => path.basename(file, ".ts"));
 
       return schemaNames.filter(
-        (schema) => schema !== "auth" && schema !== "_root"
+        (schema) => schema !== "auth" && schema !== "_root",
       );
     } catch (error) {
       // console.error(`Error reading schemas ${directory}:`, error);
@@ -306,7 +310,7 @@ export function getCurrentSchemas() {
         .map((line) => line.split(" ")[1])
         .filter((item) => !excludedSchemas.includes(item))
         .map((item) =>
-          pluralize.plural(`${item[0].toLowerCase()}${item.slice(1)}`)
+          pluralize.plural(`${item[0].toLowerCase()}${item.slice(1)}`),
         );
       return schemaNames;
     } else {
@@ -324,7 +328,7 @@ export const addToPrismaSchema = (schema: string, modelName: string) => {
     // write logic to check if model already exists -> if so replace
     const { modelStart, modelEnd, modelExists } = getPrismaModelStartAndEnd(
       schemaContents,
-      modelName
+      modelName,
     );
 
     if (modelExists) {
@@ -397,7 +401,7 @@ export function addToPrismaModel(modelName: string, attributesToAdd: string) {
 
 export function addToPrismaModelBulk(
   modelName: string,
-  attributesToAdd: string
+  attributesToAdd: string,
 ) {
   const hasSchema = existsSync("prisma/schema.prisma");
   if (!hasSchema) {

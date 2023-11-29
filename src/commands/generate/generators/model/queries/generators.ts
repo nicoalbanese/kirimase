@@ -26,24 +26,24 @@ import { eq${belongsToUser ? ", and" : ""} } from "drizzle-orm";${
     belongsToUser
       ? `\nimport { getUserAuth } from "${formatFilePath(
           shared.auth.authUtils,
-          { prefix: "alias", removeExtension: true }
+          { prefix: "alias", removeExtension: true },
         )}";`
       : ""
   }
 import { type ${tableNameSingularCapitalised}Id, ${tableNameSingular}IdSchema, ${tableNameCamelCase} } from "${formatFilePath(
     shared.orm.schemaDir,
-    { prefix: "alias", removeExtension: false }
+    { prefix: "alias", removeExtension: false },
   )}/${tableNameCamelCase}";
 ${
   relations.length > 0
     ? relations.map(
         (relation) =>
           `import { ${toCamelCase(
-            relation.references
+            relation.references,
           )} } from "${formatFilePath(shared.orm.schemaDir, {
             prefix: "alias",
             removeExtension: false,
-          })}/${toCamelCase(relation.references)}";\n`
+          })}/${toCamelCase(relation.references)}";\n`,
       )
     : ""
 }`;
@@ -65,13 +65,13 @@ const generatePrismaImports = (schema: Schema) => {
     belongsToUser
       ? `\nimport { getUserAuth } from "${formatFilePath(
           shared.auth.authUtils,
-          { prefix: "alias", removeExtension: true }
+          { prefix: "alias", removeExtension: true },
         )}";`
       : ""
   }
 import { type ${tableNameSingularCapitalised}Id, ${tableNameSingular}IdSchema } from "${formatFilePath(
     shared.orm.schemaDir,
-    { removeExtension: false, prefix: "alias" }
+    { removeExtension: false, prefix: "alias" },
   )}/${tableNameCamelCase}";
 `;
 };
@@ -91,7 +91,9 @@ const generateDrizzleGetQuery = (schema: Schema, relations: DBField[]) => {
       ? `{ ${tableNameSingular}: ${tableNameCamelCase}, ${relations
           .map(
             (relation) =>
-              `${relation.references.slice(0, -1)}: ${relation.references}`
+              `${pluralize.singular(
+                toCamelCase(relation.references),
+              )}: ${toCamelCase(relation.references)}`,
           )
           .join(", ")} }`
       : ""
@@ -99,11 +101,11 @@ const generateDrizzleGetQuery = (schema: Schema, relations: DBField[]) => {
     relations.length > 0
       ? relations.map(
           (relation) =>
-            `.leftJoin(${
-              relation.references
-            }, eq(${tableNameCamelCase}.${toCamelCase(
-              relation.name
-            )}, ${toCamelCase(relation.references)}.id))`
+            `.leftJoin(${toCamelCase(
+              relation.references,
+            )}, eq(${tableNameCamelCase}.${toCamelCase(
+              relation.name,
+            )}, ${toCamelCase(relation.references)}.id))`,
         )
       : ""
   }${
@@ -137,11 +139,11 @@ const generateDrizzleGetByIdQuery = (schema: Schema, relations: DBField[]) => {
     relations.length > 0
       ? relations.map(
           (relation) =>
-            `.leftJoin(${
-              relation.references
-            }, eq(${tableNameCamelCase}.${toCamelCase(
-              relation.name
-            )}, ${toCamelCase(relation.references)}.id))`
+            `.leftJoin(${toCamelCase(
+              relation.references,
+            )}, eq(${tableNameCamelCase}.${toCamelCase(
+              relation.name,
+            )}, ${toCamelCase(relation.references)}.id))`,
         )
       : ""
   };
@@ -165,7 +167,10 @@ const generatePrismaGetQuery = (schema: Schema, relations: DBField[]) => {
   }${belongsToUser && relations.length > 0 ? ", " : ""}${
     relations.length > 0
       ? `include: { ${relations
-          .map((relation) => `${pluralize.singular(relation.references)}: true`)
+          .map(
+            (relation) =>
+              `${pluralize.singular(toCamelCase(relation.references))}: true`,
+          )
           .join(", ")}}`
       : ""
   }});
@@ -187,14 +192,17 @@ const generatePrismaGetByIdQuery = (schema: Schema, relations: DBField[]) => {
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   const ${tableNameFirstChar} = await db.${tableNameSingular}.findFirst({
     where: { id: ${tableNameSingular}Id${
-    belongsToUser ? `, userId: session?.user.id!` : ""
-  }}${
-    relations.length > 0
-      ? `,\n    include: { ${relations
-          .map((relation) => `${relation.references.slice(0, -1)}: true`)
-          .join(", ")} }\n  `
-      : ""
-  }});
+      belongsToUser ? `, userId: session?.user.id!` : ""
+    }}${
+      relations.length > 0
+        ? `,\n    include: { ${relations
+            .map(
+              (relation) =>
+                `${pluralize.singular(toCamelCase(relation.references))}: true`,
+            )
+            .join(", ")} }\n  `
+        : ""
+    }});
   return { ${tableNameCamelCase}: ${tableNameFirstChar} };
 };
 `;

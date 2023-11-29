@@ -17,12 +17,16 @@ import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
 import { Schema } from "./types.js";
 import { scaffoldViewsAndComponents } from "./generators/views.js";
-import { getCurrentSchemas, toCamelCase } from "./utils.js";
+import {
+  camelCaseToSnakeCase,
+  getCurrentSchemas,
+  toCamelCase,
+} from "./utils.js";
 import { scaffoldModel } from "./generators/model/index.js";
 
 function provideInstructions() {
   consola.info(
-    "Quickly generate your Model (Drizzle schema + queries / mutations), Controllers (API Routes and TRPC Routes), and Views"
+    "Quickly generate your Model (Drizzle schema + queries / mutations), Controllers (API Routes and TRPC Routes), and Views",
   );
 }
 
@@ -88,7 +92,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
     const currentSchemas = getCurrentSchemas();
 
     const baseFieldTypeChoices = Object.keys(
-      createOrmMappings()[orm][dbType].typeMappings
+      createOrmMappings()[orm][dbType].typeMappings,
     )
       .filter((field) => field !== "id")
       .map((field) => {
@@ -101,7 +105,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
         currentSchemas[0] === toCamelCase(tableName));
     const fieldTypeChoices = removeReferenceOption
       ? baseFieldTypeChoices.filter(
-          (field) => field.name.toLowerCase() !== "references"
+          (field) => field.name.toLowerCase() !== "references",
         )
       : baseFieldTypeChoices;
 
@@ -116,7 +120,10 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
         choices: currentSchemas
           .filter((schema) => schema !== toCamelCase(tableName))
           .map((schema) => {
-            return { name: schema, value: schema };
+            return {
+              name: camelCaseToSnakeCase(schema),
+              value: camelCaseToSnakeCase(schema),
+            };
           }),
       });
 
@@ -237,7 +244,7 @@ export async function buildSchema() {
       scaffoldViewsAndComponents(schema);
   } else {
     consola.warn(
-      "You need to have an ORM installed in order to use the scaffold command."
+      "You need to have an ORM installed in order to use the scaffold command.",
     );
     addPackage();
   }

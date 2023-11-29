@@ -60,7 +60,7 @@ export const createOrmMappings = () => {
           }) =>
             `${getReferenceFieldType(referenceIdType)["pg"]}("${name}"${
               referenceIdType === "string" ? ", { length: 256 }" : ""
-            }).references(() => ${referencedTable}.id${
+            }).references(() => ${toCamelCase(referencedTable)}.id${
               cascade ? ', { onDelete: "cascade" }' : ""
             })`,
           // Add more types here as needed
@@ -142,7 +142,7 @@ export const authForWhereClausePrisma = (belongsToUser: boolean) => {
 export const updateRootSchema = (
   tableName: string,
   usingAuth?: boolean,
-  auth?: AuthType
+  auth?: AuthType,
 ) => {
   const tableNameCC = toCamelCase(tableName);
   const { drizzle } = getFilePaths();
@@ -176,7 +176,7 @@ export const updateRootSchema = (
     const rootSchemaContents = readFileSync(rootSchemaPath, "utf-8");
     const rootSchemaWithNewExport = rootSchemaContents.replace(
       "export {",
-      `export { ${tableNameCC},`
+      `export { ${tableNameCC},`,
     );
 
     const importInsertionPoint = rootSchemaWithNewExport.lastIndexOf("import");
@@ -184,7 +184,7 @@ export const updateRootSchema = (
       rootSchemaWithNewExport.indexOf("\n", importInsertionPoint) + 1;
     const beforeImport = rootSchemaWithNewExport.slice(
       0,
-      nextLineAfterLastImport
+      nextLineAfterLastImport,
     );
     const afterImport = rootSchemaWithNewExport.slice(nextLineAfterLastImport);
 
@@ -196,7 +196,7 @@ export const updateRootSchema = (
       rootSchemaPath,
       `${newImportStatement}
 
-export { ${usingAuth ? tableNames : tableNameCC} }`
+export { ${usingAuth ? tableNames : tableNameCC} }`,
     );
     // and also update db/index.ts to add extended model import
     const indexDbPath = formatFilePath(drizzle.dbIndex, {
@@ -207,11 +207,11 @@ export { ${usingAuth ? tableNames : tableNameCC} }`
     const updatedContentsWithImport = indexDbContents.replace(
       `import * as schema from "./schema";`,
       `import * as schema from "./schema";
-import * as extended from "~/server/db/schema/_root";`
+import * as extended from "~/server/db/schema/_root";`,
     );
     const updatedContentsFinal = updatedContentsWithImport.replace(
       `{ schema }`,
-      `{ schema: { ...schema, ...extended } }`
+      `{ schema: { ...schema, ...extended } }`,
     );
     replaceFile(indexDbPath, updatedContentsFinal);
 
@@ -220,7 +220,7 @@ import * as extended from "~/server/db/schema/_root";`
     const dConfigContents = readFileSync(drizzleConfigPath, "utf-8");
     const updatedContents = dConfigContents.replace(
       `schema: "./src/server/db/schema.ts",`,
-      `schema: "./src/server/db/*",`
+      `schema: "./src/server/db/*",`,
     );
     replaceFile(drizzleConfigPath, updatedContents);
   }

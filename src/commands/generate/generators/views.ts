@@ -231,20 +231,26 @@ const createformInputComponent = (field: DBField): string => {
               <Checkbox {...field} checked={!!field.value} onCheckedChange={field.onChange} value={""} />
             </FormControl>`;
   if (field.type.toLowerCase() == "references") {
-    const referencesSingular = pluralize.singular(field.references);
+    const referencesSingular = pluralize.singular(
+      toCamelCase(field.references),
+    );
+    const { tableNameNormalEnglishSingularLowerCase } = formatTableName(
+      field.references,
+    );
     const entity = queryHasJoins(toCamelCase(field.references))
       ? `${referencesSingular}.${referencesSingular}`
       : referencesSingular;
+    const referencesPlural = toCamelCase(field.references);
     return `<FormControl>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={String(field.value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a ${referencesSingular}" />
+                    <SelectValue placeholder="Select a ${tableNameNormalEnglishSingularLowerCase}" />
                   </SelectTrigger>
                   <SelectContent>
-                    {${field.references}?.${field.references}.map((${referencesSingular}) => (
+                    {${referencesPlural}?.${referencesPlural}.map((${referencesSingular}) => (
                       <SelectItem key={${entity}.id} value={${entity}.id.toString()}>
                         {${entity}.id}  {/* TODO: Replace with a field from the ${referencesSingular} model */}
                       </SelectItem>
