@@ -69,6 +69,7 @@ export const paths: { t3: Paths; normal: Paths } = {
       emailApiRoute: "app/api/email/route.ts",
       libEmailIndex: "lib/email/index.ts",
       firstEmailComponent: "components/emails/FirstEmail.tsx",
+      resendWebhooksApiRoute: "app/api/webhooks/resend/route.ts",
     },
     stripe: {
       stripeIndex: "lib/stripe/index.ts",
@@ -159,6 +160,7 @@ export const paths: { t3: Paths; normal: Paths } = {
       emailApiRoute: "app/api/email/route.ts",
       libEmailIndex: "lib/email/index.ts",
       firstEmailComponent: "components/emails/FirstEmail.tsx",
+      resendWebhooksApiRoute: "app/api/webhooks/resend/route.ts",
     },
     stripe: {
       stripeIndex: "lib/stripe/index.ts",

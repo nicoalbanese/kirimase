@@ -84,5 +84,6 @@ export type Paths = {
     emailApiRoute: string;
     emailUtils: string;
     libEmailIndex: string;
+    resendWebhooksApiRoute: string;
   };
 };
