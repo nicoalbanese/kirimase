@@ -272,7 +272,9 @@ export const accounts = pgTable(
     session_state: text("session_state"),
   },
   (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
   })
 );
 
@@ -292,7 +294,7 @@ export const verificationTokens = pgTable(
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );
 `;
@@ -344,8 +346,9 @@ export const accounts = mysqlTable(
     session_state: varchar("session_state", { length: 255 }),
   },
   (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
-  })
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
 );
 
 export const sessions = mysqlTable("session", {
@@ -367,7 +370,7 @@ export const verificationTokens = mysqlTable(
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );`;
     case "sqlite":
@@ -405,7 +408,9 @@ export const accounts = sqliteTable(
     session_state: text("session_state"),
   },
   (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
   })
 );
 
@@ -425,7 +430,7 @@ export const verificationTokens = sqliteTable(
     expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );`;
     default:
