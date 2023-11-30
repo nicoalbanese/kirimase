@@ -944,6 +944,8 @@ export const generateSubscriptionsDrizzleSchema = (
   driver: DBType,
   auth: AuthType,
 ) => {
+  const { multiProjectSchema } = readConfigFile();
+  const { drizzle } = getFilePaths();
   const authSubtype = AuthSubTypeMapping[auth];
   // add references for pg and sqlite
   switch (driver) {
@@ -981,12 +983,16 @@ export const subscriptions = pgTable(
 );
 `;
     case "mysql":
-      return `import {
-  mysqlTable,
+      return `import {${multiProjectSchema === true ? "" : "\n  mysqlTable,"}
   primaryKey,
   timestamp,
   varchar,
 } from "drizzle-orm/mysql-core";
+${multiProjectSchema === true ? 'import { mysqlTable } from "' + 
+formatFilePath(drizzle.dbIndex, {
+  prefix: "alias",
+  removeExtension: true,
+}) + '";' : ""}
 
 export const subscriptions = mysqlTable(
   "subscriptions",

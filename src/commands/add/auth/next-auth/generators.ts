@@ -149,6 +149,7 @@ export const libAuthUtilsTs = (
   dbType: DBType | null,
   orm: ORMType,
 ) => {
+  const { multiProjectSchema } = readConfigFile();
   const { shared } = getFilePaths();
   const dbIndex = getDbIndexPath();
   const providersToUse = providers.map((provider) => {
@@ -161,7 +162,7 @@ export const libAuthUtilsTs = (
 
   return `${
     dbType !== null
-      ? `import { db } from "${formatFilePath(dbIndex, {
+      ? `import { db${multiProjectSchema ? ", mysqlTable" : ""} } from "${formatFilePath(dbIndex, {
           prefix: "alias",
           removeExtension: true,
         })}";
@@ -204,7 +205,7 @@ export type AuthSession = {
 export const authOptions: NextAuthOptions = {
   ${
     dbType !== null
-      ? `adapter: ${AuthDriver[orm].adapter}(db),`
+      ? `adapter: ${AuthDriver[orm].adapter}(db${multiProjectSchema ? ", mysqlTable" : ""}),`
       : "// adapter: yourDBAdapterHere"
   }
   callbacks: {
@@ -234,7 +235,8 @@ export const checkAuth = async () => {
 
 // 4. create lib/db/schema/auth.ts
 export const createDrizzleAuthSchema = (dbType: DBType) => {
-  const { provider } = readConfigFile();
+  const { provider, multiProjectSchema } = readConfigFile();
+  const { drizzle } = getFilePaths();
   switch (dbType) {
     case "pg":
       return `import {
@@ -301,12 +303,16 @@ export const verificationTokens = pgTable(
     case "mysql":
       return `import {
   int,
-  timestamp,
-  mysqlTable,
+  timestamp,${multiProjectSchema === true ? "" : "\n  mysqlTable,"}
   primaryKey,
   varchar,${provider === "planetscale" ? "\n  text" : "\n  references"},
 } from "drizzle-orm/mysql-core";
 import type { AdapterAccount } from "@auth/core/adapters";
+${multiProjectSchema === true ? 'import { mysqlTable } from "' + 
+formatFilePath(drizzle.dbIndex, {
+  prefix: "alias",
+  removeExtension: true,
+}) + '";' : ""}
 
 export const users = mysqlTable("user", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
@@ -349,6 +355,7 @@ export const accounts = mysqlTable(
     compoundKey: primaryKey({
       columns: [account.provider, account.providerAccountId],
     }),
+  })
 );
 
 export const sessions = mysqlTable("session", {
