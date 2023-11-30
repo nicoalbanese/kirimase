@@ -68,8 +68,6 @@ export default {
 
 export const createIndexTs = (dbProvider: DBProvider) => {
   const { multiProjectSchema } = readConfigFile();
-  console.log("\n\n\n\n\n\nMULTI PROJECT SCHEMA", multiProjectSchema);
-  console.log("DB PROVIDER", dbProvider, "\n\n\n\n\n\n");
   const {
     shared: {
       init: { envMjs },

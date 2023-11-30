@@ -60,8 +60,6 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
     ],
   })) as boolean;
 
-  console.log("\n\n\n\n\n\nMULTI PROJECT SCHEMA", multiProjectSchema);
-
   // const dbProviders = DBProviders[dbType].filter((p) => {
   //   if (preferredPackageManager === "bun") return p.value !== "better-sqlite3";
   //   else return p.value !== "bun-sqlite";
