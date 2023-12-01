@@ -27,7 +27,7 @@ import { scaffoldModel } from "./generators/model/index.js";
 
 function provideInstructions() {
   consola.info(
-    "Quickly generate your Model (Drizzle schema + queries / mutations), Controllers (API Routes and TRPC Routes), and Views",
+    "Quickly generate your Model (Drizzle schema + queries / mutations), Controllers (API Routes and TRPC Routes), and Views"
   );
 }
 
@@ -93,7 +93,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
     const currentSchemas = getCurrentSchemas();
 
     const baseFieldTypeChoices = Object.keys(
-      createOrmMappings()[orm][dbType].typeMappings,
+      createOrmMappings()[orm][dbType].typeMappings
     )
       .filter((field) => field !== "id")
       .map((field) => {
@@ -106,7 +106,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
         currentSchemas[0] === toCamelCase(tableName));
     const fieldTypeChoices = removeReferenceOption
       ? baseFieldTypeChoices.filter(
-          (field) => field.name.toLowerCase() !== "references",
+          (field) => field.name.toLowerCase() !== "references"
         )
       : baseFieldTypeChoices;
 
@@ -222,7 +222,7 @@ export async function buildSchema(options?: GenerateOptions) {
       options.fields || (await askForFields(orm, driver, tableName));
     const indexedField =
       typeof options.index === "string"
-        ? options.index
+        ? options.index || null
         : await askForIndex(fields);
     let schema: Schema;
     if (resourceType.includes("model") && auth !== null) {
@@ -250,7 +250,7 @@ export async function buildSchema(options?: GenerateOptions) {
       scaffoldViewsAndComponents(schema);
   } else {
     consola.warn(
-      "You need to have an ORM installed in order to use the scaffold command.",
+      "You need to have an ORM installed in order to use the scaffold command."
     );
     addPackage();
   }
