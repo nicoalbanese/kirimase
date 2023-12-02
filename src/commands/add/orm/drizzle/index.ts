@@ -52,6 +52,14 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
       ],
     })) as DBType);
 
+  const multiProjectSchema = (await select({
+    message: "Are you using a multi-project schema?",
+    choices: [
+      { name: "No", value: false },
+      { name: "Yes", value: true },
+    ],
+  })) as boolean;
+
   // const dbProviders = DBProviders[dbType].filter((p) => {
   //   if (preferredPackageManager === "bun") return p.value !== "better-sqlite3";
   //   else return p.value !== "bun-sqlite";
@@ -97,6 +105,13 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
     createFolder(`${hasSrc ? "src/" : ""}lib/api`);
   }
 
+  updateConfigFile({
+    driver: dbType,
+    provider: dbProvider,
+    orm: "drizzle",
+    multiProjectSchema,
+  });
+
   // dependent on dbtype and driver, create
   createIndexTs(dbProvider);
   createMigrateTs(libPath, dbType, dbProvider);
@@ -124,8 +139,6 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
       rootPath
     );
   await updateTsConfigTarget();
-
-  updateConfigFile({ driver: dbType, provider: dbProvider, orm: "drizzle" });
   await installDependencies(dbProvider, preferredPackageManager);
   addPackageToConfig("drizzle");
 };

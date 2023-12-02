@@ -72,6 +72,7 @@ export async function initProject(options?: InitOptions) {
     packages: [],
     preferredPackageManager,
     orm: undefined,
+    multiProjectSchema: undefined,
     auth: undefined,
     componentLib: undefined,
     t3: false,

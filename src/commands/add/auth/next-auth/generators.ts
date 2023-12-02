@@ -149,6 +149,7 @@ export const libAuthUtilsTs = (
   dbType: DBType | null,
   orm: ORMType,
 ) => {
+  const { multiProjectSchema } = readConfigFile();
   const { shared } = getFilePaths();
   const dbIndex = getDbIndexPath();
   const providersToUse = providers.map((provider) => {
@@ -161,7 +162,7 @@ export const libAuthUtilsTs = (
 
   return `${
     dbType !== null
-      ? `import { db } from "${formatFilePath(dbIndex, {
+      ? `import { db${multiProjectSchema ? ", mysqlTable" : ""} } from "${formatFilePath(dbIndex, {
           prefix: "alias",
           removeExtension: true,
         })}";
@@ -204,7 +205,7 @@ export type AuthSession = {
 export const authOptions: NextAuthOptions = {
   ${
     dbType !== null
-      ? `adapter: ${AuthDriver[orm].adapter}(db),`
+      ? `adapter: ${AuthDriver[orm].adapter}(db${multiProjectSchema ? ", mysqlTable" : ""}),`
       : "// adapter: yourDBAdapterHere"
   }
   callbacks: {
@@ -234,7 +235,8 @@ export const checkAuth = async () => {
 
 // 4. create lib/db/schema/auth.ts
 export const createDrizzleAuthSchema = (dbType: DBType) => {
-  const { provider } = readConfigFile();
+  const { provider, multiProjectSchema } = readConfigFile();
+  const { drizzle } = getFilePaths();
   switch (dbType) {
     case "pg":
       return `import {
@@ -272,7 +274,9 @@ export const accounts = pgTable(
     session_state: text("session_state"),
   },
   (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
   })
 );
 
@@ -292,19 +296,23 @@ export const verificationTokens = pgTable(
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );
 `;
     case "mysql":
       return `import {
   int,
-  timestamp,
-  mysqlTable,
+  timestamp,${multiProjectSchema === true ? "" : "\n  mysqlTable,"}
   primaryKey,
   varchar,${provider === "planetscale" ? "\n  text" : "\n  references"},
 } from "drizzle-orm/mysql-core";
 import type { AdapterAccount } from "@auth/core/adapters";
+${multiProjectSchema === true ? 'import { mysqlTable } from "' + 
+formatFilePath(drizzle.dbIndex, {
+  prefix: "alias",
+  removeExtension: true,
+}) + '";' : ""}
 
 export const users = mysqlTable("user", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
@@ -344,7 +352,9 @@ export const accounts = mysqlTable(
     session_state: varchar("session_state", { length: 255 }),
   },
   (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
   })
 );
 
@@ -367,7 +377,7 @@ export const verificationTokens = mysqlTable(
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );`;
     case "sqlite":
@@ -405,7 +415,9 @@ export const accounts = sqliteTable(
     session_state: text("session_state"),
   },
   (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
   })
 );
 
@@ -425,7 +437,7 @@ export const verificationTokens = sqliteTable(
     expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );`;
     default:

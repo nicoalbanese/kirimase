@@ -89,6 +89,7 @@ export type Config = {
   provider: DBProvider | null;
   packages: AvailablePackage[];
   orm: ORMType | null;
+  multiProjectSchema: boolean | null;
   auth: AuthType | null;
   componentLib: ComponentLibType | null;
   t3: boolean;

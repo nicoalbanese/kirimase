@@ -37,6 +37,7 @@ const configDriverMappings = {
 };
 
 export const createDrizzleConfig = (libPath: string, provider: DBProvider) => {
+  const { multiProjectSchema } = readConfigFile();
   const {
     shared: {
       init: { envMjs },
@@ -60,12 +61,13 @@ export default {
         ? "url: env.DATABASE_URL"
         : "connectionString: env.DATABASE_URL"
     }${provider === "vercel-pg" ? '.concat("?sslmode=require")' : ""},
-  }
+  },${multiProjectSchema === true ? "\n  tablesFilter: ['kirimase_*']," : ""}
 } satisfies Config;`
   );
 };
 
 export const createIndexTs = (dbProvider: DBProvider) => {
+  const { multiProjectSchema } = readConfigFile();
   const {
     shared: {
       init: { envMjs },
@@ -163,11 +165,21 @@ import { env } from "${formatFilePath(envMjs, {
         removeExtension: false,
         prefix: "alias",
       })}";
- 
+${
+  multiProjectSchema === true
+    ? "import { mysqlTableCreator } from 'drizzle-orm/mysql-core';"
+    : ""
+}
+
 // create the connection
 export const connection = connect({
   url: env.DATABASE_URL
 });
+${
+  multiProjectSchema === true
+    ? "export const mysqlTable = mysqlTableCreator((name) => `kirimase_${name}`);"
+    : ""
+}
  
 export const db = drizzle(connection);
 `;
@@ -394,11 +406,12 @@ runMigrate().catch((err) => {
 };
 
 export const createInitSchema = (libPath?: string, dbType?: DBType) => {
-  const { packages, driver, rootPath } = readConfigFile();
+  const { packages, driver, rootPath, multiProjectSchema } = readConfigFile();
   const {
     shared: {
       auth: { authSchema },
     },
+    drizzle,
   } = getFilePaths();
   const path = `${rootPath}lib/db/schema/computers.ts`;
   const dbDriver = dbType ?? driver;
@@ -426,7 +439,9 @@ export const computers = pgTable("computers", {
       break;
 
     case "mysql":
-      initModel = `import { mysqlTable, serial, varchar, int } from "drizzle-orm/mysql-core";${
+      initModel = `import { ${
+        multiProjectSchema === true ? "" : "\n  mysqlTable,"
+      } serial, varchar, int } from "drizzle-orm/mysql-core";${
         packages.includes("next-auth")
           ? `\nimport { users } from "${formatFilePath(authSchema, {
               removeExtension: true,
@@ -434,6 +449,16 @@ export const computers = pgTable("computers", {
             })}";`
           : ""
       }
+${
+  multiProjectSchema === true
+    ? 'import { mysqlTable } from "' +
+      formatFilePath(drizzle.dbIndex, {
+        prefix: "alias",
+        removeExtension: true,
+      }) +
+      '";'
+    : ""
+}
 
 export const computers = mysqlTable("computers", {
   id: serial("id").primaryKey(),

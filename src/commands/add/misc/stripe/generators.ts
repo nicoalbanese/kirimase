@@ -944,6 +944,8 @@ export const generateSubscriptionsDrizzleSchema = (
   driver: DBType,
   auth: AuthType,
 ) => {
+  const { multiProjectSchema } = readConfigFile();
+  const { drizzle } = getFilePaths();
   const authSubtype = AuthSubTypeMapping[auth];
   // add references for pg and sqlite
   switch (driver) {
@@ -975,18 +977,22 @@ export const subscriptions = pgTable(
   },
   (table) => {
     return {
-      pk: primaryKey(table.userId, table.stripeCustomerId),
+      pk: primaryKey({ columns: [table.userId, table.stripeCustomerId] }),
     };
   }
 );
 `;
     case "mysql":
-      return `import {
-  mysqlTable,
+      return `import {${multiProjectSchema === true ? "" : "\n  mysqlTable,"}
   primaryKey,
   timestamp,
   varchar,
 } from "drizzle-orm/mysql-core";
+${multiProjectSchema === true ? 'import { mysqlTable } from "' + 
+formatFilePath(drizzle.dbIndex, {
+  prefix: "alias",
+  removeExtension: true,
+}) + '";' : ""}
 
 export const subscriptions = mysqlTable(
   "subscriptions",
@@ -1001,7 +1007,7 @@ export const subscriptions = mysqlTable(
   },
   (table) => {
     return {
-      pk: primaryKey(table.userId, table.stripeCustomerId),
+      pk: primaryKey({ columns: [table.userId, table.stripeCustomerId] }),
     };
   }
 );
@@ -1034,7 +1040,7 @@ export const subscriptions = sqliteTable(
   },
   (table) => {
     return {
-      pk: primaryKey(table.userId, table.stripeCustomerId),
+      pk: primaryKey({ columns: [table.userId, table.stripeCustomerId] }),
     };
   }
 );
