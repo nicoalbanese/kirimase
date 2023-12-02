@@ -8,7 +8,7 @@ import {
 import {
   apiTrpcRouteTs,
   libTrpcApiTs,
-  libTrpcApiTsBatchLink,
+  // libTrpcApiTsBatchLink,
   libTrpcClientTs,
   libTrpcContextTs,
   libTrpcProviderTsx,
@@ -79,8 +79,8 @@ export const addTrpc = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    // libTrpcApiTs()
-    libTrpcApiTsBatchLink(), // moved to batch link which is more stable and used by t3
+    libTrpcApiTs(),
+    // libTrpcApiTsBatchLink(), // moved to batch link which is more stable and used by t3
   );
 
   // 7.5. create context file and update to include context file above
@@ -89,7 +89,7 @@ export const addTrpc = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    libTrpcContextTs(packages.includes("next-auth")),
+    libTrpcContextTs(),
   );
 
   // create trpc utils file lib/trpc/utils.ts
@@ -126,6 +126,7 @@ export const addTrpc = async () => {
   //   ],
   //   hasSrc ? "src/" : ""
   // );
+
   consola.success("Successfully added trpc to your project!");
   // consola.warn(
   //   "Please add the <Provider> to your root layout, by wrapping it around your children"

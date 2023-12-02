@@ -525,7 +525,7 @@ export default async function Navbar() {
       ? ""
       : `\n  const nameExists =
     !!session?.user.name &&
-    session?.user.name.length > 5;
+    session?.user.name.length > 2;
 `
   }
 
@@ -604,7 +604,8 @@ export default async function Navbar() {
   const { session } = await getUserAuth();
   if (session?.user) {
     return (
-      <nav className="py-2 flex items-center justify-between transition-all duration-300">
+      <div className="bg-neutral-100 border-b mb-2 md:p-0 px-4">
+      <nav className="py-2 flex items-center justify-between transition-all duration-300 max-w-3xl mx-auto">
         <h1 className="font-semibold hover:opacity-75 transition-hover cursor-pointer">
           <Link href="/">Logo</Link>
         </h1>
@@ -612,12 +613,13 @@ export default async function Navbar() {
           usingClerk
             ? `<UserButton afterSignOutUrl="/" />`
             : `<Link href="/account">
-          <div className="w-8 h-8 bg-neutral-100 rounded-full text-neutral-600 flex items-center justify-center hover:opacity-75 transition-all duration-300 cursor-pointer hover:ring-1 ring-neutral-300">
+          <div className="w-8 h-8 bg-white rounded-full text-neutral-600 flex items-center justify-center hover:opacity-75 transition-all duration-300 cursor-pointer hover:ring-1 ring-neutral-300">
             {session?.user?.name ? session.user.name.slice(0, 1) : "~"}
           </div>
         </Link>`
         }
       </nav>
+      </div>
     );
   } else return null;
 }

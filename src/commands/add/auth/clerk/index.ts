@@ -20,6 +20,7 @@ import { addContextProviderToLayout } from "../../utils.js";
 import { clerkGenerators } from "./generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import { libAuthUtilsTs } from "../next-auth/generators.js";
+import { updateTrpcWithSessionIfInstalled } from "../shared/index.js";
 
 export const addClerk = async () => {
   const { rootPath, preferredPackageManager, componentLib } = readConfigFile();
@@ -46,25 +47,25 @@ export const addClerk = async () => {
       { key: "NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL", value: "/", public: true },
       { key: "NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL", value: "/", public: true },
     ],
-    rootPath
+    rootPath,
   );
   createFile(
     formatFilePath(middleware, { prefix: "rootPath", removeExtension: false }),
-    generateMiddlewareTs()
+    generateMiddlewareTs(),
   );
 
   createFile(
     formatFilePath(signInPage, { removeExtension: false, prefix: "rootPath" }),
-    generateSignInPageTs()
+    generateSignInPageTs(),
   );
   createFile(
     formatFilePath(signUpPage, { removeExtension: false, prefix: "rootPath" }),
-    generateSignUpPageTs()
+    generateSignUpPageTs(),
   );
 
   replaceFile(
     rootPath.concat("app/page.tsx"),
-    homePageWithUserButton(componentLib)
+    homePageWithUserButton(componentLib),
   );
 
   createFile(
@@ -72,17 +73,20 @@ export const addClerk = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    generateAuthUtilsTs()
+    generateAuthUtilsTs(),
   );
+
+  // If trpc installed, add protectedProcedure
+  updateTrpcWithSessionIfInstalled();
 
   await installPackages(
     { regular: "@clerk/nextjs", dev: "" },
-    preferredPackageManager
+    preferredPackageManager,
   );
   addPackageToConfig("clerk");
   updateConfigFile({ auth: "clerk" });
   consola.success("Successfully added Clerk to your project!");
   consola.info(
-    "Head over to https://dashboard.clerk.com/apps/new to create a new Clerk app"
+    "Head over to https://dashboard.clerk.com/apps/new to create a new Clerk app",
   );
 };

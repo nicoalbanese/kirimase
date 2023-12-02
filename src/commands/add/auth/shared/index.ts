@@ -17,6 +17,10 @@ import {
 } from "./generators.js";
 import { AuthType, ORMType } from "../../../../types.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import {
+  enableSessionInContext,
+  updateTrpcTs,
+} from "../next-auth/generators.js";
 
 export const createAccountSettingsPage = async () => {
   const { orm, rootPath, componentLib, auth } = readConfigFile();
@@ -29,7 +33,7 @@ export const createAccountSettingsPage = async () => {
         prefix: "rootPath",
         removeExtension: false,
       }),
-      createAccountApiTs(orm)
+      createAccountApiTs(orm),
     );
   }
 
@@ -39,7 +43,7 @@ export const createAccountSettingsPage = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createAccountPage()
+    createAccountPage(),
   );
 
   // create usersettings component
@@ -48,7 +52,7 @@ export const createAccountSettingsPage = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUserSettingsComponent()
+    createUserSettingsComponent(),
   );
 
   await scaffoldAccountSettingsUI(rootPath, withShadCn, auth);
@@ -57,7 +61,7 @@ export const createAccountSettingsPage = async () => {
 export const scaffoldAccountSettingsUI = async (
   rootPath: string,
   withShadCn: boolean,
-  auth: AuthType
+  auth: AuthType,
 ) => {
   const { shared, lucia } = getFilePaths();
   // create updatenamecard
@@ -66,7 +70,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUpdateNameCard(withShadCn, auth !== "lucia")
+    createUpdateNameCard(withShadCn, auth !== "lucia"),
   );
 
   // create updatenamecard
@@ -75,7 +79,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUpdateEmailCard(withShadCn, auth !== "lucia")
+    createUpdateEmailCard(withShadCn, auth !== "lucia"),
   );
 
   // create accountcard components
@@ -84,7 +88,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createAccountCardComponent(withShadCn)
+    createAccountCardComponent(withShadCn),
   );
 
   // create navbar component
@@ -93,7 +97,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createNavbar(withShadCn, auth === "clerk", auth)
+    createNavbar(withShadCn, auth === "clerk", auth),
   );
   if (withShadCn) {
     createFile(
@@ -101,7 +105,7 @@ export const scaffoldAccountSettingsUI = async (
         prefix: "rootPath",
         removeExtension: false,
       }),
-      createSignOutBtn()
+      createSignOutBtn(),
     );
   }
   // add navbar to root layout
@@ -109,5 +113,15 @@ export const scaffoldAccountSettingsUI = async (
   if (withShadCn) {
     consola.start("Installing Card component for account page...");
     await installShadcnUIComponents(["card"]);
+  }
+};
+
+export const updateTrpcWithSessionIfInstalled = () => {
+  const { packages, t3 } = readConfigFile();
+  if (packages.includes("trpc")) {
+    if (!t3) {
+      updateTrpcTs();
+      enableSessionInContext();
+    }
   }
 };

@@ -25,6 +25,31 @@ export type AppRouter = typeof appRouter;
 
 // 2. create server/trpc.ts
 export const serverTrpcTs = () => {
+  const { t3, auth } = readConfigFile();
+  const protectedProcedureImplentation = `\n\n/** Reusable middleware that enforces users are logged in before running the procedure. */
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+  if (!ctx.session) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx: {
+      ...ctx,
+      // infers the \`session\` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
+
+/**
+ * Protected (authenticated) procedure
+ *
+ * If you want a query or mutation to ONLY be accessible to logged in users, use this. It verifies
+ * the session is valid and guarantees \`ctx.session.user\` is not null.
+ *
+ * @see https://trpc.io/docs/procedures
+ */
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+`;
   const { trpc } = getFilePaths();
   return `import { initTRPC, TRPCError } from "@trpc/server";
 import { Context } from "${formatFilePath(trpc.trpcContext, {
@@ -56,7 +81,9 @@ const t = initTRPC.context<Context>().create({
  * that can be used throughout the router
  */
 export const router = t.router;
-export const publicProcedure = t.procedure;`;
+export const publicProcedure = t.procedure;${
+    t3 === false && auth !== null ? protectedProcedureImplentation : ""
+  }`;
 };
 
 // 3. create server/router/users.ts directory and maybe a users file
@@ -82,7 +109,7 @@ export const computersRouter = router({
     return ${
       schemaExists
         ? "getComputers()"
-        : '[{ id: 1, name: "Macintosh" }, { id: 2, name: "Microsoft" }]'
+        : '[{ id: 1, name: "Apple I" }, { id: 2, name: "Apple II" }, { id: 3, name: "Macintosh" }]'
     };
   }),
 });
@@ -238,6 +265,7 @@ import { env } from "${formatFilePath(shared.init.envMjs, {
     prefix: "alias",
     removeExtension: false,
   })}";
+import { createTRPCContext } from "./context";
 
 import {
   createTRPCProxyClient,
@@ -301,10 +329,11 @@ export const api = createTRPCProxyClient<typeof appRouter>({
 };
 
 // 8. create lib/trpc/context.ts
-export const libTrpcContextTs = (withSession: boolean = false) => {
-  const { orm } = readConfigFile();
+export const libTrpcContextTs = () => {
+  const { orm, t3, auth } = readConfigFile();
   const dbIndexPath = getDbIndexPath(orm);
   const { trpc, shared } = getFilePaths();
+  const withSession = t3 === false && auth !== null;
   return `import { db } from "${formatFilePath(dbIndexPath, {
     prefix: "alias",
     removeExtension: true,

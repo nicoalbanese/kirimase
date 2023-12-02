@@ -13,7 +13,6 @@ import {
   createPrismaAuthSchema,
   createSignInComponent,
   enableSessionInContext,
-  enableSessionInTRPCApi,
   generateUpdatedRootRoute,
   libAuthProviderTsx,
   libAuthUtilsTs,
@@ -28,6 +27,7 @@ import { prismaGenerate } from "../../orm/utils.js";
 import { InitOptions } from "../../../../types.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import { updateRootSchema } from "../../../generate/generators/model/utils.js";
+import { updateTrpcWithSessionIfInstalled } from "../shared/index.js";
 
 export const addNextAuth = async (options?: InitOptions) => {
   const providers =
@@ -58,7 +58,7 @@ export const addNextAuth = async (options?: InitOptions) => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    apiAuthNextAuthTs()
+    apiAuthNextAuthTs(),
   );
 
   // 2. create lib/auth/Provider.tsx
@@ -67,7 +67,7 @@ export const addNextAuth = async (options?: InitOptions) => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    libAuthProviderTsx()
+    libAuthProviderTsx(),
   );
 
   // 3. create lib/auth/utils.ts
@@ -76,7 +76,7 @@ export const addNextAuth = async (options?: InitOptions) => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    libAuthUtilsTs(providers, driver, orm)
+    libAuthUtilsTs(providers, driver, orm),
   );
 
   // 4. create lib/db/schema/auth.ts
@@ -87,7 +87,7 @@ export const addNextAuth = async (options?: InitOptions) => {
           removeExtension: false,
           prefix: "rootPath",
         }),
-        createDrizzleAuthSchema(driver)
+        createDrizzleAuthSchema(driver),
       );
       if (t3) {
         updateRootSchema("auth", true, "next-auth");
@@ -96,7 +96,7 @@ export const addNextAuth = async (options?: InitOptions) => {
     if (orm === "prisma") {
       addToPrismaSchema(
         createPrismaAuthSchema(driver, dbProvider === "planetscale"),
-        "Auth"
+        "Auth",
       );
     }
   }
@@ -107,17 +107,11 @@ export const addNextAuth = async (options?: InitOptions) => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    createSignInComponent(componentLib)
+    createSignInComponent(componentLib),
   );
 
-  // 6. If trpc installed, add protectedProcedure
-  if (packages.includes("trpc")) {
-    if (!t3) {
-      updateTrpcTs();
-      enableSessionInContext();
-      enableSessionInTRPCApi();
-    }
-  }
+  // 6. If trpc installed, add protectedProcedure // this wont run because it is installed before trpc
+  updateTrpcWithSessionIfInstalled();
 
   replaceFile(rootPath.concat("app/page.tsx"), generateUpdatedRootRoute());
 
@@ -155,7 +149,7 @@ export const addNextAuth = async (options?: InitOptions) => {
         },
       ]),
     ],
-    hasSrc ? "src/" : ""
+    hasSrc ? "src/" : "",
   );
 
   // 7. Install Packages: @auth/core @auth/drizzle-adapter next-auth
@@ -166,7 +160,7 @@ export const addNextAuth = async (options?: InitOptions) => {
       }`,
       dev: "",
     },
-    preferredPackageManager
+    preferredPackageManager,
   );
   addPackageToConfig("next-auth");
   updateConfigFile({ auth: "next-auth" });
@@ -177,10 +171,10 @@ export const addNextAuth = async (options?: InitOptions) => {
 
   providers.forEach((provider) => {
     consola.info(
-      `To get up and running with ${provider}, create credentials at ${AuthProviders[provider].website}`
+      `To get up and running with ${provider}, create credentials at ${AuthProviders[provider].website}`,
     );
     consola.info(
-      `and remember to add /api/auth/callback/${provider} to your ${provider} app's redirect URIs`
+      `and remember to add /api/auth/callback/${provider} to your ${provider} app's redirect URIs`,
     );
   });
 };

@@ -511,7 +511,6 @@ export default function SignIn() {
 
 // 6. updateTrpcTs
 export const updateTrpcTs = () => {
-  const { hasSrc } = readConfigFile();
   const { trpc } = getFilePaths();
   const filePath = formatFilePath(trpc.serverTrpc, {
     removeExtension: false,
@@ -520,19 +519,29 @@ export const updateTrpcTs = () => {
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
 
-  const protectedProcedureContent = `\n\nconst isAuthed = t.middleware((opts) => {
-  const { ctx } = opts;
+  const protectedProcedureContent = `\n\n/** Reusable middleware that enforces users are logged in before running the procedure. */
+const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.session) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
-  return opts.next({
+  return next({
     ctx: {
-      session: ctx.session,
+      ...ctx,
+      // infers the \`session\` as non-nullable
+      session: { ...ctx.session, user: ctx.session.user },
     },
   });
 });
 
-export const protectedProcedure = t.procedure.use(isAuthed);
+/**
+ * Protected (authenticated) procedure
+ *
+ * If you want a query or mutation to ONLY be accessible to logged in users, use this. It verifies
+ * the session is valid and guarantees \`ctx.session.user\` is not null.
+ *
+ * @see https://trpc.io/docs/procedures
+ */
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 `;
   const modifiedRouterContent = fileContent.concat(protectedProcedureContent);
 
@@ -544,7 +553,6 @@ export const protectedProcedure = t.procedure.use(isAuthed);
 };
 
 export const enableSessionInContext = () => {
-  const { hasSrc } = readConfigFile();
   const { trpc } = getFilePaths();
   const filePath = formatFilePath(trpc.trpcContext, {
     prefix: "rootPath",
@@ -559,8 +567,8 @@ export const enableSessionInContext = () => {
   consola.success("TRPC Context updated successfully to add Session data.");
 };
 
-export const enableSessionInTRPCApi = () => {
-  const { hasSrc } = readConfigFile();
+// no longer necessary
+export const enableSessionInTRPCApi_DEPRECATED = () => {
   const { trpc } = getFilePaths();
   const filePath = formatFilePath(trpc.trpcApiTs, {
     prefix: "rootPath",
