@@ -227,7 +227,9 @@ export async function buildSchema(options?: GenerateOptions) {
     let schema: Schema;
     if (resourceType.includes("model") && auth !== null) {
       const belongsToUser =
-        options.belongsToUser === "yes" || (await askIfBelongsToUser());
+        typeof options.belongsToUser === "string"
+          ? options.belongsToUser === "yes"
+          : await askIfBelongsToUser();
       schema = {
         tableName,
         fields,
