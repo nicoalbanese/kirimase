@@ -20,7 +20,8 @@ export type DBProvider =
   | "aws"
   | "planetscale"
   | "mysql-2"
-  | "better-sqlite3";
+  | "better-sqlite3"
+  | "turso";
 // | "bun-sqlite";
 
 export type DBProviderOptions = {

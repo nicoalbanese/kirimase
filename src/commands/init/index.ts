@@ -20,7 +20,7 @@ export async function initProject(options?: InitOptions) {
   const nextjsProjectExists = existsSync("package.json");
   if (!nextjsProjectExists) {
     consola.fatal(
-      "No Next.js project detected. Please create a Next.js project and then run `kirimase init` within that directory."
+      "No Next.js project detected. Please create a Next.js project and then run `kirimase init` within that directory.",
     );
     process.exit(0);
   }

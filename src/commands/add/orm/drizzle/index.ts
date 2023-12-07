@@ -45,7 +45,7 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
           disabled:
             preferredPackageManager === "bun"
               ? wrapInParenthesis(
-                  "Drizzle Kit doesn't support SQLite with Bun yet"
+                  "Drizzle Kit doesn't support SQLite with Bun yet",
                 )
               : false,
         },
@@ -109,7 +109,7 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
     preferredPackageManager,
     databaseUrl,
     dbProvider === "planetscale",
-    hasSrc ? "src/" : ""
+    hasSrc ? "src/" : "",
   );
   if (dbProvider === "vercel-pg")
     addToDotEnv(
@@ -121,8 +121,10 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
         { key: "POSTGRES_PASSWORD", value: "" },
         { key: "POSTGRES_DATABASE", value: "" },
       ],
-      rootPath
+      rootPath,
     );
+  if (dbProvider === "turso")
+    addToDotEnv([{ key: "DATABASE_AUTH_TOKEN", value: "" }], rootPath);
   await updateTsConfigTarget();
 
   updateConfigFile({ driver: dbType, provider: dbProvider, orm: "drizzle" });
