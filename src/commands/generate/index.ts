@@ -23,6 +23,7 @@ import {
   toCamelCase,
 } from "./utils.js";
 import { scaffoldModel } from "./generators/model/index.js";
+import { scaffoldServerActions } from "./generators/serverActions.js";
 
 function provideInstructions() {
   consola.info(
@@ -30,10 +31,18 @@ function provideInstructions() {
   );
 }
 
+type TResource =
+  | "model"
+  | "api_route"
+  | "trpc_route"
+  | "views_and_components_trpc"
+  | "views_and_components_server_actions"
+  | "server_actions";
+
 async function askForResourceType() {
   const { packages, orm } = readConfigFile();
 
-  const resourcesRequested = await checkbox({
+  const resourcesRequested = (await checkbox({
     message: "Please select the resources you would like to generate:",
     choices: [
       {
@@ -54,14 +63,22 @@ async function askForResourceType() {
       },
       {
         name: "Views + Components (with Shadcn UI, requires TRPC route)",
-        value: "views_and_components",
+        value: "views_and_components_trpc",
         disabled:
           !packages.includes("shadcn-ui") || !packages.includes("trpc")
             ? "[You need to have shadcn-ui and trpc installed. Run 'kirimase add']"
             : false,
       },
+      {
+        name: "Server Actions",
+        value: "server_actions",
+      },
+      {
+        name: "Views + Components (with server actions)",
+        value: "views_and_components_server_actions",
+      },
     ],
-  });
+  })) as TResource[];
   return resourcesRequested;
 }
 
@@ -210,8 +227,7 @@ export async function buildSchema() {
 
   const config = readConfigFile();
 
-  const { driver, hasSrc, packages, orm, auth, preferredPackageManager } =
-    config;
+  const { driver, hasSrc, orm, auth } = config;
 
   if (orm !== null) {
     provideInstructions();
@@ -240,8 +256,9 @@ export async function buildSchema() {
     if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
     if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
     if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
-    if (resourceType.includes("views_and_components"))
+    if (resourceType.includes("views_and_components_trpc"))
       scaffoldViewsAndComponents(schema);
+    if (resourceType.includes("server_actions")) scaffoldServerActions(schema);
   } else {
     consola.warn(
       "You need to have an ORM installed in order to use the scaffold command.",

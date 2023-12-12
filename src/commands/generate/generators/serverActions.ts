@@ -1,0 +1,81 @@
+import { createFile } from "../../../utils.js";
+import { formatFilePath } from "../../filePaths/index.js";
+import { Schema } from "../types.js";
+import { formatTableName } from "../utils.js";
+
+export const scaffoldServerActions = (schema: Schema) => {
+  const { tableName } = schema;
+  const { tableNameCamelCase } = formatTableName(tableName);
+  const path = formatFilePath(`lib/actions/${tableNameCamelCase}.ts`, {
+    prefix: "rootPath",
+    removeExtension: false,
+  });
+  createFile(path, generateRouteContent(schema));
+};
+
+const generateRouteContent = (schema: Schema) => {
+  const { tableName } = schema;
+  const {
+    tableNameSingularCapitalised,
+    tableNameSingular,
+    tableNameCamelCase,
+    tableNamePluralCapitalised,
+    tableNameKebabCase,
+  } = formatTableName(tableName);
+
+  const template = `"use server";
+
+import { revalidatePath } from "next/cache";
+import {
+  create${tableNameSingularCapitalised},
+  delete${tableNameSingularCapitalised},
+  update${tableNameSingularCapitalised},
+} from "${formatFilePath(`lib/api/${tableNameCamelCase}/mutations.ts`, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import {
+  ${tableNameSingularCapitalised}Id,
+  New${tableNameSingularCapitalised}Params,
+  Update${tableNameSingularCapitalised}Params,
+  ${tableNameSingular}IdSchema,
+  insert${tableNameSingularCapitalised}Params,
+  update${tableNameSingularCapitalised}Params,
+} from "${formatFilePath(`lib/db/schema/${tableNameCamelCase}.ts`, {
+    removeExtension: true,
+    prefix: "alias",
+  })}";
+
+const revalidate${tableNamePluralCapitalised} = () => revalidatePath("/${tableNameKebabCase}");
+
+export const create${tableNameSingularCapitalised}Action = async (input: New${tableNameSingularCapitalised}Params) => {
+  try {
+    const payload = insert${tableNameSingularCapitalised}Params.parse(input);
+    await create${tableNameSingularCapitalised}(payload);
+    revalidate${tableNamePluralCapitalised}();
+  } catch (e) {
+    return { error: "Error" };
+  }
+};
+
+export const update${tableNameSingularCapitalised}Action = async (input: Update${tableNameSingularCapitalised}Params) => {
+  try {
+    const payload = update${tableNameSingularCapitalised}Params.parse(input);
+    await update${tableNameSingularCapitalised}(payload.id, payload);
+    revalidate${tableNamePluralCapitalised};
+  } catch (e) {
+    return { error: "Error" };
+  }
+};
+
+export const delete${tableNameSingularCapitalised}Action = async (input: ${tableNameSingularCapitalised}Id) => {
+  try {
+    const payload = ${tableNameSingular}IdSchema.parse({ id: input });
+    await delete${tableNameSingularCapitalised}(payload.id);
+    revalidate${tableNamePluralCapitalised}();
+  } catch (e) {
+    return { error: "Error" };
+  }
+};`;
+  return template;
+};
