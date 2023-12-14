@@ -40,7 +40,7 @@ import {
     belongsToUser
       ? `\nimport { getUserAuth } from "${formatFilePath(
           shared.auth.authUtils,
-          { prefix: "alias", removeExtension: true }
+          { prefix: "alias", removeExtension: true },
         )}";`
       : ""
   }
@@ -66,15 +66,15 @@ const generateDrizzleCreateMutation = (schema: Schema, driver: DBType) => {
     ${
       driver === "mysql" ? "" : `const [${tableNameFirstChar}] =  `
     }await db.insert(${tableNameCamelCase}).values(new${tableNameSingularCapitalised})${
-    driver === "mysql"
-      ? "\n    return { success: true }"
-      : `.returning();
+      driver === "mysql"
+        ? "\n    return { success: true }"
+        : `.returning();
     return { ${tableNameSingular}: ${tableNameFirstChar} };`
-  }
+    }
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
     console.error(message);
-    return { error: message };
+    throw { error: message };
   }
 };
 `;
@@ -102,20 +102,20 @@ const generateDrizzleUpdateMutation = (schema: Schema, driver: DBType) => {
      .where(${
        belongsToUser ? "and(" : ""
      }eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!)${
-    belongsToUser
-      ? `, eq(${tableNameCamelCase}.userId, session?.user.id!)))`
-      : ")"
-  }${
-    driver === "mysql"
-      ? "\n    return {success: true}"
-      : `
+       belongsToUser
+         ? `, eq(${tableNameCamelCase}.userId, session?.user.id!)))`
+         : ")"
+     }${
+       driver === "mysql"
+         ? "\n    return {success: true}"
+         : `
      .returning();
     return { ${tableNameSingular}: ${tableNameFirstChar} };`
-  }
+     }
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
     console.error(message);
-    return { error: message };
+    throw { error: message };
   }
 };
 `;
@@ -135,22 +135,22 @@ const generateDrizzleDeleteMutation = (schema: Schema, driver: DBType) => {
     ${
       driver === "mysql" ? "" : `const [${tableNameFirstChar}] =  `
     }await db.delete(${tableNameCamelCase}).where(${
-    belongsToUser ? "and(" : ""
-  }eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!)${
-    belongsToUser
-      ? `, eq(${tableNameCamelCase}.userId, session?.user.id!)))`
-      : ")"
-  }${
-    driver === "mysql"
-      ? "\n    return {success: true}"
-      : `
+      belongsToUser ? "and(" : ""
+    }eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!)${
+      belongsToUser
+        ? `, eq(${tableNameCamelCase}.userId, session?.user.id!)))`
+        : ")"
+    }${
+      driver === "mysql"
+        ? "\n    return {success: true}"
+        : `
     .returning();
     return { ${tableNameSingular}: ${tableNameFirstChar} };`
-  }
+    }
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
     console.error(message);
-    return { error: message };
+    throw { error: message };
   }
 };
 `;
@@ -184,7 +184,7 @@ import {
     belongsToUser
       ? `\nimport { getUserAuth } from "${formatFilePath(
           shared.auth.authUtils,
-          { prefix: "alias", removeExtension: true }
+          { prefix: "alias", removeExtension: true },
         )}";`
       : ""
   }
@@ -210,7 +210,7 @@ const generatePrismaCreateMutation = (schema: Schema) => {
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
     console.error(message);
-    return { error: message };
+    throw { error: message };
   }
 };
 `;
@@ -233,13 +233,13 @@ const generatePrismaUpdateMutation = (schema: Schema) => {
   });
   try {
     const ${tableNameFirstChar} = await db.${tableNameSingular}.update({ where: { id: ${tableNameSingular}Id${authForWhereClausePrisma(
-    belongsToUser
-  )} }, data: new${tableNameSingularCapitalised}})
+      belongsToUser,
+    )} }, data: new${tableNameSingularCapitalised}})
     return { ${tableNameSingular}: ${tableNameFirstChar} };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
     console.error(message);
-    return { error: message };
+    throw { error: message };
   }
 };
 `;
@@ -256,13 +256,13 @@ const generatePrismaDeleteMutation = (schema: Schema) => {
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   try {
     const ${tableNameFirstChar} = await db.${tableNameSingular}.delete({ where: { id: ${tableNameSingular}Id${authForWhereClausePrisma(
-    belongsToUser
-  )} }})
+      belongsToUser,
+    )} }})
     return { ${tableNameSingular}: ${tableNameFirstChar} };
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
     console.error(message);
-    return { error: message };
+    throw { error: message };
   }
 };
 `;

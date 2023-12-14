@@ -46,7 +46,8 @@ export const createOrmMappings = () => {
       pg: {
         tableFunc: "pgTable",
         typeMappings: {
-          id: ({ name }) => `serial("${name}").primaryKey()`,
+          id: ({ name }) =>
+            `varchar("${name}", { length: 191 }).primaryKey().$defaultFn(() => randomUUID())`,
           varchar: ({ name }) => `varchar("${name}", { length: 256 })`,
           text: ({ name }) => `text("${name}")`,
           number: ({ name }) => `integer("${name}")`,
@@ -56,7 +57,7 @@ export const createOrmMappings = () => {
             name,
             references: referencedTable = "REFERENCE",
             cascade,
-            referenceIdType = "number",
+            referenceIdType = "string",
           }) =>
             `${getReferenceFieldType(referenceIdType)["pg"]}("${name}"${
               referenceIdType === "string" ? ", { length: 256 }" : ""
@@ -72,7 +73,8 @@ export const createOrmMappings = () => {
       mysql: {
         tableFunc: "mysqlTable",
         typeMappings: {
-          id: ({ name }) => `serial("${name}").primaryKey()`,
+          id: ({ name }) =>
+            `varchar("${name}", { length: 191 }).primaryKey().$defaultFn(() => randomUUID())`,
           varchar: ({ name }) => `varchar("${name}", { length: 256 })`,
           text: ({ name }) => `text("${name}")`,
           number: ({ name }) => `int("${name}")`,
@@ -82,7 +84,7 @@ export const createOrmMappings = () => {
             name,
             references: referencedTable = "REFERENCE",
             cascade,
-            referenceIdType = "number",
+            referenceIdType = "string",
           }) =>
             `${getReferenceFieldType(referenceIdType)["mysql"]}("${name}"${
               referenceIdType === "string" ? ", { length: 256 }" : ""
@@ -101,7 +103,8 @@ export const createOrmMappings = () => {
       sqlite: {
         tableFunc: "sqliteTable",
         typeMappings: {
-          id: ({ name }) => `integer("${name}").primaryKey()`,
+          id: ({ name }) =>
+            `text("${name}").primaryKey().$defaultFn(() => randomUUID())`,
           string: ({ name }) => `text("${name}")`,
           number: ({ name }) => `integer("${name}")`,
           boolean: ({ name }) => `integer("${name}", { mode: "boolean" })`,
@@ -109,7 +112,7 @@ export const createOrmMappings = () => {
             name,
             references: referencedTable = "REFERENCE",
             cascade,
-            referenceIdType = "number",
+            referenceIdType = "string",
           }) =>
             `${
               getReferenceFieldType(referenceIdType)["sqlite"]

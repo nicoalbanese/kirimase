@@ -90,10 +90,13 @@ const generateImportStatement = (
           })}";`
         : ""
     }
-import { get${tableNameCapitalised} } from "${formatFilePath(
+import { type get${tableNameCapitalised} } from "${formatFilePath(
       shared.orm.servicesDir,
       { prefix: "alias", removeExtension: false },
-    )}/${tableNameCamelCase}/queries";`;
+    )}/${tableNameCamelCase}/queries";
+
+import { randomUUID } from "crypto";
+`;
   }
   if (orm === "prisma")
     return `import { ${tableNameSingular}Schema } from "${alias}/zodAutoGenSchemas";
