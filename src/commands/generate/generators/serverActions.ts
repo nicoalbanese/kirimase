@@ -46,6 +46,10 @@ import {
     prefix: "alias",
   })}";
 
+type Error = {
+  error: string;
+};
+
 const revalidate${tableNamePluralCapitalised} = () => revalidatePath("/${tableNameKebabCase}");
 
 export const create${tableNameSingularCapitalised}Action = async (input: New${tableNameSingularCapitalised}Params) => {
@@ -54,7 +58,7 @@ export const create${tableNameSingularCapitalised}Action = async (input: New${ta
     await create${tableNameSingularCapitalised}(payload);
     revalidate${tableNamePluralCapitalised}();
   } catch (e) {
-    return e;
+    return e as Error;
   }
 };
 
@@ -64,7 +68,7 @@ export const update${tableNameSingularCapitalised}Action = async (input: Update$
     await update${tableNameSingularCapitalised}(payload.id, payload);
     revalidate${tableNamePluralCapitalised};
   } catch (e) {
-    return e;
+    return e as Error;
   }
 };
 
@@ -74,7 +78,7 @@ export const delete${tableNameSingularCapitalised}Action = async (input: ${table
     await delete${tableNameSingularCapitalised}(payload.id);
     revalidate${tableNamePluralCapitalised}();
   } catch (e) {
-    return e;
+    return e as Error;
   }
 };`;
   return template;

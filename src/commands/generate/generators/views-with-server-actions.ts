@@ -750,8 +750,8 @@ const ${tableNameSingularCapitalised}Form = ({${
     }
 
     toast({
-      title: failed ? "Failed" : "Success",
-      description: failed ? \`Failed to \${action}\` : \`${tableNameSingularCapitalised} \${action}d!\`,
+      title: failed ? \`Failed to \${action}\` : "Success",
+      description: failed ? data?.error ?? "Error" : \`${tableNameSingularCapitalised} \${action}d!\`,
       variant: failed ? "destructive" : "default",
     });
   };
