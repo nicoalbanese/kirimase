@@ -100,7 +100,8 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     // install shadcn packages (button, dialog, form, input, label) - exec script: pnpm dlx shadcn-ui@latest add _
     // const baseComponents = ["button", "dialog", "form", "input", "label"];
     const baseComponents = ["dialog", "form"];
-    schema.fields.filter((field) => field.type === "boolean").length > 0
+    schema.fields.filter((field) => field.type.toLowerCase() === "boolean")
+      .length > 0
       ? baseComponents.push("checkbox")
       : null;
     schema.fields.filter((field) => field.type.toLowerCase() === "references")
@@ -109,9 +110,9 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
       : null;
     schema.fields.filter(
       (field) =>
-        field.type === "date" ||
-        field.type === "timestamp" ||
-        field.type === "DateTime",
+        field.type.toLowerCase() === "date" ||
+        field.type.toLowerCase() === "timestamp" ||
+        field.type.toLowerCase() === "datetime",
     ).length > 0
       ? baseComponents.push("popover", "calendar")
       : null;
@@ -328,7 +329,7 @@ export default function ${tableNameSingularCapitalised}List({
           .map((relation) => relation.tableNameCamelCase)
           .join(",\n  ")
       : ""
-  } // Adjust if necessary
+  } 
 }: {
   ${tableNameCamelCase}: Complete${tableNameSingularCapitalised}[];
   ${
@@ -337,7 +338,7 @@ export default function ${tableNameSingularCapitalised}List({
           .map((relation) => relation.componentImportCompleteType)
           .join(";\n  ")
       : ""
-  } // Adjust if necessary
+  } 
 }) {
   const { optimistic${tableNamePluralCapitalised}, addOptimistic${tableNameSingularCapitalised} } = useOptimistic${tableNamePluralCapitalised}(
     ${tableNameCamelCase},
@@ -347,7 +348,7 @@ export default function ${tableNameSingularCapitalised}List({
             .map((relation) => relation.tableNameCamelCase)
             .join(",\n  ")
         : ""
-    } // Adjust if necessary
+    } 
   );
   const [open, setOpen] = useState(false);
   const [active${tableNameSingularCapitalised}, setActive${tableNameSingularCapitalised}] = useState<${tableNameSingularCapitalised} | null>(null);
@@ -362,7 +363,7 @@ export default function ${tableNameSingularCapitalised}List({
       <Modal
         open={open}
         setOpen={setOpen}
-        title={active${tableNameSingularCapitalised} ? "Edit ${tableNameNormalEnglishCapitalised}" : "Create ${tableNameNormalEnglishCapitalised}"}
+        title={active${tableNameSingularCapitalised} ? "Edit ${tableNameSingularCapitalised}" : "Create ${tableNameSingularCapitalised}"}
       >
         <${tableNameSingularCapitalised}Form
           ${tableNameSingular}={active${tableNameSingularCapitalised}}
@@ -375,7 +376,7 @@ export default function ${tableNameSingularCapitalised}List({
                   .map((relation) => relation.props)
                   .join("\n        ")
               : ""
-          } // Adjust if necessary
+          }
         />
       </Modal>
       <div className="absolute right-0 top-0 ">
@@ -513,7 +514,7 @@ const createformInputComponent = (
           <SelectContent>
           {${referencesPlural}?.map((${referencesSingular}) => (
             <SelectItem key={${entity}.id} value={${entity}.id.toString()}>
-              {${entity}.id}  {/* TODO: Replace with a field from the ${referencesSingular} model */}
+              {${entity}.id}{/* TODO: Replace with a field from the ${referencesSingular} model */}
             </SelectItem>
            ))}
           </SelectContent>
@@ -546,7 +547,7 @@ const createformInputComponent = (
             name="${fieldName}"
             onChange={() => {}}
             readOnly
-            value={dateGiven?.toUTCString() ?? new Date().toUTCString()}
+            value={${fieldName}?.toUTCString() ?? new Date().toUTCString()}
             className="hidden"
           />
 
@@ -612,13 +613,9 @@ const createformInputComponent = (
 };
 
 const createFormInputComponentImports = (field: DBField) => {
-  const { shared } = getFilePaths();
-  switch (field.type.toLowerCase()) {
-    case "string":
-      return "";
-    case "number":
-      return "";
+  switch (field.type) {
     case "boolean":
+    case "Boolean":
       return `import { Checkbox } from "${formatFilePath(
         `components/ui/checkbox`,
         {
@@ -627,6 +624,7 @@ const createFormInputComponentImports = (field: DBField) => {
         },
       )}"`;
     case "references":
+    case "References":
       return `import {
   Select,
   SelectContent,
@@ -638,6 +636,8 @@ const createFormInputComponentImports = (field: DBField) => {
         removeExtension: false,
       })}";`;
     case "date":
+    case "DateTime":
+    case "timestamp":
       return `import { Popover, PopoverContent, PopoverTrigger } from "${formatFilePath(
         `components/ui/popover`,
         {
@@ -651,18 +651,6 @@ import { Calendar } from "${formatFilePath(`components/ui/calendar`, {
         removeExtension: false,
       })}";
 import { format } from "date-fns";`;
-    case "References":
-      return `import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "${formatFilePath(`components/ui/select`, {
-        prefix: "alias",
-        removeExtension: false,
-      })}";`;
-
     default:
       return "";
   }
@@ -791,7 +779,7 @@ const ${tableNameSingularCapitalised}Form = ({${
   }
   openModal?: (${tableNameSingular}?: ${tableNameSingularCapitalised}) => void;
   closeModal?: () => void;
-  addOptimistic: TAddOptimistic;
+  addOptimistic?: TAddOptimistic;
   postSuccess?: () => void;
 }) => {
   const { errors, hasErrors, setErrors, handleChange } =
@@ -850,7 +838,7 @@ const ${tableNameSingularCapitalised}Form = ({${
     const values = ${tableNameSingular}Parsed.data;
     try {
       startMutation(async () => {
-        addOptimistic({
+        addOptimistic && addOptimistic({
           data: {
             ...values,${
               schema.belongsToUser ? '\n          userId: "",' : ""
@@ -868,7 +856,7 @@ const ${tableNameSingularCapitalised}Form = ({${
           error: data?.error ?? "Error",
           values: editing
             ? { ...${tableNameSingular}, ...values }
-            : { ...values, id: "", userId: "" }, // Adjust as necessary
+            : { ...values, id: "", userId: "" }, 
         };
         onSuccess(editing ? "update" : "create", data ? error : undefined);
       });
@@ -900,7 +888,7 @@ const ${tableNameSingularCapitalised}Form = ({${
             setIsDeleting(true);
             closeModal && closeModal();
             startMutation(async () => {
-              addOptimistic({ action: "delete", data: ${tableNameSingular} });
+              addOptimistic && addOptimistic({ action: "delete", data: ${tableNameSingular} });
               const data = await delete${tableNameSingularCapitalised}Action(${tableNameSingular}.id);
               setIsDeleting(false);
               const error = {
