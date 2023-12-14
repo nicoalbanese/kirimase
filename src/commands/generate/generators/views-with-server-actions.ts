@@ -474,7 +474,7 @@ const createformInputComponent = (
           ${fieldForLabel}
         </Label>
         <br />
-        <Checkbox checked={${`${entitySingular}.${fieldName}`}} name={'${fieldName}'} className={cn(errors?.${fieldName} ? "ring ring-destructive" : "")} />
+        <Checkbox defaultChecked={${`${entitySingular}?.${fieldName}`}} name={'${fieldName}'} className={cn(errors?.${fieldName} ? "ring ring-destructive" : "")} />
         {errors?.${fieldName} ? (
           <p className="text-xs text-destructive mt-2">{errors.${fieldName}[0]}</p>
         ) : (
@@ -546,7 +546,7 @@ const createformInputComponent = (
             name="${fieldName}"
             onChange={() => {}}
             readOnly
-            value={${fieldName}?.toUTCString()}
+            value={dateGiven?.toUTCString() ?? new Date().toUTCString()}
             className="hidden"
           />
 

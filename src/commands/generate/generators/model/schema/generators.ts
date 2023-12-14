@@ -11,7 +11,7 @@ import {
 const createInsertZodSchema = (
   schema: Schema,
   orm: ORMType,
-  zodMappings: ZodMapping[]
+  zodMappings: ZodMapping[],
 ) => {
   const {
     tableNameSingularCapitalised,
@@ -32,7 +32,10 @@ const createInsertZodSchema = (
     zodMappings.length > 0
       ? `\n  ${zodMappings
           .map(
-            (field) => `${toCamelCase(field.name)}: z.coerce.${field.type}()`
+            (field) =>
+              `${toCamelCase(field.name)}: z.coerce.${field.type}()${
+                field.type === "string" ? ".min(1)" : ""
+              }`,
           )
           .join(`,\n  `)}\n`
       : ""
@@ -46,7 +49,7 @@ const createInsertZodSchema = (
 const createUpdateZodSchema = (
   schema: Schema,
   orm: ORMType,
-  zodMappings: ZodMapping[]
+  zodMappings: ZodMapping[],
 ) => {
   const {
     tableNameSingular,
@@ -67,7 +70,10 @@ const createUpdateZodSchema = (
     zodMappings.length > 0
       ? `\n  ${zodMappings
           .map(
-            (field) => `${toCamelCase(field.name)}: z.coerce.${field.type}()`
+            (field) =>
+              `${toCamelCase(field.name)}: z.coerce.${field.type}()${
+                field.type === "string" ? ".min(1)" : ""
+              }`,
           )
           .join(`,\n  `)}\n`
       : ""
@@ -84,7 +90,7 @@ const createUpdateZodSchema = (
 
 const createIdZodSchema = (schema: Schema) => {
   const { tableNameSingular, tableNameSingularCapitalised } = formatTableName(
-    schema.tableName
+    schema.tableName,
   );
   return `export const ${tableNameSingular}IdSchema = update${tableNameSingularCapitalised}Schema.pick({ id: true });`;
 };
