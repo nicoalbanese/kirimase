@@ -24,6 +24,7 @@ import {
 } from "./utils.js";
 import { scaffoldModel } from "./generators/model/index.js";
 import { scaffoldServerActions } from "./generators/serverActions.js";
+import { scaffoldViewsAndComponentsWithServerActions } from "./generators/views-with-server-actions.js";
 
 function provideInstructions() {
   consola.info(
@@ -259,6 +260,8 @@ export async function buildSchema() {
     if (resourceType.includes("views_and_components_trpc"))
       scaffoldViewsAndComponents(schema);
     if (resourceType.includes("server_actions")) scaffoldServerActions(schema);
+    if (resourceType.includes("views_and_components_server_actions"))
+      scaffoldViewsAndComponentsWithServerActions(schema);
   } else {
     consola.warn(
       "You need to have an ORM installed in order to use the scaffold command.",

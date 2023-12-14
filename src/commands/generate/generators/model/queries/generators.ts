@@ -36,15 +36,17 @@ import { type ${tableNameSingularCapitalised}Id, ${tableNameSingular}IdSchema, $
   )}/${tableNameCamelCase}";
 ${
   relations.length > 0
-    ? relations.map(
-        (relation) =>
-          `import { ${toCamelCase(
-            relation.references,
-          )} } from "${formatFilePath(shared.orm.schemaDir, {
-            prefix: "alias",
-            removeExtension: false,
-          })}/${toCamelCase(relation.references)}";\n`,
-      )
+    ? relations
+        .map(
+          (relation) =>
+            `import { ${toCamelCase(
+              relation.references,
+            )} } from "${formatFilePath(shared.orm.schemaDir, {
+              prefix: "alias",
+              removeExtension: false,
+            })}/${toCamelCase(relation.references)}";\n`,
+        )
+        .join("")
     : ""
 }`;
 };
@@ -99,14 +101,16 @@ const generateDrizzleGetQuery = (schema: Schema, relations: DBField[]) => {
       : ""
   }).from(${tableNameCamelCase})${
     relations.length > 0
-      ? relations.map(
-          (relation) =>
-            `.leftJoin(${toCamelCase(
-              relation.references,
-            )}, eq(${tableNameCamelCase}.${toCamelCase(
-              relation.name,
-            )}, ${toCamelCase(relation.references)}.id))`,
-        )
+      ? relations
+          .map(
+            (relation) =>
+              `.leftJoin(${toCamelCase(
+                relation.references,
+              )}, eq(${tableNameCamelCase}.${toCamelCase(
+                relation.name,
+              )}, ${toCamelCase(relation.references)}.id))`,
+          )
+          .join("")
       : ""
   }${
     belongsToUser
@@ -137,14 +141,16 @@ const generateDrizzleGetByIdQuery = (schema: Schema, relations: DBField[]) => {
       : ""
   })${
     relations.length > 0
-      ? relations.map(
-          (relation) =>
-            `.leftJoin(${toCamelCase(
-              relation.references,
-            )}, eq(${tableNameCamelCase}.${toCamelCase(
-              relation.name,
-            )}, ${toCamelCase(relation.references)}.id))`,
-        )
+      ? relations
+          .map(
+            (relation) =>
+              `.leftJoin(${toCamelCase(
+                relation.references,
+              )}, eq(${tableNameCamelCase}.${toCamelCase(
+                relation.name,
+              )}, ${toCamelCase(relation.references)}.id))`,
+          )
+          .join("")
       : ""
   };
   return { ${tableNameSingular}: ${tableNameFirstChar} };

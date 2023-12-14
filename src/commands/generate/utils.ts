@@ -40,7 +40,9 @@ export function capitaliseForZodSchema(input: string): string {
 }
 
 export const formatTableName = (tableName: string) => {
-  const tableNameCamelCase = toCamelCase(tableName);
+  const tableNameCamelCase = tableName.includes("_")
+    ? toCamelCase(tableName)
+    : tableName;
   const tableNameCapitalised =
     tableNameCamelCase.charAt(0).toUpperCase() + tableNameCamelCase.slice(1);
   const tableNameSingularCapitalised =
