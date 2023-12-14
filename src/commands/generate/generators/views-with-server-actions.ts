@@ -458,7 +458,10 @@ const createformInputComponent = (
 ): string => {
   const { tableNameSingular: entitySingular } = formatTableName(tableName);
 
-  const { tableNameCamelCase: fieldName } = formatTableName(field.name);
+  const {
+    tableNameCamelCase: fieldName,
+    tableNameNormalEnglishCapitalised: fieldForLabel,
+  } = formatTableName(field.name);
 
   if (field.type.toLowerCase() == "boolean")
     return `<div>
@@ -468,16 +471,16 @@ const createformInputComponent = (
             errors?.${fieldName} ? "text-destructive" : "",
           )}
         >
-          ${fieldName}
+          ${fieldForLabel}
         </Label>
-              <br />
-              <Checkbox checked={${`${entitySingular}.${fieldName}`}} name={'${fieldName}'} className={cn(errors?.${fieldName} ? "ring ring-destructive" : "")} />
+        <br />
+        <Checkbox checked={${`${entitySingular}.${fieldName}`}} name={'${fieldName}'} className={cn(errors?.${fieldName} ? "ring ring-destructive" : "")} />
         {errors?.${fieldName} ? (
           <p className="text-xs text-destructive mt-2">{errors.${fieldName}[0]}</p>
         ) : (
           <div className="h-6" />
         )}
-            </div>`;
+      </div>`;
   if (field.type.toLowerCase() == "references") {
     const referencesSingular = pluralize.singular(
       toCamelCase(field.references),
@@ -520,8 +523,7 @@ const createformInputComponent = (
         ) : (
           <div className="h-6" />
         )}
-      </div>
-`;
+      </div>`;
   }
 
   if (
@@ -530,51 +532,61 @@ const createformInputComponent = (
     field.type == "DateTime"
   )
     return `<div>
-              <Label
-               className={cn(
-                 "mb-2 inline-block",
-                  errors?.${fieldName} ? "text-destructive" : "",
-                )}
-              >
-                ${fieldName}
-              </Label>
-              <br />
-              <Popover>
-                <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {${`${entitySingular}.${fieldName}}`} ? (
-                        format(new Date(${`${entitySingular}.${fieldName}}`}), "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={new Date(${`${entitySingular}.${fieldName}}`})}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+        <Label
+          className={cn(
+            "mb-2 inline-block",
+            errors?.${fieldName} ? "text-destructive" : "",
+          )}
+        >
+          ${fieldForLabel}
+        </Label>
+        <br />
+        <Popover>
+          <Input
+            name="${fieldName}"
+            onChange={() => {}}
+            readOnly
+            value={${fieldName}?.toUTCString()}
+            className="hidden"
+          />
+
+          <PopoverTrigger asChild>
+            <Button
+              variant={"outline"}
+              className={cn(
+                "w-[240px] pl-3 text-left font-normal",
+                !${entitySingular}?.${fieldName} && "text-muted-foreground",
+              )}
+            >
+              {${fieldName} ? (
+                <span>{format(${fieldName}, "PPP")}</span>
+              ) : (
+                <span>Pick a date</span>
+              )}
+              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              onSelect={(e) => set${fieldName
+                .slice(0, 1)
+                .toUpperCase()
+                .concat(fieldName.slice(1))}(e)}
+              selected={${fieldName}}
+              disabled={(date) =>
+                date > new Date() || date < new Date("1900-01-01")
+              }
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
         {errors?.${fieldName} ? (
           <p className="text-xs text-destructive mt-2">{errors.${fieldName}[0]}</p>
         ) : (
           <div className="h-6" />
         )}
-
-      </div>
-`;
+      </div>`;
 
   return `        <div>
         <Label
@@ -583,7 +595,7 @@ const createformInputComponent = (
             errors?.${fieldName} ? "text-destructive" : "",
           )}
         >
-          ${fieldName}
+          ${fieldForLabel}
         </Label>
         <Input
           type="text"
@@ -596,9 +608,64 @@ const createformInputComponent = (
         ) : (
           <div className="h-6" />
         )}
-      </div>
+      </div>`;
+};
 
-`;
+const createFormInputComponentImports = (field: DBField) => {
+  const { shared } = getFilePaths();
+  switch (field.type.toLowerCase()) {
+    case "string":
+      return "";
+    case "number":
+      return "";
+    case "boolean":
+      return `import { Checkbox } from "${formatFilePath(
+        `components/ui/checkbox`,
+        {
+          prefix: "alias",
+          removeExtension: false,
+        },
+      )}"`;
+    case "references":
+      return `import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "${formatFilePath(`components/ui/select`, {
+        prefix: "alias",
+        removeExtension: false,
+      })}";`;
+    case "date":
+      return `import { Popover, PopoverContent, PopoverTrigger } from "${formatFilePath(
+        `components/ui/popover`,
+        {
+          prefix: "alias",
+          removeExtension: false,
+        },
+      )}";
+import { CalendarIcon } from "lucide-react";
+import { Calendar } from "${formatFilePath(`components/ui/calendar`, {
+        prefix: "alias",
+        removeExtension: false,
+      })}";
+import { format } from "date-fns";`;
+    case "References":
+      return `import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "${formatFilePath(`components/ui/select`, {
+        prefix: "alias",
+        removeExtension: false,
+      })}";`;
+
+    default:
+      return "";
+  }
 };
 
 const createFormComponent = (schema: Schema) => {
@@ -636,6 +703,13 @@ const createFormComponent = (schema: Schema) => {
     };
   });
 
+  const dateFields = schema.fields.filter(
+    (field) =>
+      field.type === "date" ||
+      field.type === "DateTime" ||
+      field.type === "timestamp",
+  );
+
   return `import { z } from "zod";
 
 import { useState, useTransition } from "react";
@@ -671,16 +745,9 @@ import { Label } from "${formatFilePath(`components/ui/label`, {
     prefix: "alias",
     removeExtension: false,
   })}";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "${formatFilePath(`components/ui/select`, {
-    prefix: "alias",
-    removeExtension: false,
-  })}";
+${schema.fields
+  .map((field) => createFormInputComponentImports(field))
+  .join("\n")}
 
 import { type ${tableNameSingularCapitalised}, insert${tableNameSingularCapitalised}Params } from "${formatFilePath(
     `${shared.orm.schemaDir}/${tableNameCamelCase}`,
@@ -731,7 +798,20 @@ const ${tableNameSingularCapitalised}Form = ({${
     useValidatedForm<${tableNameSingularCapitalised}>(insert${tableNameSingularCapitalised}Params);
   const { toast } = useToast();
   const editing = !!${tableNameSingular}?.id;
-
+  ${
+    dateFields.length > 0
+      ? dateFields.map((field) => {
+          const {
+            tableNameCamelCase: camelCase,
+            tableNameCapitalised: capitalised,
+          } = formatTableName(field.name);
+          return `  const [${camelCase}, set${capitalised}] = useState<Date | undefined>(
+    ${tableNameSingular}?.${camelCase},
+  );
+`;
+        })
+      : ""
+  }
   const [isDeleting, setIsDeleting] = useState(false);
   const [pending, startMutation] = useTransition();
 
