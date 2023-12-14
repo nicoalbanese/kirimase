@@ -254,6 +254,7 @@ const queryHasJoins = (tableName: string) => {
   // const { hasSrc } = readConfigFile();
   const { orm } = readConfigFile();
   if (orm === "prisma") return false;
+
   const { shared } = getFilePaths();
   const { tableNameCamelCase } = formatTableName(tableName);
 
