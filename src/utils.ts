@@ -55,14 +55,14 @@ export const runCommand = async (command: string, args: string[]) => {
     throw new Error(
       `command "${command} ${formattedArgs
         .join(" ")
-        .trim()}" exited with code ${error.code}`
+        .trim()}" exited with code ${error.code}`,
     );
   }
 };
 
 export async function installPackages(
   packages: { regular: string; dev: string },
-  pmType: PMType
+  pmType: PMType,
 ) {
   const packagesListString = packages.regular.concat(" ").concat(packages.dev);
   consola.start(`Installing packages: ${packagesListString}...`);
@@ -73,14 +73,14 @@ export async function installPackages(
     if (packages.dev) {
       await runCommand(
         pmType,
-        [installCommand, "-D"].concat(packages.dev.split(" "))
+        [installCommand, "-D"].concat(packages.dev.split(" ")),
       );
     }
 
     if (packages.regular) {
       await runCommand(
         pmType,
-        [installCommand].concat(packages.regular.split(" "))
+        [installCommand].concat(packages.regular.split(" ")),
       );
     }
 
@@ -100,7 +100,7 @@ export const updateConfigFile = (options: UpdateConfig) => {
   replaceFile(
     "./kirimase.config.json",
     JSON.stringify(newConfig, null, 2),
-    false
+    false,
   );
 };
 
@@ -140,14 +140,14 @@ export const pmInstallCommand = {
 };
 
 export async function installShadcnUIComponents(
-  components: string[]
+  components: string[],
 ): Promise<void> {
   const { preferredPackageManager, hasSrc } = readConfigFile();
   const componentsToInstall: string[] = [];
 
   for (const component of components) {
     const tsxFilePath = path.resolve(
-      `${hasSrc ? "src/" : ""}components/ui/${component}.tsx`
+      `${hasSrc ? "src/" : ""}components/ui/${component}.tsx`,
     );
 
     if (!existsSync(tsxFilePath)) {
@@ -160,14 +160,14 @@ export async function installShadcnUIComponents(
 
   if (componentsToInstall.length > 0) {
     consola.start(
-      `Installing shadcn-ui components: ${componentsToInstall.join(", ")}`
+      `Installing shadcn-ui components: ${componentsToInstall.join(", ")}`,
     );
     try {
       await execa(pmInstallCommand[preferredPackageManager], installArgs, {
         stdio: "inherit",
       });
       consola.success(
-        `Installed components: ${componentsToInstall.join(", ")}`
+        `Installed components: ${componentsToInstall.join(", ")}`,
       );
     } catch (error) {
       consola.error(`Failed to install components: ${error.message}`);
@@ -178,6 +178,11 @@ export async function installShadcnUIComponents(
 }
 
 export const getFileContents = (filePath: string) => {
+  const exists = fs.existsSync(filePath);
+  if (!exists) {
+    consola.error("File does not exist at", filePath);
+    return "";
+  }
   const fileContents = fs.readFileSync(filePath, "utf-8");
   return fileContents;
 };

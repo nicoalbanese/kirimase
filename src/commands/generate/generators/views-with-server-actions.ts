@@ -134,6 +134,7 @@ const formatRelations = (relations: DBField[]) => {
       tableNameSingularCapitalised,
       tableNameSingular,
     } = formatTableName(relation.references);
+    const hasJoins = queryHasJoins(relation.references);
     const importStatementQueries = `import { get${tableNameCapitalised} } from "${formatFilePath(
       shared.orm.servicesDir.concat(`/${tableNameCamelCase}/queries.ts`),
       { prefix: "alias", removeExtension: true },
@@ -143,10 +144,19 @@ const formatRelations = (relations: DBField[]) => {
       { prefix: "alias", removeExtension: false },
     )}";`;
 
+    const importStatementCompleteSchemaType = `import { type ${tableNameSingularCapitalised} } from "${formatFilePath(
+      shared.orm.schemaDir.concat(`/${tableNameCamelCase}`),
+      { prefix: "alias", removeExtension: false },
+    )}";`;
+
     const invocation = `const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();`;
     const componentImport = `${tableNameCamelCase}: ${tableNameSingularCapitalised}[]`;
+    const componentImportCompleteType = `${tableNameCamelCase}: ${tableNameSingularCapitalised}[]`;
+
+    const mapped = `${tableNameCamelCase}.map(${tableNameSingular} => ${tableNameSingular}.${tableNameSingular})`;
 
     const props = `${tableNameCamelCase}={${tableNameCamelCase}}`;
+    const propsWithMap = `${tableNameCamelCase}={${mapped}}`;
 
     const optimisticFind = `const optimistic${tableNameSingularCapitalised} = ${tableNameCamelCase}.find(
         (${tableNameSingular}) => ${tableNameSingular}.id === data.${tableNameSingular}Id,
@@ -163,6 +173,11 @@ const formatRelations = (relations: DBField[]) => {
       tableNameSingularCapitalised,
       optimisticEntityRelation,
       optimisticFind,
+      hasJoins,
+      importStatementCompleteSchemaType,
+      componentImportCompleteType,
+      mapped,
+      propsWithMap,
     };
   });
 };
@@ -221,7 +236,11 @@ export default async function ${tableNameCapitalised}() {
         </div>
         <${tableNameSingularCapitalised}List ${tableNameCamelCase}={${tableNameCamelCase}} ${
           relationsFormatted
-            ? relationsFormatted.map((relation) => relation.props).join(" ")
+            ? relationsFormatted
+                .map((relation) =>
+                  relation.hasJoins ? relation.propsWithMap : relation.props,
+                )
+                .join(" ")
             : ""
         } />
       </div>
@@ -233,6 +252,8 @@ export default async function ${tableNameCapitalised}() {
 
 const queryHasJoins = (tableName: string) => {
   // const { hasSrc } = readConfigFile();
+  const { orm } = readConfigFile();
+  if (orm === "prisma") return false;
   const { shared } = getFilePaths();
   const { tableNameCamelCase } = formatTableName(tableName);
 
@@ -281,7 +302,7 @@ import Modal from "${formatFilePath(`components/shared/Modal.tsx`, {
 ${
   relationsFormatted
     ? relationsFormatted
-        .map((relation) => relation.importStatementSchemaType)
+        .map((relation) => relation.importStatementCompleteSchemaType)
         .join("\n")
     : ""
 }
@@ -312,7 +333,7 @@ export default function ${tableNameSingularCapitalised}List({
   ${
     relationsFormatted
       ? relationsFormatted
-          .map((relation) => relation.componentImport)
+          .map((relation) => relation.componentImportCompleteType)
           .join(";\n  ")
       : ""
   } // Adjust if necessary
@@ -464,9 +485,10 @@ const createformInputComponent = (
       // tableNameNormalEnglishSingularLowerCase,
       tableNameSingularCapitalised,
     } = formatTableName(field.references);
-    const entity = queryHasJoins(toCamelCase(field.references))
-      ? `${referencesSingular}.${referencesSingular}`
-      : referencesSingular;
+    // const entity = queryHasJoins(toCamelCase(field.references))
+    //   ? `${referencesSingular}.${referencesSingular}`
+    //   : referencesSingular;
+    const entity = referencesSingular;
     const referencesPlural = toCamelCase(field.references);
     return `
       <div>
