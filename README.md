@@ -143,13 +143,14 @@ Kirimase generates:
 
 #### b) Controller:
 
-- Gives you an option to integrate tRPC and/or API routes.
+- Gives you an option to scaffold tRPC, Server Actions and/or API routes.
 - Uses Zod schemas from models for request validation.
 - Includes built-in error handling for API routes and auto-adding of tRPC routes to the root router.
 
 #### c) Views:
 
 - Scaffolds views using Shadcn-UI to enable immediate CRUD operations (including select fields for adding relations and datepickers for dates).
+- Option to use either React Hook Form with tRPC or plain React (useOptimistic and useValidated Form hooks)
 
 ## Run in non-interactive mode
 
