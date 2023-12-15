@@ -21,7 +21,7 @@
 // select not being imported
 // didn't format imports properly in form
 
-import { DBField } from "../../../types.js";
+import { ColumnType, DBField } from "../../../types.js";
 import pluralize from "pluralize";
 import {
   createFile,
@@ -420,7 +420,13 @@ const ${tableNameSingularCapitalised} = ({
       )}
     >
       <div className="w-full">
-        <div>{${entityName}.${schema.fields[0].name}}</div>
+        <div>{${entityName}.${schema.fields[0].name}${
+          schema.fields[0].type === "date" ||
+          schema.fields[0].type === "timestamp" ||
+          schema.fields[0].type === "DateTime"
+            ? ".toUTCString()"
+            : ""
+        }}</div>
       </div>
       <Button
         onClick={() => openModal(${entityName})}
@@ -612,8 +618,8 @@ const createformInputComponent = (
       </div>`;
 };
 
-const createFormInputComponentImports = (field: DBField) => {
-  switch (field.type) {
+const createFormInputComponentImports = (field: ColumnType) => {
+  switch (field) {
     case "boolean":
     case "Boolean":
       return `import { Checkbox } from "${formatFilePath(
@@ -697,6 +703,9 @@ const createFormComponent = (schema: Schema) => {
       field.type === "DateTime" ||
       field.type === "timestamp",
   );
+  const uniqueFieldTypes = [
+    ...new Set(schema.fields.map((field) => field.type)),
+  ] as ColumnType[];
 
   return `import { z } from "zod";
 
@@ -733,7 +742,7 @@ import { Label } from "${formatFilePath(`components/ui/label`, {
     prefix: "alias",
     removeExtension: false,
   })}";
-${schema.fields
+${uniqueFieldTypes
   .map((field) => createFormInputComponentImports(field))
   .join("\n")}
 
@@ -848,17 +857,20 @@ const ${tableNameSingularCapitalised}Form = ({${
           action: editing ? "update" : "create",
         });
 
-        const data = editing
+        const error = editing
           ? await update${tableNameSingularCapitalised}Action({ ...values, id: ${tableNameSingular}.id })
           : await create${tableNameSingularCapitalised}Action(values);
 
-        const error = {
-          error: data?.error ?? "Error",
+        const errorFormatted = {
+          error: error ?? "Error",
           values: editing
             ? { ...${tableNameSingular}, ...values }
             : { ...values, id: "", userId: "" }, 
         };
-        onSuccess(editing ? "update" : "create", data ? error : undefined);
+        onSuccess(
+          editing ? "update" : "create",
+          error ? errorFormatted : undefined,
+        );
       });
     } catch (e) {
       if (e instanceof z.ZodError) {
@@ -889,14 +901,14 @@ const ${tableNameSingularCapitalised}Form = ({${
             closeModal && closeModal();
             startMutation(async () => {
               addOptimistic && addOptimistic({ action: "delete", data: ${tableNameSingular} });
-              const data = await delete${tableNameSingularCapitalised}Action(${tableNameSingular}.id);
+              const error = await delete${tableNameSingularCapitalised}Action(${tableNameSingular}.id);
               setIsDeleting(false);
-              const error = {
-                error: data?.error ?? "Error",
+              const errorFormatted = {
+                error: error ?? "Error",
                 values: ${tableNameSingular},
               };
 
-              onSuccess("delete", data ? error : undefined);
+              onSuccess("delete", error ? errorFormatted : undefined);
             });
           }}
         >
