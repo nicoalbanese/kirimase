@@ -18,7 +18,7 @@ import {
 export const apiAuthNextAuthTsOld = (
   providers: AuthProvider[],
   dbType: DBType | null,
-  orm: ORMType,
+  orm: ORMType
 ) => {
   const { shared } = getFilePaths();
   const dbIndex = getDbIndexPath();
@@ -50,7 +50,7 @@ ${providersToUse
     (provider) =>
       `import ${capitalised(provider.name)}Provider from "next-auth/providers/${
         provider.name
-      }";`,
+      }";`
   )
   .join("\n")}
 
@@ -127,7 +127,7 @@ export const libAuthUtilsTsWithoutAuthOptions = () => {
   const { "next-auth": nextAuth } = getFilePaths();
   return `import { authOptions } from "${formatFilePath(
     nextAuth.nextAuthApiRoute,
-    { removeExtension: true, prefix: "alias" },
+    { removeExtension: true, prefix: "alias" }
   )}";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -147,7 +147,7 @@ export const checkAuth = async () => {
 export const libAuthUtilsTs = (
   providers: AuthProvider[],
   dbType: DBType | null,
-  orm: ORMType,
+  orm: ORMType
 ) => {
   const { shared } = getFilePaths();
   const dbIndex = getDbIndexPath();
@@ -179,7 +179,7 @@ ${providersToUse
     (provider) =>
       `import ${capitalised(provider.name)}Provider from "next-auth/providers/${
         provider.name
-      }";`,
+      }";`
   )
   .join("\n")}
 
@@ -272,7 +272,9 @@ export const accounts = pgTable(
     session_state: text("session_state"),
   },
   (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
   })
 );
 
@@ -292,7 +294,7 @@ export const verificationTokens = pgTable(
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );
 `;
@@ -344,7 +346,9 @@ export const accounts = mysqlTable(
     session_state: varchar("session_state", { length: 255 }),
   },
   (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
   })
 );
 
@@ -367,7 +371,7 @@ export const verificationTokens = mysqlTable(
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );`;
     case "sqlite":
@@ -405,7 +409,9 @@ export const accounts = sqliteTable(
     session_state: text("session_state"),
   },
   (account) => ({
-    compoundKey: primaryKey(account.provider, account.providerAccountId),
+    compoundKey: primaryKey({
+      columns: [account.provider, account.providerAccountId],
+    }),
   })
 );
 
@@ -425,7 +431,7 @@ export const verificationTokens = sqliteTable(
     expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
   },
   (vt) => ({
-    compoundKey: primaryKey(vt.identifier, vt.token),
+    compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );`;
     default:
@@ -548,7 +554,7 @@ export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
   fs.writeFileSync(filePath, modifiedRouterContent);
 
   consola.success(
-    "TRPC Router updated successfully to add protectedProcedure.",
+    "TRPC Router updated successfully to add protectedProcedure."
   );
 };
 
@@ -585,7 +591,7 @@ export const enableSessionInTRPCApi_DEPRECATED = () => {
 
 export const createPrismaAuthSchema = (
   driver: DBType,
-  usingPlanetScale: boolean,
+  usingPlanetScale: boolean
 ) => {
   return `model Account {
   id                 String  @id @default(cuid())
