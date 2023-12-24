@@ -28,11 +28,11 @@ function addCommonOptions(command: Command) {
     .option("-sf, --has-src-folder <has>", "has a src folder")
     .option(
       "-pm, --package-manager <pm>",
-      "preferred package manager (npm, yarn, pnpm, bun)",
+      "preferred package manager (npm, yarn, pnpm, bun)"
     )
     .option(
       "-cl, --component-lib <component-lib>",
-      "preferred component library (shadcn-ui)",
+      "preferred component library (shadcn-ui)"
     )
     .option("-o, --orm <orm>", "preferred orm (prisma, drizzle)")
     .option("-db, --db <db>", "preferred database (pg, mysql, sqlite)")
@@ -40,14 +40,14 @@ function addCommonOptions(command: Command) {
     .option("-a, --auth <auth>", "preferred auth (next-auth, clerk, lucia)")
     .option(
       "-ap, --auth-providers <auth-providers...>",
-      "auth providers (if using next-auth - discord, google, github, apple)",
+      "auth providers (if using next-auth - discord, google, github, apple)"
     )
     .option(
       "-mp, --misc-packages <packages...>",
-      "misc packages (resend, stripe, trpc)",
+      "misc packages (resend, stripe, trpc)"
     )
     .option(
       "-ie, --include-example <include>",
-      "include example model in schema",
+      "include example model in schema"
     );
 }
