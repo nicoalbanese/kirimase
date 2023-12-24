@@ -586,6 +586,7 @@ export const enableSessionInTRPCApi_DEPRECATED = () => {
 export const createPrismaAuthSchema = (
   driver: DBType,
   usingPlanetScale: boolean,
+  usingNextAuthGitHub: boolean
 ) => {
   return `model Account {
   id                 String  @id @default(cuid())
@@ -600,6 +601,8 @@ export const createPrismaAuthSchema = (
   scope              String?
   id_token           String?  ${driver !== "sqlite" ? "@db.Text" : ""}
   session_state      String?
+
+  ${usingNextAuthGitHub ? "refresh_token_expires_in Int?" : ""}
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

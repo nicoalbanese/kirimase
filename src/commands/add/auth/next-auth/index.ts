@@ -95,8 +95,8 @@ export const addNextAuth = async (options?: InitOptions) => {
     }
     if (orm === "prisma") {
       addToPrismaSchema(
-        createPrismaAuthSchema(driver, dbProvider === "planetscale"),
-        "Auth",
+        createPrismaAuthSchema(driver, dbProvider === "planetscale", providers.includes("github")),
+        "Auth"
       );
     }
   }
