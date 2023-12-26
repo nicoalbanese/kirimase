@@ -135,6 +135,18 @@ export const generateDrizzleAdapterDriverMappings = () => {
           { removeExtension: true, prefix: "alias" }
         )}"`,
       },
+      turso: {
+        adapter: `adapter: libsql(sqlite, {
+		user: "user",
+		key: "user_key",
+		session: "user_session"
+	})`,
+        adapterPackage: "@lucia-auth/adapter-sqlite",
+        import: `import { libsql } from "@lucia-auth/adapter-sqlite";\nimport { sqlite } from "${formatFilePath(
+          dbIndex,
+          { removeExtension: true, prefix: "alias" }
+        )}"`,
+      },
     },
   };
   return DrizzleAdapterDriverMappings;

@@ -61,11 +61,11 @@ export default {
         ? `url: env.DATABASE_URL,
     authToken: env.DATABASE_AUTH_TOKEN`
         : provider === "better-sqlite3"
-        ? "url: env.DATABASE_URL"
-        : "connectionString: env.DATABASE_URL"
+          ? "url: env.DATABASE_URL"
+          : "connectionString: env.DATABASE_URL"
     }${provider === "vercel-pg" ? '.concat("?sslmode=require")' : ""},
   }
-} satisfies Config;`,
+} satisfies Config;`
   );
 };
 
@@ -205,12 +205,12 @@ import { env } from "${formatFilePath(envMjs, {
         prefix: "alias",
       })}";
  
-const client = createClient({
+export const sqlite = createClient({
   url: env.DATABASE_URL,
   authToken: env.DATABASE_AUTH_TOKEN,
 });
 
-export const db = drizzle(client);
+export const db = drizzle(sqlite);
 `;
       break;
     // case "bun-sqlite":
@@ -227,14 +227,14 @@ export const db = drizzle(client);
 
   createFile(
     formatFilePath(dbIndex, { prefix: "rootPath", removeExtension: false }),
-    indexTS,
+    indexTS
   );
 };
 
 export const createMigrateTs = (
   libPath: string,
   dbType: DBType,
-  dbProvider: DBProvider,
+  dbProvider: DBProvider
 ) => {
   const {
     drizzle: { dbMigrate, migrationsDir },
@@ -423,7 +423,7 @@ runMigrate().catch((err) => {
 
   createFile(
     formatFilePath(dbMigrate, { prefix: "rootPath", removeExtension: false }),
-    template,
+    template
   );
 };
 
@@ -521,7 +521,7 @@ export type ComputerId = z.infer<typeof computerIdSchema>["id"];`;
 export const addScriptsToPackageJson = (
   libPath: string,
   driver: DBType,
-  preferredPackageManager: PMType,
+  preferredPackageManager: PMType
 ) => {
   // Define the path to package.json
   const packageJsonPath = path.resolve("package.json");
@@ -557,7 +557,7 @@ export const addScriptsToPackageJson = (
 
 export const installDependencies = async (
   dbType: DBProvider,
-  preferredPackageManager: PMType,
+  preferredPackageManager: PMType
 ) => {
   const packages: { [key in DBProvider]: { regular: string; dev: string } } = {
     postgresjs: { regular: "postgres", dev: "pg" },
@@ -583,7 +583,7 @@ export const installDependencies = async (
         regular: `drizzle-orm drizzle-zod @t3-oss/env-nextjs zod ${dbSpecificPackage.regular}`,
         dev: `drizzle-kit tsx dotenv ${dbSpecificPackage.dev}`,
       },
-      preferredPackageManager,
+      preferredPackageManager
     );
   }
 };
@@ -593,7 +593,7 @@ export const createDotEnv = (
   preferredPackageManager: PMType,
   databaseUrl?: string,
   usingPlanetscale: boolean = false,
-  rootPathOld: string = "",
+  rootPathOld: string = ""
 ) => {
   const {
     shared: {
@@ -612,7 +612,7 @@ export const createDotEnv = (
         orm === "drizzle" && usingPlanetscale
           ? `# When using the PlanetScale driver with Drizzle, your connection string must end with ?ssl={"rejectUnauthorized":true} instead of ?sslaccept=strict.\n`
           : ""
-      }DATABASE_URL=${dburl}`,
+      }DATABASE_URL=${dburl}`
     );
 
   const envmjsfilePath = formatFilePath(envMjs, {
@@ -627,7 +627,7 @@ export const createDotEnv = (
 export const addToDotEnv = (
   items: DotEnvItem[],
   rootPathOld?: string,
-  excludeDbUrlIfBlank = false,
+  excludeDbUrlIfBlank = false
 ) => {
   const { orm, preferredPackageManager } = readConfigFile();
   const {
@@ -658,7 +658,7 @@ export const addToDotEnv = (
   if (!envMjsExists)
     createFile(
       envmjsfilePath,
-      generateEnvMjs(preferredPackageManager, orm, excludeDbUrlIfBlank),
+      generateEnvMjs(preferredPackageManager, orm, excludeDbUrlIfBlank)
     );
   let envmjsfileContents = fs.readFileSync(envmjsfilePath, "utf-8");
 
@@ -694,7 +694,7 @@ export const addToDotEnv = (
   const runtimeEnvRegex = /experimental__runtimeEnv: {\n/s;
   envmjsfileContents = envmjsfileContents.replace(
     runtimeEnvRegex,
-    `experimental__runtimeEnv: {\n    ${runtimeEnvItems}`,
+    `experimental__runtimeEnv: {\n    ${runtimeEnvItems}`
   );
   // Write the updated contents back to the file
   fs.writeFileSync(envmjsfilePath, envmjsfileContents);
@@ -708,7 +708,7 @@ export async function updateTsConfigTarget() {
   fs.readFile(tsConfigPath, "utf8", (err, data) => {
     if (err) {
       console.error(
-        `An error occurred while reading the tsconfig.json file: ${err}`,
+        `An error occurred while reading the tsconfig.json file: ${err}`
       );
       return;
     }
@@ -726,14 +726,14 @@ export async function updateTsConfigTarget() {
     // Write the updated content back to the file
     replaceFile(tsConfigPath, updatedContent);
     consola.success(
-      "Updated tsconfig.json target to esnext to support Drizzle-Kit.",
+      "Updated tsconfig.json target to esnext to support Drizzle-Kit."
     );
   });
 }
 
 export function createQueriesAndMutationsFolders(
   libPath: string,
-  driver: DBType,
+  driver: DBType
 ) {
   const dbIndex = getDbIndexPath("drizzle");
   // create computers queries
@@ -744,7 +744,7 @@ export function createQueriesAndMutationsFolders(
 import { eq } from "drizzle-orm";
 import { computerIdSchema, computers, ComputerId } from "${formatFilePath(
     "lib/db/schema/computers.ts",
-    { removeExtension: true, prefix: "alias" },
+    { removeExtension: true, prefix: "alias" }
   )}";
 
 export const getComputers = async () => {
@@ -766,7 +766,7 @@ export const getComputerById = async (id: ComputerId) => {
 import { eq } from "drizzle-orm";
 import { NewComputer, insertComputerSchema, computers, computerIdSchema, ComputerId } from "${formatFilePath(
     "lib/db/schema/computers.ts",
-    { removeExtension: true, prefix: "alias" },
+    { removeExtension: true, prefix: "alias" }
   )}";
 
 export const createComputer = async (computer: NewComputer) => {
@@ -826,21 +826,21 @@ export const deleteComputer = async (id: ComputerId) => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    query,
+    query
   );
   createFile(
     formatFilePath(`lib/api/computers/mutations.ts`, {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    mutation,
+    mutation
   );
 }
 
 const generateEnvMjs = (
   preferredPackageManager: PMType,
   ormType: ORMType,
-  blank = false,
+  blank = false
 ) => {
   return `import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";${

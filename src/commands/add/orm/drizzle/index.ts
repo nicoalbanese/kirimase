@@ -42,27 +42,27 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
         {
           name: "SQLite",
           value: "sqlite",
-          disabled:
-            preferredPackageManager === "bun"
-              ? wrapInParenthesis(
-                  "Drizzle Kit doesn't support SQLite with Bun yet",
-                )
-              : false,
+          //   disabled:
+          //     preferredPackageManager === "bun"
+          //       ? wrapInParenthesis(
+          //           "Drizzle Kit doesn't support SQLite with Bun yet",
+          //         )
+          //       : false,
         },
       ],
     })) as DBType);
 
-  // const dbProviders = DBProviders[dbType].filter((p) => {
-  //   if (preferredPackageManager === "bun") return p.value !== "better-sqlite3";
-  //   else return p.value !== "bun-sqlite";
-  // });
+  const dbProviders = DBProviders[dbType].filter((p) => {
+    if (preferredPackageManager === "bun") return p.value !== "better-sqlite3";
+    else return p.value !== "bun-sqlite";
+  });
 
   const dbProvider =
     initOptions?.dbProvider ||
     ((await select({
       message: "Please choose your DB Provider",
-      choices: DBProviders[dbType],
-      // choices: dbProviders,
+      // choices: DBProviders[dbType],
+      choices: dbProviders,
     })) as DBProvider);
 
   let databaseUrl = "";
@@ -109,7 +109,7 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
     preferredPackageManager,
     databaseUrl,
     dbProvider === "planetscale",
-    hasSrc ? "src/" : "",
+    hasSrc ? "src/" : ""
   );
   if (dbProvider === "vercel-pg")
     addToDotEnv(
@@ -121,7 +121,7 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
         { key: "POSTGRES_PASSWORD", value: "" },
         { key: "POSTGRES_DATABASE", value: "" },
       ],
-      rootPath,
+      rootPath
     );
   if (dbProvider === "turso")
     addToDotEnv([{ key: "DATABASE_AUTH_TOKEN", value: "" }], rootPath);
