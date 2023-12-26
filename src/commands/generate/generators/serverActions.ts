@@ -68,7 +68,7 @@ export const update${tableNameSingularCapitalised}Action = async (input: Update$
   try {
     const payload = update${tableNameSingularCapitalised}Params.parse(input);
     await update${tableNameSingularCapitalised}(payload.id, payload);
-    revalidate${tableNamePluralCapitalised};
+    revalidate${tableNamePluralCapitalised}();
   } catch (e) {
     return handleErrors(e);
   }
