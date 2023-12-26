@@ -123,6 +123,8 @@ export const addDrizzle = async (initOptions?: InitOptions) => {
       ],
       rootPath,
     );
+  if (dbProvider === "turso")
+    addToDotEnv([{ key: "DATABASE_AUTH_TOKEN", value: "" }], rootPath);
   await updateTsConfigTarget();
 
   updateConfigFile({ driver: dbType, provider: dbProvider, orm: "drizzle" });

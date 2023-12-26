@@ -36,6 +36,7 @@ export const DBProviders: DBProviderOptions = {
   ],
   sqlite: [
     { name: "better-sqlite3", value: "better-sqlite3" },
+    { name: "turso", value: "turso" },
     // { name: "Bun SQLite", value: "bun-sqlite" },
   ],
 };
@@ -121,6 +122,7 @@ export const checkForExistingPackages = async (rootPath: string) => {
     "vercel-pg": "@vercel/postgres",
     planetscale: "@planetscale/database",
     "better-sqlite3": "better-sqlite3",
+    turso: "@libsql/client",
   };
   const providerDriverMappings: Record<DBProvider, DBType> = {
     aws: "pg",
@@ -132,6 +134,7 @@ export const checkForExistingPackages = async (rootPath: string) => {
     "vercel-pg": "pg",
     planetscale: "mysql",
     "better-sqlite3": "sqlite",
+    turso: "sqlite",
   };
   for (const [key, term] of Object.entries(providerMappings)) {
     // console.log(key, terms);

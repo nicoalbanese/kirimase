@@ -34,6 +34,7 @@ const configDriverMappings = {
   planetscale: "mysql2",
   "mysql-2": "mysql2",
   "better-sqlite3": "better-sqlite",
+  turso: "turso",
 };
 
 export const createDrizzleConfig = (libPath: string, provider: DBProvider) => {
@@ -56,7 +57,10 @@ export default {
   driver: "${configDriverMappings[provider]}",
   dbCredentials: {
     ${
-      provider == "better-sqlite3"
+      provider == "turso"
+        ? `url: env.DATABASE_URL,
+    authToken: env.DATABASE_AUTH_TOKEN`
+        : provider === "better-sqlite3"
         ? "url: env.DATABASE_URL"
         : "connectionString: env.DATABASE_URL"
     }${provider === "vercel-pg" ? '.concat("?sslmode=require")' : ""},
@@ -191,6 +195,22 @@ import Database from 'better-sqlite3';
  
 export const sqlite = new Database('sqlite.db');
 export const db: BetterSQLite3Database = drizzle(sqlite);
+`;
+      break;
+    case "turso":
+      indexTS = `import { drizzle } from 'drizzle-orm/libsql';
+import { createClient } from "@libsql/client";
+import { env } from "${formatFilePath(envMjs, {
+        removeExtension: false,
+        prefix: "alias",
+      })}";
+ 
+const client = createClient({
+  url: env.DATABASE_URL,
+  authToken: env.DATABASE_AUTH_TOKEN,
+});
+
+export const db = drizzle(client);
 `;
       break;
     // case "bun-sqlite":
@@ -347,6 +367,20 @@ import Database from 'better-sqlite3';
       connectionLogic = `
 const sqlite = new Database('sqlite.db');
 const db: BetterSQLite3Database = drizzle(sqlite);
+`;
+      break;
+    case "turso":
+      imports = `
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
+import { migrate } from "drizzle-orm/libsql/migrator";
+`;
+      connectionLogic = `
+  const client = createClient({
+    url: env.DATABASE_URL,
+    authToken: env.DATABASE_AUTH_TOKEN,
+  });
+  const db = drizzle(client);
 `;
       break;
     default:
@@ -538,6 +572,7 @@ export const installDependencies = async (
       regular: "better-sqlite3",
       dev: "@types/better-sqlite3",
     },
+    turso: { regular: "@libsql/client", dev: "" },
     // "bun-sqlite": { regular: "drizzle-orm", dev: "drizzle-kit" },
   };
   // note this change hasnt been tested yet
@@ -820,6 +855,7 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
     ${blank ? "// " : ""}DATABASE_URL: z.string().min(1),
+    
   },
   client: {
     // NEXT_PUBLIC_PUBLISHABLE_KEY: z.string().min(1),
