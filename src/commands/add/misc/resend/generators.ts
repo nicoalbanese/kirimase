@@ -2,7 +2,8 @@
 // 2. Add component at components/emails/FirstEmailTemplate.tsx
 // 3. Add route handler at app/api/email/route.ts
 // 4. Add email utils
-// 4. Add email index.ts
+// 5. Add email index.ts
+// 6. Add webhook handler at app/api/webhooks/resend/route.ts
 
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
@@ -173,7 +174,7 @@ const generateApiRoute = () => {
   const { resend } = getFilePaths();
   return `import { EmailTemplate } from "${formatFilePath(
     resend.firstEmailComponent,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 import { resend } from "${formatFilePath(resend.libEmailIndex, {
     prefix: "alias",
@@ -212,7 +213,7 @@ const generateEmailIndexTs = () => {
   return `import { Resend } from "resend";
 import { env } from "${formatFilePath(init.envMjs, {
     prefix: "alias",
-    removeExtension: true,
+    removeExtension: false,
   })}";
 
 export const resend = new Resend(env.RESEND_API_KEY);
@@ -229,10 +230,121 @@ export const emailSchema = z.object({
 `;
 };
 
+const generateWebhooksApiRoute = () => {
+  const {
+    shared: { init },
+  } = getFilePaths();
+  return `import { Webhook } from "svix";
+import { headers } from "next/headers";
+import { env } from "${formatFilePath(init.envMjs, {
+    prefix: "alias",
+    removeExtension: false,
+  })}";
+
+const webhookSecret = env.RESEND_WEBHOOK_SECRET;
+
+const resendEventTypes = [
+  "email.sent",
+  "email.delivered",
+  "email.delivery_delayed",
+  "email.complained",
+  "email.bounced",
+  "email.opened",
+  "email.clicked",
+] as const;
+
+type ResendEventType = (typeof resendEventTypes)[number];
+
+type ResendBaseData = {
+  created_at: string;
+  email_id: string;
+  from: string;
+  to: string[];
+  subject: string;
+};
+
+type ResendClickData = ResendBaseData & {
+  click: {
+    ipAddress: string;
+    link: string;
+    timestamp: string;
+    userAgent: string;
+  };
+};
+
+export type ResendWebhook =
+  | {
+      type: Exclude<ResendEventType, "email.clicked">;
+      created_at: string;
+      data: ResendBaseData;
+    }
+  | {
+      type: "email.clicked";
+      created_at: string;
+      data: ResendClickData;
+    };
+
+
+/**
+ * Validate this post request was sent by resend
+ */
+async function validateRequest(request: Request) {
+  const payloadString = await request.text();
+  const headerPayload = headers();
+
+  const svixHeaders = {
+    "svix-id": headerPayload.get("svix-id")!,
+    "svix-timestamp": headerPayload.get("svix-timestamp")!,
+    "svix-signature": headerPayload.get("svix-signature")!,
+  };
+
+  const wh = new Webhook(webhookSecret);
+  return wh.verify(payloadString, svixHeaders) as ResendWebhook;
+}
+
+export async function POST(request: Request) {
+  let event: ResendWebhook | null = null;
+
+  try {
+    event = await validateRequest(request);
+  } catch (err) {
+    console.error("Error validating resend webhook:");
+    const message = err instanceof Error ? err.message : err;
+    console.error(message);
+    return new Response("Resend Webhook Error: " + message, { status: 400 });
+  }
+
+  console.log(event);
+
+  switch (event.type) {
+    case "email.sent":
+      break;
+    case "email.delivered":
+      break;
+    case "email.delivery_delayed":
+      break;
+    case "email.complained":
+      break;
+    case "email.bounced":
+      break;
+    case "email.opened":
+      break;
+    case "email.clicked":
+      break;
+    default:
+      break;
+  }
+
+  return new Response(null, { status: 200 });
+}
+`;
+};
+
 export const resendGenerators = {
   generateResendPage,
   generateEmailTemplateComponent,
   generateApiRoute,
   generateEmailIndexTs,
   generateEmailUtilsTs,
+  generateWebhooksApiRoute,
 };
