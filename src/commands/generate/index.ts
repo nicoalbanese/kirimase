@@ -5,6 +5,7 @@ import {
   DBField,
   DBType,
   DrizzleColumnType,
+  GenerateOptions,
   ORMType,
   PrismaColumnType,
 } from "../../types.js";
@@ -28,7 +29,7 @@ import { scaffoldViewsAndComponentsWithServerActions } from "./generators/views-
 
 function provideInstructions() {
   consola.info(
-    "Quickly generate your Model (Drizzle schema + queries / mutations), Controllers (API Routes and TRPC Routes), and Views",
+    "Quickly generate your Model (Drizzle schema + queries / mutations), Controllers (API Routes and TRPC Routes), and Views"
   );
 }
 
@@ -210,7 +211,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
     const currentSchemas = getCurrentSchemas();
 
     const baseFieldTypeChoices = Object.keys(
-      createOrmMappings()[orm][dbType].typeMappings,
+      createOrmMappings()[orm][dbType].typeMappings
     )
       .filter((field) => field !== "id")
       .map((field) => {
@@ -223,7 +224,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
         currentSchemas[0] === toCamelCase(tableName));
     const fieldTypeChoices = removeReferenceOption
       ? baseFieldTypeChoices.filter(
-          (field) => field.name.toLowerCase() !== "references",
+          (field) => field.name.toLowerCase() !== "references"
         )
       : baseFieldTypeChoices;
 
@@ -321,7 +322,7 @@ export function preBuild() {
   return true;
 }
 
-export async function buildSchema() {
+export async function buildSchema(options?: GenerateOptions) {
   const ready = preBuild();
 
   if (!ready) return;
@@ -332,13 +333,20 @@ export async function buildSchema() {
 
   if (orm !== null) {
     provideInstructions();
-    const resourceType = await askForResourceType();
-    const tableName = await askForTable();
-    const fields = await askForFields(orm, driver, tableName);
-    const indexedField = await askForIndex(fields);
+    const resourceType = options.resourceTypes || (await askForResourceType());
+    const tableName = options.table || (await askForTable());
+    const fields =
+      options.fields || (await askForFields(orm, driver, tableName));
+    const indexedField =
+      typeof options.index === "string"
+        ? options.index || null
+        : await askForIndex(fields);
     let schema: Schema;
     if (resourceType.includes("model") && auth !== null) {
-      const belongsToUser = await askIfBelongsToUser();
+      const belongsToUser =
+        typeof options.belongsToUser === "string"
+          ? options.belongsToUser === "yes"
+          : await askIfBelongsToUser();
       schema = {
         tableName,
         fields,
@@ -364,7 +372,7 @@ export async function buildSchema() {
       scaffoldViewsAndComponentsWithServerActions(schema);
   } else {
     consola.warn(
-      "You need to have an ORM installed in order to use the scaffold command.",
+      "You need to have an ORM installed in order to use the scaffold command."
     );
     addPackage();
   }
