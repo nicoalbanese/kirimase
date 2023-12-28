@@ -38,7 +38,7 @@ import { existsSync, readFileSync } from "fs";
 import { consola } from "consola";
 
 export const scaffoldViewsAndComponentsWithServerActions = async (
-  schema: Schema,
+  schema: Schema
 ) => {
   const { packages } = readConfigFile();
   const {
@@ -64,25 +64,25 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
         prefix: "rootPath",
         removeExtension: false,
       }),
-      generateView(schema),
+      generateView(schema)
     );
 
     // create components/tableName/TableNameList.tsx
     createFile(
       formatFilePath(
         `components/${tableNameCamelCase}/${tableNameSingularCapitalised}List.tsx`,
-        { removeExtension: false, prefix: "rootPath" },
+        { removeExtension: false, prefix: "rootPath" }
       ),
-      createListComponent(schema),
+      createListComponent(schema)
     );
 
     // create components/tableName/TableNameForm.tsx
     createFile(
       formatFilePath(
         `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Form.tsx`,
-        { prefix: "rootPath", removeExtension: false },
+        { prefix: "rootPath", removeExtension: false }
       ),
-      createFormComponent(schema),
+      createFormComponent(schema)
     );
 
     // create optimisticEntity
@@ -92,9 +92,9 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
         {
           prefix: "rootPath",
           removeExtension: false,
-        },
+        }
       ),
-      createOptimisticListHook(schema),
+      createOptimisticListHook(schema)
     );
 
     // install shadcn packages (button, dialog, form, input, label) - exec script: pnpm dlx shadcn-ui@latest add _
@@ -112,7 +112,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
       (field) =>
         field.type.toLowerCase() === "date" ||
         field.type.toLowerCase() === "timestamp" ||
-        field.type.toLowerCase() === "datetime",
+        field.type.toLowerCase() === "datetime"
     ).length > 0
       ? baseComponents.push("popover", "calendar")
       : null;
@@ -138,16 +138,16 @@ const formatRelations = (relations: DBField[]) => {
     const hasJoins = queryHasJoins(relation.references);
     const importStatementQueries = `import { get${tableNameCapitalised} } from "${formatFilePath(
       shared.orm.servicesDir.concat(`/${tableNameCamelCase}/queries.ts`),
-      { prefix: "alias", removeExtension: true },
+      { prefix: "alias", removeExtension: true }
     )}";`;
     const importStatementSchemaType = `import { type ${tableNameSingularCapitalised} } from "${formatFilePath(
       shared.orm.schemaDir.concat(`/${tableNameCamelCase}`),
-      { prefix: "alias", removeExtension: false },
+      { prefix: "alias", removeExtension: false }
     )}";`;
 
     const importStatementCompleteSchemaType = `import { type ${tableNameSingularCapitalised} } from "${formatFilePath(
       shared.orm.schemaDir.concat(`/${tableNameCamelCase}`),
-      { prefix: "alias", removeExtension: false },
+      { prefix: "alias", removeExtension: false }
     )}";`;
 
     const invocation = `const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();`;
@@ -196,11 +196,11 @@ const generateView = (schema: Schema) => {
 
   return `import ${tableNameSingularCapitalised}List from "${formatFilePath(
     `components/${tableNameCamelCase}/${tableNameSingularCapitalised}List`,
-    { removeExtension: false, prefix: "alias" },
+    { removeExtension: false, prefix: "alias" }
   )}";
 import { get${tableNameCapitalised} } from "${formatFilePath(
     shared.orm.servicesDir.concat(`/${tableNameCamelCase}/queries.ts`),
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 ${
   relationsFormatted
@@ -239,7 +239,7 @@ export default async function ${tableNameCapitalised}() {
           relationsFormatted
             ? relationsFormatted
                 .map((relation) =>
-                  relation.hasJoins ? relation.propsWithMap : relation.props,
+                  relation.hasJoins ? relation.propsWithMap : relation.props
                 )
                 .join(" ")
             : ""
@@ -295,7 +295,7 @@ import { cn } from "${formatFilePath(`lib/utils`, {
   })}";
 import { type ${tableNameSingularCapitalised}, Complete${tableNameSingularCapitalised} } from "${formatFilePath(
     shared.orm.schemaDir.concat(`/${tableNameCamelCase}`),
-    { prefix: "alias", removeExtension: false },
+    { prefix: "alias", removeExtension: false }
   )}";
 import Modal from "${formatFilePath(`components/shared/Modal.tsx`, {
     removeExtension: true,
@@ -310,7 +310,7 @@ ${
 }
 import { useOptimistic${tableNamePluralCapitalised} } from "${formatFilePath(
     `app/${tableNameKebabCase}/useOptimistic${tableNamePluralCapitalised}`,
-    { prefix: "alias", removeExtension: false },
+    { prefix: "alias", removeExtension: false }
   )}";
 import { Button } from "${formatFilePath(`components/ui/button`, {
     prefix: "alias",
@@ -461,7 +461,7 @@ const EmptyState = ({ openModal }: { openModal: TOpenModal }) => {
 
 const createformInputComponent = (
   field: DBField,
-  tableName: string,
+  tableName: string
 ): string => {
   const { tableNameSingular: entitySingular } = formatTableName(tableName);
 
@@ -490,7 +490,7 @@ const createformInputComponent = (
       </div>`;
   if (field.type.toLowerCase() == "references") {
     const referencesSingular = pluralize.singular(
-      toCamelCase(field.references),
+      toCamelCase(field.references)
     );
     const {
       // tableNameNormalEnglishSingularLowerCase,
@@ -627,7 +627,7 @@ const createFormInputComponentImports = (field: ColumnType) => {
         {
           prefix: "alias",
           removeExtension: false,
-        },
+        }
       )}"`;
     case "references":
     case "References":
@@ -649,7 +649,7 @@ const createFormInputComponentImports = (field: ColumnType) => {
         {
           prefix: "alias",
           removeExtension: false,
-        },
+        }
       )}";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "${formatFilePath(`components/ui/calendar`, {
@@ -672,7 +672,7 @@ const createFormComponent = (schema: Schema) => {
   } = formatTableName(schema.tableName);
   const { shared } = getFilePaths();
   const relations = schema.fields.filter(
-    (field) => field.type.toLowerCase() === "references",
+    (field) => field.type.toLowerCase() === "references"
   );
   const relationsFormatted = relations.map((relation) => {
     const {
@@ -683,7 +683,7 @@ const createFormComponent = (schema: Schema) => {
     } = formatTableName(relation.references);
     const importStatement = `import { type ${tableNameSingularCapitalised} } from "${formatFilePath(
       shared.orm.schemaDir.concat(`/${tableNameCamelCase}.ts`),
-      { prefix: "alias", removeExtension: true },
+      { prefix: "alias", removeExtension: true }
     )}";`;
     const invocation = `const { ${tableNameCamelCase} } = get${tableNameCapitalised}();`;
     const props = `${tableNameCamelCase}: ${tableNameSingularCapitalised}[];`;
@@ -701,7 +701,7 @@ const createFormComponent = (schema: Schema) => {
     (field) =>
       field.type === "date" ||
       field.type === "DateTime" ||
-      field.type === "timestamp",
+      field.type === "timestamp"
   );
   const uniqueFieldTypes = [
     ...new Set(schema.fields.map((field) => field.type)),
@@ -718,7 +718,7 @@ import { useToast } from "${formatFilePath(`components/ui/use-toast`, {
   })}";
 import { useValidatedForm } from "${formatFilePath(
     `lib/hooks/useValidatedForm.tsx`,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 
 import { type Action, cn } from "${formatFilePath(shared.init.libUtils, {
@@ -727,7 +727,7 @@ import { type Action, cn } from "${formatFilePath(shared.init.libUtils, {
   })}";
 import { type TAddOptimistic } from "${formatFilePath(
     `app/${tableNameKebabCase}/useOptimistic${tableNamePluralCapitalised}.tsx`,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 
 import { Input } from "${formatFilePath(`components/ui/input`, {
@@ -748,7 +748,7 @@ ${uniqueFieldTypes
 
 import { type ${tableNameSingularCapitalised}, insert${tableNameSingularCapitalised}Params } from "${formatFilePath(
     `${shared.orm.schemaDir}/${tableNameCamelCase}`,
-    { prefix: "alias", removeExtension: false },
+    { prefix: "alias", removeExtension: false }
   )}";
 import {
   create${tableNameSingularCapitalised}Action,
@@ -769,7 +769,7 @@ const ${tableNameSingularCapitalised}Form = ({${
       ? "\n  ".concat(
           relationsFormatted
             .map((relation) => `${relation.tableNameCamelCase},`)
-            .join("\n  "),
+            .join("\n  ")
         )
       : ""
   }
@@ -782,7 +782,7 @@ const ${tableNameSingularCapitalised}Form = ({${
   ${tableNameSingular}?: ${tableNameSingularCapitalised} | null;${
     relationsFormatted
       ? "\n  ".concat(
-          relationsFormatted.map((relation) => relation.props).join("\n  "),
+          relationsFormatted.map((relation) => relation.props).join("\n  ")
         )
       : ""
   }
@@ -1039,7 +1039,7 @@ const createOptimisticListHook = (schema: Schema) => {
   }
 import { type ${tableNameSingularCapitalised}, type Complete${tableNameSingularCapitalised} } from "${formatFilePath(
     shared.orm.schemaDir.concat(`/${tableNameCamelCase}`),
-    { prefix: "alias", removeExtension: false },
+    { prefix: "alias", removeExtension: false }
   )}";
 import { OptimisticAction } from "${formatFilePath(shared.init.libUtils, {
     prefix: "alias",
@@ -1067,7 +1067,6 @@ export const useOptimistic${tableNamePluralCapitalised} = (
     ): Complete${tableNameSingularCapitalised}[] => {
       const { data } = action;
 
-      // potential issue - loop over relations [COME BACK TO THIS]
       ${
         relationsFormatted
           ? relationsFormatted
@@ -1084,7 +1083,7 @@ export const useOptimistic${tableNamePluralCapitalised} = (
             ? "\n        ".concat(
                 relationsFormatted
                   .map((relation) => relation.optimisticEntityRelation)
-                  .join("\n       "),
+                  .join("\n       ")
               )
             : ""
         }
@@ -1097,7 +1096,7 @@ export const useOptimistic${tableNamePluralCapitalised} = (
             ? "\n        ".concat(
                 relationsFormatted
                   .map((relation) => relation.optimisticEntityRelation)
-                  .join("\n       "),
+                  .join("\n       ")
               )
             : ""
         }
