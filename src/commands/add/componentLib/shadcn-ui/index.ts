@@ -39,8 +39,8 @@ const manualInstallShadCn = async (
     },
     preferredPackageManager
   );
-  // add tailwind.config.js
-  createFile("tailwind.config.js", generateTailwindConfig(rootPath));
+  // add tailwind.config.ts
+  createFile("tailwind.config.ts", generateTailwindConfig(rootPath));
   // update globals.css
   replaceFile(
     formatFilePath(shared.init.globalCss, {
