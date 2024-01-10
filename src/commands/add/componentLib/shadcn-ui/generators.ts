@@ -179,7 +179,7 @@ const generateComponentsJson = (rootPath: string) => {
   "rsc": true,
   "tsx": true,
   "tailwind": {
-    "config": "tailwind.config.js",
+    "config": "tailwind.config.ts",
     "css": "${rootPath}app/globals.css",
     "baseColor": "neutral",
     "cssVariables": true
