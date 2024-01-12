@@ -48,9 +48,10 @@ export async function POST(req: Request) {
     const validatedData = insert${tableNameSingularCapitalised}Params.parse(await req.json());
     const { ${
       driver === "mysql" ? "success" : tableNameSingular
-    }, error } = await create${tableNameSingularCapitalised}(validatedData);
-    if (error) return NextResponse.json({ error }, { status: 500 });
+    } } = await create${tableNameSingularCapitalised}(validatedData);
+
     revalidatePath("/${tableNameCamelCase}"); // optional - assumes you will have named route same as entity
+
     return NextResponse.json(${
       driver === "mysql" ? "success" : tableNameSingular
     }, { status: 201 });
@@ -74,9 +75,8 @@ export async function PUT(req: Request) {
 
     const { ${
       driver === "mysql" ? "success" : tableNameSingular
-    }, error } = await update${tableNameSingularCapitalised}(validatedParams.id, validatedData);
+    } } = await update${tableNameSingularCapitalised}(validatedParams.id, validatedData);
 
-    if (error) return NextResponse.json({ error }, { status: 500 });
     return NextResponse.json(${
       driver === "mysql" ? "success" : tableNameSingular
     }, { status: 200 });
@@ -97,8 +97,7 @@ export async function DELETE(req: Request) {
     const validatedParams = ${tableNameSingular}IdSchema.parse({ id });
     const { ${
       driver === "mysql" ? "success" : tableNameSingular
-    }, error } = await delete${tableNameSingularCapitalised}(validatedParams.id);
-    if (error) return NextResponse.json({ error }, { status: 500 });
+    } } = await delete${tableNameSingularCapitalised}(validatedParams.id);
 
     return NextResponse.json(${
       driver === "mysql" ? "success" : tableNameSingular
