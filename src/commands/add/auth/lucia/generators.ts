@@ -179,7 +179,7 @@ const Page = async () => {
   const session = await getPageSession();
   if (session?.user) redirect("/");
   return (
-    <main className="max-w-lg mx-auto my-4 bg-card p-10">
+    <main className="max-w-lg mx-auto my-4 bg-secondary p-10">
       <h1 className="text-2xl font-bold text-center">
         Sign in to your account
       </h1>
@@ -476,7 +476,7 @@ export default async function Home() {
       <h1 className="text-2xl font-bold my-2">Profile</h1>
       <pre className="${
         componentLib === "shadcn-ui"
-          ? "bg-card"
+          ? "bg-secondary"
           : "bg-neutral-100 dark:bg-neutral-800"
       } p-4 rounded-lg my-2">
         {JSON.stringify(session, null, 2)}

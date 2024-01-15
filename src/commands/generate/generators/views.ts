@@ -106,7 +106,7 @@ export default async function ${tableNameCapitalised}() {
   }const { ${tableNameCamelCase} } = await api.${tableNameCamelCase}.get${tableNameCapitalised}.query();  
 
   return (
-    <main className="max-w-3xl mx-auto p-4 rounded-lg bg-card">
+    <main>
       <div className="flex justify-between">
         <h1 className="font-semibold text-2xl my-2">${tableNameNormalEnglishCapitalised}</h1>
         <New${tableNameSingularCapitalised}Modal />

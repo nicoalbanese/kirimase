@@ -50,7 +50,7 @@ export const addNavbarAndSettings = () => {
 
   if (componentLib === "shadcn-ui")
     createFile(
-      formatFilePath("settings/page.tsx", {
+      formatFilePath("app/settings/page.tsx", {
         removeExtension: false,
         prefix: "rootPath",
       }),
