@@ -99,7 +99,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
 
     // install shadcn packages (button, dialog, form, input, label) - exec script: pnpm dlx shadcn-ui@latest add _
     // const baseComponents = ["button", "dialog", "form", "input", "label"];
-    const baseComponents = ["dialog", "form"];
+    const baseComponents = ["dialog"];
     schema.fields.filter((field) => field.type.toLowerCase() === "boolean")
       .length > 0
       ? baseComponents.push("checkbox")

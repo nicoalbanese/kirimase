@@ -29,28 +29,28 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
     const rootPath = hasSrc ? "src/" : "";
     createFile(
       rootPath.concat(`app/${tableNameKebabCase}/page.tsx`),
-      generateView(schema),
+      generateView(schema)
     );
     // create components/tableName/TableNameList.tsx
     createFile(
       rootPath.concat(
-        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}List.tsx`,
+        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}List.tsx`
       ),
-      createListComponent(schema),
+      createListComponent(schema)
     );
     // create components/tableName/TableNameForm.tsx
     createFile(
       rootPath.concat(
-        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Form.tsx`,
+        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Form.tsx`
       ),
-      createFormComponent(schema),
+      createFormComponent(schema)
     );
     // create components/tableName/TableNameModal.tsx
     createFile(
       rootPath.concat(
-        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal.tsx`,
+        `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal.tsx`
       ),
-      createModalComponent(schema),
+      createModalComponent(schema)
     );
     // install shadcn packages (button, dialog, form, input, label) - exec script: pnpm dlx shadcn-ui@latest add _
     // const baseComponents = ["button", "dialog", "form", "input", "label"];
@@ -66,7 +66,7 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
       (field) =>
         field.type === "date" ||
         field.type === "timestamp" ||
-        field.type === "DateTime",
+        field.type === "DateTime"
     ).length > 0
       ? baseComponents.push("popover", "calendar")
       : null;
@@ -140,7 +140,7 @@ const createListComponent = (schema: Schema) => {
     tableNameNormalEnglishLowerCase,
   } = formatTableName(schema.tableName);
   const relations = schema.fields.filter(
-    (field) => field.type === "references",
+    (field) => field.type === "references"
   );
   const { t3 } = readConfigFile();
   const { shared, trpc } = getFilePaths();
@@ -148,7 +148,7 @@ const createListComponent = (schema: Schema) => {
   return `"use client";
 import { Complete${tableNameSingularCapitalised} } from "${formatFilePath(
     shared.orm.schemaDir,
-    { prefix: "alias", removeExtension: false },
+    { prefix: "alias", removeExtension: false }
   )}/${tableNameCamelCase}";
 import { ${t3 ? "api as " : ""}trpc } from "${formatFilePath(trpc.trpcClient, {
     prefix: "alias",
@@ -232,10 +232,10 @@ const createformInputComponent = (field: DBField): string => {
             </FormControl>`;
   if (field.type.toLowerCase() == "references") {
     const referencesSingular = pluralize.singular(
-      toCamelCase(field.references),
+      toCamelCase(field.references)
     );
     const { tableNameNormalEnglishSingularLowerCase } = formatTableName(
-      field.references,
+      field.references
     );
     const entity = queryHasJoins(toCamelCase(field.references))
       ? `${referencesSingular}.${referencesSingular}`
@@ -320,7 +320,7 @@ const createFormComponent = (schema: Schema) => {
   } = formatTableName(schema.tableName);
   const { packages, driver, alias, t3 } = readConfigFile();
   const relations = schema.fields.filter(
-    (field) => field.type.toLowerCase() === "references",
+    (field) => field.type.toLowerCase() === "references"
   );
   const { shared, trpc } = getFilePaths();
 
@@ -328,7 +328,7 @@ const createFormComponent = (schema: Schema) => {
 
 import { ${tableNameSingularCapitalised}, New${tableNameSingularCapitalised}Params, insert${tableNameSingularCapitalised}Params } from "${formatFilePath(
     shared.orm.schemaDir,
-    { prefix: "alias", removeExtension: false },
+    { prefix: "alias", removeExtension: false }
   )}/${tableNameCamelCase}";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -361,7 +361,7 @@ import { z } from "zod";${
       (field) =>
         field.type === "date" ||
         field.type === "timestamp" ||
-        field.type === "DateTime",
+        field.type === "DateTime"
     ).length > 0
       ? `import { Popover, PopoverContent, PopoverTrigger } from "${alias}/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
@@ -411,7 +411,7 @@ const ${tableNameSingularCapitalised}Form = ({
           (field) =>
             `${toCamelCase(field.name)}: ${
               defaultValueMappings[driver][field.type]
-            }`,
+            }`
         )
         .join(",\n     ")}
     },
@@ -496,7 +496,7 @@ const ${tableNameSingularCapitalised}Form = ({
               <FormMessage />
             </FormItem>
           )}
-        />`,
+        />`
           )
           .join("\n        ")}
         <Button
@@ -549,7 +549,7 @@ import {
 import ${tableNameSingularCapitalised}Form from "./${tableNameSingularCapitalised}Form";
 import { ${tableNameSingularCapitalised} } from "${formatFilePath(
     shared.orm.schemaDir,
-    { prefix: "alias", removeExtension: false },
+    { prefix: "alias", removeExtension: false }
   )}/${tableNameCamelCase}";
 
 export default function ${tableNameSingularCapitalised}Modal({ 
