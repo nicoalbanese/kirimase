@@ -3,10 +3,13 @@
 // SidebarItems.tsx
 // config/nav.ts
 
+import { on } from "events";
 import { createFile, readConfigFile } from "../../../../utils.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
-export const addNavbar = () => {
+export const addNavbarAndSettings = () => {
+  const { componentLib } = readConfigFile();
+
   // create navbar
   createFile(
     formatFilePath("components/Navbar.tsx", {
@@ -15,6 +18,281 @@ export const addNavbar = () => {
     }),
     generateNavbarTsx()
   );
+
+  // create sidebar
+  createFile(
+    formatFilePath("components/Sidebar.tsx", {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    generateSidebarTsx()
+  );
+
+  // create sidebaritems
+  createFile(
+    formatFilePath("components/SidebarItems.tsx", {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    generateSidebarItemsTsx()
+  );
+
+  // create sidebaritems
+  createFile(
+    formatFilePath("config/nav.ts", {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    generateNavConfig()
+  );
+
+  // create settings page
+
+  if (componentLib === "shadcn-ui")
+    createFile(
+      formatFilePath("settings/page.tsx", {
+        removeExtension: false,
+        prefix: "rootPath",
+      }),
+      generateSettingsPage()
+    );
+};
+
+const generateSettingsPage = () => {
+  return `"use client";
+
+import { Button } from "${formatFilePath("components/ui/button", {
+    prefix: "alias",
+    removeExtension: false,
+  })}";
+import { useTheme } from "next-themes";
+
+export default function Page() {
+  const { setTheme } = useTheme();
+  return (
+    <div>
+      <h1 className="text-2xl font-medium">Settings</h1>
+      <div className="space-y-4 my-4">
+        <div>
+          <h3 className="text-lg font-medium">Appearance</h3>
+          <p className="text-sm text-muted-foreground">
+            Customize the appearance of the app. Automatically switch between
+            day and night themes.
+          </p>
+        </div>
+        <Button
+          asChild
+          variant={"ghost"}
+          className="w-fit h-fit"
+          onClick={() => setTheme("light")}
+        >
+          <div className="flex flex-col">
+            <div className="items-center rounded-md border-2 border-muted p-1 hover:border-accent">
+              <div className="space-y-2 rounded-sm bg-[#ecedef] p-2">
+                <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">
+                  <div className="h-2 w-[80px] rounded-lg bg-[#ecedef]" />
+                  <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
+                </div>
+                <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
+                  <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
+                  <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
+                </div>
+                <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
+                  <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
+                  <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
+                </div>
+              </div>
+            </div>
+            <span className="block w-full p-2 text-center font-normal">
+              Light
+            </span>
+          </div>
+        </Button>
+        <Button
+          asChild
+          variant={"ghost"}
+          onClick={() => setTheme("dark")}
+          className="w-fit h-fit"
+        >
+          <div className="flex flex-col">
+            <div className="items-center rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground">
+              <div className="space-y-2 rounded-sm bg-neutral-950 p-2">
+                <div className="space-y-2 rounded-md bg-neutral-800 p-2 shadow-sm">
+                  <div className="h-2 w-[80px] rounded-lg bg-neutral-400" />
+                  <div className="h-2 w-[100px] rounded-lg bg-neutral-400" />
+                </div>
+                <div className="flex items-center space-x-2 rounded-md bg-neutral-800 p-2 shadow-sm">
+                  <div className="h-4 w-4 rounded-full bg-neutral-400" />
+                  <div className="h-2 w-[100px] rounded-lg bg-neutral-400" />
+                </div>
+                <div className="flex items-center space-x-2 rounded-md bg-neutral-800 p-2 shadow-sm">
+                  <div className="h-4 w-4 rounded-full bg-neutral-400" />
+                  <div className="h-2 w-[100px] rounded-lg bg-neutral-400" />
+                </div>
+              </div>
+            </div>
+            <span className="block w-full p-2 text-center font-normal">
+              Dark
+            </span>
+          </div>
+        </Button>
+        <Button
+          asChild
+          variant={"ghost"}
+          onClick={() => setTheme("system")}
+          className="w-fit h-fit"
+        >
+          <div className="flex flex-col">
+            <div className="items-center rounded-md border-2 border-muted bg-popover p-1 hover:bg-accent hover:text-accent-foreground">
+              <div className="space-y-2 rounded-sm bg-neutral-300 p-2">
+                <div className="space-y-2 rounded-md bg-neutral-600 p-2 shadow-sm">
+                  <div className="h-2 w-[80px] rounded-lg bg-neutral-400" />
+                  <div className="h-2 w-[100px] rounded-lg bg-neutral-400" />
+                </div>
+                <div className="flex items-center space-x-2 rounded-md bg-neutral-600 p-2 shadow-sm">
+                  <div className="h-4 w-4 rounded-full bg-neutral-400" />
+                  <div className="h-2 w-[100px] rounded-lg bg-neutral-400" />
+                </div>
+                <div className="flex items-center space-x-2 rounded-md bg-neutral-600 p-2 shadow-sm">
+                  <div className="h-4 w-4 rounded-full bg-neutral-400" />
+                  <div className="h-2 w-[100px] rounded-lg bg-neutral-400" />
+                </div>
+              </div>
+            </div>
+            <span className="block w-full p-2 text-center font-normal">
+              System
+            </span>
+          </div>
+        </Button>
+      </div>
+    </div>
+  );
+}
+`;
+};
+
+const generateNavConfig = () => {
+  return `import { SidebarLink } from "${formatFilePath(
+    "components/SidebarItems",
+    {
+      prefix: "alias",
+      removeExtension: false,
+    }
+  )}";
+import { Cog, Globe, HomeIcon } from "lucide-react";
+
+type AdditionalLinks = {
+  title: string;
+  links: SidebarLink[];
+};
+
+export const defaultLinks: SidebarLink[] = [
+  { href: "/", title: "Home", icon: HomeIcon },
+  { href: "/account", title: "Account", icon: Cog },
+  { href: "/settings", title: "Settings", icon: Cog },
+];
+
+export const additionalLinks: AdditionalLinks[] = [
+  // {
+  //   title: "Entities",
+  //   links: [{ href: "/authors", title: "Authors", icon: Globe }],
+  // },
+];
+`;
+};
+
+const generateSidebarItemsTsx = () => {
+  return `"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { LucideIcon } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { defaultLinks, additionalLinks } from "@/config/nav";
+
+export interface SidebarLink {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+}
+
+const SidebarItems = () => {
+  return (
+    <>
+      <SidebarLinkGroup links={defaultLinks} />
+      {additionalLinks.length > 0
+        ? additionalLinks.map((l) => (
+            <SidebarLinkGroup
+              links={l.links}
+              title={l.title}
+              border
+              key={l.title}
+            />
+          ))
+        : null}
+    </>
+  );
+};
+export default SidebarItems;
+
+const SidebarLinkGroup = ({
+  links,
+  title,
+  border,
+}: {
+  links: SidebarLink[];
+  title?: string;
+  border?: boolean;
+}) => {
+  const pathname = usePathname();
+
+  return (
+    <div className={border ? "border-border border-t my-8 pt-4" : ""}>
+      {title ? (
+        <h4 className="px-2 mb-2 text-xs uppercase text-muted-foreground tracking-wider">
+          {title}
+        </h4>
+      ) : null}
+      <ul>
+        {links.map((link) => (
+          <li key={link.title}>
+            <SidebarLink link={link} active={pathname === link.href} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+const SidebarLink = ({
+  link,
+  active,
+}: {
+  link: SidebarLink;
+  active: boolean;
+}) => {
+  return (
+    <Link
+      href={link.href}
+      className={\`group transition-colors p-2 inline-block hover:bg-popover hover:text-primary text-muted-foreground text-xs hover:shadow rounded-md w-full\${
+        active ? " text-primary font-semibold" : ""
+      }\`}
+    >
+      <div className="flex items-center">
+        <div
+          className={cn(
+            "opacity-0 left-0 h-6 w-[4px] absolute rounded-r-lg bg-primary",
+            active ? "opacity-100" : "",
+          )}
+        />
+        <link.icon className="h-3.5 mr-1" />
+        <span>{link.title}</span>
+      </div>
+    </Link>
+  );
+};
+`;
 };
 
 const generateSidebarTsx = () => {
@@ -43,7 +321,7 @@ export default Sidebar;
 
 import SidebarItems from "./SidebarItems";${
       componentLib === "shadcn-ui"
-        ? `\nimport { Avatar, AvatarImage } from "./ui/avatar";`
+        ? `\nimport { Avatar, AvatarFallback } from "./ui/avatar";`
         : null
     }
 
@@ -51,7 +329,7 @@ import { AuthSession, getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
       {
         prefix: "alias",
-        removeExtension: false,
+        removeExtension: true,
       }
     )}";
 
@@ -90,13 +368,23 @@ const UserDetails = ({ session }: { session: AuthSession }) => {
         ${
           componentLib === "shadcn-ui"
             ? `<Avatar className="h-10 w-10">
-          <AvatarImage src={user.image} />
+          <AvatarFallback className="border-border border-2 text-muted-foreground">
+            {user.name
+              ? user.name
+                  ?.split(" ")
+                  .map((word) => word[0].toUpperCase())
+                  .join("")
+              : "~"}
+          </AvatarFallback>
         </Avatar>`
-            : `<img
-          src={user.image}
-          className="h-10 w-10 rounded-full"
-          alt={user.id + "_photo"}
-        />`
+            : `<div className="p-1.5 rounded-full border-border border-2 text-muted-foreground">
+          {user.name
+            ? user.name
+                ?.split(" ")
+                .map((word) => word[0].toUpperCase())
+                .join("")
+            : "~"}
+        </div>`
         }
       </div>
     </Link>

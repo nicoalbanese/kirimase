@@ -72,7 +72,7 @@ const Page = async () => {
   const session = await getPageSession();
   if (session) redirect("/");
   return (
-    <main className="max-w-lg mx-auto my-4 bg-card p-10">
+    <main className="max-w-lg mx-auto my-4 bg-secondary p-10">
       <h1 className="text-2xl font-bold text-center">Create an account</h1>
       <AuthForm action="/api/sign-up">
         <Label htmlFor="username" className="text-muted-foreground">
@@ -492,7 +492,7 @@ const generateApiRoutes = () => {
   const { lucia } = getFilePaths();
   const signUpRoute = `import { auth } from "${formatFilePath(
     lucia.libAuthLucia,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 import { LuciaError } from "lucia";
 import * as context from "next/headers";
@@ -586,7 +586,7 @@ export const POST = async (request: NextRequest) => {
 `;
   const signInRoute = `import { auth } from "${formatFilePath(
     lucia.libAuthLucia,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 import * as context from "next/headers";
 import { NextResponse } from "next/server";
@@ -672,7 +672,7 @@ export const POST = async (request: NextRequest) => {
 `;
   const signOutRoute = `import { auth } from "${formatFilePath(
     lucia.libAuthLucia,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 import * as context from "next/headers";
 
@@ -724,7 +724,7 @@ declare namespace Lucia {
 const generateAuthDirFiles = (
   orm: ORMType,
   dbType: DBType,
-  provider: DBProvider,
+  provider: DBProvider
 ) => {
   const { lucia } = getFilePaths();
   let mappings: LuciaAdapterInfo;

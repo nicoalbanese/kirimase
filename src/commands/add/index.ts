@@ -23,7 +23,7 @@ import { addStripe } from "./misc/stripe/index.js";
 import { checkForExistingPackages } from "../init/utils.js";
 import { formatFilePath, getFilePaths } from "../filePaths/index.js";
 import { addKinde } from "./auth/kinde/index.js";
-import { addNavbar } from "./misc/navbar/generators.js";
+import { addNavbarAndSettings } from "./misc/navbar/generators.js";
 
 export const addPackage = async (options?: InitOptions) => {
   const config = readConfigFile();
@@ -106,7 +106,7 @@ export const addPackage = async (options?: InitOptions) => {
         // add account page
         await createAccountSettingsPage();
       }
-      addNavbar();
+      addNavbarAndSettings();
     }
 
     // check if misc

@@ -18,7 +18,7 @@ import {
 export const apiAuthNextAuthTsOld = (
   providers: AuthProvider[],
   dbType: DBType | null,
-  orm: ORMType,
+  orm: ORMType
 ) => {
   const { shared } = getFilePaths();
   const dbIndex = getDbIndexPath();
@@ -50,7 +50,7 @@ ${providersToUse
     (provider) =>
       `import ${capitalised(provider.name)}Provider from "next-auth/providers/${
         provider.name
-      }";`,
+      }";`
   )
   .join("\n")}
 
@@ -127,7 +127,7 @@ export const libAuthUtilsTsWithoutAuthOptions = () => {
   const { "next-auth": nextAuth } = getFilePaths();
   return `import { authOptions } from "${formatFilePath(
     nextAuth.nextAuthApiRoute,
-    { removeExtension: true, prefix: "alias" },
+    { removeExtension: true, prefix: "alias" }
   )}";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -147,7 +147,7 @@ export const checkAuth = async () => {
 export const libAuthUtilsTs = (
   providers: AuthProvider[],
   dbType: DBType | null,
-  orm: ORMType,
+  orm: ORMType
 ) => {
   const { shared } = getFilePaths();
   const dbIndex = getDbIndexPath();
@@ -179,7 +179,7 @@ ${providersToUse
     (provider) =>
       `import ${capitalised(provider.name)}Provider from "next-auth/providers/${
         provider.name
-      }";`,
+      }";`
   )
   .join("\n")}
 
@@ -548,7 +548,7 @@ export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
   fs.writeFileSync(filePath, modifiedRouterContent);
 
   consola.success(
-    "TRPC Router updated successfully to add protectedProcedure.",
+    "TRPC Router updated successfully to add protectedProcedure."
   );
 };
 
@@ -657,7 +657,7 @@ export default async function Home() {
   return (
     <main className="space-y-4">
       {session ? (
-        <pre className="bg-card p-4 rounded-sm overflow-hidden">
+        <pre className="bg-secondary p-4 rounded-sm shadow-sm text-secondary-foreground break-all whitespace-break-spaces">
           {JSON.stringify(session, null, 2)}
         </pre>
       ) : null}

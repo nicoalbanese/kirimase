@@ -12,11 +12,9 @@ import {
   createDrizzleAuthSchema,
   createPrismaAuthSchema,
   createSignInComponent,
-  enableSessionInContext,
   generateUpdatedRootRoute,
   libAuthProviderTsx,
   libAuthUtilsTs,
-  updateTrpcTs,
 } from "./generators.js";
 import { AuthDriver, AuthProvider, AuthProviders } from "./utils.js";
 import { checkbox } from "@inquirer/prompts";
@@ -58,7 +56,7 @@ export const addNextAuth = async (options?: InitOptions) => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    apiAuthNextAuthTs(),
+    apiAuthNextAuthTs()
   );
 
   // 2. create lib/auth/Provider.tsx
@@ -67,7 +65,7 @@ export const addNextAuth = async (options?: InitOptions) => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    libAuthProviderTsx(),
+    libAuthProviderTsx()
   );
 
   // 3. create lib/auth/utils.ts
@@ -76,7 +74,7 @@ export const addNextAuth = async (options?: InitOptions) => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    libAuthUtilsTs(providers, driver, orm),
+    libAuthUtilsTs(providers, driver, orm)
   );
 
   // 4. create lib/db/schema/auth.ts
@@ -87,7 +85,7 @@ export const addNextAuth = async (options?: InitOptions) => {
           removeExtension: false,
           prefix: "rootPath",
         }),
-        createDrizzleAuthSchema(driver),
+        createDrizzleAuthSchema(driver)
       );
       if (t3) {
         updateRootSchema("auth", true, "next-auth");
@@ -95,7 +93,11 @@ export const addNextAuth = async (options?: InitOptions) => {
     }
     if (orm === "prisma") {
       addToPrismaSchema(
-        createPrismaAuthSchema(driver, dbProvider === "planetscale", providers.includes("github")),
+        createPrismaAuthSchema(
+          driver,
+          dbProvider === "planetscale",
+          providers.includes("github")
+        ),
         "Auth"
       );
     }
@@ -107,7 +109,7 @@ export const addNextAuth = async (options?: InitOptions) => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    createSignInComponent(componentLib),
+    createSignInComponent(componentLib)
   );
 
   // 6. If trpc installed, add protectedProcedure // this wont run because it is installed before trpc
@@ -149,7 +151,7 @@ export const addNextAuth = async (options?: InitOptions) => {
         },
       ]),
     ],
-    hasSrc ? "src/" : "",
+    hasSrc ? "src/" : ""
   );
 
   // 7. Install Packages: @auth/core @auth/drizzle-adapter next-auth
@@ -160,7 +162,7 @@ export const addNextAuth = async (options?: InitOptions) => {
       }`,
       dev: "",
     },
-    preferredPackageManager,
+    preferredPackageManager
   );
   addPackageToConfig("next-auth");
   updateConfigFile({ auth: "next-auth" });
@@ -171,10 +173,10 @@ export const addNextAuth = async (options?: InitOptions) => {
 
   providers.forEach((provider) => {
     consola.info(
-      `To get up and running with ${provider}, create credentials at ${AuthProviders[provider].website}`,
+      `To get up and running with ${provider}, create credentials at ${AuthProviders[provider].website}`
     );
     consola.info(
-      `and remember to add /api/auth/callback/${provider} to your ${provider} app's redirect URIs`,
+      `and remember to add /api/auth/callback/${provider} to your ${provider} app's redirect URIs`
     );
   });
 };

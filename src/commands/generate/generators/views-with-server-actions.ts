@@ -230,7 +230,7 @@ export default async function ${tableNameCapitalised}() {
   }
 
   return (
-    <main className="max-w-3xl mx-auto p-4 rounded-lg bg-card">
+    <main>
       <div className="relative">
         <div className="flex justify-between">
           <h1 className="font-semibold text-2xl my-2">${tableNameNormalEnglishCapitalised}</h1>

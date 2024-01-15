@@ -44,7 +44,7 @@ const homePageWithUserButton = (componentLib: ComponentLibType) => {
   if (componentLib === "shadcn-ui") {
     return `import { Button } from "${formatFilePath(
       "components/ui/button.tsx",
-      { prefix: "alias", removeExtension: true },
+      { prefix: "alias", removeExtension: true }
     )}";
 import { getUserAuth } from "${formatFilePath(authUtils, {
       removeExtension: true,
@@ -59,7 +59,7 @@ export default async function Home() {
       <Link href="/account">
         <Button variant="outline">Account and Billing</Button>
       </Link>
-      <pre className="bg-card p-4 rounded-sm">
+      <pre className="bg-secondary p-4 rounded-sm shadow-sm text-secondary-foreground break-all whitespace-break-spaces">
         {JSON.stringify(userAuth, null, 2)}
       </pre>
     </main>
