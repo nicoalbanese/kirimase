@@ -12,6 +12,8 @@ export type Paths = {
       envMjs: string;
       libUtils: string;
       globalCss: string;
+      navbarComponent: string;
+      sidebarComponent: string;
     };
     orm: {
       servicesDir: string;
@@ -26,7 +28,6 @@ export type Paths = {
       updateNameCardComponent: string;
       updateEmailCardComponent: string;
       accountCardComponent: string;
-      navbarComponent: string;
       authSchema?: string;
     };
   };

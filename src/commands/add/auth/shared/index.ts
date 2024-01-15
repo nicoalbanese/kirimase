@@ -33,7 +33,7 @@ export const createAccountSettingsPage = async () => {
         prefix: "rootPath",
         removeExtension: false,
       }),
-      createAccountApiTs(orm),
+      createAccountApiTs(orm)
     );
   }
 
@@ -43,7 +43,7 @@ export const createAccountSettingsPage = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createAccountPage(),
+    createAccountPage()
   );
 
   // create usersettings component
@@ -52,7 +52,7 @@ export const createAccountSettingsPage = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUserSettingsComponent(),
+    createUserSettingsComponent()
   );
 
   await scaffoldAccountSettingsUI(rootPath, withShadCn, auth);
@@ -61,7 +61,7 @@ export const createAccountSettingsPage = async () => {
 export const scaffoldAccountSettingsUI = async (
   rootPath: string,
   withShadCn: boolean,
-  auth: AuthType,
+  auth: AuthType
 ) => {
   const { shared, lucia } = getFilePaths();
   // create updatenamecard
@@ -70,7 +70,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUpdateNameCard(withShadCn, auth !== "lucia"),
+    createUpdateNameCard(withShadCn, auth !== "lucia")
   );
 
   // create updatenamecard
@@ -79,7 +79,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUpdateEmailCard(withShadCn, auth !== "lucia"),
+    createUpdateEmailCard(withShadCn, auth !== "lucia")
   );
 
   // create accountcard components
@@ -88,24 +88,25 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createAccountCardComponent(withShadCn),
+    createAccountCardComponent(withShadCn)
   );
 
   // create navbar component
-  createFile(
-    formatFilePath(shared.auth.navbarComponent, {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    createNavbar(withShadCn, auth === "clerk", auth),
-  );
+  // createFile(
+  //   formatFilePath(shared.init.navbarComponent, {
+  //     prefix: "rootPath",
+  //     removeExtension: false,
+  //   }),
+  //   createNavbar(withShadCn, auth === "clerk", auth)
+  // );
+
   if (withShadCn) {
     createFile(
       formatFilePath(lucia.signOutButtonComponent, {
         prefix: "rootPath",
         removeExtension: false,
       }),
-      createSignOutBtn(),
+      createSignOutBtn()
     );
   }
   // add navbar to root layout

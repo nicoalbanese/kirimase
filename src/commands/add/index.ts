@@ -1,4 +1,4 @@
-import { checkbox, select, Separator } from "@inquirer/prompts";
+import { checkbox, confirm, select, Separator } from "@inquirer/prompts";
 import { Packages } from "./utils.js";
 import { readConfigFile, replaceFile, updateConfigFile } from "../../utils.js";
 import { addDrizzle } from "./orm/drizzle/index.js";
@@ -23,6 +23,7 @@ import { addStripe } from "./misc/stripe/index.js";
 import { checkForExistingPackages } from "../init/utils.js";
 import { formatFilePath, getFilePaths } from "../filePaths/index.js";
 import { addKinde } from "./auth/kinde/index.js";
+import { addNavbar } from "./misc/navbar/generators.js";
 
 export const addPackage = async (options?: InitOptions) => {
   const config = readConfigFile();
@@ -30,7 +31,8 @@ export const addPackage = async (options?: InitOptions) => {
   if (config) {
     if (config.packages?.length === 0)
       await checkForExistingPackages(config.rootPath);
-    const { packages, orm, auth, componentLib, rootPath } = readConfigFile();
+    const { packages, orm, auth, componentLib, rootPath, t3 } =
+      readConfigFile();
     const { shared } = getFilePaths();
 
     const nullOption = { name: "None", value: null };
@@ -104,6 +106,7 @@ export const addPackage = async (options?: InitOptions) => {
         // add account page
         await createAccountSettingsPage();
       }
+      addNavbar();
     }
 
     // check if misc
