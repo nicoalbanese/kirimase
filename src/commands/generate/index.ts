@@ -26,6 +26,7 @@ import { scaffoldModel } from "./generators/model/index.js";
 import { scaffoldServerActions } from "./generators/serverActions.js";
 import { scaffoldViewsAndComponentsWithServerActions } from "./generators/views-with-server-actions.js";
 import { addLinkToSidebar } from "./generators/model/views-shared.js";
+import { installShadcnComponentList } from "../add/utils.js";
 
 function provideInstructions() {
   consola.info(
@@ -373,6 +374,7 @@ export async function buildSchema() {
     if (resourceType.includes("server_actions")) scaffoldServerActions(schema);
     if (resourceType.includes("views_and_components_server_actions"))
       scaffoldViewsAndComponentsWithServerActions(schema);
+    await installShadcnComponentList();
   } else {
     consola.warn(
       "You need to have an ORM installed in order to use the scaffold command."

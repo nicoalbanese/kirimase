@@ -15,6 +15,7 @@ import { consola } from "consola";
 import { addPackage } from "../add/index.js";
 import { existsSync, readFileSync, readSync } from "fs";
 import path from "path";
+import { checkForPackageManager } from "./utils.js";
 
 export async function initProject(options?: InitOptions) {
   const nextjsProjectExists = existsSync("package.json");
@@ -31,6 +32,7 @@ export async function initProject(options?: InitOptions) {
     process.exit(0);
   }
   const srcExists =
+    usingAppDirWithSrc ??
     options.hasSrcFolder ??
     (await select({
       message: "Are you using a 'src' folder?",
@@ -42,6 +44,7 @@ export async function initProject(options?: InitOptions) {
 
   // console.log(options);
   const preferredPackageManager =
+    checkForPackageManager() ||
     options?.packageManager ||
     ((await select({
       message: "Please pick your preferred package manager",

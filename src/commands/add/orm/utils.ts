@@ -27,14 +27,14 @@ export const generateDbUrl = (dbType: DBType, provider?: DBProvider) => {
 };
 
 export const prismaGenerate = async (packageManager: PMType) => {
-  consola.start(
-    `Running Prisma generate command to generate zod-prisma types.`
-  );
+  // consola.start(
+  //   `Running Prisma generate command to generate zod-prisma types.`
+  // );
   try {
     await execa(pmInstallCommand[packageManager], ["prisma", "generate"], {
       stdio: "inherit",
     });
-    consola.success(`Successfully generated zod-prisma types`);
+    // consola.success(`Successfully generated zod-prisma types`);
   } catch (error) {
     consola.error(`Failed to run Prisma generate: ${error.message}`);
   }

@@ -38,9 +38,9 @@ export const addLucia = async () => {
     t3,
   } = readConfigFile();
   // ask whether want to use shadcnui
-  consola.info(
-    "Kirimase generates views and components for authenticating using Lucia."
-  );
+  // consola.info(
+  //   "Kirimase generates views and components for authenticating using Lucia."
+  // );
   // const installShadCn = await confirm({
   //   message: "Would you like to install Shadcn-UI?",
   //   default: true,
@@ -227,5 +227,5 @@ export const addLucia = async () => {
   // add package to config
   addPackageToConfig("lucia");
   updateConfigFile({ auth: "lucia" });
-  consola.success("Successfully installed Lucia!");
+  // consola.success("Successfully installed Lucia!");
 };

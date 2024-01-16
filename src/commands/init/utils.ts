@@ -5,6 +5,7 @@ import {
   DBProvider,
   DBProviderOptions,
   DBType,
+  PMType,
 } from "../../types.js";
 import {
   installPackages,
@@ -249,4 +250,16 @@ generator zod {
 
   replaceFile("prisma/schema.prisma", newSchema);
   consola.info("Updated Prisma schema");
+};
+
+export const checkForPackageManager = (): PMType | null => {
+  const bun = existsSync("bun.lockb");
+  const pnpm = existsSync("pnpm-lock.yaml");
+  const yarn = existsSync("yarn.lock");
+
+  if (bun) return "bun";
+  if (pnpm) return "pnpm";
+  if (yarn) return "yarn";
+
+  return null;
 };
