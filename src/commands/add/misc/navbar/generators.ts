@@ -404,18 +404,22 @@ const UserDetails = ({ session }: { session: AuthSession }) => {
 };
 
 const generateNavbarTsx = () => {
+  const { componentLib } = readConfigFile();
   return `"use client";
 
 import Link from "next/link";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
-
-import { AlignRight } from "lucide-react";
-
-import { Button } from "${formatFilePath("components/ui/button", {
-    prefix: "alias",
-    removeExtension: false,
-  })}";
+import { usePathname } from "next/navigation";${
+    componentLib === "shadcn-ui"
+      ? `\n\nimport { AlignRight } from "lucide-react";\n\n import { Button } from "${formatFilePath(
+          "components/ui/button",
+          {
+            prefix: "alias",
+            removeExtension: false,
+          }
+        )}";`
+      : ""
+  }
 import { defaultLinks } from "${formatFilePath("config/nav", {
     prefix: "alias",
     removeExtension: false,
@@ -428,9 +432,30 @@ export default function Navbar() {
     <div className="md:hidden border-b mb-4 pb-2 w-full">
       <nav className="flex justify-between w-full items-center">
         <div className="font-semibold text-lg">Logo</div>
-        <Button variant="ghost" onClick={() => setOpen(!open)}>
+        ${
+          componentLib === "shadcn-ui"
+            ? `<Button variant="ghost" onClick={() => setOpen(!open)}>
           <AlignRight />
-        </Button>
+        </Button>`
+            : `<button onClick={() => setOpen(!open)}>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            className="lucide lucide-align-right hover:bg-muted p-1 h-8 w-8 rounded-md"
+          >
+            <line x1="21" x2="3" y1="6" y2="6" />
+            <line x1="21" x2="9" y1="12" y2="12" />
+            <line x1="21" x2="7" y1="18" y2="18" />
+          </svg>
+        </button>`
+        }
       </nav>
       {open ? (
         <div className="my-4 p-4 bg-muted">
