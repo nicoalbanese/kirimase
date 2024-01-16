@@ -450,8 +450,7 @@ const EmptyState = ({ openModal }: { openModal: TOpenModal }) => {
       </p>
       <div className="mt-6">
         <Button onClick={() => openModal()}>
-          <PlusIcon className="h-4" /> New ${tableNameSingularCapitalised}
-        </Button>
+          <PlusIcon className="h-4" /> New ${tableNameNormalEnglishCapitalised} </Button>
       </div>
     </div>
   );

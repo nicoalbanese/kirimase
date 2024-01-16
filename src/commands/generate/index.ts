@@ -25,10 +25,11 @@ import {
 import { scaffoldModel } from "./generators/model/index.js";
 import { scaffoldServerActions } from "./generators/serverActions.js";
 import { scaffoldViewsAndComponentsWithServerActions } from "./generators/views-with-server-actions.js";
+import { addLinkToSidebar } from "./generators/model/views-shared.js";
 
 function provideInstructions() {
   consola.info(
-    "Quickly generate your Model (Drizzle schema + queries / mutations), Controllers (API Routes and TRPC Routes), and Views",
+    "Quickly generate your Model (Drizzle schema + queries / mutations), Controllers (API Routes and TRPC Routes), and Views"
   );
 }
 
@@ -170,9 +171,7 @@ async function askForResourceType() {
               : false,
         },
       ].filter((item) =>
-        viewRequested
-          ? !viewRequested.includes(item.value.split("_")[0])
-          : item,
+        viewRequested ? !viewRequested.includes(item.value.split("_")[0]) : item
       ),
     })) as TResource[];
   }
@@ -210,7 +209,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
     const currentSchemas = getCurrentSchemas();
 
     const baseFieldTypeChoices = Object.keys(
-      createOrmMappings()[orm][dbType].typeMappings,
+      createOrmMappings()[orm][dbType].typeMappings
     )
       .filter((field) => field !== "id")
       .map((field) => {
@@ -223,7 +222,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
         currentSchemas[0] === toCamelCase(tableName));
     const fieldTypeChoices = removeReferenceOption
       ? baseFieldTypeChoices.filter(
-          (field) => field.name.toLowerCase() !== "references",
+          (field) => field.name.toLowerCase() !== "references"
         )
       : baseFieldTypeChoices;
 
@@ -354,6 +353,18 @@ export async function buildSchema() {
       };
     }
 
+    if (
+      resourceType.includes("views_and_components_trpc") ||
+      resourceType.includes("views_and_components_server_actions")
+    ) {
+      const addToSidebar = await confirm({
+        message:
+          "Would you like to add a link to this new entity in your sidebar?",
+        default: true,
+      });
+      if (addToSidebar) addLinkToSidebar(tableName);
+    }
+
     if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
     if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
     if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
@@ -364,7 +375,7 @@ export async function buildSchema() {
       scaffoldViewsAndComponentsWithServerActions(schema);
   } else {
     consola.warn(
-      "You need to have an ORM installed in order to use the scaffold command.",
+      "You need to have an ORM installed in order to use the scaffold command."
     );
     addPackage();
   }
