@@ -320,9 +320,11 @@ export default Sidebar;
     return `import Link from "next/link";
 
 import SidebarItems from "./SidebarItems";${
-      componentLib === "shadcn-ui"
-        ? `\nimport { Avatar, AvatarFallback } from "./ui/avatar";`
-        : null
+      auth === "clerk"
+        ? `import { UserButton } from "@clerk/nextjs";`
+        : componentLib === "shadcn-ui"
+          ? `\nimport { Avatar, AvatarFallback } from "./ui/avatar";`
+          : null
     }
 
 import { AuthSession, getUserAuth } from "${formatFilePath(
@@ -356,6 +358,8 @@ const UserDetails = ({ session }: { session: AuthSession }) => {
   if (session.session === null) return null;
   const { user } = session.session;
 
+  if (!user?.name || user.name.length == 0) return null;
+
   return (
     <Link href="/account">
       <div className="flex items-center justify-between w-full border-t border-border pt-4 px-2">
@@ -366,8 +370,10 @@ const UserDetails = ({ session }: { session: AuthSession }) => {
           </p>
         </div>
         ${
-          componentLib === "shadcn-ui"
-            ? `<Avatar className="h-10 w-10">
+          auth === "clerk"
+            ? `<UserButton afterSignOutUrl="/" />`
+            : componentLib === "shadcn-ui"
+              ? `<Avatar className="h-10 w-10">
           <AvatarFallback className="border-border border-2 text-muted-foreground">
             {user.name
               ? user.name
@@ -377,7 +383,7 @@ const UserDetails = ({ session }: { session: AuthSession }) => {
               : "~"}
           </AvatarFallback>
         </Avatar>`
-            : `<div className="p-1.5 rounded-full border-border border-2 text-muted-foreground">
+              : `<div className="p-1.5 rounded-full border-border border-2 text-muted-foreground">
           {user.name
             ? user.name
                 ?.split(" ")
