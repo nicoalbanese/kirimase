@@ -15,6 +15,24 @@ addCommonOptions(program.command("init"))
 program
   .command("generate")
   .description("Generate a new resource")
+  .option("-r, --resourceTypes <types>", "Resource types", (types) => {
+    if (!types) return undefined;
+    const parts = types.split(",");
+    if (parts.length === 0) return undefined;
+    return parts;
+  })
+  .option("-t, --table <string>", "Table name")
+  .option("-f, --fields <fields>", "Fields in JSON format", (fields) => {
+    try {
+      if (!fields) return undefined;
+      return JSON.parse(fields);
+    } catch (error) {
+      console.error("Error parsing fields: ", error);
+      process.exit(1);
+    }
+  })
+  .option("-i, --index <string>", "Database index")
+  .option("-b, --belongsToUser <belongs-to-user>", "Belongs to user flag. yes/no", false)
   .action(buildSchema);
 
 addCommonOptions(program.command("add"))

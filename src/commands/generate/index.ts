@@ -5,6 +5,7 @@ import {
   DBField,
   DBType,
   DrizzleColumnType,
+  GenerateOptions,
   ORMType,
   PrismaColumnType,
 } from "../../types.js";
@@ -320,7 +321,7 @@ export function preBuild() {
   return true;
 }
 
-export async function buildSchema() {
+export async function buildSchema(options?: GenerateOptions) {
   const ready = preBuild();
 
   if (!ready) return;
@@ -331,13 +332,20 @@ export async function buildSchema() {
 
   if (orm !== null) {
     provideInstructions();
-    const resourceType = await askForResourceType();
-    const tableName = await askForTable();
-    const fields = await askForFields(orm, driver, tableName);
-    const indexedField = await askForIndex(fields);
+    const resourceType = options.resourceTypes || (await askForResourceType());
+    const tableName = options.table || (await askForTable());
+    const fields =
+      options.fields || (await askForFields(orm, driver, tableName));
+    const indexedField =
+      typeof options.index === "string"
+        ? options.index || null
+        : await askForIndex(fields);
     let schema: Schema;
     if (resourceType.includes("model") && auth !== null) {
-      const belongsToUser = await askIfBelongsToUser();
+      const belongsToUser =
+        typeof options.belongsToUser === "string"
+          ? options.belongsToUser === "yes"
+          : await askIfBelongsToUser();
       schema = {
         tableName,
         fields,
