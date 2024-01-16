@@ -101,13 +101,13 @@ export type UpdateConfig = Partial<Config>;
 export type InitOptions = {
   hasSrcFolder?: "yes" | "no";
   packageManager?: PMType;
-  orm?: ORMType;
+  orm?: ORMType | null;
   db?: DBType;
   dbProvider?: DBProvider;
-  auth?: AuthType;
-  authProviders?: AuthProvider[];
+  auth?: AuthType | null;
+  authProviders?: AuthProvider[] | null;
   miscPackages?: AvailablePackage[];
-  componentLib?: ComponentLibType;
+  componentLib?: ComponentLibType | null;
   includeExample?: "yes" | "no";
 };
 

@@ -19,51 +19,16 @@ import {
   installDependencies,
   updateTsConfigTarget,
 } from "./generators.js";
-import { DBProviders } from "../../../init/utils.js";
 
-export const addDrizzle = async (initOptions?: InitOptions) => {
+export const addDrizzle = async (
+  dbType: DBType,
+  dbProvider: DBProvider,
+  initOptions?: InitOptions
+) => {
   const { preferredPackageManager, hasSrc, rootPath } = readConfigFile();
 
   let libPath = "";
   hasSrc ? (libPath = "src/lib") : (libPath = "lib");
-
-  const dbType =
-    initOptions.db ||
-    ((await select({
-      message: "Please choose your DB type",
-      choices: [
-        { name: "Postgres", value: "pg" },
-        // new Separator(),
-        {
-          name: "MySQL",
-          value: "mysql",
-          // disabled: wrapInParenthesis("MySQL is not yet supported"),
-        },
-        {
-          name: "SQLite",
-          value: "sqlite",
-          //   disabled:
-          //     preferredPackageManager === "bun"
-          //       ? wrapInParenthesis(
-          //           "Drizzle Kit doesn't support SQLite with Bun yet",
-          //         )
-          //       : false,
-        },
-      ],
-    })) as DBType);
-
-  const dbProviders = DBProviders[dbType].filter((p) => {
-    if (preferredPackageManager === "bun") return p.value !== "better-sqlite3";
-    else return p.value !== "bun-sqlite";
-  });
-
-  const dbProvider =
-    initOptions?.dbProvider ||
-    ((await select({
-      message: "Please choose your DB Provider",
-      // choices: DBProviders[dbType],
-      choices: dbProviders,
-    })) as DBProvider);
 
   let databaseUrl = "";
 

@@ -17,7 +17,6 @@ import {
   libAuthUtilsTs,
 } from "./generators.js";
 import { AuthDriver, AuthProvider, AuthProviders } from "./utils.js";
-import { checkbox } from "@inquirer/prompts";
 import { addContextProviderToLayout } from "../../utils.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import { addToPrismaSchema } from "../../../generate/utils.js";
@@ -27,16 +26,10 @@ import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import { updateRootSchema } from "../../../generate/generators/model/utils.js";
 import { updateTrpcWithSessionIfInstalled } from "../shared/index.js";
 
-export const addNextAuth = async (options?: InitOptions) => {
-  const providers =
-    options?.authProviders ||
-    ((await checkbox({
-      message: "Select a provider to add",
-      choices: Object.keys(AuthProviders).map((p) => {
-        return { name: p, value: p };
-      }),
-    })) as AuthProvider[]);
-
+export const addNextAuth = async (
+  providers: AuthProvider[],
+  options?: InitOptions
+) => {
   const {
     hasSrc,
     preferredPackageManager,
