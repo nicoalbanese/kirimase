@@ -160,16 +160,16 @@ export const installPackagesFromList = async () => {
   const { preferredPackageManager } = readConfigFile();
 
   const dedupedList = {
-    regular: new Set(installList.regular),
-    dev: new Set(installList.dev),
+    regular: [...new Set(installList.regular)],
+    dev: [...new Set(installList.dev)],
   };
 
   const formattedInstallList = {
-    regular: installList.regular
+    regular: dedupedList.regular
       .map((i) => i.trim())
       .join(" ")
       .trim(),
-    dev: installList.dev
+    dev: dedupedList.dev
       .map((i) => i.trim())
       .join(" ")
       .trim(),
