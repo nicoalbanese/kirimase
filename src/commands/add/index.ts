@@ -1,6 +1,11 @@
 import { checkbox, confirm, select, Separator } from "@inquirer/prompts";
 import { Packages } from "./utils.js";
-import { readConfigFile, replaceFile, updateConfigFile } from "../../utils.js";
+import {
+  installPackages,
+  readConfigFile,
+  replaceFile,
+  updateConfigFile,
+} from "../../utils.js";
 import { addDrizzle } from "./orm/drizzle/index.js";
 import { addNextAuth } from "./auth/next-auth/index.js";
 import { addTrpc } from "./misc/trpc/index.js";
@@ -24,6 +29,10 @@ import { checkForExistingPackages } from "../init/utils.js";
 import { formatFilePath, getFilePaths } from "../filePaths/index.js";
 import { addKinde } from "./auth/kinde/index.js";
 import { addNavbarAndSettings } from "./misc/navbar/generators.js";
+import {
+  generateGlobalsCss,
+  generateUpdatedTWConfig,
+} from "./misc/defaultStyles/generators.js";
 
 export const addPackage = async (options?: InitOptions) => {
   const config = readConfigFile();
@@ -31,8 +40,15 @@ export const addPackage = async (options?: InitOptions) => {
   if (config) {
     if (config.packages?.length === 0)
       await checkForExistingPackages(config.rootPath);
-    const { packages, orm, auth, componentLib, rootPath, t3 } =
-      readConfigFile();
+    const {
+      packages,
+      orm,
+      auth,
+      componentLib,
+      rootPath,
+      t3,
+      preferredPackageManager,
+    } = readConfigFile();
     const { shared } = getFilePaths();
 
     const nullOption = { name: "None", value: null };
@@ -47,13 +63,20 @@ export const addPackage = async (options?: InitOptions) => {
 
       if (componentLibToInstall === "shadcn-ui") await installShadcnUI([]);
       if (componentLibToInstall === null) {
+        installPackages(
+          { regular: "lucide-react", dev: "" },
+          preferredPackageManager
+        );
+        // add to tailwindconfig
+        replaceFile("tailwind.config.ts", generateUpdatedTWConfig());
+
+        // add to globalcss colors
         replaceFile(
           formatFilePath(shared.init.globalCss, {
             removeExtension: false,
             prefix: "rootPath",
           }),
-          `@tailwind base;\n@tailwind components;\n@tailwind utilities;
-`
+          generateGlobalsCss()
         );
         updateConfigFile({ componentLib: null });
       }

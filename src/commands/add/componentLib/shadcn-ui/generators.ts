@@ -154,7 +154,7 @@ const generateGlobalsCss = () => {
     @apply border-border;
   }
   body {
-    @apply bg-card text-foreground;
+    @apply bg-background text-foreground;
   }
 }
 `;
