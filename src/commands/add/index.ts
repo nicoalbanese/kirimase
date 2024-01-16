@@ -63,7 +63,8 @@ export const addPackage = async (options?: InitOptions) => {
 
       if (componentLibToInstall === "shadcn-ui") await installShadcnUI([]);
       if (componentLibToInstall === null) {
-        installPackages(
+        consola.info("Installing Lucide React for icons.");
+        await installPackages(
           { regular: "lucide-react", dev: "" },
           preferredPackageManager
         );

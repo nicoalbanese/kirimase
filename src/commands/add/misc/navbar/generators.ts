@@ -205,6 +205,7 @@ export const additionalLinks: AdditionalLinks[] = [
 };
 
 const generateSidebarItemsTsx = () => {
+  const { componentLib } = readConfigFile();
   return `"use client";
 
 import Link from "next/link";
@@ -284,10 +285,16 @@ const SidebarLink = ({
     >
       <div className="flex items-center">
         <div
-          className={cn(
+          ${
+            componentLib === "shadcn-ui"
+              ? `className={cn(
             "opacity-0 left-0 h-6 w-[4px] absolute rounded-r-lg bg-primary",
             active ? "opacity-100" : "",
-          )}
+          )}`
+              : `className={\`opacity-0 left-0 h-6 w-[4px] absolute rounded-r-lg bg-primary\${
+            active ? " opacity-100" : ""
+          }\`}`
+          }
         />
         <link.icon className="h-3.5 mr-1" />
         <span>{link.title}</span>
