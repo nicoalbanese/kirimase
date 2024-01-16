@@ -1,5 +1,4 @@
-import { checkbox, confirm, select, Separator } from "@inquirer/prompts";
-import { Packages } from "./utils.js";
+import { confirm } from "@inquirer/prompts";
 import {
   installPackages,
   readConfigFile,
@@ -13,22 +12,13 @@ import { installShadcnUI } from "./componentLib/shadcn-ui/index.js";
 import { consola } from "consola";
 import { initProject } from "../init/index.js";
 import { addPrisma } from "./orm/prisma/index.js";
-import {
-  AuthType,
-  ComponentLibType,
-  ORMType,
-  PackageChoice,
-  InitOptions,
-  DBProvider,
-  DBType,
-  AvailablePackage,
-} from "../../types.js";
+import { ORMType, InitOptions } from "../../types.js";
 import { addClerk } from "./auth/clerk/index.js";
 import { addResend } from "./misc/resend/index.js";
 import { addLucia } from "./auth/lucia/index.js";
 import { createAccountSettingsPage } from "./auth/shared/index.js";
 import { addStripe } from "./misc/stripe/index.js";
-import { checkForExistingPackages, DBProviders } from "../init/utils.js";
+import { checkForExistingPackages } from "../init/utils.js";
 import { formatFilePath, getFilePaths } from "../filePaths/index.js";
 import { addKinde } from "./auth/kinde/index.js";
 import { addNavbarAndSettings } from "./misc/navbar/generators.js";
@@ -36,7 +26,7 @@ import {
   generateGlobalsCss,
   generateUpdatedTWConfig,
 } from "./misc/defaultStyles/generators.js";
-import { AuthProvider, AuthProviders } from "./auth/next-auth/utils.js";
+
 import {
   askAuth,
   askAuthProvider,
@@ -49,10 +39,12 @@ import {
 
 const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
   const config = readConfigFile();
+  console.log(config);
 
-  const currentConfig: InitOptions = {};
   // prompt component lib
-  const componentLib = await askComponentLib(options);
+  const componentLib = config.componentLib
+    ? undefined
+    : await askComponentLib(options);
 
   // prompt orm
   let orm: ORMType;
@@ -72,7 +64,9 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
     orm === null || config.driver ? undefined : await askDbType(options);
 
   const dbProvider =
-    orm === null || (config.driver && config.t3 === true)
+    orm === null ||
+    (config.driver && config.t3 === true) ||
+    (config.provider && config.t3 === false)
       ? undefined
       : await askDbProvider(options, dbType, config.preferredPackageManager);
 
@@ -98,41 +92,25 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
 };
 
 export const addPackage = async (options?: InitOptions) => {
-  const config = readConfigFile();
+  const initialConfig = readConfigFile();
 
-  if (config) {
-    if (config.packages?.length === 0)
-      await checkForExistingPackages(config.rootPath);
-    const {
-      packages,
-      orm,
-      auth,
-      componentLib,
-      rootPath,
-      t3,
-      preferredPackageManager,
-    } = readConfigFile();
+  if (initialConfig) {
+    if (initialConfig.packages?.length === 0)
+      await checkForExistingPackages(initialConfig.rootPath);
+    const config = readConfigFile();
     const { shared } = getFilePaths();
 
-    const nullOption = { name: "None", value: null };
+    const promptResponse = await promptUser(options);
+    consola.box(promptResponse);
 
-    const initOptions = await promptUser(options);
-    consola.box(initOptions);
-
-    // if (componentLib === undefined) {
-    //   const componentLibToInstall =
-    //     options?.componentLib ||
-    //     ((await select({
-    //       message: "Select a component library to use:",
-    //       choices: [...Packages.componentLib, new Separator(), nullOption],
-    //     })) as ComponentLibType | null);
-    //
-    //   if (componentLibToInstall === "shadcn-ui") await installShadcnUI([]);
-    //   if (componentLibToInstall === null) {
+    // if (config.componentLib === undefined) {
+    //   if (promptResponse.componentLib === "shadcn-ui")
+    //     await installShadcnUI([]);
+    //   if (promptResponse.componentLib === null) {
     //     consola.info("Installing Lucide React for icons.");
     //     await installPackages(
     //       { regular: "lucide-react", dev: "" },
-    //       preferredPackageManager
+    //       config.preferredPackageManager
     //     );
     //     // add to tailwindconfig
     //     replaceFile("tailwind.config.ts", generateUpdatedTWConfig());
@@ -150,49 +128,40 @@ export const addPackage = async (options?: InitOptions) => {
     // }
     //
     // // check if orm
-    // if (orm === undefined) {
-    //   const ormToInstall =
-    //     options?.orm ||
-    //     ((await select({
-    //       message: "Select an ORM to use:",
-    //       choices: [...Packages.orm, new Separator(), nullOption],
-    //       // choices: [...Packages.orm],
-    //     })) as ORMType | null);
-    //
-    //   if (ormToInstall === "drizzle")
-    //     await addDrizzle(initOptions.db, initOptions.dbProvider, options);
-    //   if (ormToInstall === "prisma") await addPrisma(options);
-    //   if (ormToInstall === null)
+    // if (config.orm === undefined) {
+    //   if (promptResponse.orm === "drizzle")
+    //     await addDrizzle(
+    //       promptResponse.db,
+    //       promptResponse.dbProvider,
+    //       promptResponse.includeExample,
+    //       options
+    //     );
+    //   if (promptResponse.orm === "prisma") await addPrisma(options);
+    //   if (promptResponse === null)
     //     updateConfigFile({ orm: null, driver: null, provider: null });
     // }
     // // check if auth
-    // if (auth === undefined) {
-    //   const { orm: ormPostPrompt } = readConfigFile();
-    //   if (ormPostPrompt === undefined) {
-    //     consola.warn(
-    //       "You cannot install an authentication package without an ORM."
-    //     );
-    //     consola.info("Please run `kirimase init` again.");
-    //     consola.info(
-    //       "If you are seeing this message, it is likely because you misspelled your 'orm' option."
-    //     );
-    //     consola.info("Your requested option: -o", options.orm);
-    //     consola.info("Available options: -o prisma, -o drizzle");
-    //     process.exit(0);
-    //   }
-    //   const authToInstall =
-    //     options?.auth ||
-    //     ((await select({
-    //       message: "Select an authentication package to use:",
-    //       choices: [...Packages.auth, new Separator(), nullOption],
-    //     })) as AuthType | null);
+    // if (config.auth === undefined) {
+    //   // const { orm: ormPostPrompt } = readConfigFile();
+    //   // if (ormPostPrompt === undefined) {
+    //   //   consola.warn(
+    //   //     "You cannot install an authentication package without an ORM."
+    //   //   );
+    //   //   consola.info("Please run `kirimase init` again.");
+    //   //   consola.info(
+    //   //     "If you are seeing this message, it is likely because you misspelled your 'orm' option."
+    //   //   );
+    //   //   consola.info("Your requested option: -o", options.orm);
+    //   //   consola.info("Available options: -o prisma, -o drizzle");
+    //   //   process.exit(0);
+    //   // }
     //
-    //   if (authToInstall === "next-auth")
-    //     await addNextAuth(initOptions.authProviders, options);
-    //   if (authToInstall === "clerk") await addClerk();
-    //   if (authToInstall === "lucia") await addLucia();
-    //   if (authToInstall === "kinde") await addKinde();
-    //   if (authToInstall === null) {
+    //   if (promptResponse.auth === "next-auth")
+    //     await addNextAuth(promptResponse.authProviders, options);
+    //   if (promptResponse.auth === "clerk") await addClerk();
+    //   if (promptResponse.auth === "lucia") await addLucia();
+    //   if (promptResponse.auth === "kinde") await addKinde();
+    //   if (promptResponse.auth === null) {
     //     updateConfigFile({ auth: null });
     //   } else {
     //     // add account page
@@ -202,35 +171,14 @@ export const addPackage = async (options?: InitOptions) => {
     // }
     //
     // // check if misc
-    // let uninstalledPackages: PackageChoice[] = [];
-    // if (packages.length === 0) {
-    //   const { packages: packagesPostOrmAndAuth } = readConfigFile();
-    //   uninstalledPackages = Packages.misc.filter(
-    //     (p) => !packagesPostOrmAndAuth.includes(p.value)
-    //   );
-    // } else {
-    //   uninstalledPackages = Packages.misc.filter(
-    //     (p) => !packages.includes(p.value)
-    //   );
-    // }
-    // if (uninstalledPackages.length > 0) {
-    //   const packageToInstall =
-    //     options?.miscPackages ||
-    //     (await checkbox({
-    //       message: "Select any miscellaneous packages to add:",
-    //       choices: uninstalledPackages,
-    //     }));
     //
-    //   if (packageToInstall.includes("trpc")) await addTrpc();
-    //   if (packageToInstall.includes("shadcn-ui"))
-    //     await installShadcnUI(packageToInstall);
-    //   if (packageToInstall.includes("resend"))
-    //     await addResend(packageToInstall);
-    //   if (packageToInstall.includes("stripe"))
-    //     await addStripe(packageToInstall);
-    // } else {
-    //   consola.info("All available packages are already installed");
-    // }
+    // if (promptResponse.miscPackages.includes("trpc")) await addTrpc();
+    // if (promptResponse.miscPackages.includes("shadcn-ui"))
+    //   await installShadcnUI(promptResponse.miscPackages);
+    // if (promptResponse.miscPackages.includes("resend"))
+    //   await addResend(promptResponse.miscPackages);
+    // if (promptResponse.miscPackages.includes("stripe"))
+    //   await addStripe(promptResponse.miscPackages);
   } else {
     consola.warn("No config file found, initializing project...");
     initProject(options);

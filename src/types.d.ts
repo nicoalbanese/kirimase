@@ -108,7 +108,7 @@ export type InitOptions = {
   authProviders?: AuthProvider[] | null;
   miscPackages?: AvailablePackage[];
   componentLib?: ComponentLibType | null;
-  includeExample?: "yes" | "no";
+  includeExample?: boolean;
 };
 
 // export type BuildOptions = {

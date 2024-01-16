@@ -46,8 +46,5 @@ function addCommonOptions(command: Command) {
       "-mp, --misc-packages <packages...>",
       "misc packages (resend, stripe, trpc)"
     )
-    .option(
-      "-ie, --include-example <include>",
-      "include example model in schema"
-    );
+    .option("-ie, --include-example", "include example model in schema");
 }

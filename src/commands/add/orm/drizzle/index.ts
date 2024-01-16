@@ -23,6 +23,7 @@ import {
 export const addDrizzle = async (
   dbType: DBType,
   dbProvider: DBProvider,
+  includeExampleModel: boolean,
   initOptions?: InitOptions
 ) => {
   const { preferredPackageManager, hasSrc, rootPath } = readConfigFile();
@@ -42,15 +43,6 @@ export const addDrizzle = async (
 
   if (dbProvider === "neon")
     databaseUrl = databaseUrl.concat("?sslmode=require");
-
-  const includeExampleModel =
-    typeof initOptions?.includeExample === "string"
-      ? initOptions.includeExample === "yes"
-      : await confirm({
-          message:
-            "Would you like to include an example model? (suggested for new users)",
-          default: false,
-        });
 
   // create all the files here
 

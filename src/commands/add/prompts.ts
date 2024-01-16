@@ -1,4 +1,4 @@
-import { Separator, checkbox, select } from "@inquirer/prompts";
+import { Separator, checkbox, select, confirm } from "@inquirer/prompts";
 import { Packages } from "./utils.js";
 import {
   AuthType,
@@ -75,6 +75,17 @@ export const askDbProvider = async (
   );
 };
 
+export const askExampleModel = async (options: InitOptions) => {
+  return (
+    options.includeExample ??
+    (await confirm({
+      message:
+        "Would you like to include an example model? (suggested for new users)",
+      default: false,
+    }))
+  );
+};
+
 export const askAuth = async (options: InitOptions) => {
   return (
     options.auth ??
@@ -96,7 +107,6 @@ export const askAuthProvider = async () => {
 
 export const askMiscPackages = async (existingPackages: AvailablePackage[]) => {
   let uninstalledPackages: PackageChoice[] = [];
-  let packageToInstall: AvailablePackage[] = [];
 
   if (existingPackages.length === 0) {
     const { packages: packagesPostOrmAndAuth } = readConfigFile();
