@@ -22,7 +22,6 @@ import {
   getDbIndexPath,
   getFilePaths,
 } from "../../../filePaths/index.js";
-import { createIndexTs } from "../../orm/drizzle/generators.js";
 import { updateTrpcWithSessionIfInstalled } from "../shared/index.js";
 
 export const addLucia = async () => {
@@ -39,7 +38,7 @@ export const addLucia = async () => {
   } = readConfigFile();
   // ask whether want to use shadcnui
   consola.info(
-    "Kirimase generates views and components for authenticating using Lucia.",
+    "Kirimase generates views and components for authenticating using Lucia."
   );
   // const installShadCn = await confirm({
   //   message: "Would you like to install Shadcn-UI?",
@@ -78,26 +77,26 @@ export const addLucia = async () => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    viewsAndComponents.signInPage,
+    viewsAndComponents.signInPage
   );
   createFile(
     formatFilePath(lucia.signUpPage, {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    viewsAndComponents.signUpPage,
+    viewsAndComponents.signUpPage
   );
   createFile(
     formatFilePath(lucia.authFormComponent, {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    viewsAndComponents.authFormComponent,
+    viewsAndComponents.authFormComponent
   );
   replaceFile(rootPath.concat("app/page.tsx"), viewsAndComponents.homePage);
   createFile(
     rootPath.concat("app/loading.tsx"),
-    viewsAndComponents.loadingPage,
+    viewsAndComponents.loadingPage
   );
   // add API routes
   const apiRoutes = generateApiRoutes();
@@ -106,21 +105,21 @@ export const addLucia = async () => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    apiRoutes.signInRoute,
+    apiRoutes.signInRoute
   );
   createFile(
     formatFilePath(lucia.signUpApiRoute, {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    apiRoutes.signUpRoute,
+    apiRoutes.signUpRoute
   );
   createFile(
     formatFilePath(lucia.signOutApiRoute, {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    apiRoutes.signOutRoute,
+    apiRoutes.signOutRoute
   );
 
   // add app.d.ts
@@ -130,7 +129,7 @@ export const addLucia = async () => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    appDTs,
+    appDTs
   );
 
   const authDirFiles = generateAuthDirFiles(orm, driver, provider);
@@ -140,7 +139,7 @@ export const addLucia = async () => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    authDirFiles.utilsTs,
+    authDirFiles.utilsTs
   );
 
   // create auth/lucia.ts
@@ -149,7 +148,7 @@ export const addLucia = async () => {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    authDirFiles.luciaTs,
+    authDirFiles.luciaTs
   );
 
   // add db schema based on orm (pulled in from config file)
@@ -159,14 +158,14 @@ export const addLucia = async () => {
     if (provider === "planetscale") {
       const schemaWithoutReferences = schema.replace(
         /\.references\(\(\) => user\.id\)/g,
-        "",
+        ""
       );
       createFile(
         formatFilePath(shared.auth.authSchema, {
           removeExtension: false,
           prefix: "rootPath",
         }),
-        schemaWithoutReferences,
+        schemaWithoutReferences
       );
     } else {
       createFile(
@@ -174,7 +173,7 @@ export const addLucia = async () => {
           removeExtension: false,
           prefix: "rootPath",
         }),
-        schema,
+        schema
       );
     }
   }
@@ -193,10 +192,10 @@ export const addLucia = async () => {
     });
     const contentsImportsUpdated = dbTsContents.replace(
       "{ neon, neonConfig }",
-      "{ neon, neonConfig, Pool }",
+      "{ neon, neonConfig, Pool }"
     );
     const contentsWithPool = contentsImportsUpdated.concat(
-      "\nexport const pool = new Pool({ connectionString: env.DATABASE_URL });",
+      "\nexport const pool = new Pool({ connectionString: env.DATABASE_URL });"
     );
     replaceFile(dbTsPath, contentsWithPool);
   }
@@ -220,7 +219,7 @@ export const addLucia = async () => {
 
   await installPackages(
     { regular: `lucia ${adapterPackage}`, dev: "" },
-    preferredPackageManager,
+    preferredPackageManager
   );
 
   // add package to config

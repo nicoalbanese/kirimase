@@ -3,7 +3,6 @@
 // SidebarItems.tsx
 // config/nav.ts
 
-import { on } from "events";
 import { createFile, readConfigFile } from "../../../../utils.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
