@@ -70,7 +70,7 @@ export default function Page() {
   const { setTheme } = useTheme();
   return (
     <div>
-      <h1 className="text-2xl font-medium">Settings</h1>
+      <h1 className="text-2xl font-semibold">Settings</h1>
       <div className="space-y-4 my-4">
         <div>
           <h3 className="text-lg font-medium">Appearance</h3>

@@ -381,12 +381,12 @@ export const createAccountPage = (withStripe = false) => {
   }
 import { checkAuth, getUserAuth } from "${formatFilePath(
     shared.auth.authUtils,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";${
     withStripe
       ? `\nimport { getUserSubscriptionPlan } from "${formatFilePath(
           stripe.stripeSubscription,
-          { prefix: "alias", removeExtension: true },
+          { prefix: "alias", removeExtension: true }
         )}";`
       : ""
   }
@@ -401,8 +401,8 @@ export default async function Account() {
   
   return (
     <main>
-      <h1 className="text-3xl font-semibold my-6">Account</h1>
-      <div className="space-y-6">${
+      <h1 className="text-2xl font-semibold my-4">Account</h1>
+      <div className="space-y-4">${
         withStripe
           ? `\n        <PlanSettings subscriptionPlan={subscriptionPlan} session={session} />`
           : ""
@@ -422,7 +422,7 @@ export const createAccountApiTs = (orm: ORMType) => {
     case "drizzle":
       return `import { getUserAuth } from "${formatFilePath(
         shared.auth.authUtils,
-        { prefix: "alias", removeExtension: true },
+        { prefix: "alias", removeExtension: true }
       )}";
 import { db } from "${formatFilePath(dbIndex, {
         prefix: "alias",
@@ -448,7 +448,7 @@ export async function PUT(request: Request) {
     case "prisma":
       return `import { getUserAuth } from "${formatFilePath(
         shared.auth.authUtils,
-        { prefix: "alias", removeExtension: true },
+        { prefix: "alias", removeExtension: true }
       )}";
 import { db } from "${formatFilePath(dbIndex, {
         prefix: "alias",
@@ -474,7 +474,7 @@ export async function PUT(request: Request) {
 export const createNavbar = (
   withShadcn: boolean,
   usingClerk = false,
-  auth: AuthType,
+  auth: AuthType
 ) => {
   const { shared, "next-auth": nextAuth } = getFilePaths();
   const { alias } = readConfigFile();
@@ -494,7 +494,7 @@ export const createNavbar = (
   if (withShadcn) {
     return `import { getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
-      { prefix: "alias", removeExtension: true },
+      { prefix: "alias", removeExtension: true }
     )}";
 import Link from "next/link";${
       usingClerk
@@ -512,7 +512,7 @@ import { Avatar, AvatarFallback } from "${alias}/components/ui/avatar";${
               ? ""
               : `\nimport SignOutBtn from "${formatFilePath(
                   nextAuth.signOutButtonComponent,
-                  { prefix: "alias", removeExtension: true },
+                  { prefix: "alias", removeExtension: true }
                 )}";`
           }
 `
@@ -594,7 +594,7 @@ export default async function Navbar() {
   } else {
     return `import { getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
-      { prefix: "alias", removeExtension: true },
+      { prefix: "alias", removeExtension: true }
     )}";
 import Link from "next/link";${
       usingClerk ? `\nimport { UserButton } from "@clerk/nextjs";` : ""

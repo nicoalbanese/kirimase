@@ -36,7 +36,7 @@ export const generateStripeSubscriptionTsOld = () => {
 
   return `import { storeSubscriptionPlans } from "${formatFilePath(
     stripe.configSubscription,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
@@ -474,11 +474,11 @@ export const generateAccountPage = () => {
 import PlanSettings from "./PlanSettings";
 import { checkAuth, getUserAuth } from "${formatFilePath(
     shared.auth.authUtils,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 import { getUserSubscriptionPlan } from "${formatFilePath(
     stripe.stripeSubscription,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 
 export default async function Account() {
@@ -488,8 +488,8 @@ export default async function Account() {
 
   return (
     <main>
-      <h1 className="text-3xl font-semibold my-6">Account</h1>
-      <div className="space-y-6">
+      <h1 className="text-2xl font-semibold mb-4">Account</h1>
+      <div className="space-y-4">
         <PlanSettings
           subscriptionPlan={subscriptionPlan}
           session={session}
@@ -519,15 +519,15 @@ import {
 } from "${alias}/components/ui/card";
 import { storeSubscriptionPlans } from "${formatFilePath(
       stripe.configSubscription,
-      { prefix: "alias", removeExtension: true },
+      { prefix: "alias", removeExtension: true }
     )}";
 import { checkAuth, getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
-      { prefix: "alias", removeExtension: true },
+      { prefix: "alias", removeExtension: true }
     )}";
 import { getUserSubscriptionPlan } from "${formatFilePath(
       stripe.stripeSubscription,
-      { prefix: "alias", removeExtension: true },
+      { prefix: "alias", removeExtension: true }
     )}";
 import { CheckCircle2Icon } from "lucide-react";
 import Link from "next/link";
@@ -632,15 +632,15 @@ export default async function Billing() {
     return `import { ManageUserSubscriptionButton } from "./ManageSubscription";
 import { storeSubscriptionPlans } from "${formatFilePath(
       stripe.configSubscription,
-      { prefix: "alias", removeExtension: true },
+      { prefix: "alias", removeExtension: true }
     )}";
 import { checkAuth, getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
-      { prefix: "alias", removeExtension: true },
+      { prefix: "alias", removeExtension: true }
     )}";
 import { getUserSubscriptionPlan } from "${formatFilePath(
       stripe.stripeSubscription,
-      { prefix: "alias", removeExtension: true },
+      { prefix: "alias", removeExtension: true }
     )}";
 import { CheckCircle2Icon } from "lucide-react";
 import Link from "next/link";
@@ -942,7 +942,7 @@ export async function POST(req: Request) {
 
 export const generateSubscriptionsDrizzleSchema = (
   driver: DBType,
-  auth: AuthType,
+  auth: AuthType
 ) => {
   const authSubtype = AuthSubTypeMapping[auth];
   // add references for pg and sqlite
@@ -1119,7 +1119,7 @@ import type Stripe from "stripe";${
     orm === "drizzle"
       ? `\nimport { subscriptions } from "${formatFilePath(
           stripe.subscriptionSchema,
-          { prefix: "alias", removeExtension: true },
+          { prefix: "alias", removeExtension: true }
         )}";\nimport { eq } from "drizzle-orm";`
       : ""
   }
@@ -1214,7 +1214,7 @@ export const generateStripeSubscriptionTs = () => {
 
   return `import { storeSubscriptionPlans } from "${formatFilePath(
     stripe.configSubscription,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
@@ -1223,7 +1223,7 @@ import { db } from "${formatFilePath(dbIndex, {
     orm === "drizzle"
       ? `\nimport { subscriptions } from "${formatFilePath(
           stripe.subscriptionSchema,
-          { prefix: "alias", removeExtension: true },
+          { prefix: "alias", removeExtension: true }
         )}";\nimport { eq } from "drizzle-orm";`
       : ""
   }
@@ -1302,11 +1302,11 @@ export const createAccountTRPCRouter = () => {
   })}";
 import { publicProcedure, ${createRouterInvokcation} } from "${formatFilePath(
     trpc.serverTrpc,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 import { getUserSubscriptionPlan } from "${formatFilePath(
     stripe.stripeSubscription,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 export const accountRouter = ${createRouterInvokcation}({
   getUser: publicProcedure.query(async () => {
