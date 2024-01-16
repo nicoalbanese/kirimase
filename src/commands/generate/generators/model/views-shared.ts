@@ -46,7 +46,6 @@ export const addLinkToSidebar = (tableName: string) => {
       },
 `;
     newContent = configContents.replace(searchQuery, replacement);
-    console.log(newContent);
   }
   replaceFile(sidebarConfigPath, newContent);
 };
