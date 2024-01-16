@@ -90,5 +90,5 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
     addToInstallList({ regular: ["zod", "@t3-oss/env-nextjs"], dev: [] });
 
   addPackageToConfig("resend");
-  consola.success("Resend successfully installed and configured.");
+  // consola.success("Resend successfully installed and configured.");
 };

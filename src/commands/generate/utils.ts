@@ -55,23 +55,23 @@ export const formatTableName = (tableName: string) => {
   const tableNameNormalEnglishCapitalised = toNormalEnglish(
     tableName,
     false,
-    false,
+    false
   );
   const tableNameNormalEnglishSingular = toNormalEnglish(
     tableName,
     false,
-    true,
+    true
   );
   const tableNameNormalEnglishSingularLowerCase = toNormalEnglish(
     tableName,
     true,
-    true,
+    true
   );
 
   const tableNameNormalEnglishLowerCase = toNormalEnglish(
     tableName,
     true,
-    false,
+    false
   );
   const tableNameKebabCase = snakeToKebab(tableName);
 
@@ -255,7 +255,7 @@ export const defaultValueMappings: Record<
 export function toNormalEnglish(
   input: string,
   lowercase?: boolean,
-  singular?: boolean,
+  singular?: boolean
 ): string {
   const output = input
     .split("_")
@@ -286,7 +286,7 @@ export function getCurrentSchemas() {
         .map((file) => path.basename(file, ".ts"));
 
       return schemaNames.filter(
-        (schema) => schema !== "auth" && schema !== "_root",
+        (schema) => schema !== "auth" && schema !== "_root"
       );
     } catch (error) {
       // console.error(`Error reading schemas ${directory}:`, error);
@@ -312,7 +312,7 @@ export function getCurrentSchemas() {
         .map((line) => line.split(" ")[1])
         .filter((item) => !excludedSchemas.includes(item))
         .map((item) =>
-          pluralize.plural(`${item[0].toLowerCase()}${item.slice(1)}`),
+          pluralize.plural(`${item[0].toLowerCase()}${item.slice(1)}`)
         );
       return schemaNames;
     } else {
@@ -330,7 +330,7 @@ export const addToPrismaSchema = (schema: string, modelName: string) => {
     // write logic to check if model already exists -> if so replace
     const { modelStart, modelEnd, modelExists } = getPrismaModelStartAndEnd(
       schemaContents,
-      modelName,
+      modelName
     );
 
     if (modelExists) {
@@ -339,11 +339,11 @@ export const addToPrismaSchema = (schema: string, modelName: string) => {
         schema +
         schemaContents.slice(modelEnd + 1);
       replaceFile(schemaPath, newContent);
-      consola.success(`Replaced ${modelName} in Prisma schema`);
+      // consola.success(`Replaced ${modelName} in Prisma schema`);
     } else {
       const newContent = schemaContents.concat("\n", schema);
       replaceFile(schemaPath, newContent);
-      consola.success(`Added ${modelName} to Prisma schema`);
+      // consola.success(`Added ${modelName} to Prisma schema`);
     }
   } else {
     consola.info(`Prisma schema file does not exist`);
@@ -403,7 +403,7 @@ export function addToPrismaModel(modelName: string, attributesToAdd: string) {
 
 export function addToPrismaModelBulk(
   modelName: string,
-  attributesToAdd: string,
+  attributesToAdd: string
 ) {
   const hasSchema = existsSync("prisma/schema.prisma");
   if (!hasSchema) {

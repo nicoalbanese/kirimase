@@ -114,7 +114,7 @@ export const installShadcnUI = async (
       //   stdio: "inherit",
       // });
       await manualInstallShadCn(preferredPackageManager, rootPath);
-      consola.success("Shadcn initialized successfully.");
+      // consola.success("Shadcn initialized successfully.");
       addPackageToConfig("shadcn-ui");
       updateConfigFile({ componentLib: "shadcn-ui" });
     } catch (error) {

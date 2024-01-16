@@ -553,7 +553,7 @@ export const addScriptsToPackageJson = (
   // Write the updated content back to package.json
   fs.writeFileSync(packageJsonPath, updatedPackageJsonData);
 
-  consola.success("Scripts added to package.json");
+  // consola.success("Scripts added to package.json");
 };
 
 export const installDependencies = async (
@@ -738,9 +738,9 @@ export async function updateTsConfigTarget() {
 
     // Write the updated content back to the file
     replaceFile(tsConfigPath, updatedContent);
-    consola.success(
-      "Updated tsconfig.json target to esnext to support Drizzle-Kit."
-    );
+    // consola.success(
+    //   "Updated tsconfig.json target to esnext to support Drizzle-Kit."
+    // );
   });
 }
 

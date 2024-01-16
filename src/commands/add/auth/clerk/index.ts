@@ -86,8 +86,9 @@ export const addClerk = async () => {
   // );
   addPackageToConfig("clerk");
   updateConfigFile({ auth: "clerk" });
-  consola.success("Successfully added Clerk to your project!");
-  consola.info(
-    "Head over to https://dashboard.clerk.com/apps/new to create a new Clerk app"
-  );
+  // consola.success("Successfully added Clerk to your project!");
+  // consola.info(
+  //   "Head over to https://dashboard.clerk.com/apps/new to create a new Clerk app"
+  // );
+  //
 };

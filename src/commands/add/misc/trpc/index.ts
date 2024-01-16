@@ -142,7 +142,7 @@ export const addTrpc = async () => {
   //   hasSrc ? "src/" : ""
   // );
 
-  consola.success("Successfully added trpc to your project!");
+  // consola.success("Successfully added trpc to your project!");
   // consola.warn(
   //   "Please add the <Provider> to your root layout, by wrapping it around your children"
   // );

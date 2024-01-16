@@ -80,5 +80,5 @@ export const addKinde = async () => {
 
   addPackageToConfig("kinde");
   updateConfigFile({ auth: "kinde" });
-  consola.success("Successfully installed Kinde auth");
+  // consola.success("Successfully installed Kinde auth");
 };

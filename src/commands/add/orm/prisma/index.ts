@@ -128,5 +128,5 @@ export const addPrisma = async (
   addPackageToConfig("prisma");
   updateConfigFile({ orm: "prisma", driver: dbType });
 
-  consola.success("Prisma has been added to your project!");
+  // consola.success("Prisma has been added to your project!");
 };

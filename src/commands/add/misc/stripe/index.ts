@@ -278,7 +278,7 @@ const addListenScriptToPackageJson = () => {
   // Write the updated content back to package.json
   replaceFile(packageJsonPath, updatedPackageJsonData);
 
-  consola.success("Stripe listen script added to package.json");
+  // consola.success("Stripe listen script added to package.json");
 };
 
 const addUtilToUtilsTs = (rootPath: string) => {

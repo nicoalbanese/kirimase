@@ -103,5 +103,5 @@ export async function scaffoldModel(
   //         "dev",
   //       ]);
   // }
-  consola.success("Successfully added model to your database!");
+  // consola.success("Successfully added model to your database!");
 }

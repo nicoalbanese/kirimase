@@ -69,10 +69,11 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
     orm === null || config.driver ? undefined : await askDbType(options);
 
   const dbProvider =
+    config.orm ||
+    orm === "prisma" ||
     orm === null ||
     (config.driver && config.t3 === true) ||
-    (config.provider && config.t3 === false) ||
-    orm === "prisma"
+    (config.provider && config.t3 === false)
       ? undefined
       : await askDbProvider(options, dbType, config.preferredPackageManager);
 

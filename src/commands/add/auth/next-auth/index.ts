@@ -167,7 +167,7 @@ export const addNextAuth = async (
   // 9. Instruct user to add the <Provider /> to their root layout.
   addContextProviderToLayout("NextAuthProvider");
   if (orm === "prisma") await prismaGenerate(preferredPackageManager);
-  consola.success("Successfully added Next Auth to your project!");
+  // consola.success("Successfully added Next Auth to your project!");
 
   providers.forEach((provider) => {
     consola.info(

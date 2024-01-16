@@ -321,7 +321,7 @@ export const addLuciaToPrismaSchema = async () => {
 
     const newContent = schemaContents.concat("\n", PrismaLuciaSchema);
     replaceFile(schemaPath, newContent);
-    consola.success(`Added auth to Prisma schema`);
+    // consola.success(`Added auth to Prisma schema`);
   } else {
     consola.info(`Prisma schema file does not exist`);
   }

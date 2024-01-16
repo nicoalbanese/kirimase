@@ -30,6 +30,7 @@
     "commander": "^11.0.0",
     "consola": "^3.2.3",
     "execa": "^8.0.1",
+    "ora": "^8.0.1",
     "pluralize": "^8.0.0",
     "strip-json-comments": "^5.0.1"
   },

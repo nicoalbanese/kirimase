@@ -73,5 +73,5 @@ export async function updateTsConfigPrismaTypeAlias() {
 
   // Write the updated content back to the file
   replaceFile(tsConfigPath, updatedContent);
-  consola.success("Updated tsconfig.json to support zod-prisma type alias.");
+  // consola.success("Updated tsconfig.json to support zod-prisma type alias.");
 }

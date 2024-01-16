@@ -111,9 +111,9 @@ export function updateTRPCRouter(routerName: string): void {
 
     replaceFile(filePath, modifiedRouterContent);
 
-    consola.success(
-      `Added '${routerName}' router to the root tRPC router successfully.`
-    );
+    // consola.success(
+    //   `Added '${routerName}' router to the root tRPC router successfully.`
+    // );
   }
 }
 
