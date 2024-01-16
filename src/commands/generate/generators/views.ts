@@ -453,27 +453,21 @@ const ${tableNameSingularCapitalised}Form = ({
   const { mutate: create${tableNameSingularCapitalised}, isLoading: isCreating } =
     trpc.${tableNameCamelCase}.create${tableNameSingularCapitalised}.useMutation({
       onSuccess${
-        packages.includes("shadcn-ui")
-          ? ': (res) => onSuccess("create", res)'
-          : ""
+        packages.includes("shadcn-ui") ? ': (res) => onSuccess("create")' : ""
       },
     });
 
   const { mutate: update${tableNameSingularCapitalised}, isLoading: isUpdating } =
     trpc.${tableNameCamelCase}.update${tableNameSingularCapitalised}.useMutation({
       onSuccess${
-        packages.includes("shadcn-ui")
-          ? ': (res) => onSuccess("update", res)'
-          : ""
+        packages.includes("shadcn-ui") ? ': (res) => onSuccess("update")' : ""
       },
     });
 
   const { mutate: delete${tableNameSingularCapitalised}, isLoading: isDeleting } =
     trpc.${tableNameCamelCase}.delete${tableNameSingularCapitalised}.useMutation({
       onSuccess${
-        packages.includes("shadcn-ui")
-          ? ': (res) => onSuccess("delete", res)'
-          : ""
+        packages.includes("shadcn-ui") ? ': (res) => onSuccess("delete")' : ""
       },
     });
 
