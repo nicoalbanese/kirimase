@@ -27,6 +27,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
     generateEmailIndexTs,
     generateApiRoute,
     generateEmailTemplateComponent,
+    generateWebhooksApiRoute,
   } = resendGenerators;
 
   // 1. Add page at app/resend/page.tsx
@@ -73,12 +74,29 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
     generateEmailIndexTs()
   );
 
-  // 6. Add items to .env
-  addToDotEnv([{ key: "RESEND_API_KEY", value: "" }], rootPath, true);
-  // 7. Install packages (resend)
+  // 6. Add webhook handler at app/api/webhooks/resend/route.ts
+  createFile(
+    formatFilePath(resend.resendWebhooksApiRoute, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    generateWebhooksApiRoute()
+  );
+
+  // 7. Add items to .env
+  addToDotEnv(
+    [
+      { key: "RESEND_API_KEY", value: "" },
+      { key: "RESEND_WEBHOOK_SECRET", value: "whsec..." },
+    ],
+    rootPath,
+    true
+  );
+
+  // 8. Install packages (resend)
   await installPackages(
     {
-      regular: `resend${orm === null ? " zod @t3-oss/env-nextjs" : ""}`,
+      regular: `resend${orm === null ? " zod @t3-oss/env-nextjs" : ""} svix`,
       dev: "",
     },
     preferredPackageManager
