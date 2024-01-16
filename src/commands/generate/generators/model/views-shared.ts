@@ -14,7 +14,8 @@ export const addLinkToSidebar = (tableName: string) => {
   if (!configExists) return;
 
   const configContents = readFileSync(sidebarConfigPath, "utf-8");
-  const initContents = `export const additionalLinks: AdditionalLinks[] = [];`;
+  const initContents: string =
+    "export const additionalLinks: AdditionalLinks[] = [];";
   const replacedInitContents = `export const additionalLinks: AdditionalLinks[] = [
   {
     title: "Entities",
@@ -30,10 +31,10 @@ export const addLinkToSidebar = (tableName: string) => {
 ];
 `;
   let newContent: string;
-  if (configContents.search(initContents) > 0) {
+  if (configContents.indexOf(initContents) !== -1) {
     newContent = configContents.replace(initContents, replacedInitContents);
   } else {
-    if (configContents.search(tableNameKebabCase) > 0) return;
+    if (configContents.indexOf(tableNameKebabCase) !== -1) return;
     const searchQuery = `    title: "Entities",
     links: [
 `;

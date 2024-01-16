@@ -176,7 +176,7 @@ export async function installShadcnUIComponents(
       consola.error(`Failed to install components: ${error.message}`);
     }
   } else {
-    consola.info("All items already installed.");
+    // consola.info("All items already installed.");
   }
 }
 

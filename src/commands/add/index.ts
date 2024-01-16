@@ -23,6 +23,7 @@ import { formatFilePath, getFilePaths } from "../filePaths/index.js";
 import { addKinde } from "./auth/kinde/index.js";
 import { addNavbarAndSettings } from "./misc/navbar/generators.js";
 import {
+  generateGenericHomepage,
   generateGlobalsCss,
   generateUpdatedTWConfig,
 } from "./misc/defaultStyles/generators.js";
@@ -37,10 +38,13 @@ import {
   askOrm,
 } from "./prompts.js";
 import {
+  addContextProviderToLayout,
   addToInstallList,
   installPackagesFromList,
   installShadcnComponentList,
 } from "./utils.js";
+
+import ora from "ora";
 
 const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
   const config = readConfigFile();
@@ -132,6 +136,7 @@ export const addPackage = async (options?: InitOptions) => {
         );
         updateConfigFile({ componentLib: null });
       }
+      addContextProviderToLayout("Navbar");
     }
 
     // check if orm
@@ -167,13 +172,19 @@ export const addPackage = async (options?: InitOptions) => {
       //   consola.info("Available options: -o prisma, -o drizzle");
       //   process.exit(0);
       // }
-
       if (promptResponse.auth === "next-auth")
         await addNextAuth(promptResponse.authProviders, options);
       if (promptResponse.auth === "clerk") await addClerk();
       if (promptResponse.auth === "lucia") await addLucia();
       if (promptResponse.auth === "kinde") await addKinde();
       if (promptResponse.auth === null) {
+        replaceFile(
+          formatFilePath("app/page.tsx", {
+            prefix: "rootPath",
+            removeExtension: false,
+          }),
+          generateGenericHomepage()
+        );
         updateConfigFile({ auth: null });
       } else {
         // add account page
@@ -191,11 +202,13 @@ export const addPackage = async (options?: InitOptions) => {
       await addResend(promptResponse.miscPackages);
     if (promptResponse.miscPackages.includes("stripe"))
       await addStripe(promptResponse.miscPackages);
+
     await installPackagesFromList();
     await installShadcnComponentList();
-    consola.box(
-      `Thank you for using Kirimase!\n\nNext steps:\n1. Run ${config.preferredPackageManager} db:generate\n 2. Run ${config.preferredPackageManager} db:migrate\n3. Run ${config.preferredPackageManager} run dev`
-    );
+    // TODO: ADD NEXT STEPS ARRAY
+    // consola.box(
+    //   `Thank you for using Kirimase!\n\nNext steps:\n1. Run ${config.preferredPackageManager} db:generate\n 2. Run ${config.preferredPackageManager} db:migrate\n3. Run ${config.preferredPackageManager} run dev`
+    // );
   } else {
     consola.warn("No config file found, initializing project...");
     initProject(options);

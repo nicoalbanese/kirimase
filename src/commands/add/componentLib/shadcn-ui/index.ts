@@ -135,7 +135,7 @@ export const installShadcnUI = async (
     "avatar",
     "input",
     "label",
-    // "dropdown-menu",
+    "dropdown-menu",
   ]);
 
   addContextProviderToLayout("ShadcnToast");

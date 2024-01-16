@@ -98,7 +98,7 @@ export const addContextProviderToLayout = (
 
   // check if the provider already exists
   if (fileContent.includes(importStatement)) {
-    consola.info(`Provider ${provider} already exists in layout.tsx`);
+    // consola.info(`Provider ${provider} already exists in layout.tsx`);
     return;
   }
   const modifiedImportContent = `${beforeImport}${importStatement}\n${afterImport}`;
@@ -158,6 +158,8 @@ export const addToInstallList = (packages: {
 
 export const installPackagesFromList = async () => {
   const { preferredPackageManager } = readConfigFile();
+
+  if (installList.dev.length === 0 && installList.regular.length === 0) return;
 
   const dedupedList = {
     regular: [...new Set(installList.regular)],

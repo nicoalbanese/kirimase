@@ -14,6 +14,7 @@ import {
 import { DBProviders } from "../init/utils.js";
 import { AuthProvider, AuthProviders } from "./auth/next-auth/utils.js";
 import { readConfigFile } from "../../utils.js";
+import { consola } from "consola";
 
 const nullOption = { name: "None", value: null };
 
@@ -123,5 +124,8 @@ export const askMiscPackages = async (existingPackages: AvailablePackage[]) => {
       message: "Select any miscellaneous packages to add:",
       choices: uninstalledPackages,
     });
+  } else {
+    consola.info("All available packages already installed.");
+    return [];
   }
 };

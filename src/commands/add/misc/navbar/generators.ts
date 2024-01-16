@@ -171,7 +171,7 @@ export default function Page() {
 };
 
 const generateNavConfig = () => {
-  const { componentLib } = readConfigFile();
+  const { componentLib, auth } = readConfigFile();
   return `import { SidebarLink } from "${formatFilePath(
     "components/SidebarItems",
     {
@@ -187,20 +187,18 @@ type AdditionalLinks = {
 };
 
 export const defaultLinks: SidebarLink[] = [
-  { href: "/", title: "Home", icon: HomeIcon },
-  { href: "/account", title: "Account", icon: Cog },${
+  { href: "/", title: "Home", icon: HomeIcon },${
+    auth !== null
+      ? `\n  { href: "/account", title: "Account", icon: Cog },`
+      : ""
+  }${
     componentLib === "shadcn-ui"
       ? `\n  { href: "/settings", title: "Settings", icon: Cog },`
       : ""
   }
 ];
 
-export const additionalLinks: AdditionalLinks[] = [
-  // {
-  //   title: "Entities",
-  //   links: [{ href: "/authors", title: "Authors", icon: Globe }],
-  // },
-];
+export const additionalLinks: AdditionalLinks[] = [];
 `;
 };
 
