@@ -36,6 +36,7 @@ import { Schema } from "../types.js";
 import { formatTableName, toCamelCase } from "../utils.js";
 import { existsSync, readFileSync } from "fs";
 import { consola } from "consola";
+import { addToShadcnComponentList } from "../../add/utils.js";
 
 export const scaffoldViewsAndComponentsWithServerActions = async (
   schema: Schema
@@ -116,7 +117,8 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     ).length > 0
       ? baseComponents.push("popover", "calendar")
       : null;
-    await installShadcnUIComponents(baseComponents);
+    // await installShadcnUIComponents(baseComponents);
+    addToShadcnComponentList(baseComponents);
   } else {
     addPackage();
   }

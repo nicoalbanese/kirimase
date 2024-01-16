@@ -25,7 +25,7 @@ program.parse(process.argv);
 
 function addCommonOptions(command: Command) {
   return command
-    .option("-sf, --has-src-folder <has>", "has a src folder")
+    .option("-sf, --has-src-folder", "has a src folder")
     .option(
       "-pm, --package-manager <pm>",
       "preferred package manager (npm, yarn, pnpm, bun)"

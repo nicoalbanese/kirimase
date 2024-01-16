@@ -15,6 +15,7 @@ import {
   generateSignInComponent,
 } from "./generators.js";
 import { updateTrpcWithSessionIfInstalled } from "../shared/index.js";
+import { addToInstallList } from "../../utils.js";
 
 export const addKinde = async () => {
   const { kinde, shared } = getFilePaths();
@@ -25,7 +26,7 @@ export const addKinde = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    generateKindeRouteHandler(),
+    generateKindeRouteHandler()
   );
   // create signin button component
   createFile(
@@ -33,7 +34,7 @@ export const addKinde = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    generateSignInComponent(),
+    generateSignInComponent()
   );
   // create auth/utils.ts
   createFile(
@@ -41,7 +42,7 @@ export const addKinde = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    generateAuthUtils(),
+    generateAuthUtils()
   );
   // update root page
   createFile(
@@ -49,7 +50,7 @@ export const addKinde = async () => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    generateUpdatedRootRoute(),
+    generateUpdatedRootRoute()
   );
 
   // If trpc installed, add protectedProcedure
@@ -71,10 +72,12 @@ export const addKinde = async () => {
     { key: "KINDE_POST_LOGIN_REDIRECT_URL", value: "http://localhost:3000" },
   ]);
   // install @kinde-oss/kinde-auth-nextjs
-  await installPackages(
-    { regular: "@kinde-oss/kinde-auth-nextjs", dev: "" },
-    preferredPackageManager,
-  );
+  // await installPackages(
+  //   { regular: "@kinde-oss/kinde-auth-nextjs", dev: "" },
+  //   preferredPackageManager,
+  // );
+  addToInstallList({ regular: ["@kinde-oss/kinde-auth-nextjs"], dev: [] });
+
   addPackageToConfig("kinde");
   updateConfigFile({ auth: "kinde" });
   consola.success("Successfully installed Kinde auth");

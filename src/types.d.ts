@@ -99,7 +99,7 @@ export type Config = {
 export type UpdateConfig = Partial<Config>;
 
 export type InitOptions = {
-  hasSrcFolder?: "yes" | "no";
+  hasSrcFolder?: boolean;
   packageManager?: PMType;
   orm?: ORMType | null;
   db?: DBType;

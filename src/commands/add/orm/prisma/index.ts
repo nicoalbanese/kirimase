@@ -24,28 +24,17 @@ import {
 import { consola } from "consola";
 import { addToPrismaSchema } from "../../../generate/utils.js";
 import { formatFilePath, getDbIndexPath } from "../../../filePaths/index.js";
+import { addToInstallList } from "../../utils.js";
 
-export const addPrisma = async (initOptions?: InitOptions) => {
+export const addPrisma = async (
+  includeExampleModel: boolean,
+  dbType: DBType,
+  initOptions?: InitOptions
+) => {
   const { preferredPackageManager, hasSrc } = readConfigFile();
   const dbIndex = getDbIndexPath("prisma");
   const rootPath = hasSrc ? "src/" : "";
   // ask for db type
-  const dbType =
-    initOptions?.db ||
-    ((await select({
-      message: "Please choose your DB type",
-      choices: [
-        { name: "Postgres", value: "pg" },
-        {
-          name: "MySQL",
-          value: "mysql",
-        },
-        {
-          name: "SQLite",
-          value: "sqlite",
-        },
-      ],
-    })) as DBType);
 
   // if mysql, ask if planetscale
   if (dbType === "mysql") {
@@ -56,7 +45,7 @@ export const addPrisma = async (initOptions?: InitOptions) => {
     // scaffold planetscale specific schema
     createFile(
       `prisma/schema.prisma`,
-      generatePrismaSchema(dbType, usingPlanetscale),
+      generatePrismaSchema(dbType, usingPlanetscale)
     );
     updateConfigFile({ provider: "planetscale" });
     createDotEnv(
@@ -64,7 +53,7 @@ export const addPrisma = async (initOptions?: InitOptions) => {
       preferredPackageManager,
       generateDbUrl(dbType),
       true,
-      hasSrc ? "src/" : "",
+      hasSrc ? "src/" : ""
     );
   } else {
     // create prisma/schema.prisma (with db type)
@@ -74,7 +63,7 @@ export const addPrisma = async (initOptions?: InitOptions) => {
       preferredPackageManager,
       generateDbUrl(dbType),
       false,
-      hasSrc ? "src/" : "",
+      hasSrc ? "src/" : ""
     );
   }
 
@@ -86,20 +75,11 @@ export const addPrisma = async (initOptions?: InitOptions) => {
       prefix: "rootPath",
       removeExtension: false,
     }),
-    generatePrismaDbInstance(),
+    generatePrismaDbInstance()
   );
 
   // update tsconfig with import alias for prisma types
   await updateTsConfigPrismaTypeAlias();
-
-  const includeExampleModel =
-    typeof initOptions?.includeExample === "string"
-      ? initOptions.includeExample === "yes"
-      : await confirm({
-          message:
-            "Would you like to include an example model? (suggested for new users)",
-          default: false,
-        });
 
   // create all the files here
 
@@ -110,22 +90,22 @@ export const addPrisma = async (initOptions?: InitOptions) => {
   brand String
   cores Int
 }`,
-      "Computer",
+      "Computer"
     );
     // generate /lib/db/schema/computers.ts
     createFile(
       `${rootPath}lib/db/schema/computers.ts`,
-      generatePrismaComputerModel(),
+      generatePrismaComputerModel()
     );
 
     // generate /lib/api/computers/queries.ts && /lib/api/computers/mutations.ts
     createFile(
       `${rootPath}lib/api/computers/queries.ts`,
-      generatePrismaComputerQueries(),
+      generatePrismaComputerQueries()
     );
     createFile(
       `${rootPath}lib/api/computers/mutations.ts`,
-      generatePrismaComputerMutations(),
+      generatePrismaComputerMutations()
     );
   } else {
     createFolder(`${hasSrc ? "src/" : ""}lib/db/schema`);
@@ -133,10 +113,14 @@ export const addPrisma = async (initOptions?: InitOptions) => {
   }
 
   // install packages: regular: [] dev: [prisma, zod-prisma]
-  await installPackages(
-    { regular: "zod @t3-oss/env-nextjs", dev: "prisma zod-prisma" },
-    preferredPackageManager,
-  );
+  // await installPackages(
+  //   { regular: "zod @t3-oss/env-nextjs", dev: "prisma zod-prisma" },
+  //   preferredPackageManager,
+  // );
+  addToInstallList({
+    regular: ["zod", "@t3-oss/env-nextjs"],
+    dev: ["prisma", "zod-prisma"],
+  });
 
   // run prisma generate
   if (includeExampleModel) await prismaGenerate(preferredPackageManager);

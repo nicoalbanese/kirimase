@@ -23,6 +23,7 @@ import {
   getFilePaths,
 } from "../../../filePaths/index.js";
 import { updateTrpcWithSessionIfInstalled } from "../shared/index.js";
+import { addToInstallList } from "../../utils.js";
 
 export const addLucia = async () => {
   // get dbtype and provider
@@ -217,10 +218,11 @@ export const addLucia = async () => {
   // If trpc installed, add protectedProcedure
   updateTrpcWithSessionIfInstalled();
 
-  await installPackages(
-    { regular: `lucia ${adapterPackage}`, dev: "" },
-    preferredPackageManager
-  );
+  // await installPackages(
+  //   { regular: `lucia ${adapterPackage}`, dev: "" },
+  //   preferredPackageManager
+  // );
+  addToInstallList({ regular: ["lucia", adapterPackage], dev: [] });
 
   // add package to config
   addPackageToConfig("lucia");

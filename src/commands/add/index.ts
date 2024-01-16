@@ -36,10 +36,15 @@ import {
   askMiscPackages,
   askOrm,
 } from "./prompts.js";
+import {
+  addToInstallList,
+  installPackagesFromList,
+  installShadcnComponentList,
+} from "./utils.js";
 
 const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
   const config = readConfigFile();
-  console.log(config);
+  // console.log(config);
 
   // prompt component lib
   const componentLib = config.componentLib
@@ -66,7 +71,8 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
   const dbProvider =
     orm === null ||
     (config.driver && config.t3 === true) ||
-    (config.provider && config.t3 === false)
+    (config.provider && config.t3 === false) ||
+    orm === "prisma"
       ? undefined
       : await askDbProvider(options, dbType, config.preferredPackageManager);
 
@@ -101,84 +107,94 @@ export const addPackage = async (options?: InitOptions) => {
     const { shared } = getFilePaths();
 
     const promptResponse = await promptUser(options);
-    consola.box(promptResponse);
 
-    // if (config.componentLib === undefined) {
-    //   if (promptResponse.componentLib === "shadcn-ui")
-    //     await installShadcnUI([]);
-    //   if (promptResponse.componentLib === null) {
-    //     consola.info("Installing Lucide React for icons.");
-    //     await installPackages(
-    //       { regular: "lucide-react", dev: "" },
-    //       config.preferredPackageManager
-    //     );
-    //     // add to tailwindconfig
-    //     replaceFile("tailwind.config.ts", generateUpdatedTWConfig());
-    //
-    //     // add to globalcss colors
-    //     replaceFile(
-    //       formatFilePath(shared.init.globalCss, {
-    //         removeExtension: false,
-    //         prefix: "rootPath",
-    //       }),
-    //       generateGlobalsCss()
-    //     );
-    //     updateConfigFile({ componentLib: null });
-    //   }
-    // }
-    //
-    // // check if orm
-    // if (config.orm === undefined) {
-    //   if (promptResponse.orm === "drizzle")
-    //     await addDrizzle(
-    //       promptResponse.db,
-    //       promptResponse.dbProvider,
-    //       promptResponse.includeExample,
-    //       options
-    //     );
-    //   if (promptResponse.orm === "prisma") await addPrisma(options);
-    //   if (promptResponse === null)
-    //     updateConfigFile({ orm: null, driver: null, provider: null });
-    // }
-    // // check if auth
-    // if (config.auth === undefined) {
-    //   // const { orm: ormPostPrompt } = readConfigFile();
-    //   // if (ormPostPrompt === undefined) {
-    //   //   consola.warn(
-    //   //     "You cannot install an authentication package without an ORM."
-    //   //   );
-    //   //   consola.info("Please run `kirimase init` again.");
-    //   //   consola.info(
-    //   //     "If you are seeing this message, it is likely because you misspelled your 'orm' option."
-    //   //   );
-    //   //   consola.info("Your requested option: -o", options.orm);
-    //   //   consola.info("Available options: -o prisma, -o drizzle");
-    //   //   process.exit(0);
-    //   // }
-    //
-    //   if (promptResponse.auth === "next-auth")
-    //     await addNextAuth(promptResponse.authProviders, options);
-    //   if (promptResponse.auth === "clerk") await addClerk();
-    //   if (promptResponse.auth === "lucia") await addLucia();
-    //   if (promptResponse.auth === "kinde") await addKinde();
-    //   if (promptResponse.auth === null) {
-    //     updateConfigFile({ auth: null });
-    //   } else {
-    //     // add account page
-    //     await createAccountSettingsPage();
-    //   }
-    //   addNavbarAndSettings();
-    // }
-    //
-    // // check if misc
-    //
-    // if (promptResponse.miscPackages.includes("trpc")) await addTrpc();
-    // if (promptResponse.miscPackages.includes("shadcn-ui"))
-    //   await installShadcnUI(promptResponse.miscPackages);
-    // if (promptResponse.miscPackages.includes("resend"))
-    //   await addResend(promptResponse.miscPackages);
-    // if (promptResponse.miscPackages.includes("stripe"))
-    //   await addStripe(promptResponse.miscPackages);
+    if (config.componentLib === undefined) {
+      if (promptResponse.componentLib === "shadcn-ui")
+        await installShadcnUI([]);
+      if (promptResponse.componentLib === null) {
+        // consola.info("Installing Lucide React for icons.");
+        addToInstallList({ regular: ["lucide-react"], dev: [] });
+        // await installPackages(
+        //   { regular: "lucide-react", dev: "" },
+        //   config.preferredPackageManager
+        // );
+        // add to tailwindconfig
+        replaceFile("tailwind.config.ts", generateUpdatedTWConfig());
+
+        // add to globalcss colors
+        replaceFile(
+          formatFilePath(shared.init.globalCss, {
+            removeExtension: false,
+            prefix: "rootPath",
+          }),
+          generateGlobalsCss()
+        );
+        updateConfigFile({ componentLib: null });
+      }
+    }
+
+    // check if orm
+    if (config.orm === undefined) {
+      if (promptResponse.orm === "drizzle")
+        await addDrizzle(
+          promptResponse.db,
+          promptResponse.dbProvider,
+          promptResponse.includeExample,
+          options
+        );
+      if (promptResponse.orm === "prisma")
+        await addPrisma(
+          promptResponse.includeExample,
+          promptResponse.db,
+          options
+        );
+      if (promptResponse === null)
+        updateConfigFile({ orm: null, driver: null, provider: null });
+    }
+    // check if auth
+    if (config.auth === undefined) {
+      // const { orm: ormPostPrompt } = readConfigFile();
+      // if (ormPostPrompt === undefined) {
+      //   consola.warn(
+      //     "You cannot install an authentication package without an ORM."
+      //   );
+      //   consola.info("Please run `kirimase init` again.");
+      //   consola.info(
+      //     "If you are seeing this message, it is likely because you misspelled your 'orm' option."
+      //   );
+      //   consola.info("Your requested option: -o", options.orm);
+      //   consola.info("Available options: -o prisma, -o drizzle");
+      //   process.exit(0);
+      // }
+
+      if (promptResponse.auth === "next-auth")
+        await addNextAuth(promptResponse.authProviders, options);
+      if (promptResponse.auth === "clerk") await addClerk();
+      if (promptResponse.auth === "lucia") await addLucia();
+      if (promptResponse.auth === "kinde") await addKinde();
+      if (promptResponse.auth === null) {
+        updateConfigFile({ auth: null });
+      } else {
+        // add account page
+        await createAccountSettingsPage();
+      }
+      addNavbarAndSettings();
+    }
+
+    // check if misc
+
+    if (promptResponse.miscPackages.includes("trpc")) await addTrpc();
+    if (promptResponse.miscPackages.includes("shadcn-ui"))
+      await installShadcnUI(promptResponse.miscPackages);
+    if (promptResponse.miscPackages.includes("resend"))
+      await addResend(promptResponse.miscPackages);
+    if (promptResponse.miscPackages.includes("stripe"))
+      await addStripe(promptResponse.miscPackages);
+    await installPackagesFromList();
+    await installShadcnComponentList();
+    consola.box(
+      `Thank you for using Kirimase!\n\nNext steps:\n1. Run ${config.preferredPackageManager} db:generate\n 2. Run ${config.preferredPackageManager} db:migrate\n3. Run ${config.preferredPackageManager} run dev`
+    );
   } else {
     consola.warn("No config file found, initializing project...");
     initProject(options);

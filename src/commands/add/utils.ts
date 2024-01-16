@@ -5,7 +5,12 @@ import {
   AvailablePackage,
   PackageType,
 } from "../../types.js";
-import { readConfigFile, replaceFile } from "../../utils.js";
+import {
+  installPackages,
+  installShadcnUIComponents,
+  readConfigFile,
+  replaceFile,
+} from "../../utils.js";
 import fs from "fs";
 import { formatFilePath, getFilePaths } from "../filePaths/index.js";
 
@@ -136,4 +141,46 @@ export const AuthSubTypeMapping: Record<AuthType, AuthSubType> = {
   kinde: "managed",
   "next-auth": "self-hosted",
   lucia: "managed",
+};
+
+const installList: { regular: string[]; dev: string[] } = {
+  regular: [],
+  dev: [],
+};
+
+export const addToInstallList = (packages: {
+  regular: string[];
+  dev: string[];
+}) => {
+  installList.regular.push(...packages.regular);
+  installList.dev.push(...packages.dev);
+};
+
+export const installPackagesFromList = async () => {
+  const { preferredPackageManager } = readConfigFile();
+
+  const dedupedList = {
+    regular: new Set(installList.regular),
+    dev: new Set(installList.dev),
+  };
+
+  const formattedInstallList = {
+    regular: installList.regular
+      .map((i) => i.trim())
+      .join(" ")
+      .trim(),
+    dev: installList.dev
+      .map((i) => i.trim())
+      .join(" ")
+      .trim(),
+  };
+  await installPackages(formattedInstallList, preferredPackageManager);
+};
+const shadCnComponentList: string[] = [];
+export const addToShadcnComponentList = (components: string[]) =>
+  shadCnComponentList.push(...components);
+export const installShadcnComponentList = async () => {
+  // consola.start("Installing shadcn components:", shadCnComponentList);
+  await installShadcnUIComponents(shadCnComponentList);
+  // consola.ready("Successfully installed components.");
 };

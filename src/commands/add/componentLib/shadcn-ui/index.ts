@@ -12,7 +12,11 @@ import {
   updateConfigFile,
 } from "../../../../utils.js";
 import { AvailablePackage, PMType } from "../../../../types.js";
-import { addContextProviderToLayout } from "../../utils.js";
+import {
+  addContextProviderToLayout,
+  addToInstallList,
+  addToShadcnComponentList,
+} from "../../utils.js";
 import { shadcnGenerators } from "./generators.js";
 import { generateLoadingPage } from "../../auth/lucia/generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
@@ -31,14 +35,27 @@ const manualInstallShadCn = async (
   } = shadcnGenerators;
   const { shared } = getFilePaths();
   // add deps (tailwindcss-animate class-variance-authority clsx tailwind-merge lucide-react)
-  await installPackages(
-    {
-      dev: "",
-      regular:
-        "tailwindcss-animate class-variance-authority clsx tailwind-merge lucide-react next-themes",
-    },
-    preferredPackageManager
-  );
+  // await installPackages(
+  //   {
+  //     dev: "",
+  //     regular:
+  //       "tailwindcss-animate class-variance-authority clsx tailwind-merge lucide-react next-themes",
+  //   },
+  //   preferredPackageManager
+  // );
+
+  addToInstallList({
+    regular: [
+      "tailwindcss-animate",
+      "class-variance-authority",
+      "clsx",
+      "tailwind-merge",
+      "lucide-react",
+      "next-themes",
+    ],
+    dev: [],
+  });
+
   // add tailwind.config.ts
   createFile("tailwind.config.ts", generateTailwindConfig(rootPath));
   // update globals.css
@@ -80,7 +97,7 @@ export const installShadcnUI = async (
     rootPath,
   } = readConfigFile();
   const packages = packagesBeingInstalled.concat(installedPackages);
-  consola.start("Installing Shadcn UI...");
+  // consola.start("Installing Shadcn UI...");
   const filePath = "components.json";
 
   // const baseArgs = ["shadcn-ui@latest", "init"];
@@ -104,14 +121,23 @@ export const installShadcnUI = async (
       consola.error(`Failed to initialize Shadcn: ${error.message}`);
     }
   }
-  await installShadcnUIComponents([
+  // await installShadcnUIComponents([
+  //   "button",
+  //   "toast",
+  //   "avatar",
+  //   "dropdown-menu",
+  //   "input",
+  //   "label",
+  // ]);
+  addToShadcnComponentList([
     "button",
     "toast",
     "avatar",
-    "dropdown-menu",
     "input",
     "label",
+    // "dropdown-menu",
   ]);
+
   addContextProviderToLayout("ShadcnToast");
 
   // if (packages.includes("next-auth")) updateSignInComponentWithShadcnUI();

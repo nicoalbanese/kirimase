@@ -15,6 +15,7 @@ import {
   toCamelCase,
   toNormalEnglish,
 } from "../utils.js";
+import { addToShadcnComponentList } from "../../add/utils.js";
 
 export const scaffoldViewsAndComponents = async (schema: Schema) => {
   const { hasSrc, packages } = readConfigFile();
@@ -70,7 +71,8 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
     ).length > 0
       ? baseComponents.push("popover", "calendar")
       : null;
-    await installShadcnUIComponents(baseComponents);
+    addToShadcnComponentList(baseComponents);
+    // await installShadcnUIComponents(baseComponents);
   } else {
     addPackage();
   }

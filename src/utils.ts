@@ -19,7 +19,8 @@ export function createFile(filePath: string, content: string) {
   }
 
   fs.writeFileSync(resolvedPath, content);
-  consola.success(`File created at ${filePath}`);
+  // TODO - add flag for verbose
+  // consola.success(`File created at ${filePath}`);
 }
 
 export function replaceFile(filePath: string, content: string, log = true) {
@@ -35,7 +36,8 @@ export function replaceFile(filePath: string, content: string, log = true) {
 
   fs.writeFileSync(resolvedPath, content);
   if (log === true) {
-    consola.success(`File replaced at ${filePath}`);
+    // TODO as above
+    // consola.success(`File replaced at ${filePath}`);
   }
 }
 
@@ -43,7 +45,8 @@ export function createFolder(relativePath: string, log = false) {
   const fullPath = path.join(process.cwd(), relativePath);
   fs.mkdirSync(fullPath, { recursive: true });
   if (log) {
-    consola.success(`Folder created at ${fullPath}`);
+    // TODO as above
+    // consola.success(`Folder created at ${fullPath}`);
   }
 }
 
@@ -55,14 +58,14 @@ export const runCommand = async (command: string, args: string[]) => {
     throw new Error(
       `command "${command} ${formattedArgs
         .join(" ")
-        .trim()}" exited with code ${error.code}`,
+        .trim()}" exited with code ${error.code}`
     );
   }
 };
 
 export async function installPackages(
   packages: { regular: string; dev: string },
-  pmType: PMType,
+  pmType: PMType
 ) {
   const packagesListString = packages.regular.concat(" ").concat(packages.dev);
   consola.start(`Installing packages: ${packagesListString}...`);
@@ -73,14 +76,14 @@ export async function installPackages(
     if (packages.dev) {
       await runCommand(
         pmType,
-        [installCommand, "-D"].concat(packages.dev.split(" ")),
+        [installCommand, "-D"].concat(packages.dev.split(" "))
       );
     }
 
     if (packages.regular) {
       await runCommand(
         pmType,
-        [installCommand].concat(packages.regular.split(" ")),
+        [installCommand].concat(packages.regular.split(" "))
       );
     }
 
@@ -100,7 +103,7 @@ export const updateConfigFile = (options: UpdateConfig) => {
   replaceFile(
     "./kirimase.config.json",
     JSON.stringify(newConfig, null, 2),
-    false,
+    false
   );
 };
 
@@ -140,14 +143,14 @@ export const pmInstallCommand = {
 };
 
 export async function installShadcnUIComponents(
-  components: string[],
+  components: string[]
 ): Promise<void> {
   const { preferredPackageManager, hasSrc } = readConfigFile();
   const componentsToInstall: string[] = [];
 
   for (const component of components) {
     const tsxFilePath = path.resolve(
-      `${hasSrc ? "src/" : ""}components/ui/${component}.tsx`,
+      `${hasSrc ? "src/" : ""}components/ui/${component}.tsx`
     );
 
     if (!existsSync(tsxFilePath)) {
@@ -160,14 +163,14 @@ export async function installShadcnUIComponents(
 
   if (componentsToInstall.length > 0) {
     consola.start(
-      `Installing shadcn-ui components: ${componentsToInstall.join(", ")}`,
+      `Installing shadcn-ui components: ${componentsToInstall.join(", ")}`
     );
     try {
       await execa(pmInstallCommand[preferredPackageManager], installArgs, {
         stdio: "inherit",
       });
       consola.success(
-        `Installed components: ${componentsToInstall.join(", ")}`,
+        `Installed components: ${componentsToInstall.join(", ")}`
       );
     } catch (error) {
       consola.error(`Failed to install components: ${error.message}`);

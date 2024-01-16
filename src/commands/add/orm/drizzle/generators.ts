@@ -21,6 +21,7 @@ import {
   removeFileExtension,
 } from "../../../filePaths/index.js";
 import stripJsonComments from "strip-json-comments";
+import { addToInstallList } from "../../utils.js";
 
 type ConfigDriver = "pg" | "turso" | "libsql" | "mysql" | "better-sqlite";
 
@@ -559,32 +560,44 @@ export const installDependencies = async (
   dbType: DBProvider,
   preferredPackageManager: PMType
 ) => {
-  const packages: { [key in DBProvider]: { regular: string; dev: string } } = {
-    postgresjs: { regular: "postgres", dev: "pg" },
-    "node-postgres": { regular: "pg", dev: "@types/pg" },
-    neon: { regular: "@neondatabase/serverless", dev: "pg" },
-    "vercel-pg": { regular: "@vercel/postgres", dev: "pg" },
-    supabase: { regular: "postgres", dev: "pg" },
-    aws: { regular: "", dev: "" }, // disabled
-    planetscale: { regular: "@planetscale/database", dev: "mysql2" },
-    "mysql-2": { regular: "mysql2", dev: "" },
+  const packages: {
+    [key in DBProvider]: { regular: string[]; dev: string[] };
+  } = {
+    postgresjs: { regular: ["postgres"], dev: ["pg"] },
+    "node-postgres": { regular: ["pg"], dev: ["@types/pg"] },
+    neon: { regular: ["@neondatabase/serverless"], dev: ["pg"] },
+    "vercel-pg": { regular: ["@vercel/postgres"], dev: ["pg"] },
+    supabase: { regular: ["postgres"], dev: ["pg"] },
+    aws: { regular: [""], dev: [""] }, // disabled
+    planetscale: { regular: ["@planetscale/database"], dev: ["mysql2"] },
+    "mysql-2": { regular: ["mysql2"], dev: [""] },
     "better-sqlite3": {
-      regular: "better-sqlite3",
-      dev: "@types/better-sqlite3",
+      regular: ["better-sqlite3"],
+      dev: ["@types/better-sqlite3"],
     },
-    turso: { regular: "@libsql/client", dev: "" },
+    turso: { regular: ["@libsql/client"], dev: [""] },
     // "bun-sqlite": { regular: "drizzle-orm", dev: "drizzle-kit" },
   };
   // note this change hasnt been tested yet
   const dbSpecificPackage = packages[dbType];
   if (dbSpecificPackage) {
-    await installPackages(
-      {
-        regular: `drizzle-orm drizzle-zod @t3-oss/env-nextjs zod ${dbSpecificPackage.regular}`,
-        dev: `drizzle-kit tsx dotenv ${dbSpecificPackage.dev}`,
-      },
-      preferredPackageManager
-    );
+    addToInstallList({
+      regular: [
+        "drizzle-orm",
+        "drizzle-zod",
+        "@t3-oss/env-nextjs",
+        "zod",
+        ...dbSpecificPackage.regular,
+      ],
+      dev: ["drizzle-kit", "tsx", "dotenv", ...dbSpecificPackage.dev],
+    });
+    // await installPackages(
+    //   {
+    //     regular: `drizzle-orm drizzle-zod @t3-oss/env-nextjs zod ${dbSpecificPackage.regular}`,
+    //     dev: `drizzle-kit tsx dotenv ${dbSpecificPackage.dev}`,
+    //   },
+    //   preferredPackageManager
+    // );
   }
 };
 

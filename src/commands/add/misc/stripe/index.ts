@@ -51,7 +51,7 @@ import { createAccountPage } from "../../auth/shared/generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import { libAuthUtilsTsWithoutAuthOptions } from "../../auth/next-auth/generators.js";
 import { updateRootSchema } from "../../../generate/generators/model/utils.js";
-import { AuthSubTypeMapping } from "../../utils.js";
+import { AuthSubTypeMapping, addToInstallList } from "../../utils.js";
 
 export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   const {
@@ -228,10 +228,16 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   // misc script updates
   addListenScriptToPackageJson();
   // install packages
-  await installPackages(
-    { dev: "", regular: "stripe @stripe/stripe-js lucide-react" },
-    preferredPackageManager
-  );
+  // await installPackages(
+  //   { dev: "", regular: "stripe @stripe/stripe-js lucide-react" },
+  //   preferredPackageManager
+  // );
+
+  addToInstallList({
+    regular: ["stripe", "@stripe/stripe-js", "lucide-react"],
+    dev: [],
+  });
+
   addPackageToConfig("stripe");
 
   if (packages.includes("trpc")) {

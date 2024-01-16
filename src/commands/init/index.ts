@@ -20,7 +20,7 @@ export async function initProject(options?: InitOptions) {
   const nextjsProjectExists = existsSync("package.json");
   if (!nextjsProjectExists) {
     consola.fatal(
-      "No Next.js project detected. Please create a Next.js project and then run `kirimase init` within that directory.",
+      "No Next.js project detected. Please create a Next.js project and then run `kirimase init` within that directory."
     );
     process.exit(0);
   }
@@ -31,16 +31,16 @@ export async function initProject(options?: InitOptions) {
     process.exit(0);
   }
   const srcExists =
-    typeof options?.hasSrcFolder === "string"
-      ? options.hasSrcFolder === "yes"
-      : await select({
-          message: "Are you using a 'src' folder?",
-          choices: [
-            { name: "Yes", value: true },
-            { name: "No", value: false },
-          ],
-        });
+    options.hasSrcFolder ??
+    (await select({
+      message: "Are you using a 'src' folder?",
+      choices: [
+        { name: "Yes", value: true },
+        { name: "No", value: false },
+      ],
+    }));
 
+  // console.log(options);
   const preferredPackageManager =
     options?.packageManager ||
     ((await select({

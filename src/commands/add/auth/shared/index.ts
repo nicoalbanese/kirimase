@@ -4,7 +4,10 @@ import {
   installShadcnUIComponents,
   readConfigFile,
 } from "../../../../utils.js";
-import { addContextProviderToLayout } from "../../utils.js";
+import {
+  addContextProviderToLayout,
+  addToShadcnComponentList,
+} from "../../utils.js";
 import {
   createAccountApiTs,
   createAccountCardComponent,
@@ -112,8 +115,9 @@ export const scaffoldAccountSettingsUI = async (
   // add navbar to root layout
   addContextProviderToLayout("Navbar");
   if (withShadCn) {
-    consola.start("Installing Card component for account page...");
-    await installShadcnUIComponents(["card"]);
+    // consola.start("Installing Card component for account page...");
+    // await installShadcnUIComponents(["card"]);
+    addToShadcnComponentList(["card"]);
   }
 };
 

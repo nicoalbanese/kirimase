@@ -17,7 +17,7 @@ import {
   libAuthUtilsTs,
 } from "./generators.js";
 import { AuthDriver, AuthProvider, AuthProviders } from "./utils.js";
-import { addContextProviderToLayout } from "../../utils.js";
+import { addContextProviderToLayout, addToInstallList } from "../../utils.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import { addToPrismaSchema } from "../../../generate/utils.js";
 import { prismaGenerate } from "../../orm/utils.js";
@@ -148,15 +148,20 @@ export const addNextAuth = async (
   );
 
   // 7. Install Packages: @auth/core @auth/drizzle-adapter next-auth
-  await installPackages(
-    {
-      regular: `@auth/core next-auth${
-        orm !== null ? ` ${AuthDriver[orm].package}` : ""
-      }`,
-      dev: "",
-    },
-    preferredPackageManager
-  );
+  // await installPackages(
+  //   {
+  //     regular: `@auth/core next-auth${
+  //       orm !== null ? ` ${AuthDriver[orm].package}` : ""
+  //     }`,
+  //     dev: "",
+  //   },
+  //   preferredPackageManager
+  // );
+
+  addToInstallList({ regular: ["@auth/core", "next-auth"], dev: [] });
+  if (orm !== null)
+    addToInstallList({ regular: [AuthDriver[orm].package], dev: [] });
+
   addPackageToConfig("next-auth");
   updateConfigFile({ auth: "next-auth" });
   // 9. Instruct user to add the <Provider /> to their root layout.

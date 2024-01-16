@@ -9,6 +9,7 @@ import { AvailablePackage } from "../../../../types.js";
 import { resendGenerators } from "./generators.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import { addToInstallList } from "../../utils.js";
 
 export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   const {
@@ -19,7 +20,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   } = readConfigFile();
   const { resend } = getFilePaths();
   // const packages = packagesBeingInstalled.concat(installedPackages);
-  consola.start("Installing Resend...");
+  // consola.start("Installing Resend...");
 
   const {
     generateResendPage,
@@ -76,13 +77,18 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   // 6. Add items to .env
   addToDotEnv([{ key: "RESEND_API_KEY", value: "" }], rootPath, true);
   // 7. Install packages (resend)
-  await installPackages(
-    {
-      regular: `resend${orm === null ? " zod @t3-oss/env-nextjs" : ""}`,
-      dev: "",
-    },
-    preferredPackageManager
-  );
+  // await installPackages(
+  //   {
+  //     regular: `resend${orm === null ? " zod @t3-oss/env-nextjs" : ""}`,
+  //     dev: "",
+  //   },
+  //   preferredPackageManager
+  // );
+
+  addToInstallList({ regular: ["resend"], dev: [] });
+  if (orm === null)
+    addToInstallList({ regular: ["zod", "@t3-oss/env-nextjs"], dev: [] });
+
   addPackageToConfig("resend");
   consola.success("Resend successfully installed and configured.");
 };

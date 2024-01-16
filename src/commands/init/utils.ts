@@ -15,6 +15,7 @@ import {
 } from "../../utils.js";
 import { consola } from "consola";
 import { updateTsConfigPrismaTypeAlias } from "../add/orm/utils.js";
+import { addToInstallList } from "../add/utils.js";
 // test
 
 export const DBProviders: DBProviderOptions = {
@@ -167,12 +168,12 @@ export const checkForExistingPackages = async (rootPath: string) => {
 
   if (configObj.packages.length > 0) {
     consola.success(
-      "Successfully searched project and found the following packages already installed:",
+      "Successfully searched project and found the following packages already installed:"
     );
     consola.info(configObj.packages.map((pkg) => pkg).join(", "));
   } else {
     consola.success(
-      "Successfully searched project and found no additional packages.",
+      "Successfully searched project and found no additional packages."
     );
   }
 
@@ -197,26 +198,28 @@ export const checkForExistingPackages = async (rootPath: string) => {
   if (configObj.t3 === true) {
     if (configObj.orm === "prisma") {
       // add zod generator to schema to schema.prisma
-      consola.start(
-        "Installing zod-prisma for use with Kirimase's generate function.",
-      );
-      await installPackages(
-        { regular: "", dev: "zod-prisma" },
-        preferredPackageManager,
-      );
+      // consola.start(
+      //   "Installing zod-prisma for use with Kirimase's generate function."
+      // );
+      addToInstallList({ regular: [], dev: ["zod-prisma"] });
+      // await installPackages(
+      //   { regular: "", dev: "zod-prisma" },
+      //   preferredPackageManager,
+      // );
       addZodGeneratorToPrismaSchema();
-      consola.success("Successfully installed!");
+      // consola.success("Successfully installed!");
 
       await updateTsConfigPrismaTypeAlias();
     } else if (configObj.orm === "drizzle") {
-      consola.start(
-        "Installing drizzle-zod for use with Kirimase's generate function.",
-      );
-      await installPackages(
-        { regular: "drizzle-zod", dev: "" },
-        preferredPackageManager,
-      );
-      consola.success("Successfully installed!");
+      // consola.start(
+      //   "Installing drizzle-zod for use with Kirimase's generate function."
+      // );
+      // await installPackages(
+      //   { regular: "drizzle-zod", dev: "" },
+      //   preferredPackageManager
+      // );
+      addToInstallList({ regular: ["drizzle-zod"], dev: [] });
+      // consola.success("Successfully installed!");
     }
   }
   // if (drizzle), check if using one schema file or schema directory - perhaps just force users?
