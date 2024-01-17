@@ -204,6 +204,7 @@ export const additionalLinks: AdditionalLinks[] = [];
 
 const generateSidebarItemsTsx = () => {
   const { componentLib } = readConfigFile();
+  const { shared } = getFilePaths();
   return `"use client";
 
 import Link from "next/link";
@@ -211,8 +212,14 @@ import { usePathname } from "next/navigation";
 
 import { LucideIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
-import { defaultLinks, additionalLinks } from "@/config/nav";
+import { cn } from "${formatFilePath(shared.init.libUtils, {
+    prefix: "alias",
+    removeExtension: true,
+  })}";
+import { defaultLinks, additionalLinks } from "${formatFilePath("config/nav", {
+    removeExtension: false,
+    prefix: "alias",
+  })}";
 
 export interface SidebarLink {
   title: string;

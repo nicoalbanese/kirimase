@@ -356,8 +356,9 @@ export async function buildSchema() {
     }
 
     if (
-      resourceType.includes("views_and_components_trpc") ||
-      resourceType.includes("views_and_components_server_actions")
+      (resourceType.includes("views_and_components_trpc") ||
+        resourceType.includes("views_and_components_server_actions")) &&
+      !config.t3
     ) {
       const addToSidebar = await confirm({
         message:

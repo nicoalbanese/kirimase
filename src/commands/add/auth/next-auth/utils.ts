@@ -1,4 +1,7 @@
+import { existsSync } from "fs";
 import { ORMType } from "../../../../types.js";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import { createFile } from "../../../../utils.js";
 
 export type AuthProvider = "discord" | "google" | "github" | "apple";
 type ProviderConfig = {
@@ -53,4 +56,42 @@ export const AuthDriver: {
     adapter: "DrizzleAdapter",
     package: "@auth/drizzle-adapter",
   },
+};
+
+export const checkAndAddAuthUtils = () => {
+  const { shared } = getFilePaths();
+  const authUtilsPath = formatFilePath(shared.auth.authUtils, {
+    removeExtension: false,
+    prefix: "rootPath",
+  });
+  const auExists = existsSync(authUtilsPath);
+  if (auExists) return;
+  const t3AuthUtilsContent = `import { redirect } from "next/navigation";
+import { getServerAuthSession } from "${formatFilePath("server/auth", {
+    prefix: "alias",
+    removeExtension: false,
+  })}";
+
+export type AuthSession = {
+  session: {
+    user: {
+      id: string;
+      name?: string;
+      email?: string;
+      username?: string;
+    };
+  } | null;
+};
+
+export const getUserAuth = async () => {
+  const session = await getServerAuthSession();
+  return { session } as AuthSession;
+};
+
+export const checkAuth = async () => {
+  const { session } = await getUserAuth();
+  if (!session) redirect("/api/auth/signin");
+};
+`;
+  createFile(authUtilsPath, t3AuthUtilsContent);
 };

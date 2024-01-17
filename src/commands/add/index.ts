@@ -45,6 +45,7 @@ import {
   printNextSteps,
 } from "./utils.js";
 import ora from "ora";
+import { checkAndAddAuthUtils } from "./auth/next-auth/utils.js";
 
 const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
   const config = readConfigFile();
@@ -145,7 +146,9 @@ export const addPackage = async (options?: InitOptions) => {
         );
         updateConfigFile({ componentLib: null });
       }
-      addContextProviderToLayout("Navbar");
+      if (!config.t3) {
+        addContextProviderToLayout("Navbar");
+      }
     }
 
     // check if orm
@@ -216,6 +219,10 @@ export const addPackage = async (options?: InitOptions) => {
     if (promptResponse.miscPackages.includes("stripe")) {
       spinner.text = "Configuring Stripe";
       await addStripe(promptResponse.miscPackages);
+    }
+
+    if (config.t3 && config.auth === "next-auth") {
+      checkAndAddAuthUtils();
     }
 
     await installPackagesFromList();
