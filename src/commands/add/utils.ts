@@ -252,9 +252,9 @@ export const printNextSteps = (
     promptResponses.miscPackages.includes("stripe");
 
   const dbMigration = [
-    `Run '${ppm} run db:generate'`,
-    `Run '${ppm} run db:${promptResponses.db === "pg" ? "migrate" : "push"}'`,
-    `Run '${ppm} run dev'`,
+    `Run \`${ppm} run db:generate\``,
+    `Run \`${ppm} run db:${promptResponses.db === "pg" ? "migrate" : "push"}\``,
+    `Run \`${ppm} run dev\``,
     "Open localhost:3000/ in your browser",
   ];
   const runMigration =
@@ -278,7 +278,8 @@ export const printNextSteps = (
 
   const notes = [
     ...authProviderInstructions,
-    "If you had any problems, please open an issue on GitHub\n  (https://github.com/nicoalbanese/kirimase/issues)",
+    "Run `kirimase generate` to quickly scaffold entire entities for your application",
+    "If you have any issues, please open an issue on GitHub\n  (https://github.com/nicoalbanese/kirimase/issues)",
   ];
 
   showNextSteps(packagesInstalledList, nextSteps, notes, duration);
