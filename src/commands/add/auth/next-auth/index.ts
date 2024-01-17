@@ -168,13 +168,4 @@ export const addNextAuth = async (
   addContextProviderToLayout("NextAuthProvider");
   if (orm === "prisma") await prismaGenerate(preferredPackageManager);
   // consola.success("Successfully added Next Auth to your project!");
-
-  providers.forEach((provider) => {
-    consola.info(
-      `To get up and running with ${provider}, create credentials at ${AuthProviders[provider].website}`
-    );
-    consola.info(
-      `and remember to add /api/auth/callback/${provider} to your ${provider} app's redirect URIs`
-    );
-  });
 };

@@ -4,6 +4,7 @@ import { Command } from "commander";
 import { initProject } from "./commands/init/index.js";
 import { buildSchema } from "./commands/generate/index.js";
 import { addPackage } from "./commands/add/index.js";
+import { printNextSteps, showNextSteps } from "./commands/add/utils.js";
 
 const program = new Command();
 program.name("kirimase").description("Kirimase CLI").version("0.0.44");
@@ -20,6 +21,21 @@ program
 addCommonOptions(program.command("add"))
   .description("Add and setup additional packages")
   .action(addPackage);
+
+program.command("ns").action(() =>
+  printNextSteps(
+    {
+      authProviders: ["google", "github"],
+      auth: "next-auth",
+      orm: "prisma",
+      packageManager: "bun",
+      componentLib: "shadcn-ui",
+      miscPackages: ["stripe"],
+      db: "mysql",
+    },
+    15000
+  )
+);
 
 program.parse(process.argv);
 

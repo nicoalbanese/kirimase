@@ -42,6 +42,7 @@ import {
   addToInstallList,
   installPackagesFromList,
   installShadcnComponentList,
+  printNextSteps,
 } from "./utils.js";
 import ora from "ora";
 
@@ -113,10 +114,11 @@ export const addPackage = async (options?: InitOptions) => {
     const { shared } = getFilePaths();
 
     const promptResponse = await promptUser(options);
+    const start = Date.now();
+    spinner.start();
+    spinner.text = "Beginning Installation Process";
 
     if (config.componentLib === undefined) {
-      spinner.text = "Beginning Installation Process";
-      spinner.start();
       if (promptResponse.componentLib === "shadcn-ui") {
         spinner.text = "Configuring Shadcn-UI";
         await installShadcnUI([]);
@@ -214,13 +216,13 @@ export const addPackage = async (options?: InitOptions) => {
     }
 
     await installPackagesFromList();
-
     await installShadcnComponentList();
+
+    const end = Date.now();
+    const duration = end - start;
     spinner.succeed();
-    // TODO: ADD NEXT STEPS ARRAY
-    // consola.box(
-    //   `Thank you for using Kirimase!\n\nNext steps:\n1. Run ${config.preferredPackageManager} db:generate\n 2. Run ${config.preferredPackageManager} db:migrate\n3. Run ${config.preferredPackageManager} run dev`
-    // );
+
+    printNextSteps(promptResponse, duration);
   } else {
     consola.warn("No config file found, initializing project...");
     initProject(options);
