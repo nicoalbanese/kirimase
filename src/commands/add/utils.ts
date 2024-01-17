@@ -215,11 +215,14 @@ export const printNextSteps = (
       : []),
     ...(promptResponses.auth === "next-auth"
       ? [
-          `${chalk.underline(
-            "Authentication"
-          )}: Auth.js (with ${promptResponses.authProviders
-            .map((p) => p)
-            .join(", ")} providers)`,
+          `${chalk.underline("Authentication")}: Auth.js ${
+            promptResponses.authProviders &&
+            promptResponses.authProviders.length > 0
+              ? `(with ${promptResponses.authProviders
+                  .map((p) => p)
+                  .join(", ")} providers)`
+              : ""
+          }`,
         ]
       : []),
     ...(promptResponses.auth === "clerk"
@@ -231,13 +234,16 @@ export const printNextSteps = (
     ...(promptResponses.auth === "kinde"
       ? [`${chalk.underline("Authentication")}: Kinde`]
       : []),
-    ...(promptResponses.miscPackages.includes("stripe")
+    ...(promptResponses.miscPackages &&
+    promptResponses.miscPackages.includes("stripe")
       ? [`${chalk.underline("Payments")}: Stripe`]
       : []),
-    ...(promptResponses.miscPackages.includes("resend")
+    ...(promptResponses.miscPackages &&
+    promptResponses.miscPackages.includes("resend")
       ? [`${chalk.underline("Email")}: Resend`]
       : []),
-    ...(promptResponses.miscPackages.includes("trpc")
+    ...(promptResponses.miscPackages &&
+    promptResponses.miscPackages.includes("trpc")
       ? [`${chalk.underline("RPC")}: tRPC`]
       : []),
     ...(promptResponses.componentLib === "shadcn-ui"
@@ -255,7 +261,7 @@ export const printNextSteps = (
     `Run \`${ppm} run db:generate\``,
     `Run \`${ppm} run db:${promptResponses.db === "pg" ? "migrate" : "push"}\``,
     `Run \`${ppm} run dev\``,
-    "Open localhost:3000/ in your browser",
+    "Open http://localhost:3000 in your browser",
   ];
   const runMigration =
     promptResponses.orm ||
@@ -263,9 +269,16 @@ export const printNextSteps = (
     promptResponses.auth === "next-auth" ||
     promptResponses.miscPackages.includes("stripe");
 
+  const includesStripe =
+    promptResponses.miscPackages &&
+    promptResponses.miscPackages.includes("stripe");
+
   const nextSteps = [
     ...(wouldHaveSecrets ? ["Add Environment Variables to your .env"] : []),
     ...(runMigration ? dbMigration : []),
+    ...(includesStripe
+      ? [`Run \`${ppm} run stripe:listen\` in a separate terminal`]
+      : []),
     "Build something awesome!",
   ];
 
@@ -276,9 +289,17 @@ export const printNextSteps = (
         })
       : [];
 
+  const stripe = [
+    "To use Stripe locally, you need the Stripe CLI (https://stripe.com/docs/stripe-cli)",
+    "Create Stripe product (https://dashboard.stripe.com/products)",
+  ];
+
   const notes = [
     ...authProviderInstructions,
-    "Run `kirimase generate` to quickly scaffold entire entities for your application",
+    ...(promptResponses.miscPackages &&
+    promptResponses.miscPackages.includes("stripe")
+      ? stripe
+      : []),
     "If you have any issues, please open an issue on GitHub\n  (https://github.com/nicoalbanese/kirimase/issues)",
   ];
 
@@ -311,11 +332,12 @@ export const showNextSteps = (
 
 ${formatInstallList(installList)}
 
-${chalk.bgGreen.black(
+${chalk.bgGreen(
   `[installed and configured in just ${duration / 1000} seconds]`
 )}
 ${createNextStepsList(steps)}
 ${notes.length > 0 ? createNotesList(notes) : ""}
-`;
+
+Hint: use \`kirimase generate\` to quickly scaffold entire entities for your application`;
   consola.box(nextStepsFormatted);
 };

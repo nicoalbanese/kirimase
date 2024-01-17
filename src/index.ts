@@ -23,20 +23,19 @@ addCommonOptions(program.command("add"))
   .action(addPackage);
 
 // TODO REMOVE
-// program.command("ns").action(() =>
-//   printNextSteps(
-//     {
-//       authProviders: ["google", "github"],
-//       auth: "next-auth",
-//       orm: "prisma",
-//       packageManager: "bun",
-//       componentLib: "shadcn-ui",
-//       miscPackages: ["stripe"],
-//       db: "mysql",
-//     },
-//     15000
-//   )
-// );
+program.command("ns").action(() =>
+  printNextSteps(
+    {
+      packageManager: "bun",
+      auth: "next-auth",
+      miscPackages: ["stripe"],
+      dbProvider: "neon",
+      db: "pg",
+      orm: "prisma",
+    },
+    1000
+  )
+);
 
 program.parse(process.argv);
 
