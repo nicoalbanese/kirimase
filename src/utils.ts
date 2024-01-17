@@ -3,6 +3,7 @@ import path from "path";
 import { consola } from "consola";
 import { AvailablePackage, Config, PMType, UpdateConfig } from "./types.js";
 import { execa } from "execa";
+import { spinner } from "./commands/add/index.js";
 
 export const delay = (ms = 2000) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -174,7 +175,7 @@ export async function installShadcnUIComponents(
     // );
     try {
       await execa(pmInstallCommand[preferredPackageManager], installArgs, {
-        stdio: "inherit",
+        stdio: "ignore",
       });
       // consola.success(
       //   `Installed components: ${componentsToInstall.join(", ")}`

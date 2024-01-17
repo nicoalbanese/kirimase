@@ -29,7 +29,7 @@ export const DBProviders: DBProviderOptions = {
     {
       name: "AWS Data API",
       value: "aws",
-      disabled: wrapInParenthesis("Not supported"),
+      disabled: "(Not supported)",
     },
   ],
   mysql: [
