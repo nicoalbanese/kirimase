@@ -305,13 +305,13 @@ export const printNextSteps = (
 
   showNextSteps(packagesInstalledList, nextSteps, notes, duration);
 };
-const createNextStepsList = (steps: string[]) => {
+export const createNextStepsList = (steps: string[]) => {
   return `
 ${chalk.bold.underline("Next Steps")}
 ${steps.map((item, i) => `${i + 1}. ${item}`).join("\n")}`;
 };
 
-const createNotesList = (notes: string[]) => {
+export const createNotesList = (notes: string[]) => {
   return `
 ${chalk.bold.underline("Notes")}
 ${notes.map((item) => `- ${item}`).join("\n")}`;

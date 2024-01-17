@@ -10,6 +10,11 @@ import { readConfigFile, replaceFile } from "../../utils.js";
 import fs, { existsSync, readFileSync } from "fs";
 import { consola } from "consola";
 import { formatFilePath, getFilePaths } from "../filePaths/index.js";
+import { Schema } from "./types.js";
+
+import chalk from "chalk";
+import { TResource } from "./index.js";
+import { createNextStepsList, createNotesList } from "../add/utils.js";
 
 export function toCamelCase(input: string): string {
   return input
@@ -424,3 +429,52 @@ export function addToPrismaModelBulk(
     consola.info("Updated Prisma schema");
   }
 }
+
+const resourceMapping: Record<TResource, string> = {
+  model: "Model (schema file and queries/mutations functions)",
+  views_and_components_server_actions: "Views (powered by Server Actions)",
+  server_actions: "Server Actions",
+  api_route: "API Route",
+  trpc_route: "tRPC Route",
+  views_and_components_trpc: "Views (powered by tRPC)",
+};
+
+export const printGenerateNextSteps = (
+  schema: Schema,
+  resources: TResource[]
+) => {
+  const config = readConfigFile();
+  const { tableNameNormalEnglishSingular, tableNameKebabCase } =
+    formatTableName(schema.tableName);
+
+  const ppm = config?.preferredPackageManager ?? "npm";
+  const dbMigration = [
+    `Run \`${ppm} run db:generate\``,
+    `Run \`${ppm} run db:${config.driver === "pg" ? "migrate" : "push"}\``,
+  ];
+
+  const viewInBrowser = [
+    `Run \`${ppm} run dev\``,
+    `Open http://localhost:3000/${tableNameKebabCase} in your browser`,
+  ];
+
+  const nextStepsList = [
+    ...(resources.includes("model") ? dbMigration : []),
+    ...(resources.includes("views_and_components_trpc") ||
+    resources.includes("views_and_components_server_actions")
+      ? viewInBrowser
+      : []),
+  ];
+
+  consola.box(`🎉 Success! 
+
+Kirimase generated the following resources for \`${tableNameNormalEnglishSingular}\`:
+${resources.map((r) => `- ${resourceMapping[r]}`).join("\n")}
+
+${createNextStepsList(nextStepsList)}
+
+${createNotesList([
+  "If you run into any issues, please create an issue on GitHub\n  (https://github.com/nicoalbanese/kirimase/issues)",
+  "Documentation (https://kirimase.dev/commands/generate)",
+])}`);
+};

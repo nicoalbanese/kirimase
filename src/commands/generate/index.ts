@@ -20,6 +20,7 @@ import { scaffoldViewsAndComponents } from "./generators/views.js";
 import {
   camelCaseToSnakeCase,
   getCurrentSchemas,
+  printGenerateNextSteps,
   toCamelCase,
 } from "./utils.js";
 import { scaffoldModel } from "./generators/model/index.js";
@@ -34,7 +35,7 @@ function provideInstructions() {
   );
 }
 
-type TResource =
+export type TResource =
   | "model"
   | "api_route"
   | "trpc_route"
@@ -375,6 +376,7 @@ export async function buildSchema() {
     if (resourceType.includes("views_and_components_server_actions"))
       scaffoldViewsAndComponentsWithServerActions(schema);
     await installShadcnComponentList();
+    printGenerateNextSteps(schema, resourceType);
   } else {
     consola.warn(
       "You need to have an ORM installed in order to use the scaffold command."

@@ -25,6 +25,7 @@ import { consola } from "consola";
 import { addToPrismaSchema } from "../../../generate/utils.js";
 import { formatFilePath, getDbIndexPath } from "../../../filePaths/index.js";
 import { addToInstallList } from "../../utils.js";
+import { addScriptsToPackageJsonForPrisma } from "./utils.js";
 
 export const addPrisma = async (
   includeExampleModel: boolean,
@@ -111,6 +112,8 @@ export const addPrisma = async (
     createFolder(`${hasSrc ? "src/" : ""}lib/db/schema`);
     createFolder(`${hasSrc ? "src/" : ""}lib/api`);
   }
+
+  addScriptsToPackageJsonForPrisma(dbType);
 
   // install packages: regular: [] dev: [prisma, zod-prisma]
   // await installPackages(
