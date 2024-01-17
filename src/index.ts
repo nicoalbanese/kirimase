@@ -22,20 +22,21 @@ addCommonOptions(program.command("add"))
   .description("Add and setup additional packages")
   .action(addPackage);
 
-program.command("ns").action(() =>
-  printNextSteps(
-    {
-      authProviders: ["google", "github"],
-      auth: "next-auth",
-      orm: "prisma",
-      packageManager: "bun",
-      componentLib: "shadcn-ui",
-      miscPackages: ["stripe"],
-      db: "mysql",
-    },
-    15000
-  )
-);
+// TODO REMOVE
+// program.command("ns").action(() =>
+//   printNextSteps(
+//     {
+//       authProviders: ["google", "github"],
+//       auth: "next-auth",
+//       orm: "prisma",
+//       packageManager: "bun",
+//       componentLib: "shadcn-ui",
+//       miscPackages: ["stripe"],
+//       db: "mysql",
+//     },
+//     15000
+//   )
+// );
 
 program.parse(process.argv);
 

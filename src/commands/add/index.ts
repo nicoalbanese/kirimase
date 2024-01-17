@@ -150,22 +150,25 @@ export const addPackage = async (options?: InitOptions) => {
 
     // check if orm
     if (config.orm === undefined) {
-      if (promptResponse.orm === "drizzle")
+      if (promptResponse.orm === "drizzle") {
         spinner.text = "Configuring Drizzle ORM";
 
-      await addDrizzle(
-        promptResponse.db,
-        promptResponse.dbProvider,
-        promptResponse.includeExample,
-        options
-      );
-      if (promptResponse.orm === "prisma") spinner.text = "Configuring Prisma";
+        await addDrizzle(
+          promptResponse.db,
+          promptResponse.dbProvider,
+          promptResponse.includeExample,
+          options
+        );
+      }
+      if (promptResponse.orm === "prisma") {
+        spinner.text = "Configuring Prisma";
 
-      await addPrisma(
-        promptResponse.includeExample,
-        promptResponse.db,
-        options
-      );
+        await addPrisma(
+          promptResponse.includeExample,
+          promptResponse.db,
+          options
+        );
+      }
       if (promptResponse === null)
         updateConfigFile({ orm: null, driver: null, provider: null });
     }
