@@ -254,8 +254,10 @@ export const printNextSteps = (
   const wouldHaveSecrets =
     promptResponses.orm ||
     promptResponses.auth ||
-    promptResponses.miscPackages.includes("resend") ||
-    promptResponses.miscPackages.includes("stripe");
+    (promptResponses.miscPackages &&
+      promptResponses.miscPackages.includes("resend")) ||
+    (promptResponses.miscPackages &&
+      promptResponses.miscPackages.includes("stripe"));
 
   const dbMigration = [
     `Run \`${ppm} run db:generate\``,
@@ -264,10 +266,14 @@ export const printNextSteps = (
     "Open http://localhost:3000 in your browser",
   ];
   const runMigration =
-    promptResponses.orm ||
+    (promptResponses.orm && promptResponses.includeExample) ||
+    (promptResponses.orm &&
+      promptResponses.auth !== "clerk" &&
+      promptResponses.auth !== "kinde") ||
     promptResponses.auth === "lucia" ||
     promptResponses.auth === "next-auth" ||
-    promptResponses.miscPackages.includes("stripe");
+    (promptResponses.miscPackages &&
+      promptResponses.miscPackages.includes("stripe"));
 
   const includesStripe =
     promptResponses.miscPackages &&
