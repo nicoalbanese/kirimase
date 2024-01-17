@@ -13,6 +13,7 @@ import {
 } from "../../utils.js";
 import fs from "fs";
 import { formatFilePath, getFilePaths } from "../filePaths/index.js";
+import { spinner } from "./index.js";
 
 export const Packages: {
   [key in PackageType]: {
@@ -176,6 +177,7 @@ export const installPackagesFromList = async () => {
       .join(" ")
       .trim(),
   };
+  spinner.text = "Installing Packages";
   await installPackages(formattedInstallList, preferredPackageManager);
 };
 const shadCnComponentList: string[] = [];
@@ -183,6 +185,10 @@ export const addToShadcnComponentList = (components: string[]) =>
   shadCnComponentList.push(...components);
 export const installShadcnComponentList = async () => {
   // consola.start("Installing shadcn components:", shadCnComponentList);
+  if (shadCnComponentList.length === 0) return;
+  spinner.text = "Installing ShadcnUI Components";
   await installShadcnUIComponents(shadCnComponentList);
   // consola.ready("Successfully installed components.");
 };
+
+const nextStepsList = [];

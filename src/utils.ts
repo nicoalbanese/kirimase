@@ -53,7 +53,7 @@ export function createFolder(relativePath: string, log = false) {
 export const runCommand = async (command: string, args: string[]) => {
   const formattedArgs = args.filter((a) => a !== "");
   try {
-    await execa(command, formattedArgs, { stdio: "inherit" });
+    await execa(command, formattedArgs, { stdio: "ignore" });
   } catch (error) {
     throw new Error(
       `command "${command} ${formattedArgs
@@ -68,7 +68,7 @@ export async function installPackages(
   pmType: PMType
 ) {
   const packagesListString = packages.regular.concat(" ").concat(packages.dev);
-  consola.start(`Installing packages: ${packagesListString}...`);
+  // consola.start(`Installing packages: ${packagesListString}...`);
 
   const installCommand = pmType === "npm" ? "install" : "add";
 
@@ -87,7 +87,14 @@ export async function installPackages(
       );
     }
 
-    consola.success(`Packages installed: ${packagesListString}`);
+    // consola.success(
+    //   `Regular dependencies installed: \n${packages.regular
+    //     .split(" ")
+    //     .join("\n")}`
+    // );
+    // consola.success(
+    //   `Dev dependencies installed: \n${packages.dev.split(" ").join("\n")}`
+    // );
   } catch (error) {
     console.error(`An error occurred: ${error.message}`);
   }
@@ -162,16 +169,16 @@ export async function installShadcnUIComponents(
     preferredPackageManager === "pnpm" ? ["dlx", ...baseArgs] : baseArgs;
 
   if (componentsToInstall.length > 0) {
-    consola.start(
-      `Installing shadcn-ui components: ${componentsToInstall.join(", ")}`
-    );
+    // consola.start(
+    //   `Installing shadcn-ui components: ${componentsToInstall.join(", ")}`
+    // );
     try {
       await execa(pmInstallCommand[preferredPackageManager], installArgs, {
         stdio: "inherit",
       });
-      consola.success(
-        `Installed components: ${componentsToInstall.join(", ")}`
-      );
+      // consola.success(
+      //   `Installed components: ${componentsToInstall.join(", ")}`
+      // );
     } catch (error) {
       consola.error(`Failed to install components: ${error.message}`);
     }

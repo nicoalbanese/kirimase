@@ -43,7 +43,6 @@ import {
   installPackagesFromList,
   installShadcnComponentList,
 } from "./utils.js";
-
 import ora from "ora";
 
 const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
@@ -102,6 +101,8 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
   };
 };
 
+export const spinner = ora();
+
 export const addPackage = async (options?: InitOptions) => {
   const initialConfig = readConfigFile();
 
@@ -114,10 +115,16 @@ export const addPackage = async (options?: InitOptions) => {
     const promptResponse = await promptUser(options);
 
     if (config.componentLib === undefined) {
-      if (promptResponse.componentLib === "shadcn-ui")
+      spinner.text = "Beginning Installation Process";
+      spinner.start();
+      if (promptResponse.componentLib === "shadcn-ui") {
+        spinner.text = "Configuring Shadcn-UI";
         await installShadcnUI([]);
+      }
       if (promptResponse.componentLib === null) {
         // consola.info("Installing Lucide React for icons.");
+        spinner.text = "Configuring Base Styles";
+
         addToInstallList({ regular: ["lucide-react"], dev: [] });
         // await installPackages(
         //   { regular: "lucide-react", dev: "" },
@@ -142,36 +149,32 @@ export const addPackage = async (options?: InitOptions) => {
     // check if orm
     if (config.orm === undefined) {
       if (promptResponse.orm === "drizzle")
-        await addDrizzle(
-          promptResponse.db,
-          promptResponse.dbProvider,
-          promptResponse.includeExample,
-          options
-        );
-      if (promptResponse.orm === "prisma")
-        await addPrisma(
-          promptResponse.includeExample,
-          promptResponse.db,
-          options
-        );
+        spinner.text = "Configuring Drizzle ORM";
+
+      await addDrizzle(
+        promptResponse.db,
+        promptResponse.dbProvider,
+        promptResponse.includeExample,
+        options
+      );
+      if (promptResponse.orm === "prisma") spinner.text = "Configuring Prisma";
+
+      await addPrisma(
+        promptResponse.includeExample,
+        promptResponse.db,
+        options
+      );
       if (promptResponse === null)
         updateConfigFile({ orm: null, driver: null, provider: null });
     }
     // check if auth
     if (config.auth === undefined) {
-      // const { orm: ormPostPrompt } = readConfigFile();
-      // if (ormPostPrompt === undefined) {
-      //   consola.warn(
-      //     "You cannot install an authentication package without an ORM."
-      //   );
-      //   consola.info("Please run `kirimase init` again.");
-      //   consola.info(
-      //     "If you are seeing this message, it is likely because you misspelled your 'orm' option."
-      //   );
-      //   consola.info("Your requested option: -o", options.orm);
-      //   consola.info("Available options: -o prisma, -o drizzle");
-      //   process.exit(0);
-      // }
+      if (promptResponse.auth !== null)
+        spinner.text =
+          "Configuring " +
+          promptResponse.auth[0].toUpperCase() +
+          promptResponse.orm.slice(1);
+
       if (promptResponse.auth === "next-auth")
         await addNextAuth(promptResponse.authProviders, options);
       if (promptResponse.auth === "clerk") await addClerk();
@@ -195,16 +198,25 @@ export const addPackage = async (options?: InitOptions) => {
 
     // check if misc
 
-    if (promptResponse.miscPackages.includes("trpc")) await addTrpc();
+    if (promptResponse.miscPackages.includes("trpc")) {
+      spinner.text = "Configuring tRPC";
+      await addTrpc();
+    }
     if (promptResponse.miscPackages.includes("shadcn-ui"))
       await installShadcnUI(promptResponse.miscPackages);
-    if (promptResponse.miscPackages.includes("resend"))
+    if (promptResponse.miscPackages.includes("resend")) {
+      spinner.text = "Configuring Resend";
       await addResend(promptResponse.miscPackages);
-    if (promptResponse.miscPackages.includes("stripe"))
+    }
+    if (promptResponse.miscPackages.includes("stripe")) {
+      spinner.text = "Configuring Stripe";
       await addStripe(promptResponse.miscPackages);
+    }
 
     await installPackagesFromList();
+
     await installShadcnComponentList();
+    spinner.succeed();
     // TODO: ADD NEXT STEPS ARRAY
     // consola.box(
     //   `Thank you for using Kirimase!\n\nNext steps:\n1. Run ${config.preferredPackageManager} db:generate\n 2. Run ${config.preferredPackageManager} db:migrate\n3. Run ${config.preferredPackageManager} run dev`
