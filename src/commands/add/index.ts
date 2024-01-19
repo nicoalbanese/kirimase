@@ -36,6 +36,7 @@ import {
   askDbType,
   askMiscPackages,
   askOrm,
+  askPscale,
 } from "./prompts.js";
 import {
   addContextProviderToLayout,
@@ -73,7 +74,7 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
   const dbType =
     orm === null || config.driver ? undefined : await askDbType(options);
 
-  const dbProvider =
+  let dbProvider =
     config.orm ||
     orm === "prisma" ||
     orm === null ||
@@ -81,6 +82,11 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
     (config.provider && config.t3 === false)
       ? undefined
       : await askDbProvider(options, dbType, config.preferredPackageManager);
+
+  if (orm === "prisma" && dbType === "mysql") {
+    const usePscale = await askPscale(options);
+    if (usePscale) dbProvider = "planetscale";
+  }
 
   const auth = config.auth || !orm ? undefined : await askAuth(options);
 

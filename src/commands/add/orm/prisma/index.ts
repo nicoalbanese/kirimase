@@ -21,7 +21,6 @@ import {
   prismaGenerate,
   updateTsConfigPrismaTypeAlias,
 } from "../utils.js";
-import { consola } from "consola";
 import { addToPrismaSchema } from "../../../generate/utils.js";
 import { formatFilePath, getDbIndexPath } from "../../../filePaths/index.js";
 import { addToInstallList } from "../../utils.js";
@@ -39,14 +38,10 @@ export const addPrisma = async (
 
   // if mysql, ask if planetscale
   if (dbType === "mysql") {
-    const usingPlanetscale = await confirm({
-      message: "Are you using PlanetScale?",
-      default: false,
-    });
     // scaffold planetscale specific schema
     createFile(
       `prisma/schema.prisma`,
-      generatePrismaSchema(dbType, usingPlanetscale)
+      generatePrismaSchema(dbType, initOptions.dbProvider === "planetscale")
     );
     updateConfigFile({ provider: "planetscale" });
     createDotEnv(

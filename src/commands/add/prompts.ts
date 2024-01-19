@@ -76,6 +76,16 @@ export const askDbProvider = async (
   );
 };
 
+export const askPscale = async (options: InitOptions) => {
+  return (
+    options.dbProvider ??
+    (await confirm({
+      message: "Are you using PlanetScale?",
+      default: false,
+    }))
+  );
+};
+
 export const askExampleModel = async (options: InitOptions) => {
   return (
     options.includeExample ??
