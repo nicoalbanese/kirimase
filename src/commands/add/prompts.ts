@@ -116,7 +116,10 @@ export const askAuthProvider = async () => {
   })) as AuthProvider[];
 };
 
-export const askMiscPackages = async (existingPackages: AvailablePackage[]) => {
+export const askMiscPackages = async (
+  existingPackages: AvailablePackage[],
+  hasOrmAndAuth: boolean
+) => {
   let uninstalledPackages: PackageChoice[] = [];
 
   if (existingPackages.length === 0) {
@@ -129,6 +132,17 @@ export const askMiscPackages = async (existingPackages: AvailablePackage[]) => {
       (p) => !existingPackages.includes(p.value)
     );
   }
+  console.log(uninstalledPackages, hasOrmAndAuth);
+  if (hasOrmAndAuth === false)
+    uninstalledPackages = uninstalledPackages.map((pkg) =>
+      pkg.value === "stripe"
+        ? {
+            ...pkg,
+            disabled: "(you must have an ORM and Auth to install Stripe)",
+          }
+        : pkg
+    );
+
   if (uninstalledPackages.length > 0) {
     return await checkbox({
       message: "Select any miscellaneous packages to add:",

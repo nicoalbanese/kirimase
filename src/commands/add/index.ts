@@ -63,7 +63,7 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
   if (orm === null) {
     const confirmedNoORM = await confirm({
       message:
-        "Are you sure you don't want to install an ORM? Note: you will not be able to install any auth.",
+        "Are you sure you don't want to install an ORM? Note: you will not be able to install auth or Stripe.",
     });
     if (confirmedNoORM === false) {
       orm = await askOrm(options);
@@ -95,8 +95,10 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
       ? options?.authProviders || (await askAuthProvider())
       : undefined;
 
+  const hasOrmAndAuth = !!(auth && auth !== null && orm && orm !== null);
   const packagesToInstall =
-    options.miscPackages || (await askMiscPackages(config.packages));
+    options.miscPackages ||
+    (await askMiscPackages(config.packages, hasOrmAndAuth));
 
   return {
     componentLib,
