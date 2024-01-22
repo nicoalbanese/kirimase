@@ -234,4 +234,5 @@ export const getDbIndexPath = (ormToBeInstalled?: ORMType) => {
   const orm = ormToBeInstalled ? ormToBeInstalled : ormFromConfig;
   if (orm === "prisma") return prisma.dbIndex;
   if (orm === "drizzle") return drizzle.dbIndex;
+  if (!orm || orm === "null") return null;
 };

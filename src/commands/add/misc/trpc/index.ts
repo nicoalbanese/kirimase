@@ -1,14 +1,11 @@
-import { consola } from "consola";
 import {
   addPackageToConfig,
   createFile,
-  installPackages,
   readConfigFile,
 } from "../../../../utils.js";
 import {
   apiTrpcRouteTs,
   libTrpcApiTs,
-  // libTrpcApiTsBatchLink,
   libTrpcClientTs,
   libTrpcContextTs,
   libTrpcProviderTsx,
@@ -18,13 +15,11 @@ import {
   serverTrpcTs,
 } from "./generators.js";
 import { addContextProviderToLayout, addToInstallList } from "../../utils.js";
-import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 export const addTrpc = async () => {
-  const { hasSrc, preferredPackageManager, packages, orm } = readConfigFile();
-  const { trpc, shared } = getFilePaths();
-  const rootPath = `${hasSrc ? "src/" : ""}`;
+  const { orm } = readConfigFile();
+  const { trpc } = getFilePaths();
   // 1. Create lib/server/index.ts
   createFile(
     formatFilePath(trpc.rootRouter, {
@@ -45,7 +40,10 @@ export const addTrpc = async () => {
   // 3. create lib/server/router/ directory and maybe a users file
   // TODO : T3 COMPATABILITY
   createFile(
-    `${rootPath}lib/server/routers/computers.ts`,
+    formatFilePath(`lib/server/routers/computers.ts`, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
     serverRouterComputersTs()
   );
   // 4. create app/api/trpc/[trpc]/route.ts

@@ -95,12 +95,12 @@ export const serverRouterComputersTs = () => {
   const schemaExists = existsSync(schemaPath);
   return `import { publicProcedure, router } from "${formatFilePath(
     trpc.serverTrpc,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";${
     schemaExists
       ? `\nimport { getComputers } from "${formatFilePath(
           shared.orm.servicesDir,
-          { prefix: "alias", removeExtension: false },
+          { prefix: "alias", removeExtension: false }
         )}/computers/queries"`
       : ""
   }
@@ -332,16 +332,18 @@ export const api = createTRPCProxyClient<typeof appRouter>({
 export const libTrpcContextTs = () => {
   const { orm, t3, auth } = readConfigFile();
   const dbIndexPath = getDbIndexPath(orm);
-  const { trpc, shared } = getFilePaths();
+  const { shared } = getFilePaths();
   const withSession = t3 === false && auth !== null;
-  return `import { db } from "${formatFilePath(dbIndexPath, {
-    prefix: "alias",
-    removeExtension: true,
-  })}"
+
+  if (dbIndexPath !== null) {
+    return `import { db } from "${formatFilePath(dbIndexPath, {
+      prefix: "alias",
+      removeExtension: true,
+    })}"
 ${withSession ? "" : " // "}import { getUserAuth } from "${formatFilePath(
-    shared.auth.authUtils,
-    { prefix: "alias", removeExtension: true },
-  )}";
+      shared.auth.authUtils,
+      { prefix: "alias", removeExtension: true }
+    )}";
 
 export async function createTRPCContext(opts: { headers: Headers }) {
 ${withSession ? "" : " // "}const { session } = await getUserAuth();
@@ -355,6 +357,23 @@ ${withSession ? "" : " // "}const { session } = await getUserAuth();
 
 export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
 `;
+  } else {
+    return `// import { db } from "path/to/your/db"
+// import { getUserAuth } from "path/to/your/auth"
+
+export async function createTRPCContext(opts: { headers: Headers }) {
+ // const { session } = await getUserAuth();
+
+  return {
+    // db,
+    // session,
+    ...opts,
+  }
+}
+
+export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
+`;
+  }
 };
 
 export const libTrpcUtilsTs = () => {
