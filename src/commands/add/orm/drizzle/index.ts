@@ -19,6 +19,7 @@ import {
   installDependencies,
   updateTsConfigTarget,
 } from "./generators.js";
+import { addNanoidToUtils } from "./utils.js";
 
 export const addDrizzle = async (
   dbType: DBType,
@@ -82,7 +83,10 @@ export const addDrizzle = async (
     );
   if (dbProvider === "turso")
     addToDotEnv([{ key: "DATABASE_AUTH_TOKEN", value: "" }], rootPath);
+
   await updateTsConfigTarget();
+
+  addNanoidToUtils();
 
   updateConfigFile({ driver: dbType, provider: dbProvider, orm: "drizzle" });
   await installDependencies(dbProvider, preferredPackageManager);

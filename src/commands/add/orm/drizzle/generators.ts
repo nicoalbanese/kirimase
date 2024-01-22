@@ -62,10 +62,10 @@ export default {
         ? `url: env.DATABASE_URL,
     authToken: env.DATABASE_AUTH_TOKEN`
         : provider === "better-sqlite3"
-        ? "url: env.DATABASE_URL"
-        : provider === "mysql-2" || provider === "planetscale"
-        ? "uri: env.DATABASE_URL"
-        : "connectionString: env.DATABASE_URL"
+          ? "url: env.DATABASE_URL"
+          : provider === "mysql-2" || provider === "planetscale"
+            ? "uri: env.DATABASE_URL"
+            : "connectionString: env.DATABASE_URL"
     }${provider === "vercel-pg" ? '.concat("?sslmode=require")' : ""},
   }
 } satisfies Config;`
@@ -589,6 +589,7 @@ export const installDependencies = async (
         "drizzle-zod",
         "@t3-oss/env-nextjs",
         "zod",
+        "nanoid",
         ...dbSpecificPackage.regular,
       ],
       dev: ["drizzle-kit", "tsx", "dotenv", ...dbSpecificPackage.dev],
@@ -790,10 +791,10 @@ export const createComputer = async (computer: NewComputer) => {
     ${
       driver === "mysql" ? "" : "const [c] = "
     } await db.insert(computers).values(newComputer)${
-    driver === "mysql"
-      ? "\n    return { success: true }"
-      : ".returning();\n    return { computer: c }"
-  }
+      driver === "mysql"
+        ? "\n    return { success: true }"
+        : ".returning();\n    return { computer: c }"
+    }
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
     console.error(message);
@@ -826,10 +827,10 @@ export const deleteComputer = async (id: ComputerId) => {
     ${
       driver === "mysql" ? "" : "const [c] = "
     }await db.delete(computers).where(eq(computers.id, computerId!))${
-    driver === "mysql"
-      ? "\n    return { success: true };"
-      : ".returning();\n    return { computer: c };"
-  }
+      driver === "mysql"
+        ? "\n    return { success: true };"
+        : ".returning();\n    return { computer: c };"
+    }
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again"
     console.error(message);

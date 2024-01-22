@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "fs";
-import { readConfigFile, replaceFile } from "../../../../utils.js";
+import { createFile, readConfigFile, replaceFile } from "../../../../utils.js";
 import { consola } from "consola";
+import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 export function addToDrizzleModel(
   modelName: string,
@@ -46,4 +47,26 @@ const getDrizzleModelStartAndEnd = (schema: string, modelName: string) => {
     modelExists = false;
   }
   return { modelStart, modelEnd, modelExists };
+};
+
+export const addNanoidToUtils = () => {
+  const nanoidContent = `import { customAlphabet } from "nanoid";
+  export const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789");`;
+  const { shared } = getFilePaths();
+  const utilsPath = formatFilePath(shared.init.libUtils, {
+    removeExtension: false,
+    prefix: "rootPath",
+  });
+  const utilsExists = existsSync(utilsPath);
+  if (!utilsExists) {
+    createFile(utilsPath, nanoidContent);
+  } else {
+    const utilsContent = readFileSync(utilsPath, "utf-8");
+    const newContent = `${nanoidContent.split("\n")[0]}
+${utilsContent}
+
+${nanoidContent.split("\n")[1]}
+`;
+    replaceFile(utilsPath, newContent);
+  }
 };

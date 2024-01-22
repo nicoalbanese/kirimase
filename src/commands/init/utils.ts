@@ -17,6 +17,7 @@ import {
 import { consola } from "consola";
 import { updateTsConfigPrismaTypeAlias } from "../add/orm/utils.js";
 import { addToInstallList } from "../add/utils.js";
+import { addNanoidToUtils } from "../add/orm/drizzle/utils.js";
 // test
 
 export const DBProviders: DBProviderOptions = {
@@ -219,7 +220,8 @@ export const checkForExistingPackages = async (rootPath: string) => {
       //   { regular: "drizzle-zod", dev: "" },
       //   preferredPackageManager
       // );
-      addToInstallList({ regular: ["drizzle-zod"], dev: [] });
+      addToInstallList({ regular: ["drizzle-zod", "nanoid"], dev: [] });
+      addNanoidToUtils();
       // consola.success("Successfully installed!");
     }
   }
