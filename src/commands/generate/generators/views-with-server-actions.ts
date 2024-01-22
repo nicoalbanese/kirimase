@@ -196,7 +196,13 @@ const generateView = (schema: Schema) => {
   const relations = getRelations(schema.fields);
   const relationsFormatted = formatRelations(relations);
 
-  return `import ${tableNameSingularCapitalised}List from "${formatFilePath(
+  return `import { Suspense } from "react";
+
+import Loading from "${formatFilePath("app/loading", {
+    prefix: "alias",
+    removeExtension: false,
+  })}";
+import ${tableNameSingularCapitalised}List from "${formatFilePath(
     `components/${tableNameCamelCase}/${tableNameSingularCapitalised}List`,
     { removeExtension: false, prefix: "alias" }
   )}";
@@ -221,35 +227,41 @@ ${
 
 export const revalidate = 0;
 
-export default async function ${tableNameCapitalised}() {
-  ${
-    schema.belongsToUser ? "await checkAuth();\n  " : ""
-  }const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();
-  ${
-    relationsFormatted
-      ? relationsFormatted.map((relation) => relation.invocation).join("\n  ")
-      : ""
-  }
-
+export default async function ${tableNameCapitalised}Page() {
+  ${schema.belongsToUser ? "await checkAuth();\n" : ""}
   return (
     <main>
       <div className="relative">
         <div className="flex justify-between">
           <h1 className="font-semibold text-2xl my-2">${tableNameNormalEnglishCapitalised}</h1>
         </div>
-        <${tableNameSingularCapitalised}List ${tableNameCamelCase}={${tableNameCamelCase}} ${
-          relationsFormatted
-            ? relationsFormatted
-                .map((relation) =>
-                  relation.hasJoins ? relation.propsWithMap : relation.props
-                )
-                .join(" ")
-            : ""
-        } />
+        <${tableNameCapitalised} />
       </div>
     </main>
   );
 }
+
+const ${tableNameCapitalised} = async () => {
+  const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();
+  ${
+    relationsFormatted
+      ? relationsFormatted.map((relation) => relation.invocation).join("\n  ")
+      : ""
+  }
+  return (
+    <Suspense fallback={<Loading />}>
+      <${tableNameSingularCapitalised}List ${tableNameCamelCase}={${tableNameCamelCase}} ${
+        relationsFormatted
+          ? relationsFormatted
+              .map((relation) =>
+                relation.hasJoins ? relation.propsWithMap : relation.props
+              )
+              .join(" ")
+          : ""
+      } />
+    </Suspense>
+  );
+};
 `;
 };
 
