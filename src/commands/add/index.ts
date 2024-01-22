@@ -183,7 +183,7 @@ export const addPackage = async (options?: InitOptions) => {
     }
     // check if auth
     if (config.auth === undefined) {
-      if (promptResponse.auth !== null)
+      if (promptResponse.auth && promptResponse.auth !== null)
         spinner.text =
           "Configuring " +
           promptResponse.auth[0].toUpperCase() +
@@ -194,7 +194,7 @@ export const addPackage = async (options?: InitOptions) => {
       if (promptResponse.auth === "clerk") await addClerk();
       if (promptResponse.auth === "lucia") await addLucia();
       if (promptResponse.auth === "kinde") await addKinde();
-      if (promptResponse.auth === null) {
+      if (!promptResponse.auth) {
         replaceFile(
           formatFilePath("app/page.tsx", {
             prefix: "rootPath",
