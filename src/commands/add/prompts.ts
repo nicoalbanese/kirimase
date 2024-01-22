@@ -132,7 +132,6 @@ export const askMiscPackages = async (
       (p) => !existingPackages.includes(p.value)
     );
   }
-  console.log(uninstalledPackages, hasOrmAndAuth);
   if (hasOrmAndAuth === false)
     uninstalledPackages = uninstalledPackages.map((pkg) =>
       pkg.value === "stripe"
