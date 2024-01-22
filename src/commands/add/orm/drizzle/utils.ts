@@ -51,7 +51,7 @@ const getDrizzleModelStartAndEnd = (schema: string, modelName: string) => {
 
 export const addNanoidToUtils = () => {
   const nanoidContent = `import { customAlphabet } from "nanoid";
-  export const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789");`;
+export const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789");`;
   const { shared } = getFilePaths();
   const utilsPath = formatFilePath(shared.init.libUtils, {
     removeExtension: false,
@@ -62,10 +62,9 @@ export const addNanoidToUtils = () => {
     createFile(utilsPath, nanoidContent);
   } else {
     const utilsContent = readFileSync(utilsPath, "utf-8");
-    const newContent = `${nanoidContent.split("\n")[0]}
+    const newContent = `${nanoidContent.split("\n")[0].trim()}
 ${utilsContent}
-
-${nanoidContent.split("\n")[1]}
+${nanoidContent.split("\n")[1].trim()}
 `;
     replaceFile(utilsPath, newContent);
   }

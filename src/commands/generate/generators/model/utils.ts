@@ -47,7 +47,7 @@ export const createOrmMappings = () => {
         tableFunc: "pgTable",
         typeMappings: {
           id: ({ name }) =>
-            `varchar("${name}", { length: 191 }).primaryKey().$defaultFn(() => randomUUID())`,
+            `varchar("${name}", { length: 191 }).primaryKey().$defaultFn(() => nanoid())`,
           varchar: ({ name }) => `varchar("${name}", { length: 256 })`,
           text: ({ name }) => `text("${name}")`,
           number: ({ name }) => `integer("${name}")`,
@@ -74,7 +74,7 @@ export const createOrmMappings = () => {
         tableFunc: "mysqlTable",
         typeMappings: {
           id: ({ name }) =>
-            `varchar("${name}", { length: 191 }).primaryKey().$defaultFn(() => randomUUID())`,
+            `varchar("${name}", { length: 191 }).primaryKey().$defaultFn(() => nanoid())`,
           varchar: ({ name }) => `varchar("${name}", { length: 256 })`,
           text: ({ name }) => `text("${name}")`,
           number: ({ name }) => `int("${name}")`,
@@ -104,7 +104,7 @@ export const createOrmMappings = () => {
         tableFunc: "sqliteTable",
         typeMappings: {
           id: ({ name }) =>
-            `text("${name}").primaryKey().$defaultFn(() => randomUUID())`,
+            `text("${name}").primaryKey().$defaultFn(() => nanoid())`,
           string: ({ name }) => `text("${name}")`,
           number: ({ name }) => `integer("${name}")`,
           boolean: ({ name }) => `integer("${name}", { mode: "boolean" })`,
@@ -145,7 +145,7 @@ export const authForWhereClausePrisma = (belongsToUser: boolean) => {
 export const updateRootSchema = (
   tableName: string,
   usingAuth?: boolean,
-  auth?: AuthType,
+  auth?: AuthType
 ) => {
   const tableNameCC = toCamelCase(tableName);
   const { drizzle } = getFilePaths();
@@ -179,7 +179,7 @@ export const updateRootSchema = (
     const rootSchemaContents = readFileSync(rootSchemaPath, "utf-8");
     const rootSchemaWithNewExport = rootSchemaContents.replace(
       "export {",
-      `export { ${tableNameCC},`,
+      `export { ${tableNameCC},`
     );
 
     const importInsertionPoint = rootSchemaWithNewExport.lastIndexOf("import");
@@ -187,7 +187,7 @@ export const updateRootSchema = (
       rootSchemaWithNewExport.indexOf("\n", importInsertionPoint) + 1;
     const beforeImport = rootSchemaWithNewExport.slice(
       0,
-      nextLineAfterLastImport,
+      nextLineAfterLastImport
     );
     const afterImport = rootSchemaWithNewExport.slice(nextLineAfterLastImport);
 
@@ -199,7 +199,7 @@ export const updateRootSchema = (
       rootSchemaPath,
       `${newImportStatement}
 
-export { ${usingAuth ? tableNames : tableNameCC} }`,
+export { ${usingAuth ? tableNames : tableNameCC} }`
     );
     // and also update db/index.ts to add extended model import
     const indexDbPath = formatFilePath(drizzle.dbIndex, {
@@ -210,11 +210,11 @@ export { ${usingAuth ? tableNames : tableNameCC} }`,
     const updatedContentsWithImport = indexDbContents.replace(
       `import * as schema from "./schema";`,
       `import * as schema from "./schema";
-import * as extended from "~/server/db/schema/_root";`,
+import * as extended from "~/server/db/schema/_root";`
     );
     const updatedContentsFinal = updatedContentsWithImport.replace(
       `{ schema }`,
-      `{ schema: { ...schema, ...extended } }`,
+      `{ schema: { ...schema, ...extended } }`
     );
     replaceFile(indexDbPath, updatedContentsFinal);
 
@@ -223,7 +223,7 @@ import * as extended from "~/server/db/schema/_root";`,
     const dConfigContents = readFileSync(drizzleConfigPath, "utf-8");
     const updatedContents = dConfigContents.replace(
       `schema: "./src/server/db/schema.ts",`,
-      `schema: "./src/server/db/*",`,
+      `schema: "./src/server/db/*",`
     );
     replaceFile(drizzleConfigPath, updatedContents);
   }

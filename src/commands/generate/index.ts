@@ -31,7 +31,7 @@ import { installShadcnComponentList } from "../add/utils.js";
 
 function provideInstructions() {
   consola.info(
-    "Quickly generate your Model (Drizzle schema + queries / mutations), Controllers (API Routes and TRPC Routes), and Views"
+    "Quickly generate your Model (schema + queries / mutations), Controllers (API Routes and TRPC Routes), and Views"
   );
 }
 
