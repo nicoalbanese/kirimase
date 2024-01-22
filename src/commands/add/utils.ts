@@ -260,7 +260,7 @@ export const printNextSteps = (
       promptResponses.miscPackages.includes("stripe"));
 
   const dbMigration = [
-    `Run \`${ppm} run db:generate\``,
+    ...(config.t3 === true ? [] : [`Run \`${ppm} run db:generate\``]),
     `Run \`${ppm} run db:${promptResponses.db === "pg" ? "migrate" : "push"}\``,
     `Run \`${ppm} run dev\``,
     "Open http://localhost:3000 in your browser",

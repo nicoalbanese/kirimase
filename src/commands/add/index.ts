@@ -95,7 +95,10 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
       ? options?.authProviders || (await askAuthProvider())
       : undefined;
 
-  const hasOrmAndAuth = !!(auth && auth !== null && orm && orm !== null);
+  const hasOrmAndAuth = !!(
+    config.auth ||
+    (auth && auth !== null && (config.orm || (orm && orm !== null)))
+  );
   const packagesToInstall =
     options.miscPackages ||
     (await askMiscPackages(config.packages, hasOrmAndAuth));

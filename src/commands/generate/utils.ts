@@ -449,7 +449,7 @@ export const printGenerateNextSteps = (
 
   const ppm = config?.preferredPackageManager ?? "npm";
   const dbMigration = [
-    `Run \`${ppm} run db:generate\``,
+    ...(config.t3 === true ? [] : [`Run \`${ppm} run db:generate\``]),
     `Run \`${ppm} run db:${config.driver === "pg" ? "migrate" : "push"}\``,
   ];
 
