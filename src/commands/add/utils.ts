@@ -111,14 +111,14 @@ export const addContextProviderToLayout = (
   const navbarExists = fileContent.includes("<Navbar />");
   const rootChildrenText = !navbarExists
     ? "{children}"
-    : `<div className="flex">\n<Sidebar />\n<main className="flex-1 md:p-8 pt-2 p-8">\n<Navbar />\n{children}\n</main>\n</div>`;
+    : `<div className="flex h-screen">\n<Sidebar />\n<main className="flex-1 md:p-8 pt-2 p-8">\n<Navbar />\n{children}\n</main>\n</div>`;
   let replacementText = "";
   switch (provider) {
     case "ShadcnToast":
       replacementText = `${rootChildrenText}\n<Toaster />\n`;
       break;
     case "Navbar":
-      replacementText = `<div className="flex">\n<Sidebar />\n<main className="flex-1 md:p-8 pt-2 p-8">\n<Navbar />\n{children}\n</main>\n</div>`;
+      replacementText = `<div className="flex h-screen">\n<Sidebar />\n<main className="flex-1 md:p-8 pt-2 p-8">\n<Navbar />\n{children}\n</main>\n</div>`;
       break;
     case "ThemeProvider":
       replacementText = `\n<${provider} attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>${rootChildrenText}</${provider}>\n`;
@@ -133,7 +133,7 @@ export const addContextProviderToLayout = (
 
   const searchValue = !navbarExists
     ? "{children}"
-    : `<div className="flex">\n<Sidebar />\n<main className="flex-1 md:p-8 pt-2 p-8">\n<Navbar />\n{children}\n</main>\n</div>`;
+    : `<div className="flex h-screen">\n<Sidebar />\n<main className="flex-1 md:p-8 pt-2 p-8">\n<Navbar />\n{children}\n</main>\n</div>`;
   const newLayoutContent = modifiedImportContent.replace(
     searchValue,
     replacementText
