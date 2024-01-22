@@ -255,7 +255,8 @@ const SidebarLinkGroup = ({
   title?: string;
   border?: boolean;
 }) => {
-  const pathname = usePathname();
+  const fullPathname = usePathname();
+  const pathname = "/" + fullPathname.split("/")[1];
 
   return (
     <div className={border ? "border-border border-t my-8 pt-4" : ""}>
