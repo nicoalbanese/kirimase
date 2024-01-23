@@ -6,7 +6,7 @@ import { buildSchema } from "./commands/generate/index.js";
 import { addPackage } from "./commands/add/index.js";
 
 const program = new Command();
-program.name("kirimase").description("Kirimase CLI").version("0.0.46");
+program.name("kirimase").description("Kirimase CLI").version("0.0.47");
 
 addCommonOptions(program.command("init"))
   .description("initialise and configure kirimase within directory")
@@ -48,3 +48,8 @@ function addCommonOptions(command: Command) {
     )
     .option("-ie, --include-example", "include example model in schema");
 }
+
+process.on("SIGINT", () => {
+  // Then end process
+  process.exit();
+});

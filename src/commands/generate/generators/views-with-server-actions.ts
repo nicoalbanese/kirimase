@@ -26,7 +26,6 @@ import pluralize from "pluralize";
 import {
   createFile,
   getFileContents,
-  installShadcnUIComponents,
   readConfigFile,
   replaceFile,
 } from "../../../utils.js";
@@ -47,6 +46,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     tableNameSingularCapitalised,
     tableNameKebabCase,
     tableNameCapitalised,
+    tableNameSingular,
   } = formatTableName(schema.tableName);
   // require trpc for these views
   if (packages.includes("shadcn-ui")) {
@@ -96,6 +96,24 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
         }
       ),
       createOptimisticListHook(schema)
+    );
+
+    // create tableName/[id]/page.tsx
+    createFile(
+      formatFilePath(
+        `app/${tableNameKebabCase}/[${tableNameCamelCase}Id]/page.tsx`,
+        { removeExtension: false, prefix: "rootPath" }
+      ),
+      createSubPage(schema)
+    );
+
+    // create tableName/[id]/OptimisticEntity.tsx
+    createFile(
+      formatFilePath(
+        `app/${tableNameKebabCase}/[${tableNameSingular}Id]/Optimistic${tableNameSingularCapitalised}.tsx`,
+        { removeExtension: false, prefix: "rootPath" }
+      ),
+      createOptimisticEntityForSubPage(schema)
     );
 
     // install shadcn packages (button, dialog, form, input, label) - exec script: pnpm dlx shadcn-ui@latest add _
@@ -303,6 +321,8 @@ const createListComponent = (schema: Schema) => {
   return `"use client";
 
 import { useState } from "react";
+import Link from "next/link";
+
 import { cn } from "${formatFilePath(`lib/utils`, {
     prefix: "alias",
     removeExtension: false,
@@ -442,12 +462,10 @@ const ${tableNameSingularCapitalised} = ({
             : ""
         }}</div>
       </div>
-      <Button
-        onClick={() => openModal(${entityName})}
-        disabled={mutating}
-        variant={"ghost"}
-      >
-        Edit
+      <Button variant={"link"} asChild>
+        <Link href={"/${tableNameKebabCase}/" + ${entityName}.id }>
+          Edit
+        </Link>
       </Button>
     </li>
   );
@@ -912,6 +930,7 @@ const ${tableNameSingularCapitalised}Form = ({${
           onClick={() => {
             setIsDeleting(true);
             closeModal && closeModal();
+            router.push("/${tableNameKebabCase}");
             startMutation(async () => {
               addOptimistic && addOptimistic({ action: "delete", data: ${tableNameSingular} });
               const error = await delete${tableNameSingularCapitalised}Action(${tableNameSingular}.id);
@@ -1200,4 +1219,157 @@ export function useValidatedForm<Entity>(insertEntityZodSchema: ZodSchema) {
   if (!vfhExists) {
     createFile(vfhPath, vfhContent);
   }
+};
+
+const createSubPage = (schema: Schema) => {
+  const {
+    tableNameSingularCapitalised,
+    tableNameCamelCase,
+    tableNameSingular,
+    tableNameKebabCase,
+  } = formatTableName(schema.tableName);
+  const { shared } = getFilePaths();
+
+  return `import { Suspense } from "react";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+
+import { get${tableNameSingularCapitalised}ById } from "${formatFilePath(
+    shared.orm.servicesDir.concat(`/${tableNameCamelCase}/queries.ts`),
+    { prefix: "alias", removeExtension: true }
+  )}";
+import Optimistic${tableNameSingularCapitalised} from "./Optimistic${tableNameSingularCapitalised}";${
+    schema.belongsToUser
+      ? `\nimport { checkAuth } from "${formatFilePath(shared.auth.authUtils, {
+          prefix: "alias",
+          removeExtension: true,
+        })}";`
+      : ""
+  }
+
+import { Button } from "${formatFilePath("components/ui/button", {
+    prefix: "alias",
+    removeExtension: false,
+  })}";
+import { ChevronLeftIcon } from "lucide-react";
+import Loading from "${formatFilePath("app/loading.tsx", {
+    removeExtension: true,
+    prefix: "alias",
+  })}";
+
+
+export const revalidate = 0;
+
+export default async function ${tableNameSingularCapitalised}Page({
+  params,
+}: {
+  params: { ${tableNameSingular}Id: string };
+}) {
+
+  return (
+    <main className="overflow-auto">
+      <${tableNameSingularCapitalised} id={params.${tableNameSingular}Id} />
+    </main>
+  );
+}
+
+const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
+  ${schema.belongsToUser ? "await checkAuth();\n" : ""}
+  const { ${tableNameSingular} } = await get${tableNameSingularCapitalised}ById(id);
+
+  if (!${tableNameSingular}) notFound();
+  return (
+    <Suspense fallback={<Loading />}>
+      <div className="relative">
+        <Button asChild variant="ghost">
+          <Link href="/${tableNameKebabCase}">
+            <ChevronLeftIcon />
+          </Link>
+        </Button>
+        <Optimistic${tableNameSingularCapitalised} ${tableNameSingular}={${tableNameSingular}} />
+      </div>
+    </Suspense>
+  );
+};
+`;
+};
+
+const createOptimisticEntityForSubPage = (schema: Schema) => {
+  const {
+    tableNameSingularCapitalised,
+    tableNameCapitalised,
+    tableNameCamelCase,
+    tableNameSingular,
+  } = formatTableName(schema.tableName);
+  const { shared } = getFilePaths();
+
+  return `"use client";
+
+import { useOptimistic, useState } from "react";
+import { TAddOptimistic } from "${formatFilePath(
+    `app/${tableNameCamelCase}/useOptimistic${tableNameCapitalised}`,
+    { prefix: "alias", removeExtension: false }
+  )}";
+import { type ${tableNameSingularCapitalised} } from "${formatFilePath(
+    shared.orm.schemaDir.concat(`/${tableNameCamelCase}`),
+    { prefix: "alias", removeExtension: false }
+  )}";
+import { cn } from "${formatFilePath(shared.init.libUtils, {
+    removeExtension: true,
+    prefix: "alias",
+  })}";
+
+import { Button } from "${formatFilePath("components/ui/button", {
+    prefix: "alias",
+    removeExtension: false,
+  })}";
+import Modal from "${formatFilePath("components/shared/Modal", {
+    prefix: "alias",
+    removeExtension: false,
+  })}";
+import ${tableNameSingularCapitalised}Form from "${formatFilePath(
+    `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Form`,
+    { prefix: "alias", removeExtension: false }
+  )}";
+
+export default function Optimistic${tableNameSingularCapitalised}({ ${tableNameSingular} }: { ${tableNameSingular}: ${tableNameSingularCapitalised} }) {
+  const [open, setOpen] = useState(false);
+  const openModal = (_?: ${tableNameSingularCapitalised}) => {
+    setOpen(true);
+  };
+  const closeModal = () => setOpen(false);
+  const [optimistic${tableNameSingularCapitalised}, setOptimistic${tableNameSingularCapitalised}] = useOptimistic(${tableNameSingular});
+  const update${tableNameSingularCapitalised}: TAddOptimistic = (input) =>
+    setOptimistic${tableNameSingularCapitalised}({ ...input.data });
+
+  return (
+    <div className="m-4">
+      <Modal open={open} setOpen={setOpen}>
+        <${tableNameSingularCapitalised}Form
+          ${tableNameSingular}={${tableNameSingular}}
+          closeModal={closeModal}
+          openModal={openModal}
+          addOptimistic={update${tableNameSingularCapitalised}}
+        />
+      </Modal>
+      <div className="flex justify-between items-end mb-4">
+        <h1 className="font-semibold text-2xl">{${tableNameSingular}.${toCamelCase(
+          schema.fields[0].name
+        )}}</h1>
+        <Button className="" onClick={() => setOpen(true)}>
+          Edit
+        </Button>
+      </div>
+      <pre
+        className={cn(
+          "bg-secondary p-4 rounded-lg",
+          optimistic${tableNameSingularCapitalised}.id === "optimistic" ? "animate-pulse" : "",
+        )}
+      >
+        {JSON.stringify(optimistic${tableNameSingularCapitalised}, null, 2)}
+      </pre>
+    </div>
+  );
+}
+`;
 };
