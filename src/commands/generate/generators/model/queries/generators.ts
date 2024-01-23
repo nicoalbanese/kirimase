@@ -26,13 +26,13 @@ import { eq${belongsToUser ? ", and" : ""} } from "drizzle-orm";${
     belongsToUser
       ? `\nimport { getUserAuth } from "${formatFilePath(
           shared.auth.authUtils,
-          { prefix: "alias", removeExtension: true },
+          { prefix: "alias", removeExtension: true }
         )}";`
       : ""
   }
 import { type ${tableNameSingularCapitalised}Id, ${tableNameSingular}IdSchema, ${tableNameCamelCase} } from "${formatFilePath(
     shared.orm.schemaDir,
-    { prefix: "alias", removeExtension: false },
+    { prefix: "alias", removeExtension: false }
   )}/${tableNameCamelCase}";
 ${
   relations.length > 0
@@ -40,11 +40,11 @@ ${
         .map(
           (relation) =>
             `import { ${toCamelCase(
-              relation.references,
+              relation.references
             )} } from "${formatFilePath(shared.orm.schemaDir, {
               prefix: "alias",
               removeExtension: false,
-            })}/${toCamelCase(relation.references)}";\n`,
+            })}/${toCamelCase(relation.references)}";\n`
         )
         .join("")
     : ""
@@ -67,13 +67,13 @@ const generatePrismaImports = (schema: Schema) => {
     belongsToUser
       ? `\nimport { getUserAuth } from "${formatFilePath(
           shared.auth.authUtils,
-          { prefix: "alias", removeExtension: true },
+          { prefix: "alias", removeExtension: true }
         )}";`
       : ""
   }
 import { type ${tableNameSingularCapitalised}Id, ${tableNameSingular}IdSchema } from "${formatFilePath(
     shared.orm.schemaDir,
-    { removeExtension: false, prefix: "alias" },
+    { removeExtension: false, prefix: "alias" }
   )}/${tableNameCamelCase}";
 `;
 };
@@ -94,8 +94,8 @@ const generateDrizzleGetQuery = (schema: Schema, relations: DBField[]) => {
           .map(
             (relation) =>
               `${pluralize.singular(
-                toCamelCase(relation.references),
-              )}: ${toCamelCase(relation.references)}`,
+                toCamelCase(relation.references)
+              )}: ${toCamelCase(relation.references)}`
           )
           .join(", ")} }`
       : ""
@@ -105,10 +105,10 @@ const generateDrizzleGetQuery = (schema: Schema, relations: DBField[]) => {
           .map(
             (relation) =>
               `.leftJoin(${toCamelCase(
-                relation.references,
+                relation.references
               )}, eq(${tableNameCamelCase}.${toCamelCase(
-                relation.name,
-              )}, ${toCamelCase(relation.references)}.id))`,
+                relation.name
+              )}, ${toCamelCase(relation.references)}.id))`
           )
           .join("")
       : ""
@@ -145,10 +145,10 @@ const generateDrizzleGetByIdQuery = (schema: Schema, relations: DBField[]) => {
           .map(
             (relation) =>
               `.leftJoin(${toCamelCase(
-                relation.references,
+                relation.references
               )}, eq(${tableNameCamelCase}.${toCamelCase(
-                relation.name,
-              )}, ${toCamelCase(relation.references)}.id))`,
+                relation.name
+              )}, ${toCamelCase(relation.references)}.id))`
           )
           .join("")
       : ""
@@ -175,7 +175,7 @@ const generatePrismaGetQuery = (schema: Schema, relations: DBField[]) => {
       ? `include: { ${relations
           .map(
             (relation) =>
-              `${pluralize.singular(toCamelCase(relation.references))}: true`,
+              `${pluralize.singular(toCamelCase(relation.references))}: true`
           )
           .join(", ")}}`
       : ""
@@ -204,12 +204,12 @@ const generatePrismaGetByIdQuery = (schema: Schema, relations: DBField[]) => {
         ? `,\n    include: { ${relations
             .map(
               (relation) =>
-                `${pluralize.singular(toCamelCase(relation.references))}: true`,
+                `${pluralize.singular(toCamelCase(relation.references))}: true`
             )
             .join(", ")} }\n  `
         : ""
     }});
-  return { ${tableNameCamelCase}: ${tableNameFirstChar} };
+  return { ${tableNameSingular}: ${tableNameFirstChar} };
 };
 `;
 };

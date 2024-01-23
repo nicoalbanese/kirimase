@@ -101,7 +101,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     // create tableName/[id]/page.tsx
     createFile(
       formatFilePath(
-        `app/${tableNameKebabCase}/[${tableNameCamelCase}Id]/page.tsx`,
+        `app/${tableNameKebabCase}/[${tableNameSingular}Id]/page.tsx`,
         { removeExtension: false, prefix: "rootPath" }
       ),
       createSubPage(schema)
@@ -397,7 +397,7 @@ export default function ${tableNameSingularCapitalised}List({
       <Modal
         open={open}
         setOpen={setOpen}
-        title={active${tableNameSingularCapitalised} ? "Edit ${tableNameSingularCapitalised}" : "Create ${tableNameSingularCapitalised}"}
+        title={active${tableNameSingularCapitalised} ? "Edit ${tableNameSingularCapitalised}" : "Create ${tableNameNormalEnglishCapitalised}"}
       >
         <${tableNameSingularCapitalised}Form
           ${tableNameSingular}={active${tableNameSingularCapitalised}}
@@ -930,7 +930,6 @@ const ${tableNameSingularCapitalised}Form = ({${
           onClick={() => {
             setIsDeleting(true);
             closeModal && closeModal();
-            router.push("/${tableNameKebabCase}");
             startMutation(async () => {
               addOptimistic && addOptimistic({ action: "delete", data: ${tableNameSingular} });
               const error = await delete${tableNameSingularCapitalised}Action(${tableNameSingular}.id);
@@ -942,6 +941,7 @@ const ${tableNameSingularCapitalised}Form = ({${
 
               onSuccess("delete", error ? errorFormatted : undefined);
             });
+            router.push("/${tableNameKebabCase}");
           }}
         >
           Delet{isDeleting ? "ing..." : "e"}
@@ -1229,6 +1229,10 @@ const createSubPage = (schema: Schema) => {
     tableNameKebabCase,
   } = formatTableName(schema.tableName);
   const { shared } = getFilePaths();
+  const hasJoins = queryHasJoins(schema.tableName);
+
+  const relations = getRelations(schema.fields);
+  const relationsFormatted = formatRelations(relations);
 
   return `import { Suspense } from "react";
 import { notFound } from "next/navigation";
@@ -1238,7 +1242,13 @@ import { get${tableNameSingularCapitalised}ById } from "${formatFilePath(
     shared.orm.servicesDir.concat(`/${tableNameCamelCase}/queries.ts`),
     { prefix: "alias", removeExtension: true }
   )}";
-import Optimistic${tableNameSingularCapitalised} from "./Optimistic${tableNameSingularCapitalised}";${
+${
+  relationsFormatted
+    ? relationsFormatted
+        .map((relation) => relation.importStatementQueries)
+        .join("\n")
+    : ""
+}import Optimistic${tableNameSingularCapitalised} from "./Optimistic${tableNameSingularCapitalised}";${
     schema.belongsToUser
       ? `\nimport { checkAuth } from "${formatFilePath(shared.auth.authUtils, {
           prefix: "alias",
@@ -1276,6 +1286,11 @@ export default async function ${tableNameSingularCapitalised}Page({
 const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
   ${schema.belongsToUser ? "await checkAuth();\n" : ""}
   const { ${tableNameSingular} } = await get${tableNameSingularCapitalised}ById(id);
+  ${
+    relationsFormatted
+      ? relationsFormatted.map((relation) => relation.invocation).join("\n  ")
+      : ""
+  }
 
   if (!${tableNameSingular}) notFound();
   return (
@@ -1286,7 +1301,17 @@ const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
             <ChevronLeftIcon />
           </Link>
         </Button>
-        <Optimistic${tableNameSingularCapitalised} ${tableNameSingular}={${tableNameSingular}} />
+        <Optimistic${tableNameSingularCapitalised} ${tableNameSingular}={${tableNameSingular}${
+          hasJoins ? `.${schema.tableName}` : ""
+        }} ${
+          relationsFormatted
+            ? relationsFormatted
+                .map((relation) =>
+                  relation.hasJoins ? relation.propsWithMap : relation.props
+                )
+                .join(" ")
+            : ""
+        } />
       </div>
     </Suspense>
   );
@@ -1300,14 +1325,19 @@ const createOptimisticEntityForSubPage = (schema: Schema) => {
     tableNameCapitalised,
     tableNameCamelCase,
     tableNameSingular,
+    tableNameKebabCase,
   } = formatTableName(schema.tableName);
+
   const { shared } = getFilePaths();
+
+  const relations = getRelations(schema.fields);
+  const relationsFormatted = formatRelations(relations);
 
   return `"use client";
 
 import { useOptimistic, useState } from "react";
 import { TAddOptimistic } from "${formatFilePath(
-    `app/${tableNameCamelCase}/useOptimistic${tableNameCapitalised}`,
+    `app/${tableNameKebabCase}/useOptimistic${tableNameCapitalised}`,
     { prefix: "alias", removeExtension: false }
   )}";
 import { type ${tableNameSingularCapitalised} } from "${formatFilePath(
@@ -1331,8 +1361,35 @@ import ${tableNameSingularCapitalised}Form from "${formatFilePath(
     `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Form`,
     { prefix: "alias", removeExtension: false }
   )}";
+${
+  relationsFormatted
+    ? relationsFormatted
+        .map((relation) => relation.importStatementSchemaType)
+        .join("\n")
+    : ""
+}
 
-export default function Optimistic${tableNameSingularCapitalised}({ ${tableNameSingular} }: { ${tableNameSingular}: ${tableNameSingularCapitalised} }) {
+export default function Optimistic${tableNameSingularCapitalised}({ 
+  ${tableNameSingular},
+  ${
+    relationsFormatted
+      ? relationsFormatted
+          .map((relation) => relation.tableNameCamelCase)
+          .join(",\n  ")
+      : ""
+  } 
+}: { 
+  ${tableNameSingular}: ${tableNameSingularCapitalised}; 
+  ${
+    relationsFormatted
+      ? "\n  ".concat(
+          relationsFormatted
+            .map((relation) => relation.componentImport)
+            .join("\n  ")
+        )
+      : ""
+  }
+}) {
   const [open, setOpen] = useState(false);
   const openModal = (_?: ${tableNameSingularCapitalised}) => {
     setOpen(true);
@@ -1347,6 +1404,13 @@ export default function Optimistic${tableNameSingularCapitalised}({ ${tableNameS
       <Modal open={open} setOpen={setOpen}>
         <${tableNameSingularCapitalised}Form
           ${tableNameSingular}={${tableNameSingular}}
+          ${
+            relationsFormatted
+              ? relationsFormatted
+                  .map((relation) => relation.props)
+                  .join("\n        ")
+              : ""
+          }
           closeModal={closeModal}
           openModal={openModal}
           addOptimistic={update${tableNameSingularCapitalised}}
@@ -1362,7 +1426,7 @@ export default function Optimistic${tableNameSingularCapitalised}({ ${tableNameS
       </div>
       <pre
         className={cn(
-          "bg-secondary p-4 rounded-lg",
+          "bg-secondary p-4 rounded-lg break-all text-wrap",
           optimistic${tableNameSingularCapitalised}.id === "optimistic" ? "animate-pulse" : "",
         )}
       >

@@ -32,7 +32,7 @@ export const prismaGenerate = async (packageManager: PMType) => {
   // );
   try {
     await execa(pmInstallCommand[packageManager], ["prisma", "generate"], {
-      stdio: "inherit",
+      stdio: "ignore",
     });
     // consola.success(`Successfully generated zod-prisma types`);
   } catch (error) {
@@ -44,7 +44,7 @@ export const prismaFormat = async (packageManager: PMType) => {
   // consola.start(`Running Prisma format.`);
   try {
     await execa(pmInstallCommand[packageManager], ["prisma", "format"], {
-      stdio: "inherit",
+      stdio: "ignore",
     });
   } catch (error) {
     consola.error(`Failed to run Prisma format: ${error.message}`);
