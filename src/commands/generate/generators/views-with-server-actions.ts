@@ -876,15 +876,20 @@ const ${tableNameSingularCapitalised}Form = ({${
 
     closeModal && closeModal();
     const values = ${tableNameSingular}Parsed.data;
+    const pending${tableNameSingularCapitalised}: ${tableNameSingularCapitalised} = {
+      // updatedAt: ${tableNameSingular}?.updatedAt ?? new Date(),
+      // createdAt: ${tableNameSingular}?.createdAt ?? new Date(),
+      id: ${tableNameSingular}?.id ?? "",${
+        schema.belongsToUser
+          ? `\n      userId: ${tableNameSingular}?.userId ?? "",`
+          : ""
+      }
+      ...values,
+    };
     try {
       startMutation(async () => {
         addOptimistic && addOptimistic({
-          data: {
-            ...values,${
-              schema.belongsToUser ? '\n          userId: "",' : ""
-            }            
-            id: editing ? ${tableNameSingular}.id : "",
-          },
+          data: pending${tableNameSingularCapitalised},
           action: editing ? "update" : "create",
         });
 
@@ -894,9 +899,7 @@ const ${tableNameSingularCapitalised}Form = ({${
 
         const errorFormatted = {
           error: error ?? "Error",
-          values: editing
-            ? { ...${tableNameSingular}, ...values }
-            : { ...values, id: "", userId: "" }, 
+          values: pending${tableNameSingularCapitalised} 
         };
         onSuccess(
           editing ? "update" : "create",
@@ -1302,7 +1305,7 @@ const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
           </Link>
         </Button>
         <Optimistic${tableNameSingularCapitalised} ${tableNameSingular}={${tableNameSingular}${
-          hasJoins ? `.${schema.tableName}` : ""
+          hasJoins ? `.${tableNameSingular}` : ""
         }} ${
           relationsFormatted
             ? relationsFormatted

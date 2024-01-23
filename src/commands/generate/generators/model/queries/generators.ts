@@ -133,7 +133,18 @@ const generateDrizzleGetByIdQuery = (schema: Schema, relations: DBField[]) => {
   const getAuth = generateAuthCheck(schema.belongsToUser);
   return `export const get${tableNameSingularCapitalised}ById = async (id: ${tableNameSingularCapitalised}Id) => {${getAuth}
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
-  const [${tableNameFirstChar}] = await db.select().from(${tableNameCamelCase}).where(${
+  const [${tableNameFirstChar}] = await db.select(${
+    relations.length > 0
+      ? `{ ${tableNameSingular}: ${tableNameCamelCase}, ${relations
+          .map(
+            (relation) =>
+              `${pluralize.singular(
+                toCamelCase(relation.references)
+              )}: ${toCamelCase(relation.references)}`
+          )
+          .join(", ")} }`
+      : ""
+  }).from(${tableNameCamelCase}).where(${
     belongsToUser ? "and(" : ""
   }eq(${tableNameCamelCase}.id, ${tableNameSingular}Id)${
     belongsToUser
