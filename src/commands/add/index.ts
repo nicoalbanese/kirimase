@@ -128,7 +128,7 @@ export const addPackage = async (options?: InitOptions) => {
     const promptResponse = await promptUser(options);
     const start = Date.now();
     spinner.start();
-    spinner.text = "Beginning Installation Process";
+    spinner.text = "Beginning Configuration Process";
 
     if (config.componentLib === undefined) {
       if (promptResponse.componentLib === "shadcn-ui") {
@@ -235,13 +235,13 @@ export const addPackage = async (options?: InitOptions) => {
     if (config.t3 && config.auth === "next-auth") {
       checkAndAddAuthUtils();
     }
+    spinner.succeed("Configuration complete");
 
     await installPackagesFromList();
     await installShadcnComponentList();
 
     const end = Date.now();
     const duration = end - start;
-    spinner.succeed();
 
     printNextSteps(promptResponse, duration);
   } else {

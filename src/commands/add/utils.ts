@@ -190,7 +190,6 @@ export const addToShadcnComponentList = (components: string[]) =>
 export const installShadcnComponentList = async () => {
   // consola.start("Installing shadcn components:", shadCnComponentList);
   if (shadCnComponentList.length === 0) return;
-  spinner.text = "Installing ShadcnUI Components";
   await installShadcnUIComponents(shadCnComponentList);
   // consola.ready("Successfully installed components.");
 };

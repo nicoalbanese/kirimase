@@ -228,7 +228,6 @@ ${
 export const revalidate = 0;
 
 export default async function ${tableNameCapitalised}Page() {
-  ${schema.belongsToUser ? "await checkAuth();\n" : ""}
   return (
     <main>
       <div className="relative">
@@ -242,6 +241,7 @@ export default async function ${tableNameCapitalised}Page() {
 }
 
 const ${tableNameCapitalised} = async () => {
+  ${schema.belongsToUser ? "await checkAuth();\n" : ""}
   const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();
   ${
     relationsFormatted

@@ -54,7 +54,9 @@ export function createFolder(relativePath: string, log = false) {
 export const runCommand = async (command: string, args: string[]) => {
   const formattedArgs = args.filter((a) => a !== "");
   try {
-    await execa(command, formattedArgs, { stdio: "ignore" });
+    await execa(command, formattedArgs, {
+      stdio: "inherit",
+    });
   } catch (error) {
     throw new Error(
       `command "${command} ${formattedArgs
@@ -74,20 +76,21 @@ export async function installPackages(
   const installCommand = pmType === "npm" ? "install" : "add";
 
   try {
-    if (packages.dev) {
-      await runCommand(
-        pmType,
-        [installCommand, "-D"].concat(packages.dev.split(" "))
-      );
-    }
-
+    spinner.stop();
+    console.log("\n");
+    consola.info("Installing Dependencies");
     if (packages.regular) {
       await runCommand(
         pmType,
         [installCommand].concat(packages.regular.split(" "))
       );
     }
-
+    if (packages.dev) {
+      await runCommand(
+        pmType,
+        [installCommand, "-D"].concat(packages.dev.split(" "))
+      );
+    }
     // consola.success(
     //   `Regular dependencies installed: \n${packages.regular
     //     .split(" ")
@@ -174,8 +177,11 @@ export async function installShadcnUIComponents(
     //   `Installing shadcn-ui components: ${componentsToInstall.join(", ")}`
     // );
     try {
+      spinner.stop();
+      console.log("\n");
+      consola.info("Installing ShadcnUI Components");
       await execa(pmInstallCommand[preferredPackageManager], installArgs, {
-        stdio: "ignore",
+        stdio: "inherit",
       });
       // consola.success(
       //   `Installed components: ${componentsToInstall.join(", ")}`
