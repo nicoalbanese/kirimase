@@ -6,6 +6,8 @@ import { addPackage } from "../add/index.js";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
 import { checkForPackageManager } from "./utils.js";
+import figlet from "figlet";
+import chalk from "chalk";
 
 export async function initProject(options?: InitOptions) {
   const nextjsProjectExists = existsSync("package.json");
@@ -22,6 +24,9 @@ export async function initProject(options?: InitOptions) {
     process.exit(0);
   }
 
+  console.clear();
+  console.log("\n");
+  console.log(chalk(figlet.textSync("Kirimase", { font: "ANSI Shadow" })));
   const srcExists =
     usingAppDirWithSrc ??
     options.hasSrcFolder ??
@@ -71,7 +76,7 @@ export async function initProject(options?: InitOptions) {
     t3: false,
     alias,
   });
-  consola.success("Kirimase initialized!");
-  consola.info("You can now add packages.");
+  // consola.success("Kirimase initialized!");
+  // consola.info("You can now add packages.");
   addPackage(options);
 }

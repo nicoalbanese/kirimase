@@ -77,7 +77,6 @@ export async function installPackages(
 
   try {
     spinner.stop();
-    console.log("\n");
     consola.info("Installing Dependencies");
     if (packages.regular) {
       await runCommand(
@@ -178,7 +177,6 @@ export async function installShadcnUIComponents(
     // );
     try {
       spinner.stop();
-      console.log("\n");
       consola.info("Installing ShadcnUI Components");
       await execa(pmInstallCommand[preferredPackageManager], installArgs, {
         stdio: "inherit",

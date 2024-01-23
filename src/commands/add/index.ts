@@ -125,6 +125,7 @@ export const addPackage = async (options?: InitOptions) => {
     const config = readConfigFile();
     const { shared } = getFilePaths();
 
+    console.log("\n");
     const promptResponse = await promptUser(options);
     const start = Date.now();
     spinner.start();
