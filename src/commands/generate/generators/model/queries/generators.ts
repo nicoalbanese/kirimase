@@ -199,7 +199,6 @@ const generatePrismaGetQuery = (schema: Schema, relations: DBField[]) => {
 const generatePrismaGetByIdQuery = (schema: Schema, relations: DBField[]) => {
   const { tableName, belongsToUser } = schema;
   const {
-    tableNameCamelCase,
     tableNameSingular,
     tableNameSingularCapitalised,
     tableNameFirstChar,

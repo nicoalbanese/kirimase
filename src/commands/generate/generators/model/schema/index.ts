@@ -192,7 +192,7 @@ ${userGeneratedFields}${addUserReferenceIfBelongsToUser(
     authType
   )}
 }${indexFormatted});\n`;
-
+  // TODO: ADD TIMESTAMPS HERE BETWEEN INDEX FORMATTED AND END CURLY
   return `${importStatement}\n\n${drizzleSchemaContent}\n\n${zodSchemas}`;
 };
 
