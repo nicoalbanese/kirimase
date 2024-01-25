@@ -69,3 +69,28 @@ ${nanoidContent.split("\n")[1].trim()}
     replaceFile(utilsPath, newContent);
   }
 };
+
+export const checkTimestampsInUtils = () => {
+  const timestampsContent = `export const timestamps: { createdAt: true; updatedAt: true } = {
+  createdAt: true,
+  updatedAt: true,
+};
+`;
+  const { shared } = getFilePaths();
+  const utilsPath = formatFilePath(shared.init.libUtils, {
+    removeExtension: false,
+    prefix: "rootPath",
+  });
+  const utilsExists = existsSync(utilsPath);
+  if (!utilsExists) {
+    createFile(utilsPath, timestampsContent);
+  } else {
+    const utilsContent = readFileSync(utilsPath, "utf-8");
+    if (utilsContent.indexOf(timestampsContent) === -1) {
+      const newContent = `${utilsContent}
+${timestampsContent}
+`;
+      replaceFile(utilsPath, newContent);
+    }
+  }
+};

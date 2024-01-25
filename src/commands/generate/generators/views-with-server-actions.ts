@@ -877,6 +877,12 @@ const ${tableNameSingularCapitalised}Form = ({${
     closeModal && closeModal();
     const values = ${tableNameSingular}Parsed.data;
     const pending${tableNameSingularCapitalised}: ${tableNameSingularCapitalised} = {
+      ${
+        schema.includeTimestamps
+          ? `updatedAt: ${tableNameSingular}?.updatedAt ?? new Date(),
+      createdAt: ${tableNameSingular}?.createdAt ?? new Date(),`
+          : ""
+      }
       id: ${tableNameSingular}?.id ?? "",${
         schema.belongsToUser
           ? `\n      userId: ${tableNameSingular}?.userId ?? "",`

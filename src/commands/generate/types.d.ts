@@ -6,6 +6,7 @@ export type Schema = {
   fields: DBField[];
   index: string;
   belongsToUser?: boolean;
+  includeTimestamps: boolean;
 };
 
 export type TypeMapFunctionParams = {

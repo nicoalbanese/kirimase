@@ -11,23 +11,29 @@ import {
 const createInsertZodSchema = (
   schema: Schema,
   orm: ORMType,
-  zodMappings: ZodMapping[],
+  zodMappings: ZodMapping[]
 ) => {
   const {
     tableNameSingularCapitalised,
     tableNameCamelCase,
     tableNameSingular,
   } = formatTableName(schema.tableName);
+
+  const baseSchema = `const baseSchema = ${
+    orm === "drizzle"
+      ? `createSelectSchema(${tableNameCamelCase})`
+      : `${tableNameSingular}Schema`
+  }${schema.includeTimestamps ? ".omit(timestamps)" : ""}`;
+
   const insertSchema = `export const insert${tableNameSingularCapitalised}Schema = ${
     orm === "drizzle"
-      ? `createInsertSchema(${tableNameCamelCase})`
-      : `${tableNameSingular}Schema.omit({ id: true })`
-  };
-`;
+      ? `createInsertSchema(${tableNameCamelCase})${
+          schema.includeTimestamps ? ".omit(timestamps)" : ""
+        }`
+      : `baseSchema.omit({ id: true })`
+  };`;
   const insertParams = `export const insert${tableNameSingularCapitalised}Params = ${
-    orm === "drizzle"
-      ? `createSelectSchema(${tableNameCamelCase}, `
-      : `${tableNameSingular}Schema.extend(`
+    orm === "drizzle" ? `baseSchema.extend(` : `baseSchema.extend(`
   }{${
     zodMappings.length > 0
       ? `\n  ${zodMappings
@@ -35,36 +41,34 @@ const createInsertZodSchema = (
             (field) =>
               `${toCamelCase(field.name)}: z.coerce.${field.type}()${
                 field.type === "string" ? ".min(1)" : ""
-              }`,
+              }`
           )
           .join(`,\n  `)}\n`
       : ""
   }}).omit({ 
   id: true${schema.belongsToUser ? ",\n  userId: true" : ""}
-});
-`;
-  return `${insertSchema}\n${insertParams}`;
+});`;
+  return `${baseSchema}\n\n${insertSchema}\n${insertParams}\n`;
 };
 
 const createUpdateZodSchema = (
   schema: Schema,
   orm: ORMType,
-  zodMappings: ZodMapping[],
+  zodMappings: ZodMapping[]
 ) => {
   const {
     tableNameSingular,
     tableNameCamelCase,
     tableNameSingularCapitalised,
   } = formatTableName(schema.tableName);
+
   const updateSchema = `export const update${tableNameSingularCapitalised}Schema = ${
-    orm === "drizzle"
-      ? `createSelectSchema(${tableNameCamelCase})`
-      : `${tableNameSingular}Schema`
-  };
-`;
+    orm === "drizzle" ? `baseSchema` : `baseSchema`
+  };`;
+
   const updateParams = `export const update${tableNameSingularCapitalised}Params = ${
     orm === "drizzle"
-      ? `createSelectSchema(${tableNameCamelCase},`
+      ? `baseSchema.extend(`
       : `update${tableNameSingularCapitalised}Schema.extend(`
   }{${
     zodMappings.length > 0
@@ -73,7 +77,7 @@ const createUpdateZodSchema = (
             (field) =>
               `${toCamelCase(field.name)}: z.coerce.${field.type}()${
                 field.type === "string" ? ".min(1)" : ""
-              }`,
+              }`
           )
           .join(`,\n  `)}\n`
       : ""
@@ -83,19 +87,18 @@ const createUpdateZodSchema = (
   userId: true
 });`
       : ""
-  }
-`;
+  }`;
   return `${updateSchema}\n${updateParams}`;
 };
 
 const createIdZodSchema = (schema: Schema) => {
   const { tableNameSingular, tableNameSingularCapitalised } = formatTableName(
-    schema.tableName,
+    schema.tableName
   );
-  return `export const ${tableNameSingular}IdSchema = update${tableNameSingularCapitalised}Schema.pick({ id: true });`;
+  return `export const ${tableNameSingular}IdSchema = baseSchema.pick({ id: true });`;
 };
 
-const createTypesForSchema = (schema: Schema) => {
+const createTypesForSchema = (schema: Schema, orm: ORMType) => {
   const {
     tableNameSingularCapitalised,
     tableNameCamelCase,
@@ -103,7 +106,11 @@ const createTypesForSchema = (schema: Schema) => {
     tableNameSingular,
   } = formatTableName(schema.tableName);
   return `// Types for ${tableNameCamelCase} - used to type API request params and within Components
-export type ${tableNameSingularCapitalised} = z.infer<typeof update${tableNameSingularCapitalised}Schema>;
+export type ${tableNameSingularCapitalised} = ${
+    orm === "drizzle"
+      ? `typeof ${tableNameCamelCase}.$inferSelect`
+      : `z.infer<typeof ${tableNameSingular}Schema>`
+  };
 export type New${tableNameSingularCapitalised} = z.infer<typeof insert${tableNameSingularCapitalised}Schema>;
 export type New${tableNameSingularCapitalised}Params = z.infer<typeof insert${tableNameSingularCapitalised}Params>;
 export type Update${tableNameSingularCapitalised}Params = z.infer<typeof update${tableNameSingularCapitalised}Params>;
@@ -127,6 +134,6 @@ ${createInsertZodSchema(schema, orm, zodMappings)}
 ${createUpdateZodSchema(schema, orm, zodMappings)}
 ${createIdZodSchema(schema)}
 
-${createTypesForSchema(schema)}
+${createTypesForSchema(schema, orm)}
 `;
 };

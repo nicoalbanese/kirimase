@@ -40,7 +40,7 @@ import {
     belongsToUser
       ? `\nimport { getUserAuth } from "${formatFilePath(
           shared.auth.authUtils,
-          { prefix: "alias", removeExtension: true },
+          { prefix: "alias", removeExtension: true }
         )}";`
       : ""
   }
@@ -88,6 +88,7 @@ const generateDrizzleUpdateMutation = (schema: Schema, driver: DBType) => {
     tableNameSingular,
   } = formatTableName(tableName);
   const getAuth = generateAuthCheck(belongsToUser);
+  const config = readConfigFile();
   return `export const update${tableNameSingularCapitalised} = async (id: ${tableNameSingularCapitalised}Id, ${tableNameSingular}: Update${tableNameSingularCapitalised}Params) => {${getAuth}
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   const new${tableNameSingularCapitalised} = update${tableNameSingularCapitalised}Schema.parse(${
@@ -98,7 +99,15 @@ const generateDrizzleUpdateMutation = (schema: Schema, driver: DBType) => {
   try {
     ${driver === "mysql" ? "" : `const [${tableNameFirstChar}] =  `}await db
      .update(${tableNameCamelCase})
-     .set(new${tableNameSingularCapitalised})
+     .set(${
+       schema.includeTimestamps
+         ? `{...new${tableNameSingularCapitalised}, updatedAt: new Date()${
+             config.driver === "sqlite"
+               ? `.toISOString().slice(0, 19).replace("T", " ")`
+               : ""
+           } }`
+         : `new${tableNameSingularCapitalised}`
+     })
      .where(${
        belongsToUser ? "and(" : ""
      }eq(${tableNameCamelCase}.id, ${tableNameSingular}Id!)${
@@ -184,7 +193,7 @@ import {
     belongsToUser
       ? `\nimport { getUserAuth } from "${formatFilePath(
           shared.auth.authUtils,
-          { prefix: "alias", removeExtension: true },
+          { prefix: "alias", removeExtension: true }
         )}";`
       : ""
   }
@@ -233,7 +242,7 @@ const generatePrismaUpdateMutation = (schema: Schema) => {
   });
   try {
     const ${tableNameFirstChar} = await db.${tableNameSingular}.update({ where: { id: ${tableNameSingular}Id${authForWhereClausePrisma(
-      belongsToUser,
+      belongsToUser
     )} }, data: new${tableNameSingularCapitalised}})
     return { ${tableNameSingular}: ${tableNameFirstChar} };
   } catch (err) {
@@ -256,7 +265,7 @@ const generatePrismaDeleteMutation = (schema: Schema) => {
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   try {
     const ${tableNameFirstChar} = await db.${tableNameSingular}.delete({ where: { id: ${tableNameSingular}Id${authForWhereClausePrisma(
-      belongsToUser,
+      belongsToUser
     )} }})
     return { ${tableNameSingular}: ${tableNameFirstChar} };
   } catch (err) {

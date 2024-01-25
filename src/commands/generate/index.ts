@@ -309,6 +309,13 @@ async function askForIndex(fields: DBField[]) {
   }
 }
 
+async function askForTimestamps() {
+  return await confirm({
+    message: "Would you like timestamps (createdAt, updatedAt)?",
+    default: true,
+  });
+}
+
 export function preBuild() {
   const config = readConfigFile();
 
@@ -337,6 +344,7 @@ export async function buildSchema() {
     const tableName = await askForTable();
     const fields = await askForFields(orm, driver, tableName);
     const indexedField = await askForIndex(fields);
+    const includeTimestamps = await askForTimestamps();
     let schema: Schema;
     if (resourceType.includes("model") && auth !== null) {
       const belongsToUser = await askIfBelongsToUser();
@@ -345,6 +353,7 @@ export async function buildSchema() {
         fields,
         index: indexedField,
         belongsToUser,
+        includeTimestamps,
       };
     } else {
       schema = {
@@ -352,6 +361,7 @@ export async function buildSchema() {
         fields,
         index: indexedField,
         belongsToUser: false,
+        includeTimestamps,
       };
     }
 

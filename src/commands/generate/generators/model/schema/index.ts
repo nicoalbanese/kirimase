@@ -7,6 +7,7 @@ import {
   ORMType,
 } from "../../../../../types.js";
 import { readConfigFile } from "../../../../../utils.js";
+import { checkTimestampsInUtils } from "../../../../add/orm/drizzle/utils.js";
 import { AuthSubTypeMapping } from "../../../../add/utils.js";
 import { formatFilePath, getFilePaths } from "../../../../filePaths/index.js";
 import { Schema, TypeMap } from "../../../types.js";
@@ -75,8 +76,13 @@ const generateImportStatement = (
     const usedTypes = getUsedTypes(fields, mappings);
     const referenceImports = getReferenceImports(fields);
 
+    if (schema.includeTimestamps)
+      usedTypes.push(generateTimestampFieldsDrizzle().importType);
+
     const uniqueTypes = getUniqueTypes(usedTypes, belongsToUser, dbType);
-    return `import { ${uniqueTypes
+    return `${
+      schema.includeTimestamps ? `import { sql } from "drizzle-orm";\n` : ""
+    }import { ${uniqueTypes
       .join(", ")
       .concat(
         `, ${mappings.tableFunc}`
@@ -95,7 +101,9 @@ import { type get${tableNameCapitalised} } from "${formatFilePath(
       { prefix: "alias", removeExtension: false }
     )}/${tableNameCamelCase}/queries";
 
-import { nanoid } from "${formatFilePath("lib/utils", {
+import { nanoid${
+      schema.includeTimestamps ? `, timestamps` : ""
+    } } from "${formatFilePath("lib/utils", {
       prefix: "alias",
       removeExtension: false,
     })}";
@@ -103,7 +111,14 @@ import { nanoid } from "${formatFilePath("lib/utils", {
   }
   if (orm === "prisma")
     return `import { ${tableNameSingular}Schema } from "${alias}/zodAutoGenSchemas";
-import { z } from "zod";
+import { z } from "zod";${
+      schema.includeTimestamps
+        ? `\nimport { timestamps } from "${formatFilePath("lib/utils", {
+            prefix: "alias",
+            removeExtension: false,
+          })}";`
+        : ""
+    }
 import { get${tableNameCapitalised} } from "${formatFilePath(
       shared.orm.servicesDir,
       { prefix: "alias", removeExtension: false }
@@ -190,29 +205,59 @@ ${userGeneratedFields}${addUserReferenceIfBelongsToUser(
     schema,
     mappings,
     authType
-  )}
+  )}${
+    schema.includeTimestamps
+      ? generateTimestampFieldsDrizzle().schemaContent
+      : ""
+  }
 }${indexFormatted});\n`;
   // TODO TODO: ADD TIMESTAMPS HERE BETWEEN INDEX FORMATTED AND END CURLY
   return `${importStatement}\n\n${drizzleSchemaContent}\n\n${zodSchemas}`;
 };
 
-const generateTimestampFields = () => {
+const generateTimestampFieldsDrizzle = () => {
+  let schemaContent = "";
+  let importType: DrizzleColumnType;
   const config = readConfigFile();
   switch (config.driver) {
     case "pg":
-      return ``;
-    case "mysql":
-      return ``;
-    case "sqlite":
-      return `  createdAt: integer("created_at", { mode: "timestamp" })
+      schemaContent = `  createdAt: timestamp("created_at")
     .notNull()
-    .$defaultFn(() => new Date()),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .default(sql\`now()\`),
+  updatedAt: timestamp("updated_at")
     .notNull()
-    .$defaultFn(() => new Date()),
+    .default(sql\`now()\`),
 `;
+      importType = "timestamp";
+      break;
+    case "mysql":
+      schemaContent = `  createdAt: timestamp("created_at")
+    .notNull()
+    .default(sql\`now()\`),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .default(sql\`now()\`),
+`;
+      importType = "timestamp";
+      break;
+    case "sqlite":
+      schemaContent = `  createdAt: text("created_at")
+    .notNull()
+    .default(sql\`CURRENT_TIMESTAMP\`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql\`CURRENT_TIMESTAMP\`),
+`;
+      importType = "text";
+      break;
   }
-  return ``;
+  return { schemaContent, importType };
+};
+
+const generateTimestampFieldsPrisma = () => {
+  return `
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt`;
 };
 
 const generateIndexFields = (
@@ -266,6 +311,7 @@ const generatePrismaSchema = (
   const relations = schema.fields.filter(
     (field) => field.type === "References"
   );
+  // TODO TODO - add timestamps below here for prisma
   const prismaSchemaContent = `model ${tableNameSingularCapitalised} {
     id    String @id @default(cuid())
   ${schema.fields
@@ -279,7 +325,9 @@ const generatePrismaSchema = (
             : "\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)"
         }`
       : ""
-  }${generateIndexFields(schema, relations, usingPlanetscale)}
+  }${generateIndexFields(schema, relations, usingPlanetscale)}${
+    schema.includeTimestamps ? generateTimestampFieldsPrisma() : ""
+  }
 }`;
   addToPrismaSchema(prismaSchemaContent, tableNameSingularCapitalised);
   if (schema.belongsToUser && authSubtype === "self-hosted")
@@ -311,6 +359,7 @@ export function generateModelContent(schema: Schema, dbType: DBType) {
   const { provider, orm, auth } = readConfigFile();
   const mappings = createOrmMappings()[orm][dbType];
   const zodSchemas = createZodSchemas(schema, orm);
+  if (schema.includeTimestamps) checkTimestampsInUtils();
 
   if (orm === "drizzle") {
     return generateDrizzleSchema(
