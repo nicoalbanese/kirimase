@@ -192,8 +192,27 @@ ${userGeneratedFields}${addUserReferenceIfBelongsToUser(
     authType
   )}
 }${indexFormatted});\n`;
-  // TODO: ADD TIMESTAMPS HERE BETWEEN INDEX FORMATTED AND END CURLY
+  // TODO TODO: ADD TIMESTAMPS HERE BETWEEN INDEX FORMATTED AND END CURLY
   return `${importStatement}\n\n${drizzleSchemaContent}\n\n${zodSchemas}`;
+};
+
+const generateTimestampFields = () => {
+  const config = readConfigFile();
+  switch (config.driver) {
+    case "pg":
+      return ``;
+    case "mysql":
+      return ``;
+    case "sqlite":
+      return `  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+`;
+  }
+  return ``;
 };
 
 const generateIndexFields = (
