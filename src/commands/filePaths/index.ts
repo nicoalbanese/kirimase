@@ -117,7 +117,7 @@ export const paths: { t3: Paths; normal: Paths } = {
         updateEmailCardComponent: "app/account/UpdateEmailCard.tsx",
       },
       init: {
-        envMjs: "env.mjs",
+        envMjs: "env.js",
         libUtils: "lib/utils.ts",
         globalCss: "styles/globals.css",
         navbarComponent: "components/Navbar.tsx",
