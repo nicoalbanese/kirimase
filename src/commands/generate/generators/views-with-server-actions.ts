@@ -705,6 +705,9 @@ const createFormComponent = (schema: Schema) => {
   const relations = schema.fields.filter(
     (field) => field.type.toLowerCase() === "references"
   );
+
+  const config = readConfigFile();
+
   const relationsFormatted = relations.map((relation) => {
     const {
       tableNameCapitalised,
@@ -879,8 +882,16 @@ const ${tableNameSingularCapitalised}Form = ({${
     const pending${tableNameSingularCapitalised}: ${tableNameSingularCapitalised} = {
       ${
         schema.includeTimestamps
-          ? `updatedAt: ${tableNameSingular}?.updatedAt ?? new Date(),
-      createdAt: ${tableNameSingular}?.createdAt ?? new Date(),`
+          ? `updatedAt: ${tableNameSingular}?.updatedAt ?? new Date()${
+              config.driver === "sqlite"
+                ? `.toISOString().slice(0, 19).replace("T", " ")`
+                : ""
+            },
+      createdAt: ${tableNameSingular}?.createdAt ?? new Date()${
+        config.driver === "sqlite"
+          ? `.toISOString().slice(0, 19).replace("T", " ")`
+          : ""
+      },`
           : ""
       }
       id: ${tableNameSingular}?.id ?? "",${
