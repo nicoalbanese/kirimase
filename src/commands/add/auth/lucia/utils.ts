@@ -41,7 +41,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 		key: "user_key",
 		session: "user_session"
 	})`,
-        adapterPackage: "@lucia-auth/adapter-postgresql",
+        adapterPackage: "@lucia-auth/adapter-postgresql@2.0.2",
         import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
           dbIndex,
           { removeExtension: true, prefix: "alias" }
@@ -53,7 +53,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 		key: "user_key",
 		session: "user_session"
 	})`,
-        adapterPackage: "@lucia-auth/adapter-postgresql",
+        adapterPackage: "@lucia-auth/adapter-postgresql@2.0.2",
         import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
           dbIndex,
           { removeExtension: true, prefix: "alias" }
@@ -65,7 +65,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 		key: "user_key",
 		session: "user_session"
 	})`,
-        adapterPackage: "@lucia-auth/adapter-postgresql",
+        adapterPackage: "@lucia-auth/adapter-postgresql@2.0.2",
         import: `import { postgres as postgresAdapter } from "@lucia-auth/adapter-postgresql";\nimport { client } from "${formatFilePath(
           dbIndex,
           { removeExtension: true, prefix: "alias" }
@@ -77,7 +77,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 		key: "user_key",
 		session: "user_session"
 	})`,
-        adapterPackage: "@lucia-auth/adapter-postgresql",
+        adapterPackage: "@lucia-auth/adapter-postgresql@2.0.2",
         import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
           dbIndex,
           { removeExtension: true, prefix: "alias" }
@@ -89,7 +89,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 		key: "user_key",
 		session: "user_session"
 	})`,
-        adapterPackage: "@lucia-auth/adapter-postgresql",
+        adapterPackage: "@lucia-auth/adapter-postgresql@2.0.2",
         import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
           dbIndex,
           { removeExtension: true, prefix: "alias" }
@@ -103,7 +103,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 		key: "user_key",
 		session: "user_session"
 	})`,
-        adapterPackage: "@lucia-auth/adapter-mysql",
+        adapterPackage: "@lucia-auth/adapter-mysql@2.1.0",
         import: `import { mysql2 } from "@lucia-auth/adapter-mysql";\nimport { poolConnection } from "${formatFilePath(
           dbIndex,
           { removeExtension: true, prefix: "alias" }
@@ -114,7 +114,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
           dbIndex,
           { removeExtension: true, prefix: "alias" }
         )}"`,
-        adapterPackage: "@lucia-auth/adapter-mysql",
+        adapterPackage: "@lucia-auth/adapter-mysql@2.1.0",
         adapter: `adapter: planetscale(connection, {
 		user: "auth_user",
 		key: "user_key",
@@ -129,7 +129,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 		key: "user_key",
 		session: "user_session"
 	})`,
-        adapterPackage: "@lucia-auth/adapter-sqlite",
+        adapterPackage: "@lucia-auth/adapter-sqlite@2.0.1",
         import: `import { betterSqlite3 } from "@lucia-auth/adapter-sqlite";\nimport { sqlite } from "${formatFilePath(
           dbIndex,
           { removeExtension: true, prefix: "alias" }
@@ -141,7 +141,7 @@ export const generateDrizzleAdapterDriverMappings = () => {
 		key: "user_key",
 		session: "user_session"
 	})`,
-        adapterPackage: "@lucia-auth/adapter-sqlite",
+        adapterPackage: "@lucia-auth/adapter-sqlite@2.0.1",
         import: `import { libsql } from "@lucia-auth/adapter-sqlite";\nimport { sqlite } from "${formatFilePath(
           dbIndex,
           { removeExtension: true, prefix: "alias" }
@@ -308,7 +308,7 @@ export const generatePrismaAdapterDriverMappings = () => {
       { removeExtension: true, prefix: "alias" }
     )}";`,
     adapter: `adapter: prisma(db)`,
-    adapterPackage: `@lucia-auth/adapter-prisma`,
+    adapterPackage: `@lucia-auth/adapter-prisma@3.0.2`,
   };
   return PrismaAdapterDriverMappings;
 };

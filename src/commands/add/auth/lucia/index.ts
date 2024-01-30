@@ -222,7 +222,7 @@ export const addLucia = async () => {
   //   { regular: `lucia ${adapterPackage}`, dev: "" },
   //   preferredPackageManager
   // );
-  addToInstallList({ regular: ["lucia", adapterPackage], dev: [] });
+  addToInstallList({ regular: ["lucia@2.7.7", adapterPackage], dev: [] });
 
   // add package to config
   addPackageToConfig("lucia");

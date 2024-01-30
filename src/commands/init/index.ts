@@ -60,7 +60,7 @@ export async function initProject(options?: InitOptions) {
     process.exit(0);
   }
   const tsConfigString = readFileSync("tsconfig.json", "utf-8");
-  let alias: string;
+  let alias: string = "@";
   if (tsConfigString.includes("@/*")) alias = "@";
   if (tsConfigString.includes("~/*")) alias = "~";
 
