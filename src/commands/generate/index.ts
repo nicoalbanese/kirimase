@@ -16,7 +16,7 @@ import { readConfigFile, updateConfigFileAfterUpdate } from "../../utils.js";
 import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
 import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
-import { Schema } from "./types.js";
+import { ExtendedSchema, Schema } from "./types.js";
 import { scaffoldViewsAndComponents } from "./generators/views.js";
 import {
   camelCaseToSnakeCase,
@@ -279,7 +279,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
 
     const continueAdding = await confirm({
       message: "Would you like to add another field?",
-      default: true,
+      default: false,
     });
 
     addMore = continueAdding;
@@ -383,16 +383,68 @@ async function getSchema(
   return await addChildSchemaToParent(config, resourceType, baseSchema);
 }
 
+function getInidividualSchemas(
+  schema: Schema,
+  parents: string[] = [],
+  result: ExtendedSchema[] = []
+) {
+  // Add the main schema entity to the result array
+  const { tableName, children, ...mainSchema } = schema;
+  const newParents = [...parents, tableName];
+
+  result.push({ ...mainSchema, tableName, parents, children });
+
+  // If there are child schemas, recursively call getSchemas() on each one
+  if (Array.isArray(children)) {
+    children.forEach((child) =>
+      getInidividualSchemas(child, newParents, result)
+    );
+  }
+
+  return result;
+}
+
+const formatSchemaForGeneration = (schema: Schema) => {
+  return getInidividualSchemas(schema);
+};
+
+async function generateResources(
+  schema: ExtendedSchema,
+  resourceType: TResource[]
+) {
+  const config = readConfigFile();
+  if (
+    (resourceType.includes("views_and_components_trpc") ||
+      resourceType.includes("views_and_components_server_actions")) &&
+    !config.t3
+  ) {
+    const addToSidebar = await confirm({
+      message:
+        "Would you like to add a link to this new entity in your sidebar?",
+      default: true,
+    });
+    if (addToSidebar) addLinkToSidebar(schema.tableName);
+  }
+
+  if (resourceType.includes("model"))
+    scaffoldModel(schema, config.driver, config.hasSrc);
+  if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
+  if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
+  if (resourceType.includes("views_and_components_trpc"))
+    scaffoldViewsAndComponents(schema);
+  if (resourceType.includes("server_actions")) scaffoldServerActions(schema);
+  if (resourceType.includes("views_and_components_server_actions"))
+    scaffoldViewsAndComponentsWithServerActions(schema);
+  await installShadcnComponentList();
+}
+
 export async function buildSchema() {
   const ready = preBuild();
-
   if (!ready) return;
 
   const config = readConfigFile();
 
-  const { driver, hasSrc, orm, auth } = config;
-
-  if (orm !== null) {
+  if (config.orm !== null) {
     provideInstructions();
     const resourceType = await askForResourceType();
     const schema = await getSchema(config, resourceType);
@@ -401,30 +453,10 @@ export async function buildSchema() {
     // would also need extra stuff like urls
     // TODO
 
-    // if (
-    //   (resourceType.includes("views_and_components_trpc") ||
-    //     resourceType.includes("views_and_components_server_actions")) &&
-    //   !config.t3
-    // ) {
-    //   const addToSidebar = await confirm({
-    //     message:
-    //       "Would you like to add a link to this new entity in your sidebar?",
-    //     default: true,
-    //   });
-    //   if (addToSidebar) addLinkToSidebar(tableName);
-    // }
-    //
-    // if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
-    // if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
-    // if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
-    // if (resourceType.includes("views_and_components_trpc"))
-    //   scaffoldViewsAndComponents(schema);
-    // if (resourceType.includes("server_actions")) scaffoldServerActions(schema);
-    // if (resourceType.includes("views_and_components_server_actions"))
-    //   scaffoldViewsAndComponentsWithServerActions(schema);
-    // await installShadcnComponentList();
-    // printGenerateNextSteps(schema, resourceType);
-    console.log(JSON.stringify(schema, null, 2));
+    const schemas = formatSchemaForGeneration(schema);
+    // schemas.forEach((s) => generateResources(s, resourceType));
+    schemas.forEach((s) => console.log(s));
+    printGenerateNextSteps(schema, resourceType);
   } else {
     consola.warn(
       "You need to have an ORM installed in order to use the scaffold command."

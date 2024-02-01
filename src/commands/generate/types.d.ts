@@ -10,6 +10,10 @@ export type Schema = {
   children?: Schema[];
 };
 
+export type ExtendedSchema = Schema & {
+  parents: string[];
+};
+
 export type TypeMapFunctionParams = {
   name: string;
   references?: string;
