@@ -7,6 +7,7 @@ export type Schema = {
   index: string;
   belongsToUser?: boolean;
   includeTimestamps: boolean;
+  children?: Schema[];
 };
 
 export type TypeMapFunctionParams = {
