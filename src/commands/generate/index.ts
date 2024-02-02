@@ -20,6 +20,7 @@ import { ExtendedSchema, Schema } from "./types.js";
 import { scaffoldViewsAndComponents } from "./generators/views.js";
 import {
   camelCaseToSnakeCase,
+  formatTableName,
   getCurrentSchemas,
   printGenerateNextSteps,
   toCamelCase,
@@ -389,10 +390,30 @@ function getInidividualSchemas(
   result: ExtendedSchema[] = []
 ) {
   // Add the main schema entity to the result array
-  const { tableName, children, ...mainSchema } = schema;
+  const { tableName, children, fields, ...mainSchema } = schema;
   const newParents = [...parents, tableName];
+  const immediateParent = parents.pop();
 
-  result.push({ ...mainSchema, tableName, parents, children });
+  const parentRelationField: DBField[] =
+    immediateParent === undefined
+      ? []
+      : [
+          {
+            name: `${pluralize.singular(immediateParent)}_id`,
+            type: "references",
+            cascade: true,
+            references: immediateParent,
+            notNull: true,
+          },
+        ];
+
+  result.push({
+    ...mainSchema,
+    tableName,
+    parents,
+    children,
+    fields: [...fields, ...parentRelationField],
+  });
 
   // If there are child schemas, recursively call getSchemas() on each one
   if (Array.isArray(children)) {
@@ -404,7 +425,7 @@ function getInidividualSchemas(
   return result;
 }
 
-const formatSchemaForGeneration = (schema: Schema) => {
+export const formatSchemaForGeneration = (schema?: Schema) => {
   return getInidividualSchemas(schema);
 };
 
@@ -413,14 +434,17 @@ async function generateResources(
   resourceType: TResource[]
 ) {
   const config = readConfigFile();
+  const { tableNameNormalEnglishCapitalised: tnEnglish } = formatTableName(
+    schema.tableName
+  );
+
   if (
     (resourceType.includes("views_and_components_trpc") ||
       resourceType.includes("views_and_components_server_actions")) &&
     !config.t3
   ) {
     const addToSidebar = await confirm({
-      message:
-        "Would you like to add a link to this new entity in your sidebar?",
+      message: `Would you like to add a link to '${tnEnglish}' in your sidebar?`,
       default: true,
     });
     if (addToSidebar) addLinkToSidebar(schema.tableName);
@@ -454,8 +478,7 @@ export async function buildSchema() {
     // TODO
 
     const schemas = formatSchemaForGeneration(schema);
-    // schemas.forEach((s) => generateResources(s, resourceType));
-    schemas.forEach((s) => console.log(s));
+    schemas.forEach((s) => generateResources(s, resourceType));
     printGenerateNextSteps(schema, resourceType);
   } else {
     consola.warn(

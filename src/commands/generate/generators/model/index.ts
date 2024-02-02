@@ -2,7 +2,7 @@ import { consola } from "consola";
 import { DBType } from "../../../../types.js";
 import { createFile, readConfigFile, replaceFile } from "../../../../utils.js";
 import { prismaFormat, prismaGenerate } from "../../../add/orm/utils.js";
-import { Schema } from "../../types.js";
+import { ExtendedSchema, Schema } from "../../types.js";
 import { toCamelCase } from "../../utils.js";
 import { generateMutationContent } from "./mutations/index.js";
 import { generateQueryContent } from "./queries/index.js";
@@ -16,7 +16,7 @@ import { existsSync, readFileSync } from "fs";
 import { updateRootSchema } from "./utils.js";
 
 export async function scaffoldModel(
-  schema: Schema,
+  schema: ExtendedSchema,
   dbType: DBType,
   hasSrc: boolean
 ) {
