@@ -38,12 +38,11 @@ export const createUpdateNameCard = (withShadCn = false, disabled = false) => {
 import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
 import { Button } from "${alias}/components/ui/button";
 import { Input } from "${alias}/components/ui/input";
-import { useToast } from "${alias}/components/ui/use-toast";
+import { toast } from "sonner";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 export default function UpdateNameCard({ name }: { name: string }) {
-  const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const handleSubmit = async (event: React.SyntheticEvent) => {
@@ -52,10 +51,7 @@ export default function UpdateNameCard({ name }: { name: string }) {
     const form = new FormData(target);
     const { name } = Object.fromEntries(form.entries()) as { name: string };
     if (name.length < 3) {
-      toast({
-        description: "Name must be longer than 3 characters.",
-        variant: "destructive",
-      });
+      toast.error("Name must be longer than 3 characters.");
       return;
     }
 
@@ -66,7 +62,7 @@ export default function UpdateNameCard({ name }: { name: string }) {
         headers: { "Content-Type": "application/json" },
       });
       if (res.status === 200)
-        toast({ description: "Successfully updated name!" });
+        toast.success("Successfully updated name!");
       router.refresh();
     });
   };
@@ -160,12 +156,11 @@ export const createUpdateEmailCard = (withShadCn = false, disabled = false) => {
     return `import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
 import { Button } from "${alias}/components/ui/button";
 import { Input } from "${alias}/components/ui/input";
-import { useToast } from "${alias}/components/ui/use-toast";
+import { toast } from "sonner";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 export default function UpdateEmailCard({ email }: { email: string }) {
-  const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -175,10 +170,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
     const form = new FormData(target);
     const { email } = Object.fromEntries(form.entries()) as { email: string };
     if (email.length < 3) {
-      toast({
-        description: "Email must be longer than 3 characters.",
-        variant: "destructive",
-      });
+      toast.error("Email must be longer than 3 characters.");
       return;
     }
 
@@ -189,7 +181,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
         headers: { "Content-Type": "application/json" },
       });
       if (res.status === 200)
-        toast({ description: "Successfully updated email!" });
+        toast.success("Successfully updated email!");
       router.refresh();
     });
   };

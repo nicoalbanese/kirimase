@@ -377,7 +377,7 @@ import { format } from "date-fns";`
   }
 import { useRouter } from "next/navigation";${
     packages.includes("shadcn-ui")
-      ? `\nimport { useToast } from "${alias}/components/ui/use-toast";`
+      ? `\nimport { toast } from "sonner";`
       : ""
   }
 
@@ -387,9 +387,7 @@ const ${tableNameSingularCapitalised}Form = ({
 }: {
   ${tableNameSingular}?: ${tableNameSingularCapitalised};
   closeModal?: () => void;
-}) => {${
-    packages.includes("shadcn-ui") ? `\n  const { toast } = useToast();` : ""
-  }
+}) => {
   ${
     relations.length > 0
       ? relations
@@ -426,14 +424,7 @@ const ${tableNameSingularCapitalised}Form = ({
   }    data?: { error?: string },
   ) => {
         if (data?.error) {
-      toast({
-        title: \`\${action
-          .slice(0, 1)
-          .toUpperCase()
-          .concat(action.slice(1))} Failed\`,
-        description: data.error,
-        variant: "destructive",
-      });
+      toast.error(data.error)
       return;
     }
 
@@ -441,11 +432,7 @@ const ${tableNameSingularCapitalised}Form = ({
     router.refresh();
     if (closeModal) closeModal();${
       packages.includes("shadcn-ui")
-        ? `\n        toast({
-      title: 'Success',
-      description: \`${tableNameNormalEnglishSingular} \${action}d!\`,
-      variant: "default",
-    });`
+        ? `\n        toast.success(\`${tableNameNormalEnglishSingular} \${action}d!\`);`
         : null
     }
   };
@@ -455,6 +442,9 @@ const ${tableNameSingularCapitalised}Form = ({
       onSuccess${
         packages.includes("shadcn-ui") ? ': (res) => onSuccess("create")' : ""
       },
+      onError${
+        packages.includes("shadcn-ui") ? ': (err) => onError("create", { error: err.message })' : ""
+      },
     });
 
   const { mutate: update${tableNameSingularCapitalised}, isLoading: isUpdating } =
@@ -462,12 +452,18 @@ const ${tableNameSingularCapitalised}Form = ({
       onSuccess${
         packages.includes("shadcn-ui") ? ': (res) => onSuccess("update")' : ""
       },
+      onError${
+        packages.includes("shadcn-ui") ? ': (err) => onError("update", { error: err.message })' : ""
+      },
     });
 
   const { mutate: delete${tableNameSingularCapitalised}, isLoading: isDeleting } =
     trpc.${tableNameCamelCase}.delete${tableNameSingularCapitalised}.useMutation({
       onSuccess${
         packages.includes("shadcn-ui") ? ': (res) => onSuccess("delete")' : ""
+      },
+      onError${
+        packages.includes("shadcn-ui") ? ': (err) => onError("delete", { error: err.message })' : ""
       },
     });
 

@@ -307,7 +307,7 @@ export const generateManageSubscriptionButton = () => {
 
 import { Button } from "${alias}/components/ui/button";
 import React from "react";
-import { toast } from "${alias}/components/ui/use-toast";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 interface ManageUserSubscriptionButtonProps {
@@ -352,7 +352,7 @@ export function ManageUserSubscriptionButton({
         }
       } catch (err) {
         console.error((err as Error).message);
-        toast({ description: "Something went wrong, please try again later." });
+        toast.error("Something went wrong, please try again later.");
       }
     });
   };
@@ -448,18 +448,17 @@ export const generateSuccessToast = () => {
   const { alias } = readConfigFile();
   return `"use client";
 
-import { useToast } from "${alias}/components/ui/use-toast";
+import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 export default function SuccessToast() {
   const searchParams = useSearchParams();
-  const { toast } = useToast();
 
   const success = searchParams.get("success") as Boolean | null;
   useEffect(() => {
     if (success) {
-      toast({ description: "Successfully updated subscription." });
+      toast.success("Successfully updated subscription.");
     }
   }, [success, toast]);
 

@@ -746,10 +746,7 @@ const createFormComponent = (schema: Schema) => {
 import { useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
-import { useToast } from "${formatFilePath(`components/ui/use-toast`, {
-    prefix: "alias",
-    removeExtension: false,
-  })}";
+import { toast } from "sonner";
 import { useValidatedForm } from "${formatFilePath(
     `lib/hooks/useValidatedForm.tsx`,
     { prefix: "alias", removeExtension: true }
@@ -827,7 +824,6 @@ const ${tableNameSingularCapitalised}Form = ({${
 }) => {
   const { errors, hasErrors, setErrors, handleChange } =
     useValidatedForm<${tableNameSingularCapitalised}>(insert${tableNameSingularCapitalised}Params);
-  const { toast } = useToast();
   const editing = !!${tableNameSingular}?.id;
   ${
     dateFields.length > 0
@@ -855,16 +851,12 @@ const ${tableNameSingularCapitalised}Form = ({${
     const failed = Boolean(data?.error);
     if (failed) {
       openModal && openModal(data?.values);
+      toast.error(data?.error ?? "Error")
     } else {
       router.refresh();
       postSuccess && postSuccess();
+      toast.success(\`${tableNameSingularCapitalised} \${action}d!\`);
     }
-
-    toast({
-      title: failed ? \`Failed to \${action}\` : "Success",
-      description: failed ? data?.error ?? "Error" : \`${tableNameSingularCapitalised} \${action}d!\`,
-      variant: failed ? "destructive" : "default",
-    });
   };
 
   const handleSubmit = async (data: FormData) => {

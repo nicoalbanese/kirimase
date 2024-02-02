@@ -82,7 +82,7 @@ export const addContextProviderToLayout = (
       )}";\nimport { cookies } from "next/headers";`;
       break;
     case "ShadcnToast":
-      importStatement = `import { Toaster } from "${alias}/components/ui/toaster";`;
+      importStatement = `import { Toaster } from "${alias}/components/ui/sonner";`;
       break;
     case "ClerkProvider":
       importStatement = 'import { ClerkProvider } from "@clerk/nextjs";';
@@ -115,7 +115,7 @@ export const addContextProviderToLayout = (
   let replacementText = "";
   switch (provider) {
     case "ShadcnToast":
-      replacementText = `${rootChildrenText}\n<Toaster />\n`;
+      replacementText = `${rootChildrenText}\n<Toaster richColors />\n`;
       break;
     case "Navbar":
       replacementText = `<div className="flex h-screen">\n<Sidebar />\n<main className="flex-1 md:p-8 pt-2 p-8 overflow-y-auto">\n<Navbar />\n{children}\n</main>\n</div>`;
