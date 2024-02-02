@@ -131,7 +131,7 @@ export const installShadcnUI = async (
   // ]);
   addToShadcnComponentList([
     "button",
-    "toast",
+    "sonner",
     "avatar",
     "input",
     "label",
