@@ -242,8 +242,9 @@ const generateDrizzleGetByIdWithChildrenQuery = (
               tableNameCamelCase: childCC,
               tableNameFirstChar: childFirstChar,
               tableNameSingularCapitalised: childSingularCapitalised,
+              tableNameSingular: childSingular,
             } = formatTableName(c.tableName);
-            return `const ${tableNameFirstChar}${childFirstChar} = rows.map((${childFirstChar}) => ${childFirstChar}.${childCC}).filter((${childFirstChar}) => ${childFirstChar} !== null) as ${childSingularCapitalised}[];`;
+            return `const ${tableNameFirstChar}${childFirstChar} = rows.map((${childFirstChar}) => ${childFirstChar}.${childSingular}).filter((${childFirstChar}) => ${childFirstChar} !== null) as ${childSingularCapitalised}[];`;
           })
           .join("\n  ")
       : ""

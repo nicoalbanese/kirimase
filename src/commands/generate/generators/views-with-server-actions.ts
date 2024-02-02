@@ -31,14 +31,14 @@ import {
 } from "../../../utils.js";
 import { addPackage } from "../../add/index.js";
 import { formatFilePath, getFilePaths } from "../../filePaths/index.js";
-import { Schema } from "../types.js";
+import { ExtendedSchema, Schema } from "../types.js";
 import { formatTableName, toCamelCase } from "../utils.js";
 import { existsSync, readFileSync } from "fs";
 import { consola } from "consola";
 import { addToShadcnComponentList } from "../../add/utils.js";
 
 export const scaffoldViewsAndComponentsWithServerActions = async (
-  schema: Schema
+  schema: ExtendedSchema
 ) => {
   const { packages } = readConfigFile();
   const {
@@ -1271,7 +1271,7 @@ export function useValidatedForm<Entity>(insertEntityZodSchema: ZodSchema) {
   }
 };
 
-const createSubPage = (schema: Schema) => {
+const createSubPage = (schema: ExtendedSchema) => {
   const {
     tableNameSingularCapitalised,
     tableNameCamelCase,
@@ -1284,11 +1284,20 @@ const createSubPage = (schema: Schema) => {
   const relations = getRelations(schema.fields);
   const relationsFormatted = formatRelations(relations);
 
+  const children =
+    schema.children.length > 0
+      ? schema.children.map((c) => formatTableName(c.tableName))
+      : [];
+
   return `import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-import { get${tableNameSingularCapitalised}ById } from "${formatFilePath(
+import { get${tableNameSingularCapitalised}ById${
+    children.length > 0
+      ? `With${children.map((c) => c.tableNameCapitalised).join("And")}`
+      : ""
+  } } from "${formatFilePath(
     shared.orm.servicesDir.concat(`/${tableNameCamelCase}/queries.ts`),
     { prefix: "alias", removeExtension: true }
   )}";
@@ -1306,6 +1315,17 @@ ${
         })}";`
       : ""
   }
+${
+  children.length > 0
+    ? children.map(
+        (c) =>
+          `import ${c.tableNameSingularCapitalised}List from "${formatFilePath(
+            `components/${c.tableNameCamelCase}/${c.tableNameSingularCapitalised}List`,
+            { removeExtension: false, prefix: "alias" }
+          )}";`
+      )
+    : ""
+}
 
 import { Button } from "${formatFilePath("components/ui/button", {
     prefix: "alias",
@@ -1335,7 +1355,13 @@ export default async function ${tableNameSingularCapitalised}Page({
 
 const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
   ${schema.belongsToUser ? "await checkAuth();\n" : ""}
-  const { ${tableNameSingular} } = await get${tableNameSingularCapitalised}ById(id);
+  const { ${tableNameSingular}${
+    children.length > 0 ? children.map((c) => `, ${c.tableNameCamelCase}`) : ""
+  } } = await get${tableNameSingularCapitalised}ById${
+    children.length > 0
+      ? `With${children.map((c) => c.tableNameCapitalised).join("And")}`
+      : ""
+  }(id);
   ${
     relationsFormatted
       ? relationsFormatted.map((relation) => relation.invocation).join("\n  ")
@@ -1362,7 +1388,27 @@ const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
                 .join(" ")
             : ""
         } />
-      </div>
+      </div>${
+        children.length > 0
+          ? children.map(
+              (c) => `
+      <div className="relative mt-8 mx-4">
+        <h3 className="text-xl font-medium mb-4">{${tableNameSingular}.${toCamelCase(
+          schema.fields[0].name
+        )}}&apos;s ${c.tableNameCapitalised}</h3>
+        <${c.tableNameSingularCapitalised}List
+          ${tableNameCamelCase}={[]}
+          ${tableNameSingular}Id={${tableNameSingular}.id}
+          ${c.tableNameCamelCase}={${c.tableNameCamelCase}.map((${
+            c.tableNameFirstChar
+          }) => ({ ${c.tableNameSingular}: ${
+            c.tableNameFirstChar
+          }, ${tableNameSingular} }))}
+        />
+      </div>`
+            )
+          : ""
+      }
     </Suspense>
   );
 };
