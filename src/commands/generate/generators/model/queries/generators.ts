@@ -5,7 +5,7 @@ import {
   getDbIndexPath,
   getFilePaths,
 } from "../../../../filePaths/index.js";
-import { Schema } from "../../../types.js";
+import { ExtendedSchema, Schema } from "../../../types.js";
 import { formatTableName, toCamelCase } from "../../../utils.js";
 import { generateAuthCheck } from "../utils.js";
 
@@ -18,6 +18,9 @@ const generateDrizzleImports = (schema: Schema, relations: DBField[]) => {
   } = formatTableName(tableName);
   const { shared } = getFilePaths();
   const dbIndex = getDbIndexPath();
+
+  const children = schema.children.map((c) => formatTableName(c.tableName));
+
   return `import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",
     removeExtension: true,
@@ -48,7 +51,21 @@ ${
         )
         .join("")
     : ""
-}`;
+}${
+    children.length > 0
+      ? children
+          .map(
+            (child) =>
+              `import { ${child.tableNameCamelCase}, type ${
+                child.tableNameSingularCapitalised
+              } } from "${formatFilePath(shared.orm.schemaDir, {
+                prefix: "alias",
+                removeExtension: false,
+              })}/${child.tableNameCamelCase}";\n`
+          )
+          .join("")
+      : ""
+  }`;
 };
 
 const generatePrismaImports = (schema: Schema) => {
@@ -169,6 +186,86 @@ const generateDrizzleGetByIdQuery = (schema: Schema, relations: DBField[]) => {
 `;
 };
 
+const generateDrizzleGetByIdWithChildrenQuery = (
+  schema: ExtendedSchema,
+  relations: DBField[]
+) => {
+  const { tableName, belongsToUser, children } = schema;
+  const {
+    tableNameCamelCase,
+    tableNameFirstChar,
+    tableNameSingularCapitalised,
+    tableNameSingular,
+  } = formatTableName(tableName);
+  const childrenTableNames = children.map((c) => formatTableName(c.tableName));
+  const getAuth = generateAuthCheck(schema.belongsToUser);
+  return `export const get${tableNameSingularCapitalised}ByIdWith${childrenTableNames
+    .map((c) => c.tableNameCapitalised)
+    .join("And")} = async (id: ${tableNameSingularCapitalised}Id) => {${getAuth}
+  const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
+  const rows = await db.select(${
+    children.length > 0
+      ? `{ ${tableNameSingular}: ${tableNameCamelCase}, ${children
+          .map(
+            (child) =>
+              `${pluralize.singular(
+                toCamelCase(child.tableName)
+              )}: ${toCamelCase(child.tableName)}`
+          )
+          .join(", ")} }`
+      : ""
+  }).from(${tableNameCamelCase}).where(${
+    belongsToUser ? "and(" : ""
+  }eq(${tableNameCamelCase}.id, ${tableNameSingular}Id)${
+    belongsToUser
+      ? `, eq(${tableNameCamelCase}.userId, session?.user.id!))`
+      : ""
+  })${
+    children.length > 0
+      ? children
+          .map((child) => {
+            const {
+              tableNameCamelCase: childNameCC,
+              tableNameSingular: childNameSingular,
+            } = formatTableName(child.tableName);
+            return `.leftJoin(${childNameCC}, eq(${tableNameCamelCase}.id, ${childNameCC}.${tableNameSingular}Id))`;
+          })
+          .join("")
+      : ""
+  };
+  const ${tableNameFirstChar} = rows[0].${tableNameSingular};
+  ${
+    children.length > 0
+      ? children
+          .map((c) => {
+            const {
+              tableNameCamelCase: childCC,
+              tableNameFirstChar: childFirstChar,
+              tableNameSingularCapitalised: childSingularCapitalised,
+            } = formatTableName(c.tableName);
+            return `const ${tableNameFirstChar}${childFirstChar} = rows.map((${childFirstChar}) => ${childFirstChar}.${childCC}).filter((${childFirstChar}) => ${childFirstChar} !== null) as ${childSingularCapitalised}[];`;
+          })
+          .join("\n  ")
+      : ""
+  }
+
+  return { ${tableNameSingular}: ${tableNameFirstChar}, ${
+    children.length > 0
+      ? children
+          .map((c) => {
+            const {
+              tableNameFirstChar: childFirstChar,
+              tableNameCamelCase: childNameCC,
+            } = formatTableName(c.tableName);
+            return `${childNameCC}: ${tableNameFirstChar}${childFirstChar}`;
+          })
+          .join(", ")
+      : ""
+  } };
+};
+`;
+};
+
 const generatePrismaGetQuery = (schema: Schema, relations: DBField[]) => {
   const { tableName, belongsToUser } = schema;
   const {
@@ -224,15 +321,48 @@ const generatePrismaGetByIdQuery = (schema: Schema, relations: DBField[]) => {
 `;
 };
 
+const generatePrismaGetByIdQueryWithChildren = (
+  schema: Schema,
+  relations: DBField[]
+) => {
+  const { tableName, belongsToUser } = schema;
+  const {
+    tableNameSingular,
+    tableNameSingularCapitalised,
+    tableNameFirstChar,
+  } = formatTableName(tableName);
+  const getAuth = generateAuthCheck(schema.belongsToUser);
+  return `export const get${tableNameSingularCapitalised}ById = async (id: ${tableNameSingularCapitalised}Id) => {${getAuth}
+  const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
+  const ${tableNameFirstChar} = await db.${tableNameSingular}.findFirst({
+    where: { id: ${tableNameSingular}Id${
+      belongsToUser ? `, userId: session?.user.id!` : ""
+    }}${
+      relations.length > 0
+        ? `,\n    include: { ${relations
+            .map(
+              (relation) =>
+                `${pluralize.singular(toCamelCase(relation.references))}: true`
+            )
+            .join(", ")} }\n  `
+        : ""
+    }});
+  return { ${tableNameSingular}: ${tableNameFirstChar} };
+};
+`;
+};
+
 export const generateQueries = {
   prisma: {
     imports: generatePrismaImports,
     get: generatePrismaGetQuery,
     getById: generatePrismaGetByIdQuery,
+    getByIdWithChildren: generatePrismaGetByIdQueryWithChildren,
   },
   drizzle: {
     imports: generateDrizzleImports,
     get: generateDrizzleGetQuery,
     getById: generateDrizzleGetByIdQuery,
+    getByIdWithChildren: generateDrizzleGetByIdWithChildrenQuery,
   },
 };

@@ -478,7 +478,9 @@ export async function buildSchema() {
     // TODO
 
     const schemas = formatSchemaForGeneration(schema);
-    schemas.forEach((s) => generateResources(s, resourceType));
+    for (let schema of schemas) {
+      await generateResources(schema, resourceType);
+    }
     printGenerateNextSteps(schema, resourceType);
   } else {
     consola.warn(

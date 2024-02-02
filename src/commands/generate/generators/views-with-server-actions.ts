@@ -165,7 +165,7 @@ const formatRelations = (relations: DBField[]) => {
       { prefix: "alias", removeExtension: false }
     )}";`;
 
-    const importStatementCompleteSchemaType = `import { type ${tableNameSingularCapitalised} } from "${formatFilePath(
+    const importStatementCompleteSchemaType = `import { type ${tableNameSingularCapitalised}, type ${tableNameSingularCapitalised}Id } from "${formatFilePath(
       shared.orm.schemaDir.concat(`/${tableNameCamelCase}`),
       { prefix: "alias", removeExtension: false }
     )}";`;
@@ -173,16 +173,22 @@ const formatRelations = (relations: DBField[]) => {
     const invocation = `const { ${tableNameCamelCase} } = await get${tableNameCapitalised}();`;
     const componentImport = `${tableNameCamelCase}: ${tableNameSingularCapitalised}[]`;
     const componentImportCompleteType = `${tableNameCamelCase}: ${tableNameSingularCapitalised}[]`;
+    const componentImportCompleteTypeAndId = `${tableNameCamelCase}: ${tableNameSingularCapitalised}[];\n  ${tableNameSingular}Id?: ${tableNameSingularCapitalised}Id`;
 
     const mapped = `${tableNameCamelCase}.map(${tableNameSingular} => ${tableNameSingular}.${tableNameSingular})`;
 
     const props = `${tableNameCamelCase}={${tableNameCamelCase}}`;
     const propsWithMap = `${tableNameCamelCase}={${mapped}}`;
+    const propsWithId = `${tableNameCamelCase}={${tableNameCamelCase}}\n        ${tableNameSingular}Id={${tableNameSingular}Id}`;
 
     const optimisticFind = `const optimistic${tableNameSingularCapitalised} = ${tableNameCamelCase}.find(
         (${tableNameSingular}) => ${tableNameSingular}.id === data.${tableNameSingular}Id,
       )!;`;
     const optimisticEntityRelation = `${tableNameSingular}: optimistic${tableNameSingularCapitalised},`;
+
+    const tableNameSingularWithId = tableNameSingular + "Id";
+    const tnCamelCaseAndTnId =
+      tableNameCamelCase + ",\n  " + tableNameSingularWithId;
 
     return {
       importStatementQueries,
@@ -199,6 +205,10 @@ const formatRelations = (relations: DBField[]) => {
       componentImportCompleteType,
       mapped,
       propsWithMap,
+      tnCamelCaseAndTnId,
+      componentImportCompleteTypeAndId,
+      propsWithId,
+      tableNameSingularWithId,
     };
   });
 };
@@ -360,7 +370,7 @@ export default function ${tableNameSingularCapitalised}List({
   ${
     relationsFormatted
       ? relationsFormatted
-          .map((relation) => relation.tableNameCamelCase)
+          .map((relation) => relation.tnCamelCaseAndTnId)
           .join(",\n  ")
       : ""
   } 
@@ -369,7 +379,7 @@ export default function ${tableNameSingularCapitalised}List({
   ${
     relationsFormatted
       ? relationsFormatted
-          .map((relation) => relation.componentImportCompleteType)
+          .map((relation) => relation.componentImportCompleteTypeAndId)
           .join(";\n  ")
       : ""
   } 
@@ -407,7 +417,7 @@ export default function ${tableNameSingularCapitalised}List({
           ${
             relationsFormatted
               ? relationsFormatted
-                  .map((relation) => relation.props)
+                  .map((relation) => relation.propsWithId)
                   .join("\n        ")
               : ""
           }
@@ -526,6 +536,7 @@ const createformInputComponent = (
     const {
       // tableNameNormalEnglishSingularLowerCase,
       tableNameSingularCapitalised,
+      tableNameSingular,
     } = formatTableName(field.references);
     // const entity = queryHasJoins(toCamelCase(field.references))
     //   ? `${referencesSingular}.${referencesSingular}`
@@ -533,7 +544,7 @@ const createformInputComponent = (
     const entity = referencesSingular;
     const referencesPlural = toCamelCase(field.references);
     return `
-      <div>
+      {${tableNameSingular}Id ? null : <div>
         <Label
           className={cn(
             "mb-2 inline-block",
@@ -561,7 +572,7 @@ const createformInputComponent = (
         ) : (
           <div className="h-6" />
         )}
-      </div>`;
+      </div> }`;
   }
 
   if (
@@ -708,6 +719,8 @@ const createFormComponent = (schema: Schema) => {
 
   const config = readConfigFile();
 
+  // terrible code, rewrite
+  const relationsFormattedNew = formatRelations(relations);
   const relationsFormatted = relations.map((relation) => {
     const {
       tableNameCapitalised,
@@ -793,16 +806,18 @@ import {
     removeExtension: false,
   })}";
 ${
-  relationsFormatted
-    ? relationsFormatted.map((relation) => relation.importStatement).join("\n")
+  relationsFormattedNew
+    ? relationsFormattedNew
+        .map((relation) => relation.importStatementCompleteSchemaType)
+        .join("\n")
     : ""
 }
 
 const ${tableNameSingularCapitalised}Form = ({${
-    relationsFormatted
+    relationsFormattedNew
       ? "\n  ".concat(
-          relationsFormatted
-            .map((relation) => `${relation.tableNameCamelCase},`)
+          relationsFormattedNew
+            .map((relation) => `${relation.tnCamelCaseAndTnId},`)
             .join("\n  ")
         )
       : ""
@@ -814,9 +829,11 @@ const ${tableNameSingularCapitalised}Form = ({${
   postSuccess,
 }: {
   ${tableNameSingular}?: ${tableNameSingularCapitalised} | null;${
-    relationsFormatted
+    relationsFormattedNew
       ? "\n  ".concat(
-          relationsFormatted.map((relation) => relation.props).join("\n  ")
+          relationsFormattedNew
+            .map((relation) => relation.componentImportCompleteTypeAndId)
+            .join("\n  ")
         )
       : ""
   }
@@ -871,7 +888,13 @@ const ${tableNameSingularCapitalised}Form = ({${
     setErrors(null);
 
     const payload = Object.fromEntries(data.entries());
-    const ${tableNameSingular}Parsed = await insert${tableNameSingularCapitalised}Params.safeParseAsync(payload);
+    const ${tableNameSingular}Parsed = await insert${tableNameSingularCapitalised}Params.safeParseAsync({ ${
+      relationsFormattedNew
+        ? relationsFormattedNew
+            .map((r) => r.tableNameSingularWithId + ",")
+            .join("\n  ")
+        : ""
+    } ...payload });
     if (!${tableNameSingular}Parsed.success) {
       setErrors(${tableNameSingular}Parsed?.error.flatten().fieldErrors);
       return;
@@ -1078,6 +1101,7 @@ const createOptimisticListHook = (schema: Schema) => {
   const hasJoins = queryHasJoins(schema.tableName);
 
   const { shared } = getFilePaths();
+  // TODO: This is causing bug
   const relations = getRelations(schema.fields);
   const relationsFormatted = formatRelations(relations);
   return `${
