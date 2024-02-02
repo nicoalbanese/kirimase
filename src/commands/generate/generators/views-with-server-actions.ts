@@ -306,7 +306,15 @@ const queryHasJoins = (tableName: string) => {
     removeExtension: false,
   })}/${tableNameCamelCase}/queries.ts`;
   const queryContent = getFileContents(path);
-  return queryContent.includes("Join");
+
+  const defaultQueriesBoundary = queryContent.indexOf("With");
+  const hasChildren = defaultQueriesBoundary === -1 ? false : true;
+
+  const searchMaterial = hasChildren
+    ? queryContent.slice(0, defaultQueriesBoundary)
+    : queryContent;
+
+  return searchMaterial.includes("Join");
 };
 
 const createListComponent = (schema: Schema) => {
@@ -1098,10 +1106,10 @@ const createOptimisticListHook = (schema: Schema) => {
     tableNameSingular,
   } = formatTableName(schema.tableName);
 
+  // TODO: This is causing bug
   const hasJoins = queryHasJoins(schema.tableName);
 
   const { shared } = getFilePaths();
-  // TODO: This is causing bug
   const relations = getRelations(schema.fields);
   const relationsFormatted = formatRelations(relations);
   return `${
