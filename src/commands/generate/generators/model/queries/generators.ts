@@ -388,15 +388,13 @@ const generatePrismaGetByIdQueryWithChildren = (
     childrenTableNames.length > 0
       ? `if (${tableNameFirstChar} === null) return { ${tableNameSingular}: null };
   const { ${joins
-    .map((j) => `${toCamelCase(j)}`)
+    .map((j) => `${j}`)
     .join(", ")}, ...${tableNameSingular} } = ${tableNameFirstChar};
 `
       : ""
   }
   return { ${tableNameSingular}${
-    joins.length > 0
-      ? `, ${joins.map((j) => `${toCamelCase(j)}:${toCamelCase(j)}`)}`
-      : ""
+    joins.length > 0 ? `, ${joins.map((j) => `${j}:${j}`).join(", ")}` : ""
   } };
 };
 `;

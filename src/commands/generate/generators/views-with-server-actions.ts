@@ -56,6 +56,9 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     // check if modal exists components/shared/Modal.tsx
     checkModalExists();
 
+    // check if modal exists components/shared/BackButton.tsx
+    checkBackButtonExists();
+
     // check if vfh exists
     checkValidatedForm();
 
@@ -104,7 +107,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
         `app/${tableNameKebabCase}/[${tableNameSingular}Id]/page.tsx`,
         { removeExtension: false, prefix: "rootPath" }
       ),
-      createSubPage(schema)
+      createSubPage(schema, false)
     );
 
     // create subpage as child directory
@@ -120,7 +123,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
           `app/${baseUrl}${tableNameKebabCase}/[${tableNameSingular}Id]/page.tsx`,
           { removeExtension: false, prefix: "rootPath" }
         ),
-        createSubPage(schema)
+        createSubPage(schema, true)
       );
     }
     // create tableName/[id]/OptimisticEntity.tsx
@@ -351,6 +354,7 @@ const createListComponent = (schema: ExtendedSchema) => {
     tableNamePluralCapitalised,
     tableNameKebabCase,
     tableNameNormalEnglishCapitalised,
+    tableNameNormalEnglishSingular,
   } = formatTableName(schema.tableName);
   const { shared } = getFilePaths();
   const relations = getRelations(schema.fields);
@@ -444,7 +448,7 @@ export default function ${tableNameSingularCapitalised}List({
       <Modal
         open={open}
         setOpen={setOpen}
-        title={active${tableNameSingularCapitalised} ? "Edit ${tableNameSingularCapitalised}" : "Create ${tableNameNormalEnglishCapitalised}"}
+        title={active${tableNameSingularCapitalised} ? "Edit ${tableNameSingularCapitalised}" : "Create ${tableNameNormalEnglishSingular}"}
       >
         <${tableNameSingularCapitalised}Form
           ${tableNameSingular}={active${tableNameSingularCapitalised}}
@@ -1133,6 +1137,52 @@ export default function Modal({
   }
 };
 
+const checkBackButtonExists = () => {
+  const bbPath = formatFilePath("components/shared/BackButton.tsx", {
+    removeExtension: false,
+    prefix: "rootPath",
+  });
+
+  const bbExists = existsSync(bbPath);
+  if (!bbExists) {
+    const bbContents = `
+"use client";
+
+import { ChevronLeftIcon } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Button } from "${formatFilePath("components/ui/button", {
+      removeExtension: false,
+      prefix: "alias",
+    })}";
+
+export default function BackButton({
+  currentResource,
+}: {
+  /* must be in kebab-case */
+  currentResource: string;
+}) {
+  const pathname = usePathname();
+  const segmentCount = pathname.slice(1).split("/");
+  const backPath =
+    segmentCount.length > 2
+      ? pathname.slice(0, pathname.indexOf(currentResource) - 1)
+      : pathname.slice(0, pathname.indexOf(segmentCount[1]));
+
+  return (
+    <Button variant={"ghost"} asChild>
+      <Link href={backPath}>
+        <ChevronLeftIcon />
+      </Link>
+    </Button>
+  );
+}
+
+`;
+    createFile(bbPath, bbContents);
+  }
+};
+
 const createOptimisticListHook = (schema: Schema) => {
   const {
     tableNameCamelCase,
@@ -1306,7 +1356,7 @@ export function useValidatedForm<Entity>(insertEntityZodSchema: ZodSchema) {
   }
 };
 
-const createSubPage = (schema: ExtendedSchema) => {
+const createSubPage = (schema: ExtendedSchema, isChild: boolean) => {
   const {
     tableNameSingularCapitalised,
     tableNameCamelCase,
@@ -1329,7 +1379,6 @@ const createSubPage = (schema: ExtendedSchema) => {
 
   return `import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 
 import { get${tableNameSingularCapitalised}ById${
     children.length > 0
@@ -1376,11 +1425,10 @@ ${
     : ""
 }
 
-import { Button } from "${formatFilePath("components/ui/button", {
+import BackButton from "${formatFilePath("components/shared/BackButton", {
     prefix: "alias",
     removeExtension: false,
   })}";
-import { ChevronLeftIcon } from "lucide-react";
 import Loading from "${formatFilePath("app/loading.tsx", {
     removeExtension: true,
     prefix: "alias",
@@ -1423,11 +1471,7 @@ const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
   return (
     <Suspense fallback={<Loading />}>
       <div className="relative">
-        <Button asChild variant="ghost">
-          <Link href="/${tableNameKebabCase}">
-            <ChevronLeftIcon />
-          </Link>
-        </Button>
+        <BackButton currentResource="${tableNameKebabCase}" />
         <Optimistic${tableNameSingularCapitalised} ${tableNameSingular}={${tableNameSingular}${
           hasJoins ? `.${tableNameSingular}` : ""
         }} ${
@@ -1435,13 +1479,9 @@ const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
             ? relationsFormatted
                 // TODO TODO
                 .map((relation) =>
-                  config.orm === "prisma"
-                    ? relation.hasJoins
-                      ? relation.propsWithMapWithCustomId(tableNameSingular)
-                      : relation.propsWithCustomId(tableNameSingular)
-                    : relation.hasJoins
-                      ? relation.propsWithMap
-                      : relation.props
+                  isChild === false
+                    ? relation.props
+                    : relation.propsWithCustomId(tableNameSingular)
                 )
                 .join(" ")
             : ""
@@ -1454,7 +1494,7 @@ const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
       <div className="relative mt-8 mx-4">
         <h3 className="text-xl font-medium mb-4">{${tableNameSingular}.${toCamelCase(
           schema.fields[0].name
-        )}}&apos;s ${c.tableNameCapitalised}</h3>
+        )}}&apos;s ${c.tableNameNormalEnglishCapitalised}</h3>
         <${c.tableNameSingularCapitalised}List
           ${tableNameCamelCase}={[]}
           ${tableNameSingular}Id={${tableNameSingular}.id}
