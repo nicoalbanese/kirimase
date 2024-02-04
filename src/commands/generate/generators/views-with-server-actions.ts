@@ -320,6 +320,7 @@ const queryHasJoins = (tableName: string) => {
   // const { hasSrc } = readConfigFile();
   const { orm } = readConfigFile();
   if (orm === "prisma") return false;
+  return false;
 
   const { shared } = getFilePaths();
   const { tableNameCamelCase } = formatTableName(tableName);
@@ -367,6 +368,7 @@ const createListComponent = (schema: ExtendedSchema) => {
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { cn } from "${formatFilePath(`lib/utils`, {
     prefix: "alias",
@@ -490,6 +492,12 @@ const ${tableNameSingularCapitalised} = ({
   const optimistic = ${entityName}.id === "optimistic";
   const deleting = ${entityName}.id === "delete";
   const mutating = optimistic || deleting;
+  const pathname = usePathname();
+  const basePath = pathname.includes("${tableNameKebabCase}")
+    ? pathname
+    : pathname + "/${tableNameKebabCase}/";
+
+
   return (
     <li
       className={cn(
@@ -499,7 +507,7 @@ const ${tableNameSingularCapitalised} = ({
       )}
     >
       <div className="w-full">
-        <div>{${entityName}.${schema.fields[0].name}${
+        <div>{${entityName}.${toCamelCase(schema.fields[0].name)}${
           schema.fields[0].type === "date" ||
           schema.fields[0].type === "timestamp" ||
           schema.fields[0].type === "DateTime"
@@ -508,14 +516,7 @@ const ${tableNameSingularCapitalised} = ({
         }}</div>
       </div>
       <Button variant={"link"} asChild>
-        <Link href={${
-          parents.length > 0
-            ? `${parents.map(
-                (p) =>
-                  ` "/${p.tableNameKebabCase}/" + ${entityName}.${p.tableNameSingular}Id + `
-              )}`
-            : ""
-        }"/${tableNameKebabCase}/" + ${entityName}.id }>
+        <Link href={ basePath + "/" + ${entityName}.id }>
           Edit
         </Link>
       </Button>
@@ -948,12 +949,12 @@ const ${tableNameSingularCapitalised}Form = ({${
       ${
         schema.includeTimestamps
           ? `updatedAt: ${tableNameSingular}?.updatedAt ?? new Date()${
-              config.driver === "sqlite"
+              config.driver === "sqlite" && config.orm === "drizzle"
                 ? `.toISOString().slice(0, 19).replace("T", " ")`
                 : ""
             },
       createdAt: ${tableNameSingular}?.createdAt ?? new Date()${
-        config.driver === "sqlite"
+        config.driver === "sqlite" && config.orm === "drizzle"
           ? `.toISOString().slice(0, 19).replace("T", " ")`
           : ""
       },`
@@ -1313,7 +1314,8 @@ const createSubPage = (schema: ExtendedSchema) => {
     tableNameKebabCase,
   } = formatTableName(schema.tableName);
   const { shared } = getFilePaths();
-  const hasJoins = queryHasJoins(schema.tableName);
+  // const hasJoins = queryHasJoins(schema.tableName);
+  const hasJoins = false; // added data transformation so hasJoins will always be false
 
   const relations = getRelations(schema.fields);
   const relationsFormatted = formatRelations(relations);
@@ -1360,13 +1362,17 @@ ${
   }
 ${
   children.length > 0
-    ? children.map(
-        (c) =>
-          `import ${c.tableNameSingularCapitalised}List from "${formatFilePath(
-            `components/${c.tableNameCamelCase}/${c.tableNameSingularCapitalised}List`,
-            { removeExtension: false, prefix: "alias" }
-          )}";`
-      )
+    ? children
+        .map(
+          (c) =>
+            `import ${
+              c.tableNameSingularCapitalised
+            }List from "${formatFilePath(
+              `components/${c.tableNameCamelCase}/${c.tableNameSingularCapitalised}List`,
+              { removeExtension: false, prefix: "alias" }
+            )}";`
+        )
+        .join("\n")
     : ""
 }
 
@@ -1399,7 +1405,9 @@ export default async function ${tableNameSingularCapitalised}Page({
 const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
   ${schema.belongsToUser ? "await checkAuth();\n" : ""}
   const { ${tableNameSingular}${
-    children.length > 0 ? children.map((c) => `, ${c.tableNameCamelCase}`) : ""
+    children.length > 0
+      ? children.map((c) => `, ${c.tableNameCamelCase}`).join("")
+      : ""
   } } = await get${tableNameSingularCapitalised}ById${
     children.length > 0
       ? `With${children.map((c) => c.tableNameCapitalised).join("And")}`
@@ -1440,8 +1448,9 @@ const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
         } />
       </div>${
         children.length > 0
-          ? children.map(
-              (c) => `
+          ? children
+              .map(
+                (c) => `
       <div className="relative mt-8 mx-4">
         <h3 className="text-xl font-medium mb-4">{${tableNameSingular}.${toCamelCase(
           schema.fields[0].name
@@ -1449,16 +1458,11 @@ const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
         <${c.tableNameSingularCapitalised}List
           ${tableNameCamelCase}={[]}
           ${tableNameSingular}Id={${tableNameSingular}.id}
-          ${c.tableNameCamelCase}={${c.tableNameCamelCase}.map((${
-            c.tableNameFirstChar
-          }) => ({ ${
-            config.orm === "prisma"
-              ? `${tableNameSingular}, ...${c.tableNameFirstChar}`
-              : `${c.tableNameSingular}: ${c.tableNameFirstChar}, ${tableNameSingular}`
-          } }))}
+          ${c.tableNameCamelCase}={${c.tableNameCamelCase}}
         />
       </div>`
-            )
+              )
+              .join("")
           : ""
       }
     </Suspense>
