@@ -107,6 +107,22 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
       createSubPage(schema)
     );
 
+    // create subpage as child directory
+    if (schema.parents.length > 0) {
+      const baseUrl = schema.parents
+        .map((p) => {
+          const parent = formatTableName(p);
+          return `${parent.tableNameKebabCase}/[${parent.tableNameSingular}Id]/`;
+        })
+        .join("");
+      createFile(
+        formatFilePath(
+          `app/${baseUrl}${tableNameKebabCase}/[${tableNameSingular}Id]/page.tsx`,
+          { removeExtension: false, prefix: "rootPath" }
+        ),
+        createSubPage(schema)
+      );
+    }
     // create tableName/[id]/OptimisticEntity.tsx
     createFile(
       formatFilePath(
@@ -181,6 +197,11 @@ const formatRelations = (relations: DBField[]) => {
     const propsWithMap = `${tableNameCamelCase}={${mapped}}`;
     const propsWithId = `${tableNameCamelCase}={${tableNameCamelCase}}\n        ${tableNameSingular}Id={${tableNameSingular}Id}`;
 
+    const propsWithMapWithCustomId = (id: string) =>
+      `${tableNameCamelCase}={${mapped}}\n        ${tableNameSingular}Id={${id}.${tableNameSingular}Id}`;
+    const propsWithCustomId = (id: string) =>
+      `${tableNameCamelCase}={${tableNameCamelCase}}\n        ${tableNameSingular}Id={${id}.${tableNameSingular}Id}`;
+
     const optimisticFind = `const optimistic${tableNameSingularCapitalised} = ${tableNameCamelCase}.find(
         (${tableNameSingular}) => ${tableNameSingular}.id === data.${tableNameSingular}Id,
       )!;`;
@@ -209,6 +230,8 @@ const formatRelations = (relations: DBField[]) => {
       componentImportCompleteTypeAndId,
       propsWithId,
       tableNameSingularWithId,
+      propsWithCustomId,
+      propsWithMapWithCustomId,
     };
   });
 };
@@ -317,7 +340,7 @@ const queryHasJoins = (tableName: string) => {
   return searchMaterial.includes("Join");
 };
 
-const createListComponent = (schema: Schema) => {
+const createListComponent = (schema: ExtendedSchema) => {
   const {
     tableNameCamelCase,
     tableNameSingular,
@@ -335,6 +358,10 @@ const createListComponent = (schema: Schema) => {
   const entityName = hasJoins
     ? `${tableNameSingular}.${tableNameSingular}`
     : tableNameSingular;
+  const hasParents = schema.parents.length > 0;
+  const parents = hasParents
+    ? schema.parents.map((p) => formatTableName(p))
+    : [];
 
   return `"use client";
 
@@ -481,7 +508,14 @@ const ${tableNameSingularCapitalised} = ({
         }}</div>
       </div>
       <Button variant={"link"} asChild>
-        <Link href={"/${tableNameKebabCase}/" + ${entityName}.id }>
+        <Link href={${
+          parents.length > 0
+            ? `${parents.map(
+                (p) =>
+                  ` "/${p.tableNameKebabCase}/" + ${entityName}.${p.tableNameSingular}Id + `
+              )}`
+            : ""
+        }"/${tableNameKebabCase}/" + ${entityName}.id }>
           Edit
         </Link>
       </Button>
@@ -1284,6 +1318,8 @@ const createSubPage = (schema: ExtendedSchema) => {
   const relations = getRelations(schema.fields);
   const relationsFormatted = formatRelations(relations);
 
+  const config = readConfigFile();
+
   const children =
     schema.children.length > 0
       ? schema.children.map((c) => formatTableName(c.tableName))
@@ -1307,7 +1343,14 @@ ${
         .map((relation) => relation.importStatementQueries)
         .join("\n")
     : ""
-}import Optimistic${tableNameSingularCapitalised} from "./Optimistic${tableNameSingularCapitalised}";${
+}import Optimistic${tableNameSingularCapitalised} from "${
+    schema.parents.length > 0
+      ? `${formatFilePath(
+          `app/${tableNameKebabCase}/[${tableNameSingular}Id]/Optimistic${tableNameSingularCapitalised}`,
+          { prefix: "alias", removeExtension: false }
+        )}`
+      : `./Optimistic${tableNameSingularCapitalised}`
+  }";${
     schema.belongsToUser
       ? `\nimport { checkAuth } from "${formatFilePath(shared.auth.authUtils, {
           prefix: "alias",
@@ -1382,8 +1425,15 @@ const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
         }} ${
           relationsFormatted
             ? relationsFormatted
+                // TODO TODO
                 .map((relation) =>
-                  relation.hasJoins ? relation.propsWithMap : relation.props
+                  config.orm === "prisma"
+                    ? relation.hasJoins
+                      ? relation.propsWithMapWithCustomId(tableNameSingular)
+                      : relation.propsWithCustomId(tableNameSingular)
+                    : relation.hasJoins
+                      ? relation.propsWithMap
+                      : relation.props
                 )
                 .join(" ")
             : ""
@@ -1401,9 +1451,11 @@ const ${tableNameSingularCapitalised} = async ({ id }: { id: string }) => {
           ${tableNameSingular}Id={${tableNameSingular}.id}
           ${c.tableNameCamelCase}={${c.tableNameCamelCase}.map((${
             c.tableNameFirstChar
-          }) => ({ ${c.tableNameSingular}: ${
-            c.tableNameFirstChar
-          }, ${tableNameSingular} }))}
+          }) => ({ ${
+            config.orm === "prisma"
+              ? `${tableNameSingular}, ...${c.tableNameFirstChar}`
+              : `${c.tableNameSingular}: ${c.tableNameFirstChar}, ${tableNameSingular}`
+          } }))}
         />
       </div>`
             )
@@ -1460,7 +1512,7 @@ import ${tableNameSingularCapitalised}Form from "${formatFilePath(
 ${
   relationsFormatted
     ? relationsFormatted
-        .map((relation) => relation.importStatementSchemaType)
+        .map((relation) => relation.importStatementCompleteSchemaType)
         .join("\n")
     : ""
 }
@@ -1470,7 +1522,7 @@ export default function Optimistic${tableNameSingularCapitalised}({
   ${
     relationsFormatted
       ? relationsFormatted
-          .map((relation) => relation.tableNameCamelCase)
+          .map((relation) => relation.tnCamelCaseAndTnId)
           .join(",\n  ")
       : ""
   } 
@@ -1480,7 +1532,7 @@ export default function Optimistic${tableNameSingularCapitalised}({
     relationsFormatted
       ? "\n  ".concat(
           relationsFormatted
-            .map((relation) => relation.componentImport)
+            .map((relation) => relation.componentImportCompleteTypeAndId)
             .join("\n  ")
         )
       : ""
@@ -1503,7 +1555,7 @@ export default function Optimistic${tableNameSingularCapitalised}({
           ${
             relationsFormatted
               ? relationsFormatted
-                  .map((relation) => relation.props)
+                  .map((relation) => relation.propsWithId)
                   .join("\n        ")
               : ""
           }

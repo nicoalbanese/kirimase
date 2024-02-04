@@ -390,9 +390,10 @@ function getInidividualSchemas(
   result: ExtendedSchema[] = []
 ) {
   // Add the main schema entity to the result array
+  const config = readConfigFile();
   const { tableName, children, fields, ...mainSchema } = schema;
   const newParents = [...parents, tableName];
-  const immediateParent = parents.pop();
+  const immediateParent = parents[parents.length - 1];
 
   const parentRelationField: DBField[] =
     immediateParent === undefined
@@ -400,7 +401,7 @@ function getInidividualSchemas(
       : [
           {
             name: `${pluralize.singular(immediateParent)}_id`,
-            type: "references",
+            type: config.orm === "prisma" ? "References" : "references",
             cascade: true,
             references: immediateParent,
             notNull: true,
