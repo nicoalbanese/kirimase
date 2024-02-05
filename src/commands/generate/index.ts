@@ -381,6 +381,7 @@ async function getSchema(
   resourceType: TResource[]
 ): Promise<Schema> {
   const baseSchema = await promptUserForSchema(config, resourceType);
+  if (resourceType.includes("views_and_components_trpc")) return baseSchema;
   return await addChildSchemaToParent(config, resourceType, baseSchema);
 }
 

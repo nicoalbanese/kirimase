@@ -836,6 +836,11 @@ import { Label } from "${formatFilePath(`components/ui/label`, {
     prefix: "alias",
     removeExtension: false,
   })}";
+import { useBackPath } from "${formatFilePath(`components/shared/BackButton`, {
+    prefix: "alias",
+    removeExtension: false,
+  })}";
+
 ${uniqueFieldTypes
   .map((field) => createFormInputComponentImports(field))
   .join("\n")}
@@ -911,6 +916,8 @@ const ${tableNameSingularCapitalised}Form = ({${
   const [pending, startMutation] = useTransition();
 
   const router = useRouter();
+  const backpath = useBackPath("${tableNameKebabCase}");
+
 
   const onSuccess = (
     action: Action,
@@ -1029,7 +1036,7 @@ const ${tableNameSingularCapitalised}Form = ({${
 
               onSuccess("delete", error ? errorFormatted : undefined);
             });
-            router.push("/${tableNameKebabCase}");
+            router.push(backpath);
           }}
         >
           Delet{isDeleting ? "ing..." : "e"}
@@ -1156,19 +1163,24 @@ import { Button } from "${formatFilePath("components/ui/button", {
       prefix: "alias",
     })}";
 
-export default function BackButton({
-  currentResource,
-}: {
-  /* must be in kebab-case */
-  currentResource: string;
-}) {
+
+export function useBackPath(currentResource: string) {
   const pathname = usePathname();
   const segmentCount = pathname.slice(1).split("/");
   const backPath =
     segmentCount.length > 2
       ? pathname.slice(0, pathname.indexOf(currentResource) - 1)
       : pathname.slice(0, pathname.indexOf(segmentCount[1]));
+  return backPath;
+}
 
+export function BackButton({
+  currentResource,
+}: {
+  /* must be in kebab-case */
+  currentResource: string;
+}) {
+  const backPath = useBackPath(currentResource);
   return (
     <Button variant={"ghost"} asChild>
       <Link href={backPath}>
@@ -1177,7 +1189,6 @@ export default function BackButton({
     </Button>
   );
 }
-
 `;
     createFile(bbPath, bbContents);
   }
@@ -1425,7 +1436,7 @@ ${
     : ""
 }
 
-import BackButton from "${formatFilePath("components/shared/BackButton", {
+import { BackButton } from "${formatFilePath("components/shared/BackButton", {
     prefix: "alias",
     removeExtension: false,
   })}";

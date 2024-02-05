@@ -346,6 +346,11 @@ const generatePrismaGetByIdQuery = (schema: Schema, relations: DBField[]) => {
 `;
 };
 
+type TJoin = {
+  name: string;
+  type: "relation" | "child";
+  nameCapitalised?: string;
+};
 const generatePrismaGetByIdQueryWithChildren = (
   schema: ExtendedSchema,
   relations: DBField[]
@@ -354,24 +359,28 @@ const generatePrismaGetByIdQueryWithChildren = (
 
   const { tableName, belongsToUser, children } = schema;
 
-  const relationsTableNames = relations.map(
-    (r) => formatTableName(r.references).tableNameSingular
-  );
-  const childrenTableNames = children.map(
-    (c) => formatTableName(c.tableName).tableNameCamelCase
-  );
+  const relationsTableNames: TJoin[] = relations.map((r) => ({
+    name: formatTableName(r.references).tableNameSingular,
+    type: "relation",
+  }));
+  const childrenTableNames: TJoin[] = children.map((c) => ({
+    name: formatTableName(c.tableName).tableNameCamelCase,
+    nameCapitalised: formatTableName(c.tableName).tableNameCapitalised,
+    type: "child",
+  }));
   const joins = Array.from(
     new Set([...relationsTableNames, ...childrenTableNames])
   );
 
   const {
     tableNameSingular,
+    tableNameCamelCase,
     tableNameSingularCapitalised,
     tableNameFirstChar,
   } = formatTableName(tableName);
   const getAuth = generateAuthCheck(schema.belongsToUser);
   return `export const get${tableNameSingularCapitalised}ByIdWith${childrenTableNames
-    .map((c) => formatTableName(c).tableNameCapitalised)
+    .map((c) => c.nameCapitalised)
     .join("And")} = async (id: ${tableNameSingularCapitalised}Id) => {${getAuth}
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   const ${tableNameFirstChar} = await db.${tableNameSingular}.findFirst({
@@ -380,7 +389,12 @@ const generatePrismaGetByIdQueryWithChildren = (
     }}${
       joins.length > 0
         ? `,\n    include: { ${joins
-            .map((j) => `${j}: { include: {${tableNameSingular}: true } }`)
+            .map(
+              (j) =>
+                `${j.name}: { include: {${
+                  j.type === "child" ? tableNameSingular : tableNameCamelCase
+                }: true } }`
+            )
             .join(", ")} }\n  `
         : ""
     }});
@@ -388,13 +402,15 @@ const generatePrismaGetByIdQueryWithChildren = (
     childrenTableNames.length > 0
       ? `if (${tableNameFirstChar} === null) return { ${tableNameSingular}: null };
   const { ${joins
-    .map((j) => `${j}`)
+    .map((j) => `${j.name}`)
     .join(", ")}, ...${tableNameSingular} } = ${tableNameFirstChar};
 `
       : ""
   }
   return { ${tableNameSingular}${
-    joins.length > 0 ? `, ${joins.map((j) => `${j}:${j}`).join(", ")}` : ""
+    joins.length > 0
+      ? `, ${joins.map((j) => `${j.name}:${j.name}`).join(", ")}`
+      : ""
   } };
 };
 `;

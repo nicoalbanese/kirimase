@@ -11,7 +11,7 @@ export const generateQueryContent = (schema: ExtendedSchema, orm: ORMType) => {
   const getQuery = generateQueries[orm].get(schema, relations);
   const getByIdQuery = generateQueries[orm].getById(schema, relations);
   const getByIdWithChildren =
-    schema.children.length > 0
+    schema.children && schema.children.length > 0
       ? generateQueries[orm].getByIdWithChildren(schema, relations)
       : "";
 
