@@ -193,6 +193,7 @@ const generateDrizzleGetByIdQuery = (schema: Schema, relations: DBField[]) => {
           .join("")
       : ""
   };
+  if (row === undefined) return {};
   const ${tableNameFirstChar} = ${
     relations.length > 0
       ? ` { ...row.${tableNameSingular}, ${relations
@@ -257,6 +258,7 @@ const generateDrizzleGetByIdWithChildrenQuery = (
           .join("")
       : ""
   };
+  if (rows.length === 0) return {};
   const ${tableNameFirstChar} = rows[0].${tableNameSingular};
   ${
     children.length > 0
