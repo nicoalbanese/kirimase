@@ -2,6 +2,7 @@ import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { consola } from "consola";
 import pluralize from "pluralize";
 import {
+  Config,
   DBField,
   DBType,
   DrizzleColumnType,
@@ -15,10 +16,11 @@ import { readConfigFile, updateConfigFileAfterUpdate } from "../../utils.js";
 import { scaffoldTRPCRoute } from "./generators/trpcRoute.js";
 import { addPackage } from "../add/index.js";
 import { initProject } from "../init/index.js";
-import { Schema } from "./types.js";
+import { ExtendedSchema, Schema } from "./types.js";
 import { scaffoldViewsAndComponents } from "./generators/views.js";
 import {
   camelCaseToSnakeCase,
+  formatTableName,
   getCurrentSchemas,
   printGenerateNextSteps,
   toCamelCase,
@@ -278,7 +280,7 @@ async function askForFields(orm: ORMType, dbType: DBType, tableName: string) {
 
     const continueAdding = await confirm({
       message: "Would you like to add another field?",
-      default: true,
+      default: false,
     });
 
     addMore = continueAdding;
@@ -316,6 +318,13 @@ async function askForTimestamps() {
   });
 }
 
+async function askForChildModel(parentModel: string) {
+  return await confirm({
+    message: `Would you like to add a child model? (${parentModel})`,
+    default: false,
+  });
+}
+
 export function preBuild() {
   const config = readConfigFile();
 
@@ -329,64 +338,151 @@ export function preBuild() {
   return true;
 }
 
+async function promptUserForSchema(config: Config, resourceType: TResource[]) {
+  const tableName = await askForTable();
+  const fields = await askForFields(config.orm, config.driver, tableName);
+  const indexedField = await askForIndex(fields);
+  const includeTimestamps = await askForTimestamps();
+  let belongsToUser: boolean = false;
+  if (resourceType.includes("model") && config.auth !== null) {
+    belongsToUser = await askIfBelongsToUser();
+  }
+  return {
+    tableName,
+    fields,
+    index: indexedField,
+    belongsToUser,
+    includeTimestamps,
+  } as Schema;
+}
+
+// Create a new function to handle the recursion
+async function addChildSchemaToParent(
+  config: Config,
+  resourceType: TResource[],
+  parentSchema: Schema
+): Promise<Schema> {
+  const childModels: Schema[] = [];
+  let addChild = await askForChildModel(parentSchema.tableName);
+  while (addChild) {
+    const childSchema = await getSchema(config, resourceType); // recursive call instead of getBaseSchema
+    childModels.push(childSchema);
+    addChild = await askForChildModel(parentSchema.tableName); // ask again if they want to add another child
+  }
+
+  return {
+    ...parentSchema,
+    children: childModels,
+  } as Schema;
+}
+
+async function getSchema(
+  config: Config,
+  resourceType: TResource[]
+): Promise<Schema> {
+  const baseSchema = await promptUserForSchema(config, resourceType);
+  if (resourceType.includes("views_and_components_trpc")) return baseSchema;
+  return await addChildSchemaToParent(config, resourceType, baseSchema);
+}
+
+function getInidividualSchemas(
+  schema: Schema,
+  parents: string[] = [],
+  result: ExtendedSchema[] = []
+) {
+  // Add the main schema entity to the result array
+  const config = readConfigFile();
+  const { tableName, children, fields, ...mainSchema } = schema;
+  const newParents = [...parents, tableName];
+  const immediateParent = parents[parents.length - 1];
+
+  const parentRelationField: DBField[] =
+    immediateParent === undefined
+      ? []
+      : [
+          {
+            name: `${pluralize.singular(immediateParent)}_id`,
+            type: config.orm === "prisma" ? "References" : "references",
+            cascade: true,
+            references: immediateParent,
+            notNull: true,
+          },
+        ];
+
+  result.push({
+    ...mainSchema,
+    tableName,
+    parents,
+    children,
+    fields: [...fields, ...parentRelationField],
+  });
+
+  // If there are child schemas, recursively call getSchemas() on each one
+  if (Array.isArray(children)) {
+    children.forEach((child) =>
+      getInidividualSchemas(child, newParents, result)
+    );
+  }
+
+  return result;
+}
+
+export const formatSchemaForGeneration = (schema?: Schema) => {
+  return getInidividualSchemas(schema);
+};
+
+async function generateResources(
+  schema: ExtendedSchema,
+  resourceType: TResource[]
+) {
+  const config = readConfigFile();
+  const { tableNameNormalEnglishCapitalised: tnEnglish } = formatTableName(
+    schema.tableName
+  );
+
+  if (
+    (resourceType.includes("views_and_components_trpc") ||
+      resourceType.includes("views_and_components_server_actions")) &&
+    !config.t3
+  ) {
+    const addToSidebar = await confirm({
+      message: `Would you like to add a link to '${tnEnglish}' in your sidebar?`,
+      default: true,
+    });
+    if (addToSidebar) addLinkToSidebar(schema.tableName);
+  }
+
+  if (resourceType.includes("model"))
+    scaffoldModel(schema, config.driver, config.hasSrc);
+  if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
+  if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
+  if (resourceType.includes("views_and_components_trpc"))
+    scaffoldViewsAndComponents(schema);
+  if (resourceType.includes("server_actions")) scaffoldServerActions(schema);
+  if (resourceType.includes("views_and_components_server_actions"))
+    scaffoldViewsAndComponentsWithServerActions(schema);
+  await installShadcnComponentList();
+}
+
 export async function buildSchema() {
   const ready = preBuild();
-
   if (!ready) return;
 
   const config = readConfigFile();
 
-  const { driver, hasSrc, orm, auth } = config;
-
-  if (orm !== null) {
+  if (config.orm !== null) {
     provideInstructions();
     const resourceType = await askForResourceType();
-    const tableName = await askForTable();
-    const fields = await askForFields(orm, driver, tableName);
-    const indexedField = await askForIndex(fields);
-    const includeTimestamps = await askForTimestamps();
-    let schema: Schema;
-    if (resourceType.includes("model") && auth !== null) {
-      const belongsToUser = await askIfBelongsToUser();
-      schema = {
-        tableName,
-        fields,
-        index: indexedField,
-        belongsToUser,
-        includeTimestamps,
-      };
-    } else {
-      schema = {
-        tableName,
-        fields,
-        index: indexedField,
-        belongsToUser: false,
-        includeTimestamps,
-      };
-    }
+    const schema = await getSchema(config, resourceType);
+    // would want to have something that formatted the schema object into:
+    // an array of items that needed to be created using code commented below
+    // would also need extra stuff like urls
+    // TODO
 
-    if (
-      (resourceType.includes("views_and_components_trpc") ||
-        resourceType.includes("views_and_components_server_actions")) &&
-      !config.t3
-    ) {
-      const addToSidebar = await confirm({
-        message:
-          "Would you like to add a link to this new entity in your sidebar?",
-        default: true,
-      });
-      if (addToSidebar) addLinkToSidebar(tableName);
+    const schemas = formatSchemaForGeneration(schema);
+    for (let schema of schemas) {
+      await generateResources(schema, resourceType);
     }
-
-    if (resourceType.includes("model")) scaffoldModel(schema, driver, hasSrc);
-    if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
-    if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
-    if (resourceType.includes("views_and_components_trpc"))
-      scaffoldViewsAndComponents(schema);
-    if (resourceType.includes("server_actions")) scaffoldServerActions(schema);
-    if (resourceType.includes("views_and_components_server_actions"))
-      scaffoldViewsAndComponentsWithServerActions(schema);
-    await installShadcnComponentList();
     printGenerateNextSteps(schema, resourceType);
   } else {
     consola.warn(
