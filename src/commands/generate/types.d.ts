@@ -7,6 +7,11 @@ export type Schema = {
   index: string;
   belongsToUser?: boolean;
   includeTimestamps: boolean;
+  children?: Schema[];
+};
+
+export type ExtendedSchema = Schema & {
+  parents: string[];
 };
 
 export type TypeMapFunctionParams = {

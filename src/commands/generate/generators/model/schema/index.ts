@@ -165,7 +165,7 @@ const addUserReferenceIfBelongsToUser = (
         references: "users",
         cascade: true,
         referenceIdType: "string",
-      }).concat(".notNull()")},`
+      }).concat(".notNull()")}`
     : "";
   const valueIfManaged = value.replace(
     `.references(() => users.id, { onDelete: "cascade" })`,
@@ -207,7 +207,7 @@ ${userGeneratedFields}${addUserReferenceIfBelongsToUser(
     authType
   )}${
     schema.includeTimestamps
-      ? generateTimestampFieldsDrizzle().schemaContent
+      ? ",\n  ".concat(generateTimestampFieldsDrizzle().schemaContent)
       : ""
   }
 }${indexFormatted});\n`;
