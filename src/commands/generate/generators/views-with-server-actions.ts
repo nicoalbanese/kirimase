@@ -922,11 +922,14 @@ const ${tableNameSingularCapitalised}Form = ({${
     const failed = Boolean(data?.error);
     if (failed) {
       openModal && openModal(data?.values);
-      toast.error(data?.error ?? "Error")
+      toast.error(\`Failed to \${action}\`, {
+        description: data?.error ?? "Error",
+      });
     } else {
       router.refresh();
       postSuccess && postSuccess();
       toast.success(\`${tableNameSingularCapitalised} \${action}d!\`);
+      if (action === "delete") router.push(backpath);
     }
   };
 
@@ -1028,7 +1031,6 @@ const ${tableNameSingularCapitalised}Form = ({${
 
               onSuccess("delete", error ? errorFormatted : undefined);
             });
-            router.push(backpath);
           }}
         >
           Delet{isDeleting ? "ing..." : "e"}
