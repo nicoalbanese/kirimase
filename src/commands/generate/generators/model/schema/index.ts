@@ -221,7 +221,7 @@ const generateTimestampFieldsDrizzle = () => {
   const config = readConfigFile();
   switch (config.driver) {
     case "pg":
-      schemaContent = `,
+      schemaContent = `
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql\`now()\`),
@@ -232,7 +232,7 @@ const generateTimestampFieldsDrizzle = () => {
       importType = "timestamp";
       break;
     case "mysql":
-      schemaContent = `,
+      schemaContent = `
   createdAt: timestamp("created_at")
     .notNull()
     .default(sql\`now()\`),
@@ -243,7 +243,7 @@ const generateTimestampFieldsDrizzle = () => {
       importType = "timestamp";
       break;
     case "sqlite":
-      schemaContent = `,
+      schemaContent = `
   createdAt: text("created_at")
     .notNull()
     .default(sql\`CURRENT_TIMESTAMP\`),
