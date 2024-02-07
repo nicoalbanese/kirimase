@@ -29,7 +29,7 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
     // create view - tableName/page.tsx
     const rootPath = hasSrc ? "src/" : "";
     createFile(
-      rootPath.concat(`app/${tableNameKebabCase}/page.tsx`),
+      rootPath.concat(`app/(app)/${tableNameKebabCase}/page.tsx`),
       generateView(schema)
     );
     // create components/tableName/TableNameList.tsx
@@ -376,9 +376,7 @@ import { format } from "date-fns";`
       : ""
   }
 import { useRouter } from "next/navigation";${
-    packages.includes("shadcn-ui")
-      ? `\nimport { toast } from "sonner";`
-      : ""
+    packages.includes("shadcn-ui") ? `\nimport { toast } from "sonner";` : ""
   }
 
 const ${tableNameSingularCapitalised}Form = ({
@@ -443,7 +441,9 @@ const ${tableNameSingularCapitalised}Form = ({
         packages.includes("shadcn-ui") ? ': (res) => onSuccess("create")' : ""
       },
       onError${
-        packages.includes("shadcn-ui") ? ': (err) => onError("create", { error: err.message })' : ""
+        packages.includes("shadcn-ui")
+          ? ': (err) => onError("create", { error: err.message })'
+          : ""
       },
     });
 
@@ -453,7 +453,9 @@ const ${tableNameSingularCapitalised}Form = ({
         packages.includes("shadcn-ui") ? ': (res) => onSuccess("update")' : ""
       },
       onError${
-        packages.includes("shadcn-ui") ? ': (err) => onError("update", { error: err.message })' : ""
+        packages.includes("shadcn-ui")
+          ? ': (err) => onError("update", { error: err.message })'
+          : ""
       },
     });
 
@@ -463,7 +465,9 @@ const ${tableNameSingularCapitalised}Form = ({
         packages.includes("shadcn-ui") ? ': (res) => onSuccess("delete")' : ""
       },
       onError${
-        packages.includes("shadcn-ui") ? ': (err) => onError("delete", { error: err.message })' : ""
+        packages.includes("shadcn-ui")
+          ? ': (err) => onError("delete", { error: err.message })'
+          : ""
       },
     });
 
