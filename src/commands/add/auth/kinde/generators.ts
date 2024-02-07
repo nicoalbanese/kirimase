@@ -71,14 +71,37 @@ export default async function SignIn() {
     );
   } else {
     return (
-      <div>
-        <LoginLink className="hover:underline">Sign in</LoginLink>
-        <br />
-        <RegisterLink className="hover:underline">Sign up</RegisterLink>
+      <div className="w-full space-y-2 pt-4">
+        <LoginLink className="text-center block hover:bg-neutral-900 bg-neutral-800 text-neutral-50 px-4 py-2 rounded-lg">
+          Sign in
+        </LoginLink>
+        <RegisterLink className="text-center block hover:bg-neutral-200 bg-neutral-100 text-neutral-800 px-4 py-2 rounded-lg">
+          Sign up
+        </RegisterLink>
       </div>
     );
   }
 };
 
+`;
+};
+
+export const generateSignInPage = () => {
+  return `import SignIn from "${formatFilePath("components/auth/SignIn", { prefix: "alias", removeExtension: false })}";
+
+const Page = async () => {
+  return (
+    <main className="bg-popover max-w-lg mx-auto my-4 rounded-lg p-10">
+      <h1 className="text-2xl font-bold text-center">
+        Sign in to your account
+      </h1>
+      <div className="">
+        <SignIn />
+      </div>
+    </main>
+  );
+};
+
+export default Page;
 `;
 };

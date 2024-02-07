@@ -13,6 +13,7 @@ import {
   generateAuthUtils,
   generateKindeRouteHandler,
   generateSignInComponent,
+  generateSignInPage,
 } from "./generators.js";
 import { updateTrpcWithSessionIfInstalled } from "../shared/index.js";
 import { addToInstallList } from "../../utils.js";
@@ -51,6 +52,15 @@ export const addKinde = async () => {
       removeExtension: false,
     }),
     generateUpdatedRootRoute()
+  );
+
+  // generate sign in page
+  createFile(
+    formatFilePath(kinde.signInPage, {
+      prefix: "rootPath",
+      removeExtension: false,
+    }),
+    generateSignInPage()
   );
 
   // If trpc installed, add protectedProcedure

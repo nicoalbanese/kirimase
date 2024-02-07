@@ -58,6 +58,7 @@ export type Paths = {
   };
   kinde: {
     routeHandler: string;
+    signInPage: string;
   };
   trpc: {
     rootRouter: string;
