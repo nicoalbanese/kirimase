@@ -95,6 +95,7 @@ export const paths: { t3: Paths; normal: Paths } = {
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
       nextAuthApiRoute: "app/api/auth/[...nextauth]/route.ts",
       authProviderComponent: "lib/auth/Provider.tsx",
+      signInPage: "app/(auth)/sign-in/page.tsx",
     },
   },
   t3: {
@@ -191,6 +192,7 @@ export const paths: { t3: Paths; normal: Paths } = {
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
       nextAuthApiRoute: "app/api/auth/[...nextauth]/route.ts",
       authProviderComponent: "lib/auth/Provider.tsx",
+      signInPage: "app/(auth)/sign-in/page.tsx",
     },
   },
 };

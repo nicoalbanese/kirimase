@@ -453,7 +453,7 @@ export default function SignIn() {
           Signed in as{" "}
           <span className="font-medium">{session.user?.email}</span>
         </p>
-        <Button variant={"destructive"} onClick={() => signOut()}>
+        <Button variant={"destructive"} onClick={() => signOut({ callbackUrl: "/" })}>
           Sign out
         </Button>
       </div>
@@ -485,7 +485,7 @@ export default function SignIn() {
           <span className="font-medium">{session.user?.email}</span>
         </p>
         <button
-          onClick={() => signOut()}
+          onClick={() => signOut({ callbackUrl: "/" })}
           className="py-2.5 px-3.5 rounded-md bg-red-500 text-white hover:opacity-80 text-sm"
         >
           Sign out
@@ -665,5 +665,32 @@ export default async function Home() {
     </main>
   );
 }
+`;
+};
+
+export const generateSignInPage = () => {
+  return `"use client";
+
+import { signIn } from "next-auth/react";
+
+const Page = () => {
+  return (
+    <main className="bg-popover max-w-lg mx-auto my-4 rounded-lg p-10">
+      <h1 className="text-2xl font-bold text-center">
+        Sign in to your account
+      </h1>
+      <div className="mt-4">
+        <button
+          onClick={() => signIn(undefined, { callbackUrl: "/dashboard" })}
+          className="w-full bg-primary text-primary-foreground text-center hover:opacity-90 font-medium px-4 py-2 rounded-lg block"
+        >
+          Sign In
+        </button>
+      </div>
+    </main>
+  );
+};
+
+export default Page;
 `;
 };

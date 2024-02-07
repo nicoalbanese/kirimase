@@ -39,6 +39,7 @@ export type Paths = {
     nextAuthApiRoute: string;
     authProviderComponent: string;
     signOutButtonComponent: string;
+    signInPage: string;
   };
   clerk: {
     middleware: string;

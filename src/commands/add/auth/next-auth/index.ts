@@ -12,6 +12,7 @@ import {
   createDrizzleAuthSchema,
   createPrismaAuthSchema,
   createSignInComponent,
+  generateSignInPage,
   generateUpdatedRootRoute,
   libAuthProviderTsx,
   libAuthUtilsTs,
@@ -118,6 +119,15 @@ export const addNextAuth = async (
       prefix: "rootPath",
     }),
     generateUpdatedRootRoute()
+  );
+
+  // generate sign in page
+  createFile(
+    formatFilePath(nextAuth.signInPage, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    generateSignInPage()
   );
 
   // add to env

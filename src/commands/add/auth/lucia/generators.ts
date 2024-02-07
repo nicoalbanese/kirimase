@@ -65,7 +65,7 @@ import { Label } from "${alias}/components/ui/label";
 
 const Page = async () => {
   return (
-    <main className="max-w-lg mx-auto my-4 bg-secondary p-10">
+    <main className="max-w-lg mx-auto my-4 bg-popover p-10">
       <h1 className="text-2xl font-bold text-center">Create an account</h1>
       <AuthForm action="/api/sign-up">
         <Label htmlFor="username" className="text-muted-foreground">
@@ -100,7 +100,7 @@ import Link from "next/link";
 
 const Page = async () => {
   return (
-    <main className="max-w-lg mx-auto my-4 bg-neutral-100 p-10">
+    <main className="max-w-lg mx-auto my-4 bg-white p-10">
       <h1 className="text-2xl font-bold text-center">Create an account</h1>
       <AuthForm action="/api/sign-up">
         <label
@@ -158,7 +158,7 @@ import Link from "next/link";
 
 const Page = async () => {
   return (
-    <main className="max-w-lg mx-auto my-4 bg-secondary p-10">
+    <main className="max-w-lg mx-auto my-4 bg-popover p-10">
       <h1 className="text-2xl font-bold text-center">
         Sign in to your account
       </h1>
@@ -198,7 +198,7 @@ import Link from "next/link";
 
 const Page = async () => {
   return (
-    <main className="max-w-lg mx-auto my-4 bg-neutral-100 p-10">
+    <main className="max-w-lg mx-auto my-4 bg-white p-10">
       <h1 className="text-2xl font-bold text-center">
         Sign in to your account
       </h1>
