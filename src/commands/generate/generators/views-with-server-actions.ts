@@ -64,7 +64,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
 
     // create view - tableName/page.tsx
     createFile(
-      formatFilePath(`app/${tableNameKebabCase}/page.tsx`, {
+      formatFilePath(`app/(app)/${tableNameKebabCase}/page.tsx`, {
         prefix: "rootPath",
         removeExtension: false,
       }),
@@ -92,7 +92,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     // create optimisticEntity
     createFile(
       formatFilePath(
-        `app/${tableNameKebabCase}/useOptimistic${tableNameCapitalised}.tsx`,
+        `app/(app)/${tableNameKebabCase}/useOptimistic${tableNameCapitalised}.tsx`,
         {
           prefix: "rootPath",
           removeExtension: false,
@@ -104,7 +104,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     // create tableName/[id]/page.tsx
     createFile(
       formatFilePath(
-        `app/${tableNameKebabCase}/[${tableNameSingular}Id]/page.tsx`,
+        `app/(app)/${tableNameKebabCase}/[${tableNameSingular}Id]/page.tsx`,
         { removeExtension: false, prefix: "rootPath" }
       ),
       createSubPage(schema, false)
@@ -120,7 +120,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
         .join("");
       createFile(
         formatFilePath(
-          `app/${baseUrl}${tableNameKebabCase}/[${tableNameSingular}Id]/page.tsx`,
+          `app/(app)/${baseUrl}${tableNameKebabCase}/[${tableNameSingular}Id]/page.tsx`,
           { removeExtension: false, prefix: "rootPath" }
         ),
         createSubPage(schema, true)
@@ -129,7 +129,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     // create tableName/[id]/OptimisticEntity.tsx
     createFile(
       formatFilePath(
-        `app/${tableNameKebabCase}/[${tableNameSingular}Id]/Optimistic${tableNameSingularCapitalised}.tsx`,
+        `app/(app)/${tableNameKebabCase}/[${tableNameSingular}Id]/Optimistic${tableNameSingularCapitalised}.tsx`,
         { removeExtension: false, prefix: "rootPath" }
       ),
       createOptimisticEntityForSubPage(schema)
@@ -394,7 +394,7 @@ ${
     : ""
 }
 import { useOptimistic${tableNamePluralCapitalised} } from "${formatFilePath(
-    `app/${tableNameKebabCase}/useOptimistic${tableNamePluralCapitalised}`,
+    `app/(app)/${tableNameKebabCase}/useOptimistic${tableNamePluralCapitalised}`,
     { prefix: "alias", removeExtension: false }
   )}";
 import { Button } from "${formatFilePath(`components/ui/button`, {
@@ -817,7 +817,7 @@ import { type Action, cn } from "${formatFilePath(shared.init.libUtils, {
     removeExtension: true,
   })}";
 import { type TAddOptimistic } from "${formatFilePath(
-    `app/${tableNameKebabCase}/useOptimistic${tableNamePluralCapitalised}.tsx`,
+    `app/(app)/${tableNameKebabCase}/useOptimistic${tableNamePluralCapitalised}.tsx`,
     { prefix: "alias", removeExtension: true }
   )}";
 
@@ -1402,7 +1402,7 @@ ${
 }import Optimistic${tableNameSingularCapitalised} from "${
     schema.parents.length > 0
       ? `${formatFilePath(
-          `app/${tableNameKebabCase}/[${tableNameSingular}Id]/Optimistic${tableNameSingularCapitalised}`,
+          `app/(app)/${tableNameKebabCase}/[${tableNameSingular}Id]/Optimistic${tableNameSingularCapitalised}`,
           { prefix: "alias", removeExtension: false }
         )}`
       : `./Optimistic${tableNameSingularCapitalised}`
@@ -1534,7 +1534,7 @@ const createOptimisticEntityForSubPage = (schema: Schema) => {
 
 import { useOptimistic, useState } from "react";
 import { TAddOptimistic } from "${formatFilePath(
-    `app/${tableNameKebabCase}/useOptimistic${tableNameCapitalised}`,
+    `app/(app)/${tableNameKebabCase}/useOptimistic${tableNameCapitalised}`,
     { prefix: "alias", removeExtension: false }
   )}";
 import { type ${tableNameSingularCapitalised} } from "${formatFilePath(

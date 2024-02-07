@@ -6,7 +6,6 @@ export const generateQueryContent = (schema: ExtendedSchema, orm: ORMType) => {
   const relations = schema.fields.filter(
     (field) => field.type.toLowerCase() === "references"
   );
-  console.log(schema);
   const hasChildren = schema.children !== undefined;
 
   const imports = generateQueries[orm].imports(schema, relations);
