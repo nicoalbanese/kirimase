@@ -46,7 +46,7 @@ export const addKinde = async () => {
   );
   // update root page
   createFile(
-    formatFilePath("app/page.tsx", {
+    formatFilePath(shared.init.dashboardRoute, {
       prefix: "rootPath",
       removeExtension: false,
     }),
@@ -69,7 +69,10 @@ export const addKinde = async () => {
     { key: "KINDE_ISSUER_URL", value: "https://kirimase.kinde.com" },
     { key: "KINDE_SITE_URL", value: "http://localhost:3000" },
     { key: "KINDE_POST_LOGOUT_REDIRECT_URL", value: "http://localhost:3000" },
-    { key: "KINDE_POST_LOGIN_REDIRECT_URL", value: "http://localhost:3000" },
+    {
+      key: "KINDE_POST_LOGIN_REDIRECT_URL",
+      value: "http://localhost:3000/dashboard",
+    },
   ]);
   // install @kinde-oss/kinde-auth-nextjs
   // await installPackages(

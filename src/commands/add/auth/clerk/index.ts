@@ -16,7 +16,11 @@ import {
   updateConfigFile,
 } from "../../../../utils.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
-import { addContextProviderToLayout, addToInstallList } from "../../utils.js";
+import {
+  addContextProviderToAppLayout,
+  addContextProviderToAuthLayout,
+  addToInstallList,
+} from "../../utils.js";
 import { clerkGenerators } from "./generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import { libAuthUtilsTs } from "../next-auth/generators.js";
@@ -28,6 +32,7 @@ export const addClerk = async () => {
     clerk: { middleware, signInPage, signUpPage },
     shared: {
       auth: { authUtils },
+      init,
     },
   } = getFilePaths();
   const {
@@ -37,7 +42,8 @@ export const addClerk = async () => {
     generateSignUpPageTs,
     homePageWithUserButton,
   } = clerkGenerators;
-  addContextProviderToLayout("ClerkProvider");
+  addContextProviderToAuthLayout("ClerkProvider");
+  addContextProviderToAppLayout("ClerkProvider");
   addToDotEnv(
     [
       { key: "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", value: "", public: true },
@@ -64,7 +70,10 @@ export const addClerk = async () => {
   );
 
   replaceFile(
-    rootPath.concat("app/page.tsx"),
+    formatFilePath(init.dashboardRoute, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
     homePageWithUserButton(componentLib)
   );
 

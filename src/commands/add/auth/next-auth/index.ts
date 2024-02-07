@@ -17,7 +17,11 @@ import {
   libAuthUtilsTs,
 } from "./generators.js";
 import { AuthDriver, AuthProvider, AuthProviders } from "./utils.js";
-import { addContextProviderToLayout, addToInstallList } from "../../utils.js";
+import {
+  addContextProviderToAppLayout,
+  // addContextProviderToAuthLayout,
+  addToInstallList,
+} from "../../utils.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import { addToPrismaSchema } from "../../../generate/utils.js";
 import { prismaGenerate } from "../../orm/utils.js";
@@ -108,7 +112,13 @@ export const addNextAuth = async (
   // 6. If trpc installed, add protectedProcedure // this wont run because it is installed before trpc
   updateTrpcWithSessionIfInstalled();
 
-  replaceFile(rootPath.concat("app/page.tsx"), generateUpdatedRootRoute());
+  replaceFile(
+    formatFilePath(shared.init.dashboardRoute, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    generateUpdatedRootRoute()
+  );
 
   // add to env
   addToDotEnv(
@@ -165,7 +175,8 @@ export const addNextAuth = async (
   addPackageToConfig("next-auth");
   updateConfigFile({ auth: "next-auth" });
   // 9. Instruct user to add the <Provider /> to their root layout.
-  addContextProviderToLayout("NextAuthProvider");
+  // addContextProviderToAuthLayout("NextAuthProvider");
+  addContextProviderToAppLayout("NextAuthProvider");
   if (orm === "prisma") await prismaGenerate(preferredPackageManager);
   // consola.success("Successfully added Next Auth to your project!");
 };

@@ -60,17 +60,10 @@ const generateSignUpPage = (withShadCn: boolean) => {
       prefix: "alias",
     })}";
 import Link from "next/link"; 
-import { getPageSession } from "${formatFilePath(lucia.libAuthLucia, {
-      prefix: "alias",
-      removeExtension: true,
-    })}";
-import { redirect } from "next/navigation";
 import { Input } from "${alias}/components/ui/input";
 import { Label } from "${alias}/components/ui/label";
 
 const Page = async () => {
-  const session = await getPageSession();
-  if (session) redirect("/");
   return (
     <main className="max-w-lg mx-auto my-4 bg-secondary p-10">
       <h1 className="text-2xl font-bold text-center">Create an account</h1>
@@ -104,15 +97,8 @@ export default Page;
       prefix: "alias",
     })}";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
-      prefix: "alias",
-      removeExtension: true,
-    })}";
 
 const Page = async () => {
-  const { session } = await getUserAuth();
-  if (session) redirect("/");
   return (
     <main className="max-w-lg mx-auto my-4 bg-neutral-100 p-10">
       <h1 className="text-2xl font-bold text-center">Create an account</h1>
@@ -168,16 +154,9 @@ const generateSignInPage = (withShadCn: boolean) => {
     })}";
 import { Input } from "${alias}/components/ui/input";
 import { Label } from "${alias}/components/ui/label";
-import { getPageSession } from "${formatFilePath(lucia.libAuthLucia, {
-      prefix: "alias",
-      removeExtension: true,
-    })}";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 const Page = async () => {
-  const session = await getPageSession();
-  if (session?.user) redirect("/");
   return (
     <main className="max-w-lg mx-auto my-4 bg-secondary p-10">
       <h1 className="text-2xl font-bold text-center">
@@ -215,16 +194,9 @@ export default Page;
       removeExtension: true,
       prefix: "alias",
     })}";
-import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
-      prefix: "alias",
-      removeExtension: true,
-    })}";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 const Page = async () => {
-  const { session } = await getUserAuth();
-  if (session?.user) redirect("/");
   return (
     <main className="max-w-lg mx-auto my-4 bg-neutral-100 p-10">
       <h1 className="text-2xl font-bold text-center">
@@ -466,11 +438,9 @@ import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
     prefix: "alias",
     removeExtension: true,
   })}";
-import { redirect } from "next/navigation";
 
 export default async function Home() {
   const { session } = await getUserAuth();
-  if (!session) redirect("/sign-up");
   return (
     <main className="">
       <h1 className="text-2xl font-bold my-2">Profile</h1>
@@ -555,7 +525,7 @@ export const POST = async (request: NextRequest) => {
     return new Response(null, {
       status: 302,
       headers: {
-        Location: "/", // redirect to profile page
+        Location: "/dashboard", // redirect to profile page
       },
     });
   } catch (e) {
@@ -640,7 +610,7 @@ export const POST = async (request: NextRequest) => {
     return new Response(null, {
       status: 302,
       headers: {
-        Location: "/", // redirect to profile page
+        Location: "/dashboard", // redirect to profile page
       },
     });
   } catch (e) {

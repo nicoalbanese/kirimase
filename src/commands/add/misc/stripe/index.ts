@@ -44,7 +44,7 @@ import {
   generateSuccessToast,
 } from "./generators.js";
 import { addPackage } from "../../index.js";
-import { updateClerkMiddlewareForStripe } from "../../auth/clerk/utils.js";
+import { addToClerkIgnoredRoutes } from "../../auth/clerk/utils.js";
 import { AvailablePackage } from "../../../../types.js";
 import { updateTRPCRouter } from "../../../generate/generators/trpcRoute.js";
 import { createAccountPage } from "../../auth/shared/generators.js";
@@ -88,7 +88,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   }
 
   if (auth === "clerk") {
-    updateClerkMiddlewareForStripe(rootPath);
+    addToClerkIgnoredRoutes("/api/webhooks/stripe");
   }
 
   // add attributes to usermodel

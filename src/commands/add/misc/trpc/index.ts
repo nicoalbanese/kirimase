@@ -14,7 +14,10 @@ import {
   serverRouterComputersTs,
   serverTrpcTs,
 } from "./generators.js";
-import { addContextProviderToLayout, addToInstallList } from "../../utils.js";
+import {
+  addContextProviderToAppLayout,
+  addToInstallList,
+} from "../../utils.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 export const addTrpc = async () => {
@@ -126,7 +129,7 @@ export const addTrpc = async () => {
 
   addPackageToConfig("trpc");
   // 9. Instruct user to add the <Provider /> to their root layout.
-  addContextProviderToLayout("TrpcProvider");
+  addContextProviderToAppLayout("TrpcProvider");
   // addToDotEnv(
   //   [
   //     {

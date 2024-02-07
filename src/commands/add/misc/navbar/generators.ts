@@ -49,7 +49,7 @@ export const addNavbarAndSettings = () => {
 
   if (componentLib === "shadcn-ui")
     createFile(
-      formatFilePath("app/settings/page.tsx", {
+      formatFilePath("app/(app)/settings/page.tsx", {
         removeExtension: false,
         prefix: "rootPath",
       }),
@@ -187,7 +187,7 @@ type AdditionalLinks = {
 };
 
 export const defaultLinks: SidebarLink[] = [
-  { href: "/", title: "Home", icon: HomeIcon },${
+  { href: "/dashboard", title: "Home", icon: HomeIcon },${
     auth !== null
       ? `\n  { href: "/account", title: "Account", icon: Cog },`
       : ""

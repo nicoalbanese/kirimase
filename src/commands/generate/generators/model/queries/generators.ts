@@ -19,7 +19,10 @@ const generateDrizzleImports = (schema: Schema, relations: DBField[]) => {
   const { shared } = getFilePaths();
   const dbIndex = getDbIndexPath();
 
-  const children = schema.children.map((c) => formatTableName(c.tableName));
+  const children =
+    schema.children !== undefined
+      ? schema.children.map((c) => formatTableName(c.tableName))
+      : [];
 
   return `import { db } from "${formatFilePath(dbIndex, {
     prefix: "alias",

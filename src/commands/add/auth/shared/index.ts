@@ -4,10 +4,7 @@ import {
   installShadcnUIComponents,
   readConfigFile,
 } from "../../../../utils.js";
-import {
-  addContextProviderToLayout,
-  addToShadcnComponentList,
-} from "../../utils.js";
+import { addToShadcnComponentList } from "../../utils.js";
 import {
   createAccountApiTs,
   createAccountCardComponent,

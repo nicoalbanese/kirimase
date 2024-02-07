@@ -1,5 +1,6 @@
 import { confirm } from "@inquirer/prompts";
 import {
+  createFile,
   installPackages,
   readConfigFile,
   replaceFile,
@@ -23,6 +24,9 @@ import { formatFilePath, getFilePaths } from "../filePaths/index.js";
 import { addKinde } from "./auth/kinde/index.js";
 import { addNavbarAndSettings } from "./misc/navbar/generators.js";
 import {
+  createAppLayoutFile,
+  createAuthLayoutFile,
+  createLandingPage,
   generateGenericHomepage,
   generateGlobalsCss,
   generateUpdatedTWConfig,
@@ -39,7 +43,8 @@ import {
   askPscale,
 } from "./prompts.js";
 import {
-  addContextProviderToLayout,
+  addAuthCheckToAppLayout,
+  addContextProviderToAppLayout,
   addToInstallList,
   installPackagesFromList,
   installShadcnComponentList,
@@ -131,6 +136,9 @@ export const addPackage = async (options?: InitOptions) => {
     spinner.start();
     spinner.text = "Beginning Configuration Process";
 
+    createAppLayoutFile();
+    createLandingPage();
+
     if (config.componentLib === undefined) {
       if (promptResponse.componentLib === "shadcn-ui") {
         spinner.text = "Configuring Shadcn-UI";
@@ -159,7 +167,7 @@ export const addPackage = async (options?: InitOptions) => {
         updateConfigFile({ componentLib: null });
       }
       if (!config.t3) {
-        addContextProviderToLayout("Navbar");
+        addContextProviderToAppLayout("Navbar");
       }
     }
 
@@ -194,7 +202,7 @@ export const addPackage = async (options?: InitOptions) => {
           "Configuring " +
           promptResponse.auth[0].toUpperCase() +
           promptResponse.orm.slice(1);
-
+      if (promptResponse.auth) createAuthLayoutFile();
       if (promptResponse.auth === "next-auth")
         await addNextAuth(promptResponse.authProviders, options);
       if (promptResponse.auth === "clerk") await addClerk();
@@ -202,7 +210,7 @@ export const addPackage = async (options?: InitOptions) => {
       if (promptResponse.auth === "kinde") await addKinde();
       if (!promptResponse.auth) {
         replaceFile(
-          formatFilePath("app/page.tsx", {
+          formatFilePath(shared.init.dashboardRoute, {
             prefix: "rootPath",
             removeExtension: false,
           }),
@@ -214,6 +222,7 @@ export const addPackage = async (options?: InitOptions) => {
         await createAccountSettingsPage();
       }
       addNavbarAndSettings();
+      addAuthCheckToAppLayout();
     }
 
     // check if misc

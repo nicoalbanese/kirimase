@@ -14,6 +14,9 @@ export type Paths = {
       globalCss: string;
       navbarComponent: string;
       sidebarComponent: string;
+      appLayout: string;
+      indexRoute: string;
+      dashboardRoute: string;
     };
     orm: {
       servicesDir: string;
@@ -28,6 +31,7 @@ export type Paths = {
       updateNameCardComponent: string;
       updateEmailCardComponent: string;
       accountCardComponent: string;
+      layoutPage: string;
       authSchema?: string;
     };
   };

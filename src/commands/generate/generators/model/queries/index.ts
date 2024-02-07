@@ -6,14 +6,17 @@ export const generateQueryContent = (schema: ExtendedSchema, orm: ORMType) => {
   const relations = schema.fields.filter(
     (field) => field.type.toLowerCase() === "references"
   );
+  console.log(schema);
+  const hasChildren = schema.children !== undefined;
 
   const imports = generateQueries[orm].imports(schema, relations);
   const getQuery = generateQueries[orm].get(schema, relations);
   const getByIdQuery = generateQueries[orm].getById(schema, relations);
-  const getByIdWithChildren =
-    schema.children && schema.children.length > 0
+  const getByIdWithChildren = hasChildren
+    ? schema.children && schema.children.length > 0
       ? generateQueries[orm].getByIdWithChildren(schema, relations)
-      : "";
+      : ""
+    : "";
 
   return `${imports}
 ${getQuery}

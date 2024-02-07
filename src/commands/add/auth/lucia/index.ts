@@ -94,7 +94,13 @@ export const addLucia = async () => {
     }),
     viewsAndComponents.authFormComponent
   );
-  replaceFile(rootPath.concat("app/page.tsx"), viewsAndComponents.homePage);
+  replaceFile(
+    formatFilePath(shared.init.dashboardRoute, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    viewsAndComponents.homePage
+  );
   createFile(
     rootPath.concat("app/loading.tsx"),
     viewsAndComponents.loadingPage

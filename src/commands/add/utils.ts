@@ -44,15 +44,7 @@ export const Packages: {
   componentLib: [{ name: "Shadcn UI (with next-themes)", value: "shadcn-ui" }],
 };
 
-export const addContextProviderToLayout = (
-  provider:
-    | "NextAuthProvider"
-    | "TrpcProvider"
-    | "ShadcnToast"
-    | "ClerkProvider"
-    | "Navbar"
-    | "ThemeProvider"
-) => {
+export const addContextProviderToRootLayout = (provider: "ThemeProvider") => {
   const { hasSrc, alias } = readConfigFile();
   const path = `${hasSrc ? "src/" : ""}app/layout.tsx`;
 
@@ -62,6 +54,84 @@ export const addContextProviderToLayout = (
   const importInsertionPoint = fileContent.lastIndexOf("import");
   const nextLineAfterLastImport =
     fileContent.indexOf("\n", importInsertionPoint) + 1;
+  const beforeImport = fileContent.slice(0, nextLineAfterLastImport);
+  const afterImport = fileContent.slice(nextLineAfterLastImport);
+
+  let importStatement: string;
+  switch (provider) {
+    case "ThemeProvider":
+      importStatement = `import { ThemeProvider } from "${alias}/components/ThemeProvider";`;
+      break;
+  }
+
+  // check if the provider already exists
+  if (fileContent.includes(importStatement)) {
+    // consola.info(`Provider ${provider} already exists in layout.tsx`);
+    return;
+  }
+  const modifiedImportContent = `${beforeImport}${importStatement}\n${afterImport}`;
+
+  const rootChildrenText = "{children}";
+  let replacementText = "";
+  switch (provider) {
+    case "ThemeProvider":
+      replacementText = `\n<${provider} attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>${rootChildrenText}</${provider}>\n`;
+      break;
+    default:
+      replacementText = `\n<${provider}>${rootChildrenText}</${provider}>\n`;
+      break;
+  }
+
+  const searchValue = "{children}";
+  const newLayoutContent = modifiedImportContent.replace(
+    searchValue,
+    replacementText
+  );
+  replaceFile(path, newLayoutContent);
+};
+
+export const addAuthCheckToAppLayout = () => {
+  const { hasSrc } = readConfigFile();
+  const path = `${hasSrc ? "src/" : ""}app/(app)/layout.tsx`;
+  const { shared } = getFilePaths();
+
+  const fileContent = fs.readFileSync(path, "utf-8");
+  const importStatement = `import { checkAuth } from "${formatFilePath(
+    shared.auth.authUtils,
+    { prefix: "alias", removeExtension: true }
+  )}";\n`;
+  const searchText = `  children: React.ReactNode;
+}) {
+`;
+  const replacementText = `  children: React.ReactNode;
+}) {
+  await checkAuth();
+`;
+  const newText =
+    importStatement + fileContent.replace(searchText, replacementText);
+  replaceFile(path, newText);
+};
+export const addContextProviderToAppLayout = (
+  provider:
+    | "NextAuthProvider"
+    | "TrpcProvider"
+    | "ShadcnToast"
+    | "ClerkProvider"
+    | "Navbar"
+    | "ThemeProvider"
+) => {
+  const { hasSrc, alias } = readConfigFile();
+  const path = `${hasSrc ? "src/" : ""}app/(app)/layout.tsx`;
+
+  const fileContent = fs.readFileSync(path, "utf-8");
+
+  // Add import statement after the last import
+  const lastIndexOfImport = fileContent.lastIndexOf("import");
+  const importInsertionPoint = lastIndexOfImport === -1 ? 0 : lastIndexOfImport;
+  const nextLineAfterLastImport =
+    lastIndexOfImport === -1
+      ? 0
+      : fileContent.indexOf("\n", importInsertionPoint) + 1;
   const beforeImport = fileContent.slice(0, nextLineAfterLastImport);
   const afterImport = fileContent.slice(nextLineAfterLastImport);
 
@@ -120,9 +190,6 @@ export const addContextProviderToLayout = (
     case "Navbar":
       replacementText = `<div className="flex h-screen">\n<Sidebar />\n<main className="flex-1 md:p-8 pt-2 p-8 overflow-y-auto">\n<Navbar />\n{children}\n</main>\n</div>`;
       break;
-    case "ThemeProvider":
-      replacementText = `\n<${provider} attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>${rootChildrenText}</${provider}>\n`;
-      break;
     case "TrpcProvider":
       replacementText = `\n<${provider} cookies={cookies().toString()}>${rootChildrenText}</${provider}>\n`;
       break;
@@ -134,6 +201,80 @@ export const addContextProviderToLayout = (
   const searchValue = !navbarExists
     ? "{children}"
     : `<div className="flex h-screen">\n<Sidebar />\n<main className="flex-1 md:p-8 pt-2 p-8 overflow-y-auto">\n<Navbar />\n{children}\n</main>\n</div>`;
+  const newLayoutContent = modifiedImportContent.replace(
+    searchValue,
+    replacementText
+  );
+  replaceFile(path, newLayoutContent);
+};
+
+export const addContextProviderToAuthLayout = (
+  provider:
+    | "NextAuthProvider"
+    | "TrpcProvider"
+    | "ShadcnToast"
+    | "ClerkProvider"
+) => {
+  const { hasSrc, alias } = readConfigFile();
+  const path = `${hasSrc ? "src/" : ""}app/(auth)/layout.tsx`;
+
+  const pathExists = fs.existsSync(path);
+  if (!pathExists) return;
+  const fileContent = fs.readFileSync(path, "utf-8");
+
+  // Add import statement after the last import
+  const importInsertionPoint = fileContent.lastIndexOf("import");
+  const nextLineAfterLastImport =
+    fileContent.indexOf("\n", importInsertionPoint) + 1;
+  const beforeImport = fileContent.slice(0, nextLineAfterLastImport);
+  const afterImport = fileContent.slice(nextLineAfterLastImport);
+
+  const { trpc, "next-auth": nextAuth } = getFilePaths();
+
+  let importStatement: string;
+  switch (provider) {
+    case "NextAuthProvider":
+      importStatement = `import NextAuthProvider from "${formatFilePath(
+        nextAuth.authProviderComponent,
+        { prefix: "alias", removeExtension: true }
+      )}";`;
+      break;
+    case "TrpcProvider":
+      importStatement = `import TrpcProvider from "${formatFilePath(
+        trpc.trpcProvider,
+        { removeExtension: true, prefix: "alias" }
+      )}";\nimport { cookies } from "next/headers";`;
+      break;
+    case "ShadcnToast":
+      importStatement = `import { Toaster } from "${alias}/components/ui/sonner";`;
+      break;
+    case "ClerkProvider":
+      importStatement = 'import { ClerkProvider } from "@clerk/nextjs";';
+      break;
+  }
+
+  // check if the provider already exists
+  if (fileContent.includes(importStatement)) {
+    // consola.info(`Provider ${provider} already exists in layout.tsx`);
+    return;
+  }
+  const modifiedImportContent = `${beforeImport}${importStatement}\n${afterImport}`;
+
+  const rootChildrenText = "{children}";
+  let replacementText = "";
+  switch (provider) {
+    case "ShadcnToast":
+      replacementText = `${rootChildrenText}\n<Toaster richColors />\n`;
+      break;
+    case "TrpcProvider":
+      replacementText = `\n<${provider} cookies={cookies().toString()}>${rootChildrenText}</${provider}>\n`;
+      break;
+    default:
+      replacementText = `\n<${provider}>${rootChildrenText}</${provider}>\n`;
+      break;
+  }
+
+  const searchValue = "{children}";
   const newLayoutContent = modifiedImportContent.replace(
     searchValue,
     replacementText
