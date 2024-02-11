@@ -173,7 +173,7 @@ const generateApiRoute = () => {
   const { resend } = getFilePaths();
   return `import { EmailTemplate } from "${formatFilePath(
     resend.firstEmailComponent,
-    { prefix: "alias", removeExtension: true },
+    { prefix: "alias", removeExtension: true }
   )}";
 import { resend } from "${formatFilePath(resend.libEmailIndex, {
     prefix: "alias",
@@ -212,7 +212,7 @@ const generateEmailIndexTs = () => {
   return `import { Resend } from "resend";
 import { env } from "${formatFilePath(init.envMjs, {
     prefix: "alias",
-    removeExtension: true,
+    removeExtension: false,
   })}";
 
 export const resend = new Resend(env.RESEND_API_KEY);

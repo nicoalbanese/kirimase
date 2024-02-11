@@ -1,11 +1,5 @@
 import { confirm } from "@inquirer/prompts";
-import {
-  createFile,
-  installPackages,
-  readConfigFile,
-  replaceFile,
-  updateConfigFile,
-} from "../../utils.js";
+import { readConfigFile, replaceFile, updateConfigFile } from "../../utils.js";
 import { addDrizzle } from "./orm/drizzle/index.js";
 import { addNextAuth } from "./auth/next-auth/index.js";
 import { addTrpc } from "./misc/trpc/index.js";
@@ -15,6 +9,7 @@ import { initProject } from "../init/index.js";
 import { addPrisma } from "./orm/prisma/index.js";
 import { ORMType, InitOptions } from "../../types.js";
 import { addClerk } from "./auth/clerk/index.js";
+import { addSupabase } from "./auth/supabase/index.js";
 import { addResend } from "./misc/resend/index.js";
 import { addLucia } from "./auth/lucia/index.js";
 import { createAccountSettingsPage } from "./auth/shared/index.js";
@@ -136,8 +131,8 @@ export const addPackage = async (options?: InitOptions) => {
     spinner.start();
     spinner.text = "Beginning Configuration Process";
 
-    createAppLayoutFile();
-    createLandingPage();
+    await createAppLayoutFile();
+    await createLandingPage();
 
     if (config.componentLib === undefined) {
       if (promptResponse.componentLib === "shadcn-ui") {
@@ -154,20 +149,20 @@ export const addPackage = async (options?: InitOptions) => {
         //   config.preferredPackageManager
         // );
         // add to tailwindconfig
-        replaceFile("tailwind.config.ts", generateUpdatedTWConfig());
+        await replaceFile("tailwind.config.ts", generateUpdatedTWConfig());
 
         // add to globalcss colors
-        replaceFile(
+        await replaceFile(
           formatFilePath(shared.init.globalCss, {
             removeExtension: false,
             prefix: "rootPath",
           }),
           generateGlobalsCss()
         );
-        updateConfigFile({ componentLib: null });
+        await updateConfigFile({ componentLib: null });
       }
       if (!config.t3) {
-        addContextProviderToAppLayout("Navbar");
+        await addContextProviderToAppLayout("Navbar");
       }
     }
 
@@ -193,7 +188,7 @@ export const addPackage = async (options?: InitOptions) => {
         );
       }
       if (promptResponse === null)
-        updateConfigFile({ orm: null, driver: null, provider: null });
+        await updateConfigFile({ orm: null, driver: null, provider: null });
     }
     // check if auth
     if (config.auth === undefined) {
@@ -202,27 +197,28 @@ export const addPackage = async (options?: InitOptions) => {
           "Configuring " +
           promptResponse.auth[0].toUpperCase() +
           promptResponse.orm.slice(1);
-      if (promptResponse.auth) createAuthLayoutFile();
+      if (promptResponse.auth) await createAuthLayoutFile();
       if (promptResponse.auth === "next-auth")
         await addNextAuth(promptResponse.authProviders, options);
       if (promptResponse.auth === "clerk") await addClerk();
       if (promptResponse.auth === "lucia") await addLucia();
       if (promptResponse.auth === "kinde") await addKinde();
+      if (promptResponse.auth === "supabase") await addSupabase();
       if (!promptResponse.auth) {
-        replaceFile(
+        await replaceFile(
           formatFilePath(shared.init.dashboardRoute, {
             prefix: "rootPath",
             removeExtension: false,
           }),
           generateGenericHomepage()
         );
-        updateConfigFile({ auth: null });
+        await updateConfigFile({ auth: null });
       } else {
         // add account page
         await createAccountSettingsPage();
       }
-      addNavbarAndSettings();
-      addAuthCheckToAppLayout();
+      await addNavbarAndSettings();
+      await addAuthCheckToAppLayout();
     }
 
     // check if misc
@@ -243,7 +239,7 @@ export const addPackage = async (options?: InitOptions) => {
     }
 
     if (config.t3 && config.auth === "next-auth") {
-      checkAndAddAuthUtils();
+      await checkAndAddAuthUtils();
     }
     spinner.succeed("Configuration complete");
 

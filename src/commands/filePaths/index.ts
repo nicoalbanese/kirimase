@@ -65,6 +65,15 @@ export const paths: { t3: Paths; normal: Paths } = {
       authFormComponent: "components/auth/Form.tsx",
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
     },
+    supabase: {
+      authFormComponent: "components/auth/Form.tsx",
+      signInPage: "app/(auth)/sign-in/page.tsx",
+      signUpPage: "app/(auth)/sign-up/page.tsx",
+      signOutButtonComponent: "components/auth/SignOutBtn.tsx",
+      callbackApiRoute: "app/api/auth/callback/route.ts",
+      libAuthSupabase: "lib/supabase/auth/index.ts",
+      middleware: "middleware.ts",
+    },
     kinde: {
       routeHandler: "app/api/auth/[kindeAuth]/route.ts",
       signInPage: "app/(auth)/sign-in/page.tsx",
@@ -161,6 +170,15 @@ export const paths: { t3: Paths; normal: Paths } = {
       libAuthLucia: "lib/auth/lucia.ts",
       authFormComponent: "components/auth/Form.tsx",
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
+    },
+    supabase: {
+      authFormComponent: "components/auth/Form.tsx",
+      signInPage: "app/(auth)/sign-in/page.tsx",
+      signUpPage: "app/(auth)/sign-up/page.tsx",
+      signOutButtonComponent: "components/auth/SignOutBtn.tsx",
+      callbackApiRoute: "app/api/auth/callback/route.ts",
+      libAuthSupabase: "lib/supabase/auth/index.ts",
+      middleware: "middleware.ts",
     },
     kinde: {
       routeHandler: "app/api/auth/[kindeAuth]/route.ts",

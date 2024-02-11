@@ -1,8 +1,6 @@
-import { consola } from "consola";
 import {
   addPackageToConfig,
   createFile,
-  installPackages,
   readConfigFile,
 } from "../../../../utils.js";
 import { AvailablePackage } from "../../../../types.js";
@@ -19,6 +17,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
     rootPath,
   } = readConfigFile();
   const { resend } = getFilePaths();
+
   // const packages = packagesBeingInstalled.concat(installedPackages);
   // consola.start("Installing Resend...");
 
@@ -31,7 +30,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   } = resendGenerators;
 
   // 1. Add page at app/resend/page.tsx
-  createFile(
+  await createFile(
     formatFilePath(resend.resendPage, {
       prefix: "rootPath",
       removeExtension: false,
@@ -40,7 +39,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   );
 
   // 2. Add component at components/emails/FirstEmailTemplate.tsx
-  createFile(
+  await createFile(
     formatFilePath(resend.firstEmailComponent, {
       prefix: "rootPath",
       removeExtension: false,
@@ -48,7 +47,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
     generateEmailTemplateComponent()
   );
   // 3. Add route handler at app/api/email/route.ts
-  createFile(
+  await createFile(
     formatFilePath(resend.emailApiRoute, {
       prefix: "rootPath",
       removeExtension: false,
@@ -57,7 +56,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   );
 
   // 4. Add email utils
-  createFile(
+  await createFile(
     formatFilePath(resend.emailUtils, {
       prefix: "rootPath",
       removeExtension: false,
@@ -66,7 +65,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   );
 
   // 5. add email index.ts
-  createFile(
+  await createFile(
     formatFilePath(resend.libEmailIndex, {
       prefix: "rootPath",
       removeExtension: false,
@@ -75,7 +74,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   );
 
   // 6. Add items to .env
-  addToDotEnv([{ key: "RESEND_API_KEY", value: "" }], rootPath, true);
+  await addToDotEnv([{ key: "RESEND_API_KEY", value: "" }], rootPath, true);
   // 7. Install packages (resend)
   // await installPackages(
   //   {
@@ -89,6 +88,6 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   if (orm === null)
     addToInstallList({ regular: ["zod", "@t3-oss/env-nextjs"], dev: [] });
 
-  addPackageToConfig("resend");
+  await addPackageToConfig("resend");
   // consola.success("Resend successfully installed and configured.");
 };

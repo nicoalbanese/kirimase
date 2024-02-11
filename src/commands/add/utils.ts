@@ -35,6 +35,7 @@ export const Packages: {
     { name: "Clerk", value: "clerk" },
     { name: "Lucia", value: "lucia" },
     { name: "Kinde", value: "kinde" },
+    { name: "Supabase", value: "supabase" },
   ],
   misc: [
     { name: "TRPC", value: "trpc" },
@@ -44,7 +45,9 @@ export const Packages: {
   componentLib: [{ name: "Shadcn UI (with next-themes)", value: "shadcn-ui" }],
 };
 
-export const addContextProviderToRootLayout = (provider: "ThemeProvider") => {
+export const addContextProviderToRootLayout = async (
+  provider: "ThemeProvider"
+) => {
   const { hasSrc, alias } = readConfigFile();
   const path = `${hasSrc ? "src/" : ""}app/layout.tsx`;
 
@@ -87,10 +90,10 @@ export const addContextProviderToRootLayout = (provider: "ThemeProvider") => {
     searchValue,
     replacementText
   );
-  replaceFile(path, newLayoutContent);
+  await replaceFile(path, newLayoutContent);
 };
 
-export const addAuthCheckToAppLayout = () => {
+export const addAuthCheckToAppLayout = async () => {
   const { hasSrc } = readConfigFile();
   const path = `${hasSrc ? "src/" : ""}app/(app)/layout.tsx`;
   const { shared } = getFilePaths();
@@ -109,9 +112,9 @@ export const addAuthCheckToAppLayout = () => {
 `;
   const newText =
     importStatement + fileContent.replace(searchText, replacementText);
-  replaceFile(path, newText);
+  await replaceFile(path, newText);
 };
-export const addContextProviderToAppLayout = (
+export const addContextProviderToAppLayout = async (
   provider:
     | "NextAuthProvider"
     | "TrpcProvider"
@@ -205,10 +208,10 @@ export const addContextProviderToAppLayout = (
     searchValue,
     replacementText
   );
-  replaceFile(path, newLayoutContent);
+  await replaceFile(path, newLayoutContent);
 };
 
-export const addContextProviderToAuthLayout = (
+export const addContextProviderToAuthLayout = async (
   provider:
     | "NextAuthProvider"
     | "TrpcProvider"
@@ -279,7 +282,7 @@ export const addContextProviderToAuthLayout = (
     searchValue,
     replacementText
   );
-  replaceFile(path, newLayoutContent);
+  await replaceFile(path, newLayoutContent);
 };
 
 export const AuthSubTypeMapping: Record<AuthType, AuthSubType> = {
@@ -287,6 +290,7 @@ export const AuthSubTypeMapping: Record<AuthType, AuthSubType> = {
   kinde: "managed",
   "next-auth": "self-hosted",
   lucia: "managed",
+  supabase: "managed",
 };
 
 const installList: { regular: string[]; dev: string[] } = {
@@ -367,6 +371,9 @@ export const printNextSteps = (
       : []),
     ...(promptResponses.auth === "clerk"
       ? [`${chalk.underline("Authentication")}: Clerk`]
+      : []),
+    ...(promptResponses.auth === "supabase"
+      ? [`${chalk.underline("Authentication")}: Supabase`]
       : []),
     ...(promptResponses.auth === "lucia"
       ? [`${chalk.underline("Authentication")}: Lucia`]

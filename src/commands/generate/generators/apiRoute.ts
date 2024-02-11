@@ -4,13 +4,13 @@ import { formatFilePath, getFilePaths } from "../../filePaths/index.js";
 import { Schema } from "../types.js";
 import { formatTableName, toCamelCase } from "../utils.js";
 
-export const scaffoldAPIRoute = (schema: Schema) => {
+export const scaffoldAPIRoute = async (schema: Schema) => {
   const { hasSrc, driver } = readConfigFile();
   const { tableName } = schema;
   const path = `${hasSrc ? "src/" : ""}app/api/${toCamelCase(
     tableName
   )}/route.ts`;
-  createFile(path, generateRouteContent(schema, driver));
+  await createFile(path, generateRouteContent(schema, driver));
 };
 
 const generateRouteContent = (schema: Schema, driver: DBType) => {

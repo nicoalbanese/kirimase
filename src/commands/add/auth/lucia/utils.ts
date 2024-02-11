@@ -320,14 +320,14 @@ export const addLuciaToPrismaSchema = async () => {
     // write logic to check if model already exists -> if so replace
 
     const newContent = schemaContents.concat("\n", PrismaLuciaSchema);
-    replaceFile(schemaPath, newContent);
+    await replaceFile(schemaPath, newContent);
     // consola.success(`Added auth to Prisma schema`);
   } else {
     consola.info(`Prisma schema file does not exist`);
   }
 };
 
-export const updateDrizzleDbIndex = (provider: DBProvider) => {
+export const updateDrizzleDbIndex = async (provider: DBProvider) => {
   const { shared, drizzle } = getFilePaths();
   // what is it like to type like this'
   // functions intended use if with t3 so assumed provider is pscale
@@ -347,7 +347,7 @@ export const connection = connect({
  
 export const db = drizzle(connection, { schema });
 `;
-    replaceFile(
+    await replaceFile(
       formatFilePath(drizzle.dbIndex, {
         prefix: "rootPath",
         removeExtension: false,
@@ -356,5 +356,5 @@ export const db = drizzle(connection, { schema });
     );
   }
   // TODO: NOW
-  updateRootSchema("auth", true, "lucia");
+  await updateRootSchema("auth", true, "lucia");
 };

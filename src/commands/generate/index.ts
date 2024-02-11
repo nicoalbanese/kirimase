@@ -325,7 +325,7 @@ async function askForChildModel(parentModel: string) {
   });
 }
 
-export function preBuild() {
+export async function preBuild() {
   const config = readConfigFile();
 
   if (!config) {
@@ -334,7 +334,7 @@ export function preBuild() {
     return false;
   }
 
-  if (config.orm === undefined) updateConfigFileAfterUpdate();
+  if (config.orm === undefined) await updateConfigFileAfterUpdate();
   return true;
 }
 
@@ -449,23 +449,24 @@ async function generateResources(
       message: `Would you like to add a link to '${tnEnglish}' in your sidebar?`,
       default: true,
     });
-    if (addToSidebar) addLinkToSidebar(schema.tableName);
+    if (addToSidebar) await addLinkToSidebar(schema.tableName);
   }
 
   if (resourceType.includes("model"))
     scaffoldModel(schema, config.driver, config.hasSrc);
-  if (resourceType.includes("api_route")) scaffoldAPIRoute(schema);
-  if (resourceType.includes("trpc_route")) scaffoldTRPCRoute(schema);
+  if (resourceType.includes("api_route")) await scaffoldAPIRoute(schema);
+  if (resourceType.includes("trpc_route")) await scaffoldTRPCRoute(schema);
   if (resourceType.includes("views_and_components_trpc"))
-    scaffoldViewsAndComponents(schema);
-  if (resourceType.includes("server_actions")) scaffoldServerActions(schema);
+    await scaffoldViewsAndComponents(schema);
+  if (resourceType.includes("server_actions"))
+    await scaffoldServerActions(schema);
   if (resourceType.includes("views_and_components_server_actions"))
-    scaffoldViewsAndComponentsWithServerActions(schema);
+    await scaffoldViewsAndComponentsWithServerActions(schema);
   await installShadcnComponentList();
 }
 
 export async function buildSchema() {
-  const ready = preBuild();
+  const ready = await preBuild();
   if (!ready) return;
 
   const config = readConfigFile();

@@ -74,12 +74,13 @@ export type AvailablePackage =
   | "resend"
   | "lucia"
   | "kinde"
-  | "stripe";
+  | "stripe"
+  | "supabase";
 
 export type PackageType = "orm" | "auth" | "componentLib" | "misc";
 export type ComponentLibType = "shadcn-ui";
 export type ORMType = "drizzle" | "prisma";
-export type AuthType = "next-auth" | "clerk" | "lucia" | "kinde";
+export type AuthType = "next-auth" | "clerk" | "lucia" | "kinde" | "supabase";
 export type MiscType = "trpc" | "stripe" | "resend";
 export type AuthSubType = "self-hosted" | "managed";
 

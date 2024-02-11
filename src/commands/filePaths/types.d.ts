@@ -57,6 +57,15 @@ export type Paths = {
     libAuthLucia: string;
     signOutButtonComponent: string;
   };
+  supabase: {
+    signInPage: string;
+    signUpPage: string;
+    authFormComponent: string;
+    callbackApiRoute: string;
+    libAuthSupabase: string;
+    signOutButtonComponent: string;
+    middleware: string;
+  };
   kinde: {
     routeHandler: string;
     signInPage: string;

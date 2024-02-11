@@ -1,8 +1,6 @@
-import { consola } from "consola";
 import {
   addPackageToConfig,
   createFile,
-  installPackages,
   readConfigFile,
   updateConfigFile,
 } from "../../../../utils.js";
@@ -20,33 +18,36 @@ import { addToInstallList } from "../../utils.js";
 
 export const addKinde = async () => {
   const { kinde, shared } = getFilePaths();
-  const { preferredPackageManager } = readConfigFile();
+
   // add api route
-  createFile(
+  await createFile(
     formatFilePath(kinde.routeHandler, {
       prefix: "rootPath",
       removeExtension: false,
     }),
     generateKindeRouteHandler()
   );
+
   // create signin button component
-  createFile(
+  await createFile(
     formatFilePath(shared.auth.signInComponent, {
       prefix: "rootPath",
       removeExtension: false,
     }),
     generateSignInComponent()
   );
+
   // create auth/utils.ts
-  createFile(
+  await createFile(
     formatFilePath(shared.auth.authUtils, {
       prefix: "rootPath",
       removeExtension: false,
     }),
     generateAuthUtils()
   );
+
   // update root page
-  createFile(
+  await createFile(
     formatFilePath(shared.init.dashboardRoute, {
       prefix: "rootPath",
       removeExtension: false,
@@ -55,7 +56,7 @@ export const addKinde = async () => {
   );
 
   // generate sign in page
-  createFile(
+  await createFile(
     formatFilePath(kinde.signInPage, {
       prefix: "rootPath",
       removeExtension: false,
@@ -64,10 +65,10 @@ export const addKinde = async () => {
   );
 
   // If trpc installed, add protectedProcedure
-  updateTrpcWithSessionIfInstalled();
+  await updateTrpcWithSessionIfInstalled();
 
   // add env variables
-  addToDotEnv([
+  await addToDotEnv([
     {
       key: "KINDE_CLIENT_ID",
       value: "",
@@ -91,7 +92,7 @@ export const addKinde = async () => {
   // );
   addToInstallList({ regular: ["@kinde-oss/kinde-auth-nextjs"], dev: [] });
 
-  addPackageToConfig("kinde");
-  updateConfigFile({ auth: "kinde" });
+  await addPackageToConfig("kinde");
+  await updateConfigFile({ auth: "kinde" });
   // consola.success("Successfully installed Kinde auth");
 };

@@ -24,7 +24,7 @@ export const addTrpc = async () => {
   const { orm } = readConfigFile();
   const { trpc } = getFilePaths();
   // 1. Create lib/server/index.ts
-  createFile(
+  await createFile(
     formatFilePath(trpc.rootRouter, {
       prefix: "rootPath",
       removeExtension: false,
@@ -33,7 +33,7 @@ export const addTrpc = async () => {
   );
 
   // 2. create lib/server/trpc.ts
-  createFile(
+  await createFile(
     formatFilePath(trpc.serverTrpc, {
       prefix: "rootPath",
       removeExtension: false,
@@ -42,7 +42,7 @@ export const addTrpc = async () => {
   );
   // 3. create lib/server/router/ directory and maybe a users file
   // TODO : T3 COMPATABILITY
-  createFile(
+  await createFile(
     formatFilePath(`lib/server/routers/computers.ts`, {
       prefix: "rootPath",
       removeExtension: false,
@@ -50,7 +50,7 @@ export const addTrpc = async () => {
     serverRouterComputersTs()
   );
   // 4. create app/api/trpc/[trpc]/route.ts
-  createFile(
+  await createFile(
     formatFilePath(trpc.trpcApiRoute, {
       prefix: "rootPath",
       removeExtension: false,
@@ -58,7 +58,7 @@ export const addTrpc = async () => {
     apiTrpcRouteTs()
   );
   // 5. create lib/trpc/client.ts
-  createFile(
+  await createFile(
     formatFilePath(trpc.trpcClient, {
       prefix: "rootPath",
       removeExtension: false,
@@ -66,7 +66,7 @@ export const addTrpc = async () => {
     libTrpcClientTs()
   );
   // 6. create lib/trpc/Provider.tsx
-  createFile(
+  await createFile(
     formatFilePath(trpc.trpcProvider, {
       prefix: "rootPath",
       removeExtension: false,
@@ -74,8 +74,8 @@ export const addTrpc = async () => {
     libTrpcProviderTsx()
   );
   // 7. create lib/trpc/serverClient.ts -> updated to lib/trpc/api.ts using server invoker
-  // createFile(`${rootPath}/lib/trpc/serverClient.ts`, libTrpcServerClientTs());
-  createFile(
+  // await createFile(`${rootPath}/lib/trpc/serverClient.ts`, libTrpcServerClientTs());
+  await createFile(
     formatFilePath(trpc.trpcApiTs, {
       prefix: "rootPath",
       removeExtension: false,
@@ -85,7 +85,7 @@ export const addTrpc = async () => {
   );
 
   // 7.5. create context file and update to include context file above
-  createFile(
+  await createFile(
     formatFilePath(trpc.trpcContext, {
       prefix: "rootPath",
       removeExtension: false,
@@ -94,7 +94,7 @@ export const addTrpc = async () => {
   );
 
   // create trpc utils file lib/trpc/utils.ts
-  createFile(
+  await createFile(
     formatFilePath(trpc.trpcUtils, {
       prefix: "rootPath",
       removeExtension: false,
@@ -127,10 +127,10 @@ export const addTrpc = async () => {
   });
   if (orm === null) addToInstallList({ regular: ["zod"], dev: [] });
 
-  addPackageToConfig("trpc");
+  await addPackageToConfig("trpc");
   // 9. Instruct user to add the <Provider /> to their root layout.
-  addContextProviderToAppLayout("TrpcProvider");
-  // addToDotEnv(
+  await addContextProviderToAppLayout("TrpcProvider");
+  // await addToDotEnv(
   //   [
   //     {
   //       key: "VERCEL_URL",

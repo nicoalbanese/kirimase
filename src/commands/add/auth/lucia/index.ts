@@ -1,12 +1,10 @@
 import {
   addPackageToConfig,
   createFile,
-  installPackages,
   readConfigFile,
   replaceFile,
   updateConfigFile,
 } from "../../../../utils.js";
-import { consola } from "consola";
 import { luciaGenerators } from "./generators.js";
 import {
   generateDrizzleAdapterDriverMappings,
@@ -30,13 +28,13 @@ export const addLucia = async () => {
   const {
     orm,
     provider,
-    preferredPackageManager,
     // packages,
     rootPath,
     driver,
     componentLib,
     t3,
   } = readConfigFile();
+
   // ask whether want to use shadcnui
   // consola.info(
   //   "Kirimase generates views and components for authenticating using Lucia."
@@ -73,55 +71,55 @@ export const addLucia = async () => {
   } else {
     viewsAndComponents = generateViewsAndComponents(false);
   }
-  createFile(
+  await createFile(
     formatFilePath(lucia.signInPage, {
       removeExtension: false,
       prefix: "rootPath",
     }),
     viewsAndComponents.signInPage
   );
-  createFile(
+  await createFile(
     formatFilePath(lucia.signUpPage, {
       removeExtension: false,
       prefix: "rootPath",
     }),
     viewsAndComponents.signUpPage
   );
-  createFile(
+  await createFile(
     formatFilePath(lucia.authFormComponent, {
       removeExtension: false,
       prefix: "rootPath",
     }),
     viewsAndComponents.authFormComponent
   );
-  replaceFile(
+  await replaceFile(
     formatFilePath(shared.init.dashboardRoute, {
       removeExtension: false,
       prefix: "rootPath",
     }),
     viewsAndComponents.homePage
   );
-  createFile(
+  await createFile(
     rootPath.concat("app/loading.tsx"),
     viewsAndComponents.loadingPage
   );
   // add API routes
   const apiRoutes = generateApiRoutes();
-  createFile(
+  await createFile(
     formatFilePath(lucia.signInApiRoute, {
       removeExtension: false,
       prefix: "rootPath",
     }),
     apiRoutes.signInRoute
   );
-  createFile(
+  await createFile(
     formatFilePath(lucia.signUpApiRoute, {
       removeExtension: false,
       prefix: "rootPath",
     }),
     apiRoutes.signUpRoute
   );
-  createFile(
+  await createFile(
     formatFilePath(lucia.signOutApiRoute, {
       removeExtension: false,
       prefix: "rootPath",
@@ -131,7 +129,7 @@ export const addLucia = async () => {
 
   // add app.d.ts
   const appDTs = generateAppDTs();
-  createFile(
+  await createFile(
     formatFilePath(lucia.appDTs, {
       removeExtension: false,
       prefix: "rootPath",
@@ -141,7 +139,7 @@ export const addLucia = async () => {
 
   const authDirFiles = generateAuthDirFiles(orm, driver, provider);
   // create auth/utils.ts
-  createFile(
+  await createFile(
     formatFilePath(shared.auth.authUtils, {
       removeExtension: false,
       prefix: "rootPath",
@@ -150,7 +148,7 @@ export const addLucia = async () => {
   );
 
   // create auth/lucia.ts
-  createFile(
+  await createFile(
     formatFilePath(lucia.libAuthLucia, {
       removeExtension: false,
       prefix: "rootPath",
@@ -167,7 +165,7 @@ export const addLucia = async () => {
         /\.references\(\(\) => user\.id\)/g,
         ""
       );
-      createFile(
+      await createFile(
         formatFilePath(shared.auth.authSchema, {
           removeExtension: false,
           prefix: "rootPath",
@@ -175,7 +173,7 @@ export const addLucia = async () => {
         schemaWithoutReferences
       );
     } else {
-      createFile(
+      await createFile(
         formatFilePath(shared.auth.authSchema, {
           removeExtension: false,
           prefix: "rootPath",
@@ -204,7 +202,7 @@ export const addLucia = async () => {
     const contentsWithPool = contentsImportsUpdated.concat(
       "\nexport const pool = new Pool({ connectionString: env.DATABASE_URL });"
     );
-    replaceFile(dbTsPath, contentsWithPool);
+    await replaceFile(dbTsPath, contentsWithPool);
   }
 
   // install packages (lucia, and adapter) will have to pull in specific package
@@ -217,12 +215,12 @@ export const addLucia = async () => {
 
   if (t3 && orm === "drizzle") {
     // replace server/db/index.ts to have connection exported
-    updateDrizzleDbIndex(provider);
+    await updateDrizzleDbIndex(provider);
     // updates to make sure shcmea is included in dbindex  too
   }
 
   // If trpc installed, add protectedProcedure
-  updateTrpcWithSessionIfInstalled();
+  await updateTrpcWithSessionIfInstalled();
 
   // await installPackages(
   //   { regular: `lucia ${adapterPackage}`, dev: "" },
@@ -231,7 +229,7 @@ export const addLucia = async () => {
   addToInstallList({ regular: ["lucia@2.7.7", adapterPackage], dev: [] });
 
   // add package to config
-  addPackageToConfig("lucia");
-  updateConfigFile({ auth: "lucia" });
+  await addPackageToConfig("lucia");
+  await updateConfigFile({ auth: "lucia" });
   // consola.success("Successfully installed Lucia!");
 };

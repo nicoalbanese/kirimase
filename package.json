@@ -1,6 +1,6 @@
 {
   "name": "kirimase",
-  "version": "0.0.53",
+  "version": "0.0.54",
   "description": "A Rails-like CLI for building full-stack Next.js apps faster",
   "main": "index.js",
   "type": "module",
@@ -41,6 +41,7 @@
     "@typescript-eslint/eslint-plugin": "^6.6.0",
     "@typescript-eslint/parser": "^6.6.0",
     "eslint": "^8.48.0",
+    "prettier": "^3.2.5",
     "typescript": "^5.1.6"
   }
 }

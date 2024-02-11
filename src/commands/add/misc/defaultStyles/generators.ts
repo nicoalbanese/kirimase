@@ -149,10 +149,10 @@ const defaultAppLayout = `export default async function AppLayout({
   return ( <main>{children}</main> )
 }`;
 
-export const createAppLayoutFile = () => {
+export const createAppLayoutFile = async () => {
   const { shared } = getFilePaths();
 
-  createFile(
+  await createFile(
     formatFilePath(shared.init.appLayout, {
       prefix: "rootPath",
       removeExtension: false,
@@ -176,10 +176,10 @@ export default async function AuthLayout({
 }
 `;
 
-export const createAuthLayoutFile = () => {
+export const createAuthLayoutFile = async () => {
   const { shared } = getFilePaths();
 
-  createFile(
+  await createFile(
     formatFilePath(shared.auth.layoutPage, {
       prefix: "rootPath",
       removeExtension: false,
@@ -373,8 +373,8 @@ function MountainIcon(props: any) {
 }
 `;
 
-export const createLandingPage = () => {
-  replaceFile(
+export const createLandingPage = async () => {
+  await replaceFile(
     formatFilePath("app/page.tsx", {
       prefix: "rootPath",
       removeExtension: false,

@@ -1,6 +1,7 @@
 import path from "path";
 import fs from "fs";
 import { DBType } from "../../../../types.js";
+import { formatFileContentWithPrettier } from "../../../init/utils.js";
 
 export const prismaDbTypeMappings: { [key in DBType]: string } = {
   pg: "postgresql",
@@ -8,7 +9,7 @@ export const prismaDbTypeMappings: { [key in DBType]: string } = {
   sqlite: "sqlite",
 };
 
-export const addScriptsToPackageJsonForPrisma = (driver: DBType) => {
+export const addScriptsToPackageJsonForPrisma = async (driver: DBType) => {
   // Define the path to package.json
   const packageJsonPath = path.resolve("package.json");
 
@@ -33,7 +34,10 @@ export const addScriptsToPackageJsonForPrisma = (driver: DBType) => {
   const updatedPackageJsonData = JSON.stringify(packageJson, null, 2);
 
   // Write the updated content back to package.json
-  fs.writeFileSync(packageJsonPath, updatedPackageJsonData);
+  fs.writeFileSync(
+    packageJsonPath,
+    await formatFileContentWithPrettier(updatedPackageJsonData, packageJsonPath)
+  );
 
   // consola.success("Scripts added to package.json");
 };

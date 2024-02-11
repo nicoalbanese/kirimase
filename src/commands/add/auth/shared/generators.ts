@@ -468,6 +468,7 @@ export const createNavbar = (
   usingClerk = false,
   auth: AuthType
 ) => {
+  // TODO: Add supabase as auth provider
   const { shared, "next-auth": nextAuth } = getFilePaths();
   const { alias } = readConfigFile();
   let logOutRoute: string;
