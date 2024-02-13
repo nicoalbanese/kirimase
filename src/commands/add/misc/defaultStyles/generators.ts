@@ -195,7 +195,7 @@ const landingPage = `/**
  */
 import Link from "next/link";
 
-export default function Component() {
+export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center">
@@ -375,11 +375,13 @@ function MountainIcon(props: any) {
 
 export const createLandingPage = () => {
   // need to make a check here to not replace things
-  replaceFile(
-    formatFilePath("app/page.tsx", {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    landingPage
-  );
+  const rootPath = formatFilePath("app/page.tsx", {
+    prefix: "rootPath",
+    removeExtension: false,
+  });
+  const lpContent = readFileSync(rootPath, "utf-8");
+  const alreadyUpdated =
+    lpContent.indexOf("v0 by Vercel") === -1 ? false : true;
+
+  if (alreadyUpdated === false) replaceFile(rootPath, landingPage);
 };
