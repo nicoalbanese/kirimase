@@ -374,6 +374,7 @@ function MountainIcon(props: any) {
 `;
 
 export const createLandingPage = () => {
+  // need to make a check here to not replace things
   replaceFile(
     formatFilePath("app/page.tsx", {
       prefix: "rootPath",

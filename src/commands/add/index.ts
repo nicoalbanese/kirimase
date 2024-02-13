@@ -203,14 +203,15 @@ export const addPackage = async (options?: InitOptions) => {
           promptResponse.auth[0].toUpperCase() +
           promptResponse.orm.slice(1);
 
-      if (promptResponse.auth !== null) createAuthLayoutFile();
+      if (promptResponse.auth !== null && promptResponse.auth !== undefined)
+        createAuthLayoutFile();
 
       if (promptResponse.auth === "next-auth")
         await addNextAuth(promptResponse.authProviders, options);
       if (promptResponse.auth === "clerk") await addClerk();
       if (promptResponse.auth === "lucia") await addLucia();
       if (promptResponse.auth === "kinde") await addKinde();
-      if (!promptResponse.auth) {
+      if (promptResponse.auth === null || promptResponse.auth === undefined) {
         replaceFile(
           formatFilePath(shared.init.dashboardRoute, {
             prefix: "rootPath",
@@ -222,9 +223,9 @@ export const addPackage = async (options?: InitOptions) => {
       } else {
         // add account page
         await createAccountSettingsPage();
+        addAuthCheckToAppLayout();
       }
       addNavbarAndSettings();
-      addAuthCheckToAppLayout();
     }
 
     // check if misc

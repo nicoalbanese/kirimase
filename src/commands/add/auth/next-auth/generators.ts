@@ -41,6 +41,7 @@ ${AuthDriver[orm].import}`
   }
 import { DefaultSession, NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth/next";
+import { Adapter } from "next-auth/adapters";
 import { env } from "${formatFilePath(shared.init.envMjs, {
     prefix: "alias",
     removeExtension: false,
@@ -65,7 +66,7 @@ declare module "next-auth" {
 export const authOptions: NextAuthOptions = {
   ${
     dbType !== null
-      ? `adapter: ${AuthDriver[orm].adapter}(db),`
+      ? `adapter: ${AuthDriver[orm].adapter}(db) as Adapter,`
       : "// adapter: yourDBAdapterHere"
   }
   callbacks: {
@@ -169,6 +170,7 @@ ${AuthDriver[orm].import}`
       : ""
   }
 import { DefaultSession, getServerSession, NextAuthOptions } from "next-auth";
+import { Adapter } from "next-auth/adapters";
 import { redirect } from "next/navigation";
 import { env } from "${formatFilePath(shared.init.envMjs, {
     prefix: "alias",
@@ -204,7 +206,7 @@ export type AuthSession = {
 export const authOptions: NextAuthOptions = {
   ${
     dbType !== null
-      ? `adapter: ${AuthDriver[orm].adapter}(db),`
+      ? `adapter: ${AuthDriver[orm].adapter}(db) as Adapter,`
       : "// adapter: yourDBAdapterHere"
   }
   callbacks: {

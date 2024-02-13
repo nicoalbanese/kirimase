@@ -84,16 +84,14 @@ export const generateDrizzleAdapterDriverMappings = () => {
         )}"`,
       },
       "vercel-pg": {
-        adapter: `adapter: pg(pool, {
+        adapter: `adapter: pg(db, {
 		user: "auth_user",
 		key: "user_key",
 		session: "user_session"
 	})`,
         adapterPackage: "@lucia-auth/adapter-postgresql@2.0.2",
-        import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
-          dbIndex,
-          { removeExtension: true, prefix: "alias" }
-        )}"`,
+        import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { db } from "@vercel/postgres";
+`,
       },
     },
     mysql: {
