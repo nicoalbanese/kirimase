@@ -52,6 +52,7 @@ import {
 } from "./utils.js";
 import ora from "ora";
 import { checkAndAddAuthUtils } from "./auth/next-auth/utils.js";
+import { installNextUI } from "./componentLib/next-ui/index.js";
 
 const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
   const config = readConfigFile();
@@ -143,6 +144,10 @@ export const addPackage = async (options?: InitOptions) => {
       if (promptResponse.componentLib === "shadcn-ui") {
         spinner.text = "Configuring Shadcn-UI";
         await installShadcnUI([]);
+      }
+      if (promptResponse.componentLib === 'next-ui') {
+        spinner.text = "Configuring Next-UI | https://nextui.org";
+        await installNextUI();
       }
       if (promptResponse.componentLib === null) {
         // consola.info("Installing Lucide React for icons.");
