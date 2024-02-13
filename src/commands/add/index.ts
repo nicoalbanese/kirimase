@@ -197,14 +197,17 @@ export const addPackage = async (options?: InitOptions) => {
           "Configuring " +
           promptResponse.auth[0].toUpperCase() +
           promptResponse.orm.slice(1);
-      if (promptResponse.auth) await createAuthLayoutFile();
+
+      if (promptResponse.auth !== null && promptResponse.auth !== undefined)
+        await createAuthLayoutFile();
+
       if (promptResponse.auth === "next-auth")
         await addNextAuth(promptResponse.authProviders, options);
       if (promptResponse.auth === "clerk") await addClerk();
       if (promptResponse.auth === "lucia") await addLucia();
       if (promptResponse.auth === "kinde") await addKinde();
       if (promptResponse.auth === "supabase") await addSupabase();
-      if (!promptResponse.auth) {
+      if (promptResponse.auth === null || promptResponse.auth === undefined) {
         await replaceFile(
           formatFilePath(shared.init.dashboardRoute, {
             prefix: "rootPath",
@@ -216,9 +219,9 @@ export const addPackage = async (options?: InitOptions) => {
       } else {
         // add account page
         await createAccountSettingsPage();
+        addAuthCheckToAppLayout();
       }
       await addNavbarAndSettings();
-      await addAuthCheckToAppLayout();
     }
 
     // check if misc

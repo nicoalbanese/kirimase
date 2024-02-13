@@ -152,13 +152,13 @@ const defaultAppLayout = `export default async function AppLayout({
 export const createAppLayoutFile = async () => {
   const { shared } = getFilePaths();
 
-  await createFile(
-    formatFilePath(shared.init.appLayout, {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    defaultAppLayout
-  );
+  const layoutPath = formatFilePath(shared.init.appLayout, {
+    prefix: "rootPath",
+    removeExtension: false,
+  });
+  const layoutExists = existsSync(layoutPath);
+
+  if (!layoutExists) await createFile(layoutPath, defaultAppLayout);
 };
 
 const defaultAuthLayout = `import { getUserAuth } from "@/lib/auth/utils";
@@ -178,14 +178,14 @@ export default async function AuthLayout({
 
 export const createAuthLayoutFile = async () => {
   const { shared } = getFilePaths();
+  const layoutPath = formatFilePath(shared.auth.layoutPage, {
+    prefix: "rootPath",
+    removeExtension: false,
+  });
 
-  await createFile(
-    formatFilePath(shared.auth.layoutPage, {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    defaultAuthLayout
-  );
+  const layoutExists = existsSync(layoutPath);
+
+  if (!layoutExists) await createFile(layoutPath, defaultAuthLayout);
 };
 
 const landingPage = `/**
@@ -195,7 +195,7 @@ const landingPage = `/**
  */
 import Link from "next/link";
 
-export default function Component() {
+export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center">
@@ -374,11 +374,14 @@ function MountainIcon(props: any) {
 `;
 
 export const createLandingPage = async () => {
-  await replaceFile(
-    formatFilePath("app/page.tsx", {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    landingPage
-  );
+  // need to make a check here to not replace things
+  const rootPath = formatFilePath("app/page.tsx", {
+    prefix: "rootPath",
+    removeExtension: false,
+  });
+  const lpContent = readFileSync(rootPath, "utf-8");
+  const alreadyUpdated =
+    lpContent.indexOf("v0 by Vercel") === -1 ? false : true;
+
+  if (alreadyUpdated === false) await replaceFile(rootPath, landingPage);
 };

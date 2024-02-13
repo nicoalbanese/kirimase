@@ -85,7 +85,7 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
   // );
 
   addToInstallList({ regular: ["resend"], dev: [] });
-  if (orm === null)
+  if (orm === null || orm === undefined)
     addToInstallList({ regular: ["zod", "@t3-oss/env-nextjs"], dev: [] });
 
   await addPackageToConfig("resend");

@@ -445,7 +445,6 @@ export function ManageUserSubscriptionButton({
 };
 
 export const generateSuccessToast = () => {
-  const { alias } = readConfigFile();
   return `"use client";
 
 import { toast } from "sonner";
@@ -460,7 +459,7 @@ export default function SuccessToast() {
     if (success) {
       toast.success("Successfully updated subscription.");
     }
-  }, [success, toast]);
+  }, [success]);
 
   return null;
 }
