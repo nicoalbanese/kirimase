@@ -6,6 +6,7 @@ import {
   InitOptions,
   PMType,
   PackageType,
+  Providers,
 } from "../../types.js";
 import {
   installPackages,
@@ -41,10 +42,13 @@ export const Packages: {
     { name: "Stripe", value: "stripe" },
     { name: "Resend", value: "resend" },
   ],
-  componentLib: [{ name: "Shadcn UI (with next-themes)", value: "shadcn-ui" }],
+  componentLib: [
+    { name: "Shadcn UI (with next-themes)", value: "shadcn-ui" },
+    { name: "NextUI (nextui.org)", value: "next-ui" }
+  ],
 };
 
-export const addContextProviderToRootLayout = (provider: "ThemeProvider") => {
+export const addContextProviderToRootLayout = (provider: Providers) => {
   const { hasSrc, alias } = readConfigFile();
   const path = `${hasSrc ? "src/" : ""}app/layout.tsx`;
 
@@ -61,6 +65,9 @@ export const addContextProviderToRootLayout = (provider: "ThemeProvider") => {
   switch (provider) {
     case "ThemeProvider":
       importStatement = `import { ThemeProvider } from "${alias}/components/ThemeProvider";`;
+      break;
+    case "NextUIProvider":
+      importStatement = `import { NextUIProvider } from "@nextui-org/react";`;
       break;
   }
 
@@ -345,25 +352,23 @@ export const printNextSteps = (
   const packagesInstalledList = [
     ...(promptResponses.orm === "drizzle"
       ? [
-          `${chalk.underline("ORM")}: Drizzle (using ${
-            promptResponses.dbProvider
-          })`,
-        ]
+        `${chalk.underline("ORM")}: Drizzle (using ${promptResponses.dbProvider
+        })`,
+      ]
       : []),
     ...(promptResponses.orm === "prisma"
       ? [`${chalk.underline("ORM")}: Prisma`]
       : []),
     ...(promptResponses.auth === "next-auth"
       ? [
-          `${chalk.underline("Authentication")}: Auth.js ${
-            promptResponses.authProviders &&
-            promptResponses.authProviders.length > 0
-              ? `(with ${promptResponses.authProviders
-                  .map((p) => p)
-                  .join(", ")} providers)`
-              : ""
-          }`,
-        ]
+        `${chalk.underline("Authentication")}: Auth.js ${promptResponses.authProviders &&
+          promptResponses.authProviders.length > 0
+          ? `(with ${promptResponses.authProviders
+            .map((p) => p)
+            .join(", ")} providers)`
+          : ""
+        }`,
+      ]
       : []),
     ...(promptResponses.auth === "clerk"
       ? [`${chalk.underline("Authentication")}: Clerk`]
@@ -375,15 +380,15 @@ export const printNextSteps = (
       ? [`${chalk.underline("Authentication")}: Kinde`]
       : []),
     ...(promptResponses.miscPackages &&
-    promptResponses.miscPackages.includes("stripe")
+      promptResponses.miscPackages.includes("stripe")
       ? [`${chalk.underline("Payments")}: Stripe`]
       : []),
     ...(promptResponses.miscPackages &&
-    promptResponses.miscPackages.includes("resend")
+      promptResponses.miscPackages.includes("resend")
       ? [`${chalk.underline("Email")}: Resend`]
       : []),
     ...(promptResponses.miscPackages &&
-    promptResponses.miscPackages.includes("trpc")
+      promptResponses.miscPackages.includes("trpc")
       ? [`${chalk.underline("RPC")}: tRPC`]
       : []),
     ...(promptResponses.componentLib === "shadcn-ui"
@@ -431,8 +436,8 @@ export const printNextSteps = (
   const authProviderInstructions =
     promptResponses.authProviders && promptResponses.authProviders.length > 0
       ? promptResponses.authProviders.map((provider) => {
-          return `${provider} auth: create credentials at ${AuthProviders[provider].website}\n  (redirect URI: /api/auth/callback/${provider})`;
-        })
+        return `${provider} auth: create credentials at ${AuthProviders[provider].website}\n  (redirect URI: /api/auth/callback/${provider})`;
+      })
       : [];
 
   const stripe = [
@@ -443,7 +448,7 @@ export const printNextSteps = (
   const notes = [
     ...authProviderInstructions,
     ...(promptResponses.miscPackages &&
-    promptResponses.miscPackages.includes("stripe")
+      promptResponses.miscPackages.includes("stripe")
       ? stripe
       : []),
     "If you have any issues, please open an issue on GitHub\n  (https://github.com/nicoalbanese/kirimase/issues)",
