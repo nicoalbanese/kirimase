@@ -74,10 +74,11 @@ export type AvailablePackage =
   | "resend"
   | "lucia"
   | "kinde"
-  | "stripe";
+  | "stripe"
+  | "next-ui"
 
 export type PackageType = "orm" | "auth" | "componentLib" | "misc";
-export type ComponentLibType = "shadcn-ui";
+export type ComponentLibType = "shadcn-ui" | "next-ui";
 export type ORMType = "drizzle" | "prisma";
 export type AuthType = "next-auth" | "clerk" | "lucia" | "kinde";
 export type MiscType = "trpc" | "stripe" | "resend";
@@ -177,3 +178,6 @@ export type DotEnvItem = {
   customZodImplementation?: string;
   public?: boolean;
 };
+
+
+export type Providers = "ThemeProvider" | "NextUIProvider";
