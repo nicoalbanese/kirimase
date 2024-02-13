@@ -24,7 +24,7 @@ export const installNextUI = async () => {
 
     // run shadcn ui install
     addToInstallList({
-        regular: ["@nextui-org/react", "framer-motion"], dev: []
+        regular: ["@nextui-org/react", "framer-motion", "next-themes", "lucide-react"], dev: []
     })
 
     // add tailwind config
