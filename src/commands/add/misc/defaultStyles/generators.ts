@@ -152,13 +152,13 @@ const defaultAppLayout = `export default async function AppLayout({
 export const createAppLayoutFile = () => {
   const { shared } = getFilePaths();
 
-  createFile(
-    formatFilePath(shared.init.appLayout, {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    defaultAppLayout
-  );
+  const layoutPath = formatFilePath(shared.init.appLayout, {
+    prefix: "rootPath",
+    removeExtension: false,
+  });
+  const layoutExists = existsSync(layoutPath);
+
+  if (!layoutExists) createFile(layoutPath, defaultAppLayout);
 };
 
 const defaultAuthLayout = `import { getUserAuth } from "@/lib/auth/utils";
@@ -178,14 +178,14 @@ export default async function AuthLayout({
 
 export const createAuthLayoutFile = () => {
   const { shared } = getFilePaths();
+  const layoutPath = formatFilePath(shared.auth.layoutPage, {
+    prefix: "rootPath",
+    removeExtension: false,
+  });
 
-  createFile(
-    formatFilePath(shared.auth.layoutPage, {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    defaultAuthLayout
-  );
+  const layoutExists = existsSync(layoutPath);
+
+  if (!layoutExists) createFile(layoutPath, defaultAuthLayout);
 };
 
 const landingPage = `/**

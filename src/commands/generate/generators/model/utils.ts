@@ -40,7 +40,7 @@ export const prismaMappings = {
 } as TypeMap;
 
 export const createOrmMappings = () => {
-  const { provider } = readConfigFile();
+  const { provider, auth } = readConfigFile();
   return {
     drizzle: {
       pg: {
@@ -114,11 +114,13 @@ export const createOrmMappings = () => {
             cascade,
             referenceIdType = "string",
           }) =>
-            `${
-              getReferenceFieldType(referenceIdType)["sqlite"]
-            }("${name}").references(() => ${toCamelCase(referencedTable)}.id${
-              cascade ? ', { onDelete: "cascade" }' : ""
-            })`,
+            `${getReferenceFieldType(referenceIdType)["sqlite"]}("${name}")${
+              auth === "lucia"
+                ? ""
+                : `.references(() => ${toCamelCase(referencedTable)}.id${
+                    cascade ? ', { onDelete: "cascade" }' : ""
+                  })`
+            }`,
           date: ({ name }) => `integer("${name}", { mode: "timestamp" })`,
           timestamp: ({ name }) =>
             `integer("${name}", { mode: "timestamp_ms" })`,

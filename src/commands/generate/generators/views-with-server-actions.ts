@@ -1600,7 +1600,7 @@ export default function Optimistic${tableNameSingularCapitalised}({
     <div className="m-4">
       <Modal open={open} setOpen={setOpen}>
         <${tableNameSingularCapitalised}Form
-          ${tableNameSingular}={${tableNameSingular}}
+          ${tableNameSingular}={optimistic${tableNameSingularCapitalised}}
           ${
             relationsFormatted
               ? relationsFormatted
@@ -1614,7 +1614,7 @@ export default function Optimistic${tableNameSingularCapitalised}({
         />
       </Modal>
       <div className="flex justify-between items-end mb-4">
-        <h1 className="font-semibold text-2xl">{${tableNameSingular}.${toCamelCase(
+        <h1 className="font-semibold text-2xl">{optimistic${tableNameSingularCapitalised}.${toCamelCase(
           schema.fields[0].name
         )}}</h1>
         <Button className="" onClick={() => setOpen(true)}>

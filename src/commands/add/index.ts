@@ -202,7 +202,9 @@ export const addPackage = async (options?: InitOptions) => {
           "Configuring " +
           promptResponse.auth[0].toUpperCase() +
           promptResponse.orm.slice(1);
-      if (promptResponse.auth) createAuthLayoutFile();
+
+      if (promptResponse.auth !== null) createAuthLayoutFile();
+
       if (promptResponse.auth === "next-auth")
         await addNextAuth(promptResponse.authProviders, options);
       if (promptResponse.auth === "clerk") await addClerk();
