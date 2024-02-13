@@ -44,7 +44,7 @@ export const Packages: {
   ],
   componentLib: [
     { name: "Shadcn UI (with next-themes)", value: "shadcn-ui" },
-    { name: "NextUI (nextui.org)", value: "next-ui" }
+    { name: "NextUI (with next-themes)", value: "next-ui" }
   ],
 };
 
@@ -66,8 +66,8 @@ export const addContextProviderToRootLayout = (provider: Providers) => {
     case "ThemeProvider":
       importStatement = `import { ThemeProvider } from "${alias}/components/ThemeProvider";`;
       break;
-    case "NextUIProvider":
-      importStatement = `import { NextUIProvider } from "@nextui-org/react";`;
+    case "NextUIWithThemeProvider":
+      importStatement = `import { NextUIWithThemeProvider } from "${alias}/components/NextUIWithThemeProvider";`;
       break;
   }
 

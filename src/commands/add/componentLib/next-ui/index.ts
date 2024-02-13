@@ -15,7 +15,7 @@ import {
     addContextProviderToRootLayout,
     addToInstallList,
 } from "../../utils.js";
-import { generateTailwindConfigWithNextUIContent } from "./generators.js";
+import { generateNextUIWithThemeProvider, generateTailwindConfigWithNextUIContent, generateThemeSwitcher } from "./generators.js";
 
 export const installNextUI = async () => {
     const {
@@ -30,9 +30,20 @@ export const installNextUI = async () => {
     // add tailwind config
     createFile("tailwind.config.ts", generateTailwindConfigWithNextUIContent(rootPath))
 
+    // generate next ui & theme provider
+    createFile(
+        rootPath.concat("components/NextUIWithThemeProvider.tsx"),
+        generateNextUIWithThemeProvider()
+    );
+
+    // generate themeswitcher component
+    createFile(
+        rootPath.concat("components/ui/ThemeSwitcher.tsx"),
+        generateThemeSwitcher()
+    )
 
     // wrap root layout with next ui provider
-    addContextProviderToRootLayout("NextUIProvider");
+    addContextProviderToRootLayout("NextUIWithThemeProvider");
 
     addPackageToConfig("next-ui");
     updateConfigFile({ componentLib: "next-ui" });

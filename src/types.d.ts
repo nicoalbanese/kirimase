@@ -180,4 +180,4 @@ export type DotEnvItem = {
 };
 
 
-export type Providers = "ThemeProvider" | "NextUIProvider";
+export type Providers = "ThemeProvider" | "NextUIWithThemeProvider";
