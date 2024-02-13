@@ -9,7 +9,7 @@ import {
   ORMType,
   PrismaColumnType,
 } from "../../types.js";
-import { Choice } from "@inquirer/checkbox";
+// import { Choice } from "@inquirer/checkbox";
 import { createOrmMappings } from "./generators/model/utils.js";
 import { scaffoldAPIRoute } from "./generators/apiRoute.js";
 import { readConfigFile, updateConfigFileAfterUpdate } from "../../utils.js";
@@ -30,6 +30,18 @@ import { scaffoldServerActions } from "./generators/serverActions.js";
 import { scaffoldViewsAndComponentsWithServerActions } from "./generators/views-with-server-actions.js";
 import { addLinkToSidebar } from "./generators/model/views-shared.js";
 import { installShadcnComponentList } from "../add/utils.js";
+
+/* 
+  By Kairedblue - PR 131 
+  https://github.com/nicoalbanese/kirimase/pull/131
+*/
+type Choice<Value> = {
+  name?: string;
+  value: Value;
+  disabled?: boolean | string;
+  checked?: boolean;
+  type?: never;
+};
 
 function provideInstructions() {
   consola.info(
