@@ -1,4 +1,4 @@
-import { AuthType, ORMType } from "../../../../types.js";
+import { AuthType, ComponentLib, ORMType } from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
 import {
   formatFilePath,
@@ -77,14 +77,12 @@ export default function UpdateNameCard({ name }: { name: string }) {
     >
       <form onSubmit={handleSubmit}>
         <AccountCardBody>
-          <Input defaultValue={name ?? ""} name="name" disabled={${
-            disabled ? "true" : "isPending"
-          }} />
+          <Input defaultValue={name ?? ""} name="name" dis{disabled ? "true" : "isPending"
+      }} />
         </AccountCardBody>
         <AccountCardFooter description="64 characters maximum">
-          <Button disabled={${
-            disabled ? "true" : "isPending"
-          }}>Update Name</Button>
+          <Button disabled={${disabled ? "true" : "isPending"
+      }}>Update Name</Button>
         </AccountCardFooter>
       </form>
     </AccountCard>
@@ -196,14 +194,12 @@ export default function UpdateEmailCard({ email }: { email: string }) {
     >
       <form onSubmit={handleSubmit}>
         <AccountCardBody>
-          <Input defaultValue={email ?? ""} name="email" disabled={${
-            disabled ? "true" : "isPending"
-          }} />
+          <Input defaultValue={email ?? ""} name="email" disabled={${disabled ? "true" : "isPending"
+      }} />
         </AccountCardBody>
         <AccountCardFooter description="We will email vou to verify the change.">
-          <Button disabled={${
-            disabled ? "true" : "isPending"
-          }}>Update Email</Button>
+          <Button disabled={${disabled ? "true" : "isPending"
+      }}>Update Email</Button>
         </AccountCardFooter>
       </form>
     </AccountCard>
@@ -368,37 +364,33 @@ export function AccountCardFooter({
 
 export const createAccountPage = (withStripe = false) => {
   const { shared, stripe } = getFilePaths();
-  return `import UserSettings from "./UserSettings";${
-    withStripe ? '\nimport PlanSettings from "./PlanSettings";' : ""
-  }
+  return `import UserSettings from "./UserSettings";${withStripe ? '\nimport PlanSettings from "./PlanSettings";' : ""
+    }
 import { checkAuth, getUserAuth } from "${formatFilePath(
-    shared.auth.authUtils,
-    { prefix: "alias", removeExtension: true }
-  )}";${
-    withStripe
+  shared.auth.authUtils,
+  { prefix: "alias", removeExtension: true }
+    )}";${withStripe
       ? `\nimport { getUserSubscriptionPlan } from "${formatFilePath(
-          stripe.stripeSubscription,
-          { prefix: "alias", removeExtension: true }
-        )}";`
+        stripe.stripeSubscription,
+        { prefix: "alias", removeExtension: true }
+      )}";`
       : ""
-  }
+    }
 
 export default async function Account() {
   await checkAuth();
-  const { session } = await getUserAuth();${
-    withStripe
+  const { session } = await getUserAuth();${withStripe
       ? "\n  const subscriptionPlan = await getUserSubscriptionPlan();"
       : ""
-  }
+    }
   
   return (
     <main>
       <h1 className="text-2xl font-semibold my-4">Account</h1>
-      <div className="space-y-4">${
-        withStripe
-          ? `\n        <PlanSettings subscriptionPlan={subscriptionPlan} session={session} />`
-          : ""
-      }
+      <div className="space-y-4">${withStripe
+      ? `\n        <PlanSettings subscriptionPlan={subscriptionPlan} session={session} />`
+      : ""
+    }
         <UserSettings session={session} />
       </div>
     </main>
@@ -463,35 +455,25 @@ export async function PUT(request: Request) {
   }
 };
 
-export const createNavbar = (
-  withShadcn: boolean,
-  usingClerk = false,
+const generateNavbarWithShadcnUI = ({
+  logOutRoute,
+  usingClerk,
+  auth,
+}: {
+  logOutRoute: string,
+  usingClerk: boolean,
   auth: AuthType
-) => {
+  }) => {
   const { shared, "next-auth": nextAuth } = getFilePaths();
   const { alias } = readConfigFile();
-  let logOutRoute: string;
-  switch (auth) {
-    case "next-auth":
-      logOutRoute = "/api/auth/signout";
-      break;
-    case "clerk":
-      break;
-    case "lucia":
-      break;
-    case "kinde":
-      logOutRoute = "/api/auth/logout";
-      break;
-  }
-  if (withShadcn) {
-    return `import { getUserAuth } from "${formatFilePath(
-      shared.auth.authUtils,
-      { prefix: "alias", removeExtension: true }
-    )}";
-import Link from "next/link";${
-      usingClerk
-        ? '\nimport { UserButton } from "@clerk/nextjs";'
-        : `\nimport {
+
+  return `import { getUserAuth } from "${formatFilePath(
+    shared.auth.authUtils,
+    { prefix: "alias", removeExtension: true }
+  )}";
+import Link from "next/link";${usingClerk
+      ? '\nimport { UserButton } from "@clerk/nextjs";'
+      : `\nimport {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -499,27 +481,25 @@ import Link from "next/link";${
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "${alias}/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "${alias}/components/ui/avatar";${
-            auth === "next-auth"
-              ? ""
-              : `\nimport SignOutBtn from "${formatFilePath(
-                  nextAuth.signOutButtonComponent,
-                  { prefix: "alias", removeExtension: true }
-                )}";`
-          }
+import { Avatar, AvatarFallback } from "${alias}/components/ui/avatar";${auth === "next-auth"
+      ? ""
+      : `\nimport SignOutBtn from "${formatFilePath(
+        nextAuth.signOutButtonComponent,
+        { prefix: "alias", removeExtension: true }
+      )}";`
+      }
 `
     }
 import { ModeToggle } from "${alias}/components/ui/ThemeToggle";
 
 export default async function Navbar() {
-  const { session } = await getUserAuth();${
-    usingClerk
+  const { session } = await getUserAuth();${usingClerk
       ? ""
       : `\n  const nameExists =
     !!session?.user.name &&
     session?.user.name.length > 2;
 `
-  }
+    }
 
   if (session?.user) {
     return (
@@ -529,10 +509,9 @@ export default async function Navbar() {
           <Link href="/">Logo</Link>
         </h1>
         <div className="space-x-2 flex items-center">
-          <ModeToggle />${
-            usingClerk
-              ? `\n          <UserButton afterSignOutUrl="/" />`
-              : `\n          {session ? (
+          <ModeToggle />${usingClerk
+      ? `\n          <UserButton afterSignOutUrl="/" />`
+      : `\n          {session ? (
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Avatar>
@@ -558,24 +537,23 @@ export default async function Navbar() {
                     Account
                   </DropdownMenuItem>
                 </Link>
-                ${
-                  auth === "next-auth" || auth === "kinde"
-                    ? `<Link href="${logOutRoute}">
+                ${auth === "next-auth" || auth === "kinde"
+      ? `<Link href="${logOutRoute}">
                   <DropdownMenuItem className="cursor-pointer">
                     Sign out
                   </DropdownMenuItem>
                 </Link>`
-                    : `<DropdownMenuItem>
+      : `<DropdownMenuItem>
                   <SignOutBtn />  
                 </DropdownMenuItem>`
-                }
+      }
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Link href="/sign-in">Sign in</Link>
           )}
 `
-          }
+    }
         </div>
       </nav>
       </div>
@@ -583,14 +561,146 @@ export default async function Navbar() {
   } else return null;
 }
 `;
-  } else {
+}
+
+const generateNavbarWithNextUI = ({
+  logOutRoute,
+  usingClerk,
+  auth,
+}: {
+  logOutRoute: string,
+  usingClerk: boolean,
+  auth: AuthType
+}) => {
+  const { shared, "next-auth": nextAuth } = getFilePaths();
+  const { alias } = readConfigFile();
+
+  return `import { getUserAuth } from "${formatFilePath(
+    shared.auth.authUtils,
+    { prefix: "alias", removeExtension: true }
+  )}";
+import Link from "next/link";
+${usingClerk
+      ? 'import { UserButton } from "@clerk/nextjs";'
+      : `import {Dropdown, DropdownTrigger, DropdownMenu, DropdownSection, DropdownItem, Button, Avatar} from "@nextui-org/react";
+    ${auth === "next-auth"
+        ? ""
+        : `\nimport SignOutBtn from "${formatFilePath(
+          nextAuth.signOutButtonComponent,
+          { prefix: "alias", removeExtension: true }
+        )}";`
+      }
+  `
+    }
+import { ModeToggle } from "${alias}/components/ui/ThemeToggle";
+
+export default async function Navbar() {
+  const { session } = await getUserAuth();
+  ${usingClerk
+      ? ""
+      : `const nameExists =
+    !!session?.user.name &&
+    session?.user.name.length > 2;
+  `}
+
+  if (session?.user) {
+    return (
+      <div className="bg-popover border-b mb-2 md:p-0 px-4">
+      <nav className="py-2 flex items-center justify-between transition-all duration-300 max-w-3xl mx-auto">
+        <h1 className="font-semibold hover:opacity-75 transition-hover cursor-pointer">
+          <Link href="/">Logo</Link>
+        </h1>
+        <div className="space-x-2 flex items-center">
+          <ModeToggle />
+          ${usingClerk
+      ? `          <UserButton afterSignOutUrl="/" />`
+      : `          {session ? (
+            <Dropdown>
+              <DropdownTrigger>
+                <Avatar showFallback>
+                    {nameExists
+                      ? session.user.name
+                          ?.split(" ")
+                          .map((word) => word[0].toUpperCase())
+                          .join("")
+                      : "~"}
+                </Avatar>
+              </DropdownTrigger>
+              <DropdownMenu className="w-56">
+                <DropdownItem>
+                  <span className="font-semibold">
+                    {nameExists ? session.user.name : "New User"}
+                  </span>
+                </DropdownItem>
+                <DropdownSection showDivider />
+                <Link href="/account">
+                  <DropdownItem className="cursor-pointer">
+                    Account
+                  </DropdownItem>
+                </Link>
+                ${auth === "next-auth" || auth === "kinde"
+        ? `<Link href="${logOutRoute}">
+                  <DropdownItem className="cursor-pointer">
+                    Sign out
+                  </DropdownItem>
+                </Link>`
+        : `<DropdownItem>
+                  <SignOutBtn />  
+                </DropdownItem>`
+      }
+              </DropdownMenu>
+            </Dropdown>
+          ) : (
+            <div className="flex space-x-2">
+              <ModeToggle />
+              <Link href="/sign-in">Sign in</Link>
+            </div>
+          )}
+`
+    }
+        </div>
+      </nav>
+      </div>
+    );
+  } else return null;
+}
+`
+}
+
+export const createNavbar = (
+  withShadCn: true,
+  usingClerk = false,
+  auth: AuthType
+) => {
+  const { shared, "next-auth": nextAuth } = getFilePaths();
+  const { packages } = readConfigFile();
+  let logOutRoute: string;
+  switch (auth) {
+    case "next-auth":
+      logOutRoute = "/api/auth/signout";
+      break;
+    case "clerk":
+      break;
+    case "lucia":
+      break;
+    case "kinde":
+      logOutRoute = "/api/auth/logout";
+      break;
+  }
+  if (withShadCn) {
+    return generateNavbarWithShadcnUI({ logOutRoute, usingClerk, auth });
+  } else if (
+    packages.includes("next-ui")
+  ) {
+    return generateNavbarWithNextUI({ logOutRoute, usingClerk, auth });
+  }
+  else {
     return `import { getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
       { prefix: "alias", removeExtension: true }
     )}";
-import Link from "next/link";${
-      usingClerk ? `\nimport { UserButton } from "@clerk/nextjs";` : ""
-    }
+import Link from "next/link";${usingClerk ? `\nimport { UserButton } from "@clerk/nextjs";` : ""
+      }
 
 export default async function Navbar() {
   const { session } = await getUserAuth();
@@ -601,15 +711,14 @@ export default async function Navbar() {
         <h1 className="font-semibold hover:opacity-75 transition-hover cursor-pointer">
           <Link href="/">Logo</Link>
         </h1>
-        ${
-          usingClerk
-            ? `<UserButton afterSignOutUrl="/" />`
-            : `<Link href="/account">
+        ${usingClerk
+        ? `<UserButton afterSignOutUrl="/" />`
+        : `<Link href="/account">
           <div className="w-8 h-8 bg-white rounded-full text-neutral-600 flex items-center justify-center hover:opacity-75 transition-all duration-300 cursor-pointer hover:ring-1 ring-neutral-300">
             {session?.user?.name ? session.user.name.slice(0, 1) : "~"}
           </div>
         </Link>`
-        }
+      }
       </nav>
       </div>
     );
