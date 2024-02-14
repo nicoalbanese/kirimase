@@ -68,14 +68,13 @@ export type AvailablePackage =
   | "drizzle"
   | "trpc"
   | "next-auth"
-  | "shadcn-ui"
   | "prisma"
   | "clerk"
   | "resend"
   | "lucia"
   | "kinde"
   | "stripe"
-  | "next-ui"
+  | ComponentLib
 
 export type PackageType = "orm" | "auth" | "componentLib" | "misc";
 export type ComponentLibType = "shadcn-ui" | "next-ui";
@@ -181,3 +180,5 @@ export type DotEnvItem = {
 
 
 export type Providers = "ThemeProvider" | "NextUIWithThemeProvider";
+
+export type ComponentLib = "shadcn-ui" | "next-ui";
