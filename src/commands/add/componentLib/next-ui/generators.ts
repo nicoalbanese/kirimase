@@ -16,7 +16,7 @@ const {nextui} = require("@nextui-org/react");
 module.exports = {
   content: [
     "${rootPath}app/**/*.{ts,tsx}", 
-    "${rootPath}components/**/*.{ts,tsx}"
+    "${rootPath}components/**/*.{ts,tsx}",
 
     // nextui content
     "./node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}",
@@ -56,28 +56,40 @@ export function NextUIWithThemeProvider({ children, ...props }: ThemeProviderPro
 `;
 }
 
-export const generateThemeSwitcher = () => {
+export const generateThemeToggler = () => {
   return `"use client";
 
-import {useTheme} from "next-themes";
-import { useEffect, useState } from "react";
+import * as React from "react";
+import { MoonIcon, SunIcon } from "lucide-react";
+import { useTheme } from "next-themes";
 
-export function ThemeSwitcher() {
-  const [mounted, setMounted] = useState(false)
-  const { theme, setTheme } = useTheme()
+import {Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Button} from "@nextui-org/react";
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if(!mounted) return null
+export function ModeToggle() {
+  const { setTheme } = useTheme();
 
   return (
-    <div>
-      The current theme is: {theme}
-      <button onClick={() => setTheme('light')}>Light Mode</button>
-      <button onClick={() => setTheme('dark')}>Dark Mode</button>
-    </div>
-  )
-};`
+    <Dropdown>
+      <DropdownTrigger>
+        <Button variant="flat" color="danger" isIconOnly>
+          <SunIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownTrigger>
+      <DropdownMenu>
+        <DropdownItem onClick={() => setTheme("light")}>
+          Light
+        </DropdownItem>
+        <DropdownItem onClick={() => setTheme("dark")}>
+          Dark
+        </DropdownItem>
+        <DropdownItem onClick={() => setTheme("system")}>
+          System
+        </DropdownItem>
+      </DropdownMenu>
+    </Dropdown>
+  );
 }
+`;
+};
