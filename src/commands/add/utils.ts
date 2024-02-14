@@ -81,7 +81,7 @@ export const addContextProviderToRootLayout = (provider: Providers) => {
   const rootChildrenText = "{children}";
   let replacementText = "";
   switch (provider) {
-    case "ThemeProvider":
+    case "ThemeProvider" || "NextUIWithThemeProvider":
       replacementText = `\n<${provider} attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>${rootChildrenText}</${provider}>\n`;
       break;
     default:
