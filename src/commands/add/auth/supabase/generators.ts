@@ -1,4 +1,3 @@
-import { ORMType } from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
@@ -31,105 +30,130 @@ export const generateSupabaseHelpers = () => {
     import { cookies } from 'next/headers'
     import { type NextRequest, NextResponse } from "next/server";
 
-    export const supabaseBrowserClient = createBrowserClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+    /* Only use this for client components ("use client" at the top of the file) */
+    export const createSupabaseBrowserClient = createBrowserClient(
+        env.NEXT_PUBLIC_SUPABASE_URL,
+        env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    )
 
-    export const createSupabaseServerClient = () => 
-        createServerClient(
+    /* Only use this for server only components */
+    export const createSupabaseServerComponentClient = () => {
+        return createServerClient(
             env.NEXT_PUBLIC_SUPABASE_URL,
             env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
             {
                 cookies: {
                     get(name: string) {
-                        return cookies().get(name)?.value;
+                        return cookies().get(name)?.value
+                    }
+                }
+            }
+        )
+    }
+
+    /* Use this inside Server Actions or Route Handlers bc only in those u can set cookies */
+    export const createSupabaseServerActionClient = () => {
+        return createServerClient(
+            env.NEXT_PUBLIC_SUPABASE_URL,
+            env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+            {
+                cookies: {
+                    get(name: string) {
+                    return cookies().get(name)?.value
                     },
                     set(name: string, value: string, options: CookieOptions) {
-                        cookies().set({ name, value, ...options });
+                    cookies().set({ name, value, ...options })
                     },
                     remove(name: string, options: CookieOptions) {
-                        cookies().set({ name, value: "", ...options });
-                    },
-                },
-            },
-        );
+                    cookies().set({ name, value: '', ...options })
+                    }
+                }
+            }
+        )
+    }
 
+    /* Use this inside Server Actions or Route Handlers bc only in those u can set cookies */
+    export const createSupabaseApiRouteClient = () => {
+        return createSupabaseServerActionClient()
+    }
+
+    /* Use this inside the middleware */
     export const createSupabaseMiddlewareClient = (request: NextRequest) => {
         // Create an unmodified response
         let response = NextResponse.next({
             request: {
-            headers: request.headers,
-            },
-        });
+                headers: request.headers
+            }
+        })
 
         const supabase = createServerClient(
             env.NEXT_PUBLIC_SUPABASE_URL,
             env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
             {
-                cookies: {
-                    get(name: string) {
-                        return request.cookies.get(name)?.value;
-                    },
-                    set(name: string, value: string, options: CookieOptions) {
-                        // If the cookie is updated, update the cookies for the request and response
-                        request.cookies.set({
-                            name,
-                            value,
-                            ...options,
-                        });
-                        response = NextResponse.next({
-                            request: {
-                            headers: request.headers,
-                            },
-                        });
-                        response.cookies.set({
-                            name,
-                            value,
-                            ...options,
-                        });
-                    },
-                    remove(name: string, options: CookieOptions) {
-                        // If the cookie is removed, update the cookies for the request and response
-                        request.cookies.set({
-                            name,
-                            value: "",
-                            ...options,
-                        });
-                        response = NextResponse.next({
-                            request: {
-                            headers: request.headers,
-                            },
-                        });
-                        response.cookies.set({
-                            name,
-                            value: "",
-                            ...options,
-                        });
-                    },
+            cookies: {
+                get(name: string) {
+                    return request.cookies.get(name)?.value
                 },
-            }
-        );
-
-        return { supabase, response };
-    };
+                set(name: string, value: string, options: CookieOptions) {
+                    // If the cookie is updated, update the cookies for the request and response
+                    request.cookies.set({
+                        name,
+                        value,
+                        ...options
+                    })
+                    response = NextResponse.next({
+                        request: {
+                        headers: request.headers
+                        }
+                    })
+                    response.cookies.set({
+                        name,
+                        value,
+                        ...options
+                    })
+                },
+                remove(name: string, options: CookieOptions) {
+                    // If the cookie is removed, update the cookies for the request and response
+                    request.cookies.set({
+                        name,
+                        value: '',
+                        ...options
+                    })
+                    response = NextResponse.next({
+                        request: {
+                        headers: request.headers
+                        }
+                    })
+                    response.cookies.set({
+                        name,
+                        value: '',
+                        ...options
+                    })
+                }
+            }}
+        )
+        return { supabase, response }
+    }
 
     export const updateSession = async (request: NextRequest) => {
         try {
-            const { supabase, response } = createSupabaseMiddlewareClient(request);
+            const { supabase, response } = createSupabaseMiddlewareClient(request)
             // This will refresh session if expired - required for Server Components
             // https://supabase.com/docs/guides/auth/server-side/nextjs
-            await supabase.auth.getUser();
+            await supabase.auth.getUser()
 
-            return response;
+            return response
         } catch (e) {
             // If you are here, a Supabase client could not be created!
             // This is likely because you have not set up environment variables.
             // Check out http://localhost:3000 for Next Steps.
             return NextResponse.next({
                 request: {
-                    headers: request.headers,
-                },
-            });
+                    headers: request.headers
+                }
+            })
         }
-    };
+    }
 `;
 };
 
@@ -142,7 +166,7 @@ export const generateSignInPage = (withShadCn: boolean) => {
           removeExtension: true,
           prefix: "alias",
         })}";
-        import { signIn } from "${formatFilePath(shared.auth.authUtils, {
+        import { signIn } from "${formatFilePath(shared.auth.authActions, {
           prefix: "alias",
           removeExtension: true,
         })}";
@@ -156,11 +180,11 @@ export const generateSignInPage = (withShadCn: boolean) => {
                     <h1 className="text-2xl font-bold text-center">
                         Sign in to your account
                     </h1>
-                    <AuthForm action={signIn} authType="sign-up">
-                        <Label htmlFor="username" className="text-muted-foreground">
-                            Username
+                    <AuthForm action={signIn} authType="sign-in">
+                        <Label htmlFor="email" className="text-muted-foreground">
+                            Email
                         </Label>
-                        <Input name="username" id="username" />
+                        <Input name="email" id="email" />
                         <br />
                         <Label htmlFor="password" className="text-muted-foreground">
                             Password
@@ -188,7 +212,7 @@ export const generateSignInPage = (withShadCn: boolean) => {
         removeExtension: true,
         prefix: "alias",
       })}";
-        import { signUp } from "${formatFilePath(shared.auth.authUtils, {
+        import { signIn } from "${formatFilePath(shared.auth.authActions, {
           prefix: "alias",
           removeExtension: true,
         })}";
@@ -200,16 +224,16 @@ export const generateSignInPage = (withShadCn: boolean) => {
                     <h1 className="text-2xl font-bold text-center">
                         Sign in to your account
                     </h1>
-                    <AuthForm action={signUp} authType="sign-up">
+                    <AuthForm action={signUp} authType="sign-in">
                         <label
-                            htmlFor="username"
+                            htmlFor="email"
                             className="block font-medium text-sm text-neutral-500"
                         >
-                            Username
+                            Email
                         </label>
                         <input
-                            name="username"
-                            id="username"
+                            name="email"
+                            id="email"
                             className="block w-full px-3 py-2 rounded-md border border-neutral-200 focus:outline-neutral-700"
                         />
                         <br />
@@ -253,7 +277,7 @@ export const generateSignUpPage = (withShadCn: boolean) => {
           removeExtension: true,
           prefix: "alias",
         })}";
-        import { signUp } from "${formatFilePath(shared.auth.authUtils, {
+        import { signUp } from "${formatFilePath(shared.auth.authActions, {
           prefix: "alias",
           removeExtension: true,
         })}";
@@ -266,10 +290,10 @@ export const generateSignUpPage = (withShadCn: boolean) => {
                 <main className="max-w-lg mx-auto my-4 bg-popover p-10">
                     <h1 className="text-2xl font-bold text-center">Create an account</h1>
                     <AuthForm action={signUp} authType="sign-up">
-                        <Label htmlFor="username" className="text-muted-foreground">
-                            Username
+                        <Label htmlFor="email" className="text-muted-foreground">
+                            Email
                         </Label>
-                        <Input name="username" id="username" />
+                        <Input name="email" id="email" />
                         <br />
                         <Label htmlFor="password" className="text-muted-foreground">
                             Password
@@ -294,7 +318,7 @@ export const generateSignUpPage = (withShadCn: boolean) => {
         removeExtension: true,
         prefix: "alias",
       })}";
-        import { signUp } from "${formatFilePath(shared.auth.authUtils, {
+        import { signUp } from "${formatFilePath(shared.auth.authActions, {
           prefix: "alias",
           removeExtension: true,
         })}";
@@ -306,14 +330,14 @@ export const generateSignUpPage = (withShadCn: boolean) => {
                     <h1 className="text-2xl font-bold text-center">Create an account</h1>
                     <AuthForm action={signUp} authType="sign-up">
                         <label
-                            htmlFor="username"
+                            htmlFor="email"
                             className="block font-medium text-sm text-neutral-500"
                         >
-                            Username
+                            Email
                         </label>
                         <input
-                            name="username"
-                            id="username"
+                            name="email"
+                            id="email"
                             className="block w-full px-3 py-2 rounded-md border border-neutral-200 focus:outline-neutral-700"
                         />
                         <br />
@@ -349,38 +373,43 @@ export const generateSignOutButtonComponent = (withShadCn: boolean) => {
   const { alias } = readConfigFile();
   const { shared } = getFilePaths();
   if (withShadCn) {
-    return `"use client";
-import { Button } from "${alias}/components/ui/button";
-import { signOut } from "${formatFilePath(shared.auth.authUtils, {
-      prefix: "alias",
-      removeExtension: true,
-    })}";
+    return `
+        "use client";
+        import { Button } from "${alias}/components/ui/button";
+        import { signOut } from "${formatFilePath(shared.auth.authActions, {
+          prefix: "alias",
+          removeExtension: true,
+        })}";
 
-export const SignOutButton = () => {
-  return (
-    <Button onClick={signOut} className='bg-red-600 text-foreground'>
-       Sign Out
-    </Button>
-   );
-};
+        export const SignOutButton = () => {
+            return (
+                <form action={signOut}>
+                    <Button type="submit" className="bg-red-600 text-foreground">
+                        Sign Out
+                    </Button>
+                </form>
+            );
+        };
     `;
   } else {
     return `
-"use client";
+        "use client";
 
-import { signOut } from "${formatFilePath(shared.auth.authUtils, {
-      prefix: "alias",
-      removeExtension: true,
-    })}";
+        import { signOut } from "${formatFilePath(shared.auth.authActions, {
+          prefix: "alias",
+          removeExtension: true,
+        })}";
 
-export const SignOutButton = () => {
-    return (
-        <button onClick={signOut} className='bg-red-600 text-foreground'>
-            Sign Out
-        </button>
-    );
-};
-`;
+        export const SignOutButton = () => {
+            return (
+                <form action={signOut}>
+                    <button type="submit" className="py-2.5 px-3.5 rounded-md bg-red-500 text-white hover:opacity-80 text-sm">
+                        Sign Out
+                    </button>
+                </form>
+            )
+        }
+    `;
   }
 };
 
@@ -393,7 +422,7 @@ export const generateAuthFormComponent = (withShadCn: boolean) => {
         import { useFormState, useFormStatus } from "react-dom";
         import { redirect } from 'next/navigation';
         import { Button } from "${alias}/components/ui/button";
-        import { type State } from "${formatFilePath(shared.auth.authUtils, {
+        import { type State } from "${formatFilePath(shared.auth.authActions, {
           prefix: "alias",
           removeExtension: true,
         })}";
@@ -421,7 +450,7 @@ export const generateAuthFormComponent = (withShadCn: boolean) => {
                         action={formAction}>
                         {children}
 
-                        {state?.error && <span className='text-red-600'>{state.error.message}</span>}
+                        {state?.error && <span className='text-red-600'>{state.error}</span>}
 
                         {state?.message && <span className='text-green-600'>{state.message}</span>}
 
@@ -443,29 +472,30 @@ export const generateAuthFormComponent = (withShadCn: boolean) => {
     return (
       authForm +
       `
-                    return (
-                        <Button
-                        type='submit' 
-                        className='w-full' 
-                        disabled={pending}
-                        variant='default'>
-                            Sign{pending ? 'ing' : ''} {buttonSuffix}
-                        </Button>
-                    )}`
+        return (
+            <Button
+                type='submit' 
+                className='w-full' 
+                disabled={pending}
+                variant='default'
+            >
+                Sign{pending ? 'ing' : ''} {buttonSuffix}
+            </Button>
+        )}`
     );
   } else {
     return (
       authForm +
       `
-                    return (
-                        <button
-                        type='submit' 
-                        className='w-full' 
-                        disabled={pending}
-                        >
-                            Sign{pending ? 'ing' : ''} {buttonSuffix}
-                        </button>
-                    )}`
+        return (
+            <button
+                type='submit' 
+                className='w-full' 
+                disabled={pending}
+            >
+                Sign{pending ? 'ing' : ''} {buttonSuffix}
+            </button>
+        )}`
     );
   }
 };
@@ -545,8 +575,8 @@ export const generateLoadingPage = () => {
 export const generateApiRoutes = () => {
   const { supabase } = getFilePaths();
   return `
-        import { createSupabaseServerClient } from "${formatFilePath(
-          supabase.libAuthSupabase,
+        import { createSupabaseApiRouteClient } from "${formatFilePath(
+          supabase.libSupabaseAuthHelpers,
           {
             removeExtension: true,
             prefix: "alias",
@@ -559,7 +589,7 @@ export const generateApiRoutes = () => {
             const code = requestUrl.searchParams.get("code");
 
             if (code) {
-                const supabase = createSupabaseServerClient();
+                const supabase = createSupabaseApiRouteClient();
                 await supabase.auth.exchangeCodeForSession(code);
             }
 
@@ -569,12 +599,12 @@ export const generateApiRoutes = () => {
     `;
 };
 
-const generateAuthDirFiles = (orm: ORMType) => {
+const generateAuthDirFiles = () => {
   const { supabase } = getFilePaths();
   const utilsTs = `
     import { redirect } from "next/navigation";
-    import { createSupabaseServerClient } from "${formatFilePath(
-      supabase.libAuthSupabase,
+    import { createSupabaseServerComponentClient } from "${formatFilePath(
+      supabase.libSupabaseAuthHelpers,
       {
         removeExtension: true,
         prefix: "alias",
@@ -582,7 +612,7 @@ const generateAuthDirFiles = (orm: ORMType) => {
     )}";
 
     export const getServerSession = async () => {
-        const supabase = createSupabaseServerClient();
+        const supabase = createSupabaseServerComponentClient();
         const {
             data: { session }
         } = await supabase.auth.getSession()
@@ -591,7 +621,7 @@ const generateAuthDirFiles = (orm: ORMType) => {
     };
 
     export const getServerUser = async () => {
-        const supabase = createSupabaseServerClient()
+        const supabase = createSupabaseServerComponentClient()
         const {
             data: { user }
         } = await supabase.auth.getUser()
@@ -617,7 +647,7 @@ const generateAuthDirFiles = (orm: ORMType) => {
                 session: {
                     user: {
                         id: user.id,
-                        name: "",
+                        name: user.user_metadata?.username ?? '',
                         email: user.email,
                     },
                 },
@@ -632,62 +662,91 @@ const generateAuthDirFiles = (orm: ORMType) => {
 
         if (!session) redirect("/sign-in");
     };
+`;
 
-    // ---------------------------------------------------
-    // You can move these functions to a separate file and/or directory if you want but make sure to update the import paths
-    import { type AuthError } from '@supabase/supabase-js'
+  const actionTs = `
+    "use server"
+    import { redirect } from "next/navigation";
+    import { createSupabaseServerActionClient } from "${formatFilePath(
+      supabase.libSupabaseAuthHelpers,
+      {
+        removeExtension: true,
+        prefix: "alias",
+      }
+    )}"
 
     export type State = {
-        error?: AuthError
+        error?: string
         message?: string
         redirectTo?: string
     } | null
 
     export const signOut = async () => {
-        'use server'
-        const supabase = createSupabaseServerClient()
+        const supabase = createSupabaseServerActionClient()
         await supabase.auth.signOut()
         redirect('/')
     }
 
     export const signIn = async (state: State, formData: FormData) => {
-        'use server'
-        const supabase = createSupabaseServerClient()
+        const supabase = createSupabaseServerActionClient()
         const email = formData.get('email') as string
         const password = formData.get('password') as string
 
         const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-        if (error) return { error }
+        if (error) return { error: error.message }
 
-        return { redirectTo: '/' }
+        return { redirectTo: '/', ...state }
     }
 
     export const signUp = async (state: State, formData: FormData) => {
-        'use server'
-        const supabase = createSupabaseServerClient()
+        const supabase = createSupabaseServerActionClient()
         const email = formData.get('email') as string
         const password = formData.get('password') as string
 
         const { error } = await supabase.auth.signUp({ email, password })
 
-        if (error) return { error }
+        if (error) return { error: error.message }
 
-        return { redirectTo: '/' }
+        return { redirectTo: '/', ...state }
     }
-`;
 
-  return { utilsTs };
+    export const updateUserName = async (state: State, formData: FormData) => {
+        const supabase = createSupabaseServerActionClient()
+        const username = formData.get('name') as string
+
+        const { error } = await supabase.auth.updateUser({ data: { username } })
+
+        if (error) return { error: error.message }
+
+        return { message: 'Successfully updated username!', ...state }
+    }
+
+    export const updateEmail = async (state: State, formData: FormData) => {
+        const supabase = createSupabaseServerActionClient()
+        const email = formData.get('email') as string
+
+        const { error } = await supabase.auth.updateUser({ email })
+
+        if (error) return { error: error.message }
+
+        return { message: 'Successfully updated email!', ...state }
+    }`;
+
+  return { utilsTs, actionTs };
 };
 
 const generateMiddleware = () => {
   const { supabase } = getFilePaths();
   return `
     import { type NextRequest } from "next/server";
-    import { updateSession } from "${formatFilePath(supabase.libAuthSupabase, {
-      removeExtension: true,
-      prefix: "alias",
-    })}";
+    import { updateSession } from "${formatFilePath(
+      supabase.libSupabaseAuthHelpers,
+      {
+        removeExtension: true,
+        prefix: "alias",
+      }
+    )}";
 
     export async function middleware(request: NextRequest) {
         return await updateSession(request);

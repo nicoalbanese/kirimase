@@ -15,6 +15,7 @@ export const paths: { t3: Paths; normal: Paths } = {
         schemaDir: "lib/db/schema",
       },
       auth: {
+        authActions: "lib/auth/actions.ts",
         authUtils: "lib/auth/utils.ts",
         accountPage: "app/(app)/account/page.tsx",
         authSchema: "lib/db/schema/auth.ts",
@@ -71,7 +72,7 @@ export const paths: { t3: Paths; normal: Paths } = {
       signUpPage: "app/(auth)/sign-up/page.tsx",
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
       callbackApiRoute: "app/api/auth/callback/route.ts",
-      libAuthSupabase: "lib/supabase/auth/index.ts",
+      libSupabaseAuthHelpers: "lib/supabase/auth/helper.ts",
       middleware: "middleware.ts",
     },
     kinde: {
@@ -121,6 +122,7 @@ export const paths: { t3: Paths; normal: Paths } = {
         schemaDir: "server/db/schema",
       },
       auth: {
+        authActions: "lib/auth/actions.ts",
         authUtils: "lib/auth/utils.ts",
         accountPage: "app/(app)/account/page.tsx",
         authSchema: "server/db/schema/auth.ts",
@@ -177,7 +179,7 @@ export const paths: { t3: Paths; normal: Paths } = {
       signUpPage: "app/(auth)/sign-up/page.tsx",
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
       callbackApiRoute: "app/api/auth/callback/route.ts",
-      libAuthSupabase: "lib/supabase/auth/index.ts",
+      libSupabaseAuthHelpers: "lib/supabase/auth/helper.ts",
       middleware: "middleware.ts",
     },
     kinde: {

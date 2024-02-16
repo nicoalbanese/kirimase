@@ -126,8 +126,9 @@ export const addSupabase = async () => {
     apiRoute
   );
 
-  const authDirFiles = generateAuthDirFiles(orm);
+  const authDirFiles = generateAuthDirFiles();
 
+  // create auth utility functions
   await createFile(
     formatFilePath(shared.auth.authUtils, {
       removeExtension: false,
@@ -136,10 +137,20 @@ export const addSupabase = async () => {
     authDirFiles.utilsTs
   );
 
+  // create auth actions
+  await createFile(
+    formatFilePath(shared.auth.authActions, {
+      removeExtension: false,
+      prefix: "rootPath",
+    }),
+    authDirFiles.actionTs
+  );
+
   const helpers = generateSupabaseHelpers();
 
+  // generate supabase helpers
   await createFile(
-    formatFilePath(supabase.libAuthSupabase, {
+    formatFilePath(supabase.libSupabaseAuthHelpers, {
       removeExtension: false,
       prefix: "rootPath",
     }),
@@ -147,8 +158,8 @@ export const addSupabase = async () => {
   );
 
   const supabasePackages = ["@supabase/supabase-js", "@supabase/ssr"];
-  const adapterPackage = orm === "drizzle" && ["postgres"];
-  const packagesToInstall = [...supabasePackages, ...adapterPackage];
+  // const adapterPackage = orm === "drizzle" && ["postgres"];
+  const packagesToInstall = [...supabasePackages];
 
   addToInstallList({ regular: packagesToInstall, dev: [] });
 

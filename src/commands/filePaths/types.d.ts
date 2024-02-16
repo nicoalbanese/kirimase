@@ -23,6 +23,7 @@ export type Paths = {
       schemaDir?: string;
     };
     auth: {
+      authActions: string;
       authUtils: string;
       signInComponent: string;
       accountApiRoute: string;
@@ -62,7 +63,7 @@ export type Paths = {
     signUpPage: string;
     authFormComponent: string;
     callbackApiRoute: string;
-    libAuthSupabase: string;
+    libSupabaseAuthHelpers: string;
     signOutButtonComponent: string;
     middleware: string;
   };

@@ -5,8 +5,8 @@ import fs from "fs";
 // TODO: Idk if this is necessary for Supabase
 export const addToSupabasegnoredRoutes = async (newPath: string) => {
   const { supabase } = getFilePaths();
-  const initMWContent = "ignoredRoutes: [";
-  const updatedMWContent = "ignoredRoutes: [" + ` "${newPath}", `;
+  const initMWContent = "matcher: [";
+  const updatedMWContent = "matcher: [" + ` "${newPath}", `;
   const mwPath = formatFilePath(supabase.middleware, {
     prefix: "rootPath",
     removeExtension: false,
