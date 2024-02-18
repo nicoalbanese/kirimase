@@ -4,6 +4,7 @@ import {
   installPackages,
   readConfigFile,
   replaceFile,
+  sendEvent,
   updateConfigFile,
 } from "../../utils.js";
 import { addDrizzle } from "./orm/drizzle/index.js";
@@ -121,7 +122,10 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
 
 export const spinner = ora();
 
-export const addPackage = async (options?: InitOptions) => {
+export const addPackage = async (
+  options?: InitOptions,
+  init: boolean = false
+) => {
   const initialConfig = readConfigFile();
 
   if (initialConfig) {
@@ -248,6 +252,15 @@ export const addPackage = async (options?: InitOptions) => {
     if (config.t3 && config.auth === "next-auth") {
       checkAndAddAuthUtils();
     }
+
+    if (init === true) {
+      await sendEvent("init_config", {});
+    } else {
+      await sendEvent("add_package", {
+        newPackages: promptResponse.miscPackages,
+      });
+    }
+
     spinner.succeed("Configuration complete");
 
     await installPackagesFromList();

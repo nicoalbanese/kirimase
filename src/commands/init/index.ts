@@ -1,5 +1,5 @@
 import { select } from "@inquirer/prompts";
-import { createConfigFile } from "../../utils.js";
+import { createConfigFile, sendEvent } from "../../utils.js";
 import { InitOptions, PMType } from "../../types.js";
 import { consola } from "consola";
 import { addPackage } from "../add/index.js";
@@ -79,5 +79,5 @@ export async function initProject(options?: InitOptions) {
   });
   // consola.success("Kirimase initialized!");
   // consola.info("You can now add packages.");
-  addPackage(options);
+  addPackage(options, true);
 }

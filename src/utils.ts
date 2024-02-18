@@ -240,3 +240,30 @@ export const getFileLocations = (): T3Deltas => {
   if (t3) return t3Locations;
   else return regularLocations;
 };
+
+type TAnalyticsEvent = "init_config" | "add_package" | "generate";
+
+export const sendEvent = async (
+  event: TAnalyticsEvent,
+  data: Record<any, any>
+) => {
+  const config = readConfigFile();
+  if (config.analytics === false) return;
+  try {
+    await fetch(`https://kirimase-proxy-analytics.vercel.app/api/send-event`, {
+      method: "POST",
+      headers: {
+        "x-request-from": "kirimase",
+      },
+      body: JSON.stringify({
+        event,
+        config,
+        data,
+      }),
+    });
+  } catch (e) {
+    // do nothing
+    // console.error(e);
+    return;
+  }
+};

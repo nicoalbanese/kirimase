@@ -262,9 +262,9 @@ export const toggleAnalytics = (input: { toggle?: boolean }) => {
   if (input.toggle) {
     updateConfigFile({ analytics: !analytics });
 
-    console.log(`Anonymous analytics are now ${analytics ? "off" : "on"}`);
+    consola.info(`Anonymous analytics are now ${analytics ? "off" : "on"}`);
   } else {
-    console.log(
+    consola.info(
       `Anonymous analytics are currently ${analytics ? "on" : "off"}`
     );
   }
