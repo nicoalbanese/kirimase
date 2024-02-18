@@ -255,3 +255,17 @@ export const checkForPackageManager = (): PMType | null => {
 
   return null;
 };
+
+export const toggleAnalytics = (input: { toggle?: boolean }) => {
+  const { analytics } = readConfigFile();
+
+  if (input.toggle) {
+    updateConfigFile({ analytics: !analytics });
+
+    console.log(`Anonymous analytics are now ${analytics ? "off" : "on"}`);
+  } else {
+    console.log(
+      `Anonymous analytics are currently ${analytics ? "on" : "off"}`
+    );
+  }
+};

@@ -4,9 +4,15 @@ import { Command } from "commander";
 import { initProject } from "./commands/init/index.js";
 import { buildSchema } from "./commands/generate/index.js";
 import { addPackage } from "./commands/add/index.js";
+import { toggleAnalytics } from "./commands/init/utils.js";
 
 const program = new Command();
 program.name("kirimase").description("Kirimase CLI").version("0.0.55");
+
+program
+  .command("analytics")
+  .option("-t, --toggle", "toggle anonymous analytics")
+  .action(toggleAnalytics);
 
 addCommonOptions(program.command("init"))
   .description("initialise and configure kirimase within directory")

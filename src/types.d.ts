@@ -94,6 +94,7 @@ export type Config = {
   componentLib: ComponentLibType | null;
   t3: boolean;
   alias: string;
+  analytics: boolean;
 };
 
 export type UpdateConfig = Partial<Config>;
