@@ -249,8 +249,10 @@ export const sendEvent = async (
 ) => {
   const config = readConfigFile();
   if (config.analytics === false) return;
+  const url = "https://kirimase-proxy-analytics.vercel.app";
+  // const url = "http://localhost:3000";
   try {
-    await fetch(`https://kirimase-proxy-analytics.vercel.app/api/send-event`, {
+    await fetch(url + `/api/send-event`, {
       method: "POST",
       headers: {
         "x-request-from": "kirimase",
