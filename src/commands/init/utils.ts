@@ -11,7 +11,12 @@ import {
   DBType,
   PMType,
 } from "../../types.js";
-import { createFile, replaceFile, updateConfigFile } from "../../utils.js";
+import {
+  createFile,
+  readConfigFile,
+  replaceFile,
+  updateConfigFile,
+} from "../../utils.js";
 import { consola } from "consola";
 import { updateTsConfigPrismaTypeAlias } from "../add/orm/utils.js";
 import { addToInstallList } from "../add/utils.js";
@@ -331,4 +336,3 @@ export const toggleAnalytics = (input: { toggle?: boolean }) => {
     );
   }
 };
-
