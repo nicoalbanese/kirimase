@@ -190,7 +190,6 @@ export const generateSignInPage = (withShadCn: boolean) => {
                             Password
                         </Label>
                         <Input type="password" name="password" id="password" />
-                        <br />
                     </AuthForm>
                     <div className="mt-4 text-sm text-center text-muted-foreground">
                         Don&apos;t have an account yet?{" "}
@@ -249,7 +248,6 @@ export const generateSignInPage = (withShadCn: boolean) => {
                             id="password"
                             className="block w-full px-3 py-2 rounded-md border border-neutral-200 focus:outline-neutral-700"
                         />
-                        <br />
                     </AuthForm>
                     <div className="mt-4 text-sm text-center text-muted-foreground">
                         Don&apos;t have an account yet?{" "}
@@ -299,7 +297,6 @@ export const generateSignUpPage = (withShadCn: boolean) => {
                             Password
                         </Label>
                         <Input type="password" name="password" id="password" />
-                        <br />
                     </AuthForm>
                     <div className="mt-4 text-muted-foreground text-center text-sm">
                         Already have an account?{" "}
@@ -353,7 +350,6 @@ export const generateSignUpPage = (withShadCn: boolean) => {
                             id="password"
                             className="block w-full px-3 py-2 rounded-md border border-neutral-200 focus:outline-neutral-700"
                         />
-                        <br />
                     </AuthForm>
                     <div className="mt-4 text-neutral-500 text-center text-sm">
                         Already have an account?{" "}
@@ -450,9 +446,9 @@ export const generateAuthFormComponent = (withShadCn: boolean) => {
                         action={formAction}>
                         {children}
 
-                        {state?.error && <span className='text-red-600'>{state.error}</span>}
+                        {state?.error && <span className='text-red-600 my-4'>{state.error}</span>}
 
-                        {state?.message && <span className='text-green-600'>{state.message}</span>}
+                        {state?.message && <span className='text-green-600 my-4'>{state.message}</span>}
 
                         <SubmitButton authType={authType} />
                     </form>
@@ -647,7 +643,7 @@ const generateAuthDirFiles = () => {
                 session: {
                     user: {
                         id: user.id,
-                        name: user.user_metadata?.username ?? '',
+                        name: user.user_metadata?.name ?? '', // user.user_metadata.name is only populated after the user has updated their name once. Supabase doesn't store the user's name by default.
                         email: user.email,
                     },
                 },
@@ -674,6 +670,8 @@ const generateAuthDirFiles = () => {
         prefix: "alias",
       }
     )}"
+    import { zfd } from 'zod-form-data'
+    import { z } from 'zod'
 
     export type State = {
         error?: string
@@ -687,28 +685,79 @@ const generateAuthDirFiles = () => {
         redirect('/')
     }
 
+    const signInSchema = zfd.formData({
+        email: zfd.text(
+            z
+                .string({
+                    required_error: 'You have to enter an email address.',
+                })
+                .email({ message: 'Please provide a valid email address' })
+        ),
+        password: zfd.text(
+            z
+                .string({ required_error: 'You have to enter a password' })
+                .min(8, 'Password must be longer than 8 characters.')
+        ),
+    })
+
     export const signIn = async (state: State, formData: FormData) => {
         const supabase = createSupabaseServerActionClient()
-        const email = formData.get('email') as string
-        const password = formData.get('password') as string
+        const res = signUpSchema.safeParse(formData)
 
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (!res.success) {
+            const errors = res.error.flatten()
+            const errorMessage = Object.values(errors.fieldErrors)
+                .join('\\n')
+                .replace(',', '\\n')
+            return { error: errorMessage }
+        }
+
+        const { email, password } = signInSchema.parse(formData)
+
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        })
 
         if (error) return { error: error.message }
 
-        return { redirectTo: '/', ...state }
+        return { redirectTo: '/' }
     }
+
+    const signUpSchema = zfd.formData({
+        email: zfd.text(
+            z
+                .string({
+                    required_error: 'You have to enter an email address.',
+                })
+                .email({ message: 'Please provide a valid email address' })
+        ),
+        password: zfd.text(
+            z
+                .string({ required_error: 'You have to enter a password' })
+                .min(8, 'Password must be longer than 8 characters.')
+        ),
+    })
 
     export const signUp = async (state: State, formData: FormData) => {
         const supabase = createSupabaseServerActionClient()
-        const email = formData.get('email') as string
-        const password = formData.get('password') as string
+        const res = signUpSchema.safeParse(formData)
+
+        if (!res.success) {
+            const errors = res.error.flatten()
+            const errorMessage = Object.values(errors.fieldErrors)
+                .join('\\n')
+                .replace(',', '\\n')
+            return { error: errorMessage }
+        }
+
+        const { email, password } = signUpSchema.parse(formData)
 
         const { error } = await supabase.auth.signUp({ email, password })
 
         if (error) return { error: error.message }
 
-        return { redirectTo: '/', ...state }
+        return { redirectTo: '/' }
     }
 
     export const updateUserName = async (state: State, formData: FormData) => {

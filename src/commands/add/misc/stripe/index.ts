@@ -50,6 +50,7 @@ import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import { libAuthUtilsTsWithoutAuthOptions } from "../../auth/next-auth/generators.js";
 import { updateRootSchema } from "../../../generate/generators/model/utils.js";
 import { AuthSubTypeMapping, addToInstallList } from "../../utils.js";
+import { addToSupabaseIgnoredRoutes } from "../../auth/supabase/utils.js";
 
 export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   const {
@@ -86,6 +87,11 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
 
   if (auth === "clerk") {
     addToClerkIgnoredRoutes("/api/webhooks/stripe");
+  }
+
+  // TODO: Find out if this is actually necessary for Supabase
+  if (auth === "supabase") {
+    addToSupabaseIgnoredRoutes("/api/webhooks/stripe");
   }
 
   // add attributes to usermodel

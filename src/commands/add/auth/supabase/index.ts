@@ -158,8 +158,9 @@ export const addSupabase = async () => {
   );
 
   const supabasePackages = ["@supabase/supabase-js", "@supabase/ssr"];
-  // const adapterPackage = orm === "drizzle" && ["postgres"];
-  const packagesToInstall = [...supabasePackages];
+  const zodPackages = ["zod", "zod-form-data"];
+
+  const packagesToInstall = [...supabasePackages, ...zodPackages];
 
   addToInstallList({ regular: packagesToInstall, dev: [] });
 

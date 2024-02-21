@@ -20,6 +20,7 @@ import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 //   }
 // };
 
+// TODO: Shouldn't this be "matcher" instead of "ignoredRoutes"?
 export const addToClerkIgnoredRoutes = async (newPath: string) => {
   const { clerk } = getFilePaths();
   const initMWContent = "ignoredRoutes: [";

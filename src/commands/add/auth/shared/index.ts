@@ -22,7 +22,7 @@ export const createAccountSettingsPage = async () => {
   const { shared } = getFilePaths();
   const withShadCn = componentLib === "shadcn-ui" ? true : false;
 
-  // create account api - clerk has managed component so no need
+  // create account api - clerk has managed components so no need - supabase has its own client to update user details
   if (auth !== "supabase" && auth !== "clerk") {
     await createFile(
       formatFilePath(shared.auth.accountApiRoute, {
