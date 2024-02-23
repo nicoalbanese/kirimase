@@ -16,6 +16,7 @@ import {
   toNormalEnglish,
 } from "../utils.js";
 import { addToShadcnComponentList } from "../../add/utils.js";
+import eta from "../../../eta.js";
 
 export const scaffoldViewsAndComponents = async (schema: Schema) => {
   const { hasSrc, packages } = readConfigFile();
@@ -45,6 +46,11 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
         `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Form.tsx`
       ),
       createFormComponent(schema)
+    );
+    // create components/tableName/columns.tsx
+    createFile(
+      rootPath.concat(`components/${tableNameCamelCase}/columns.tsx`),
+      eta.render('DataTable/columns.eta', { fields: schema.fields });
     );
     // create components/tableName/TableNameModal.tsx
     createFile(
@@ -101,6 +107,8 @@ import { api } from "${formatFilePath(trpc.trpcApiTs, {
         })}";`
       : ""
   }
+import { DataTable } from "${alias}/components/ui/dataTable";
+import { columns } from "./columns";
 
 export default async function ${tableNameCapitalised}() {
   ${
@@ -113,6 +121,7 @@ export default async function ${tableNameCapitalised}() {
         <h1 className="font-semibold text-2xl my-2">${tableNameNormalEnglishCapitalised}</h1>
         <New${tableNameSingularCapitalised}Modal />
       </div>
+      <DataTable data={${tableNameCamelCase}} columns={columns} />
       <${tableNameSingularCapitalised}List ${tableNameCamelCase}={${tableNameCamelCase}} />
     </main>
   );

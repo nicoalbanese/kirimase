@@ -36,6 +36,7 @@ import { formatTableName, toCamelCase } from "../utils.js";
 import { existsSync, readFileSync } from "fs";
 import { consola } from "consola";
 import { addToShadcnComponentList } from "../../add/utils.js";
+import eta from "../../../eta.js";
 
 export const scaffoldViewsAndComponentsWithServerActions = async (
   schema: ExtendedSchema
@@ -78,6 +79,15 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
         { removeExtension: false, prefix: "rootPath" }
       ),
       createListComponent(schema)
+    );
+
+    // create columns
+    createFile(
+      formatFilePath(
+        `app/(app)/${tableNameKebabCase}/columns.tsx`,
+        { prefix: "rootPath", removeExtension: false }
+      ),
+      eta.render('DataTable/columns.eta', { fields: schema.fields })
     );
 
     // create components/tableName/TableNameForm.tsx
@@ -251,7 +261,8 @@ const generateView = (schema: Schema) => {
   const relationsFormatted = formatRelations(relations);
 
   return `import { Suspense } from "react";
-
+import { DataTable } from "${formatFilePath(`components/ui/DataTable`, {prefix: "alias", removeExtension: false})}";
+import { columns } from "./columns";
 import Loading from "${formatFilePath("app/loading", {
     prefix: "alias",
     removeExtension: false,
@@ -313,6 +324,7 @@ const ${tableNameCapitalised} = async () => {
               .join(" ")
           : ""
       } />
+      <DataTable data={${tableNameCamelCase}} columns={columns} />
     </Suspense>
   );
 };

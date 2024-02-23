@@ -1,0 +1,110 @@
+import { Table } from "@tanstack/react-table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const PaginationFirst = ({
+  className,
+  ...props
+}: React.ComponentProps<typeof PaginationLink>) => (
+  <PaginationLink
+    aria-label="Go to first page"
+    size="default"
+    className={cn("px-2", className)}
+    {...props}
+  >
+    <ChevronsLeft className="square-4" />
+  </PaginationLink>
+);
+PaginationFirst.displayName = "PaginationFirst";
+
+
+const PaginationLast = ({
+  className,
+  ...props
+}: React.ComponentProps<typeof PaginationLink>) => (
+  <PaginationLink
+    aria-label="Go to last page"
+    size="default"
+    className={cn("gap-1 pr-2.5", className)}
+    {...props}
+  >
+    <ChevronsRight className="square-4" />
+  </PaginationLink>
+);
+PaginationLast.displayName = "PaginationLast";
+
+interface DataTablePaginationProps<TData> {
+  table: Table<TData>;
+}
+
+export function DataTablePagination<TData>({
+  table,
+}: DataTablePaginationProps<TData>) {
+  const currentPageIndex = table.getState().pagination.pageIndex;
+  const lastPageIndex = table.getPageCount() - 1;
+  return (
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem className="hidden xl:block">
+          <PaginationFirst
+            onClick={() => table.setPageIndex(0)}
+            isActive={table.getCanPreviousPage()}
+          />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationPrevious
+            onClick={() => table.previousPage()}
+            isActive={table.getCanPreviousPage()}
+          />
+        </PaginationItem>
+        {table.getCanPreviousPage() && (
+          <PaginationItem className="hidden xl:block">
+            <PaginationLink
+              onClick={() => table.previousPage()}
+              isActive={table.getCanPreviousPage()}
+            >
+              {currentPageIndex}
+            </PaginationLink>
+          </PaginationItem>
+        )}
+        <PaginationItem className="hidden lg:block">
+          <PaginationLink isActive={false}>
+            {currentPageIndex + 1}
+          </PaginationLink>
+        </PaginationItem>
+        {table.getCanNextPage() && (
+          <PaginationItem className="hidden xl:block">
+            <PaginationLink
+              onClick={() => table.nextPage()}
+              isActive={table.getCanNextPage()}
+            >
+              {currentPageIndex + 2}
+            </PaginationLink>
+          </PaginationItem>
+        )}
+        <PaginationItem>
+          <PaginationNext
+            onClick={() => {
+              if (table.getCanNextPage()) table.nextPage();
+            }}
+            isActive={table.getCanNextPage()}
+          />
+        </PaginationItem>
+        <PaginationItem className="hidden xl:block">
+          <PaginationLast
+            onClick={() => table.setPageIndex(lastPageIndex)}
+            isActive={table.getCanNextPage()}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
+}

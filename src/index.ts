@@ -20,6 +20,7 @@ addCommonOptions(program.command("init"))
 
 program
   .command("generate")
+  .alias("g")
   .description("Generate a new resource")
   .action(buildSchema);
 
