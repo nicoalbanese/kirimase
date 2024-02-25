@@ -55,14 +55,11 @@ export const paths: { t3: Paths; normal: Paths } = {
       signUpPage: "app/(auth)/sign-up/[[...sign-in]]/page.tsx",
     },
     lucia: {
-      signUpApiRoute: "app/api/sign-up/route.ts",
-      signInApiRoute: "app/api/sign-in/route.ts",
-      signOutApiRoute: "app/api/sign-out/route.ts",
-      appDTs: "app.d.ts",
       signInPage: "app/(auth)/sign-in/page.tsx",
       signUpPage: "app/(auth)/sign-up/page.tsx",
+      usersActions: "lib/actions/users.ts",
       libAuthLucia: "lib/auth/lucia.ts",
-      authFormComponent: "components/auth/Form.tsx",
+      formErrorComponent: "components/auth/AuthFormError.tsx",
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
     },
     kinde: {
@@ -152,14 +149,11 @@ export const paths: { t3: Paths; normal: Paths } = {
       signUpPage: "app/(auth)/sign-up/[[...sign-in]]/page.tsx",
     },
     lucia: {
-      signUpApiRoute: "app/api/sign-up/route.ts",
-      signInApiRoute: "app/api/sign-in/route.ts",
-      signOutApiRoute: "app/api/sign-out/route.ts",
-      appDTs: "app.d.ts",
       signInPage: "app/(auth)/sign-in/page.tsx",
       signUpPage: "app/(auth)/sign-up/page.tsx",
       libAuthLucia: "lib/auth/lucia.ts",
-      authFormComponent: "components/auth/Form.tsx",
+      usersActions: "lib/actions/users.ts",
+      formErrorComponent: "components/auth/AuthFormError.tsx",
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
     },
     kinde: {

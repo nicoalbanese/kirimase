@@ -49,13 +49,10 @@ export type Paths = {
   lucia: {
     signInPage: string;
     signUpPage: string;
-    authFormComponent: string;
-    signInApiRoute: string;
-    signUpApiRoute: string;
-    signOutApiRoute: string;
-    appDTs: string;
+    usersActions: string;
     libAuthLucia: string;
     signOutButtonComponent: string;
+    formErrorComponent: string;
   };
   kinde: {
     routeHandler: string;

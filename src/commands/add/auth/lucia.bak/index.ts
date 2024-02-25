@@ -1,10 +1,12 @@
 import {
   addPackageToConfig,
   createFile,
+  installPackages,
   readConfigFile,
   replaceFile,
   updateConfigFile,
 } from "../../../../utils.js";
+import { consola } from "consola";
 import { luciaGenerators } from "./generators.js";
 import {
   generateDrizzleAdapterDriverMappings,
@@ -25,8 +27,24 @@ import { addToInstallList } from "../../utils.js";
 
 export const addLucia = async () => {
   // get dbtype and provider
-  const { orm, provider, rootPath, driver, componentLib, t3 } =
-    readConfigFile();
+  const {
+    orm,
+    provider,
+    preferredPackageManager,
+    // packages,
+    rootPath,
+    driver,
+    componentLib,
+    t3,
+  } = readConfigFile();
+  // ask whether want to use shadcnui
+  // consola.info(
+  //   "Kirimase generates views and components for authenticating using Lucia."
+  // );
+  // const installShadCn = await confirm({
+  //   message: "Would you like to install Shadcn-UI?",
+  //   default: true,
+  // });
 
   const {
     generateViewsAndComponents,
