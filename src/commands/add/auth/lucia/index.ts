@@ -12,6 +12,7 @@ import {
   generatePrismaAdapterDriverMappings,
   addLuciaToPrismaSchema,
   updateDrizzleDbIndex,
+  addNodeRsFlagsToNextConfig,
 } from "./utils.js";
 
 import fs from "fs";
@@ -30,9 +31,8 @@ export const addLucia = async () => {
 
   const {
     generateViewsAndComponents,
-    generateApiRoutes,
-    generateAppDTs,
     generateAuthDirFiles,
+    generateUserServerActions,
   } = luciaGenerators;
 
   const { lucia, shared, drizzle } = getFilePaths();
@@ -43,9 +43,10 @@ export const addLucia = async () => {
   let viewsAndComponents: {
     signUpPage: string;
     signInPage: string;
-    authFormComponent: string;
+    authFormErrorComponent: string;
     homePage: string;
     loadingPage: string;
+    updatedSignOutButton: string;
   };
 
   if (componentLib === "shadcn-ui") {
@@ -70,11 +71,11 @@ export const addLucia = async () => {
     viewsAndComponents.signUpPage
   );
   createFile(
-    formatFilePath(lucia.authFormComponent, {
+    formatFilePath(lucia.formErrorComponent, {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    viewsAndComponents.authFormComponent
+    viewsAndComponents.authFormErrorComponent
   );
   replaceFile(
     formatFilePath(shared.init.dashboardRoute, {
@@ -87,38 +88,22 @@ export const addLucia = async () => {
     rootPath.concat("app/loading.tsx"),
     viewsAndComponents.loadingPage
   );
-  // add API routes
-  const apiRoutes = generateApiRoutes();
+
   createFile(
-    formatFilePath(lucia.signInApiRoute, {
+    formatFilePath(lucia.signOutButtonComponent, {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    apiRoutes.signInRoute
-  );
-  createFile(
-    formatFilePath(lucia.signUpApiRoute, {
-      removeExtension: false,
-      prefix: "rootPath",
-    }),
-    apiRoutes.signUpRoute
-  );
-  createFile(
-    formatFilePath(lucia.signOutApiRoute, {
-      removeExtension: false,
-      prefix: "rootPath",
-    }),
-    apiRoutes.signOutRoute
+    viewsAndComponents.updatedSignOutButton
   );
 
-  // add app.d.ts
-  const appDTs = generateAppDTs();
+  // add server actions
   createFile(
-    formatFilePath(lucia.appDTs, {
+    formatFilePath(lucia.usersActions, {
       removeExtension: false,
       prefix: "rootPath",
     }),
-    appDTs
+    generateUserServerActions()
   );
 
   const authDirFiles = generateAuthDirFiles(orm, driver, provider);
@@ -141,11 +126,53 @@ export const addLucia = async () => {
   );
 
   // add db schema based on orm (pulled in from config file)
-  if (orm === "prisma") await addLuciaToPrismaSchema();
+  if (orm === "prisma") {
+    await addLuciaToPrismaSchema();
+    createFile(
+      formatFilePath(shared.auth.authSchema, {
+        removeExtension: false,
+        prefix: "rootPath",
+      }),
+      `import { z } from "zod";
+
+export const authenticationSchema = z.object({
+  email: z.string().email().min(5).max(31),
+  password: z
+    .string()
+    .min(4, { message: "must be at least 4 characters long" })
+    .max(15, { message: "cannot be more than 15 characters long" }),
+});
+
+export const updateUserSchema = z.object({
+  name: z.string().min(3).optional(),
+  email: z.string().min(4).optional(),
+});
+
+export type UsernameAndPassword = z.infer<typeof authenticationSchema>;
+`
+    );
+  }
   if (orm === "drizzle") {
     const schema = DrizzleLuciaSchema[driver];
+    const schemaWithZodSchemas =
+      schema +
+      `\n\nexport const authenticationSchema = z.object({
+  email: z.string().email().min(5).max(31),
+  password: z
+    .string()
+    .min(4, { message: "must be at least 4 characters long" })
+    .max(15, { message: "cannot be more than 15 characters long" }),
+});
+
+export const updateUserSchema = z.object({
+  name: z.string().min(3).optional(),
+  email: z.string().min(4).optional(),
+});
+
+export type UsernameAndPassword = z.infer<typeof authenticationSchema>;
+`;
     if (provider === "planetscale") {
-      const schemaWithoutReferences = schema.replace(
+      const schemaWithoutReferences = schemaWithZodSchemas.replace(
         /\.references\(\(\) => user\.id\)/g,
         ""
       );
@@ -162,7 +189,7 @@ export const addLucia = async () => {
           removeExtension: false,
           prefix: "rootPath",
         }),
-        schema
+        schemaWithZodSchemas
       );
     }
   }
@@ -206,11 +233,19 @@ export const addLucia = async () => {
   // If trpc installed, add protectedProcedure
   updateTrpcWithSessionIfInstalled();
 
-  // await installPackages(
-  //   { regular: `lucia ${adapterPackage}`, dev: "" },
-  //   preferredPackageManager
-  // );
-  addToInstallList({ regular: ["lucia@2.7.7", adapterPackage], dev: [] });
+  // update next config mjs
+  addNodeRsFlagsToNextConfig();
+
+  addToInstallList({
+    regular: [
+      "lucia",
+      "oslo",
+      "@node-rs/bcrypt",
+      "@node-rs/argon2",
+      adapterPackage,
+    ],
+    dev: [],
+  });
 
   // add package to config
   addPackageToConfig("lucia");

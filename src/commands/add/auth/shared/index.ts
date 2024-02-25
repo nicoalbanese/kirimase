@@ -100,7 +100,8 @@ export const scaffoldAccountSettingsUI = async (
   //   createNavbar(withShadCn, auth === "clerk", auth)
   // );
 
-  if (withShadCn) {
+  // TODO FIX THIS
+  if (withShadCn && auth !== "lucia") {
     createFile(
       formatFilePath(lucia.signOutButtonComponent, {
         prefix: "rootPath",
