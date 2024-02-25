@@ -31,10 +31,64 @@ export default function UserSettings({
 `;
 };
 
-export const createUpdateNameCard = (withShadCn = false, disabled = false) => {
+export const createUpdateNameCard = (
+  withShadCn = false,
+  disabled = false,
+  serverActions = false
+) => {
   const { alias } = readConfigFile();
+  const { lucia } = getFilePaths();
   if (withShadCn) {
-    return `"use client";
+    if (serverActions) {
+      return `"use client";
+
+import { useEffect } from "react";
+import { useFormState, useFormStatus } from "react-dom";
+
+import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
+import { updateUser } from "${formatFilePath(lucia.usersActions, { prefix: "alias", removeExtension: true })}";
+
+import { toast } from "sonner";
+import { Input } from "${formatFilePath(`components/ui/input`, { prefix: "alias", removeExtension: false })}";
+import { Button } from "${formatFilePath(`components/ui/button`, { prefix: "alias", removeExtension: false })}";
+
+export default function UpdateNameCard({ name }: { name: string }) {
+  const [state, formAction] = useFormState(updateUser, {
+    error: "",
+  });
+
+  useEffect(() => {
+    if (state.success == true) toast.success("Updated User");
+    if (state.error) toast.error("Error", { description: state.error });
+  }, [state]);
+
+  return (
+    <AccountCard
+      params={{
+        header: "Your Name",
+        description:
+          "Please enter your full name, or a display name you are comfortable with.",
+      }}
+    >
+      <form action={formAction}>
+        <AccountCardBody>
+          <Input defaultValue={name ?? ""} name="name" />
+        </AccountCardBody>
+        <AccountCardFooter description="64 characters maximum">
+          <Submit />
+        </AccountCardFooter>
+      </form>
+    </AccountCard>
+  );
+}
+
+const Submit = () => {
+  const { pending } = useFormStatus();
+  return <Button disabled={pending}>Update Name</Button>;
+};
+`;
+    } else
+      return `"use client";
 import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
 import { Button } from "${alias}/components/ui/button";
 import { Input } from "${alias}/components/ui/input";
@@ -150,10 +204,65 @@ export default function UpdateNameCard({ name }: { name: string }) {
   }
 };
 
-export const createUpdateEmailCard = (withShadCn = false, disabled = false) => {
+export const createUpdateEmailCard = (
+  withShadCn = false,
+  disabled = false,
+  serverActions = false
+) => {
   const { alias } = readConfigFile();
+  const { lucia } = getFilePaths();
   if (withShadCn) {
-    return `import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
+    if (serverActions) {
+      return `"use client";
+
+import { useEffect } from "react";
+import { useFormState, useFormStatus } from "react-dom";
+
+import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
+import { updateUser } from "${formatFilePath(lucia.usersActions, { prefix: "alias", removeExtension: true })}";
+
+import { toast } from "sonner";
+import { Input } from "${formatFilePath(`components/ui/input`, { prefix: "alias", removeExtension: false })}";
+import { Button } from "${formatFilePath(`components/ui/button`, { prefix: "alias", removeExtension: false })}";
+
+export default function UpdateEmailCard({ email }: { email: string }) {
+  const [state, formAction] = useFormState(updateUser, {
+    error: "",
+  });
+
+  useEffect(() => {
+    if (state.success == true) toast.success("Updated Email");
+    if (state.error) toast.error("Error", { description: state.error });
+  }, [state]);
+
+  return (
+    <AccountCard
+      params={{
+        header: "Your Email",
+        description:
+          "Please enter the email address you want to use with your account.",
+      }}
+    >
+      <form action={formAction}>
+        <AccountCardBody>
+          <Input defaultValue={email ?? ""} name="email" />
+        </AccountCardBody>
+        <AccountCardFooter description="We will email vou to verify the change.">
+          <Submit />
+        </AccountCardFooter>
+      </form>
+    </AccountCard>
+  );
+}
+
+const Submit = () => {
+  const { pending } = useFormStatus();
+  return <Button disabled={pending}>Update Email</Button>;
+};
+
+`;
+    } else {
+      return `import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
 import { Button } from "${alias}/components/ui/button";
 import { Input } from "${alias}/components/ui/input";
 import { toast } from "sonner";
@@ -210,6 +319,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
   );
 }
 `;
+    }
   } else {
     return `import { AccountCard, AccountCardFooter, AccountCardBody } from "./AccountCard";
 import { useTransition } from "react";

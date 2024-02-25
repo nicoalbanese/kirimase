@@ -79,10 +79,10 @@ import { sessions, users } from "../db/schema/auth";
 
 export const DrizzleLuciaSchema: { [k in DBType]: string } = {
   pg: `import { z } from "zod";  
-import { pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, timestamp, text } from "drizzle-orm/pg-core";
 
 export const users = pgTable("user", {
-	id: text("id").primaryKey()
+	id: text("id").primaryKey(),
         email: text("email").notNull().unique(),
         hashedPassword: text("hashed_password").notNull(),
         name: text("name"),
@@ -92,7 +92,7 @@ export const sessions = pgTable("session", {
 	id: text("id").primaryKey(),
 	userId: text("user_id")
 		.notNull()
-		.references(() => userTable.id),
+		.references(() => users.id),
 	expiresAt: timestamp("expires_at", {
 		withTimezone: true,
 		mode: "date"
@@ -100,7 +100,7 @@ export const sessions = pgTable("session", {
 });
 `,
   mysql: `import { z } from "zod";
-import { mysqlTable, bigint, varchar, datetime } from "drizzle-orm/mysql-core";
+import { mysqlTable, varchar, datetime } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("user", {
 	id: varchar("id", {
@@ -125,7 +125,7 @@ export const sessions = mysqlTable("session", {
 		length: 255
 	})
 		.notNull()
-		.references(() => userTable.id),
+		.references(() => users.id),
 	expiresAt: datetime("expires_at").notNull()
 });`,
   sqlite: `import { z } from "zod";

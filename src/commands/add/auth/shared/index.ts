@@ -70,7 +70,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUpdateNameCard(withShadCn, auth !== "lucia")
+    createUpdateNameCard(withShadCn, auth !== "lucia", auth === "lucia")
   );
 
   // create updatenamecard
@@ -79,7 +79,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUpdateEmailCard(withShadCn, auth !== "lucia")
+    createUpdateEmailCard(withShadCn, auth !== "lucia", auth === "lucia")
   );
 
   // create accountcard components
