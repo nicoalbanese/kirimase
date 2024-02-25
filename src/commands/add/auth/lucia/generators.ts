@@ -571,6 +571,7 @@ export const getUserAuth = async (): Promise<AuthSession> => {
       user: {
         id: user.id,
         email: user.email,
+        name: user.name,
       },
     },
   }
@@ -635,6 +636,7 @@ export const lucia = new Lucia(adapter, {
     return {
       // attributes has the type of DatabaseUserAttributes
       email: attributes.email,
+      name: attributes.name,
     }
   },
 })
@@ -648,6 +650,7 @@ declare module 'lucia' {
 
 interface DatabaseUserAttributes {
   email: string
+  name: string;
 }
 
 export const validateRequest = cache(
