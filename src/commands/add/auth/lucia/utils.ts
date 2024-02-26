@@ -152,6 +152,7 @@ export const PrismaLuciaSchema = `model User {
   id             String    @id
   email          String    @unique
   hashedPassword String
+  name           String?
   sessions       Session[]
 }
 
