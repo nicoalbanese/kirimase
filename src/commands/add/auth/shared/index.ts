@@ -27,7 +27,7 @@ export const createAccountSettingsPage = async () => {
   const { shared } = getFilePaths();
   const withShadCn = componentLib === "shadcn-ui" ? true : false;
   // create account api - clerk has managed component so no need
-  if (auth !== "clerk") {
+  if (auth !== "clerk" && auth !== "lucia") {
     createFile(
       formatFilePath(shared.auth.accountApiRoute, {
         prefix: "rootPath",
@@ -70,7 +70,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUpdateNameCard(withShadCn, auth !== "lucia")
+    createUpdateNameCard(withShadCn, auth !== "lucia", auth === "lucia")
   );
 
   // create updatenamecard
@@ -79,7 +79,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUpdateEmailCard(withShadCn, auth !== "lucia")
+    createUpdateEmailCard(withShadCn, auth !== "lucia", auth === "lucia")
   );
 
   // create accountcard components
@@ -100,7 +100,8 @@ export const scaffoldAccountSettingsUI = async (
   //   createNavbar(withShadCn, auth === "clerk", auth)
   // );
 
-  if (withShadCn) {
+  // TODO FIX THIS
+  if (withShadCn && auth !== "lucia") {
     createFile(
       formatFilePath(lucia.signOutButtonComponent, {
         prefix: "rootPath",

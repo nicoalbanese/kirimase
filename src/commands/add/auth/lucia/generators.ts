@@ -1,6 +1,10 @@
 import { DBProvider, DBType, ORMType } from "../../../../types.js";
 import { readConfigFile } from "../../../../utils.js";
-import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import {
+  formatFilePath,
+  getDbIndexPath,
+  getFilePaths,
+} from "../../../filePaths/index.js";
 import {
   generateDrizzleAdapterDriverMappings,
   LuciaAdapterInfo,
@@ -10,10 +14,22 @@ import {
 const generateViewsAndComponents = (withShadCn: boolean) => {
   const signUpPage = generateSignUpPage(withShadCn);
   const signInPage = generateSignInPage(withShadCn);
-  const authFormComponent = generateAuthFormComponent(withShadCn);
+
+  const authFormErrorComponent = generateAuthFormErrorComponent();
+
   const homePage = generateHomePage();
   const loadingPage = generateLoadingPage();
-  return { signUpPage, signInPage, authFormComponent, homePage, loadingPage };
+
+  const updatedSignOutButton = generateUpdatedSignoutButton(withShadCn);
+
+  return {
+    signUpPage,
+    signInPage,
+    authFormErrorComponent,
+    homePage,
+    loadingPage,
+    updatedSignOutButton,
+  };
 };
 export const generateLoadingPage = () => {
   const { componentLib } = readConfigFile();
@@ -52,33 +68,44 @@ export const generateLoadingPage = () => {
 `;
 };
 const generateSignUpPage = (withShadCn: boolean) => {
-  const { lucia, shared } = getFilePaths();
-  const { alias } = readConfigFile();
+  const { lucia } = getFilePaths();
   if (withShadCn) {
-    return `import AuthForm from "${formatFilePath(lucia.authFormComponent, {
-      removeExtension: true,
-      prefix: "alias",
-    })}";
-import Link from "next/link"; 
-import { Input } from "${alias}/components/ui/input";
-import { Label } from "${alias}/components/ui/label";
+    return `"use client";
 
-const Page = async () => {
+import Link from "next/link";
+import { useFormState } from "react-dom";
+import { useFormStatus } from "react-dom";
+
+import { signUpAction } from "${formatFilePath(lucia.usersActions, { prefix: "alias", removeExtension: true })}";
+
+import { Label } from "${formatFilePath(`components/ui/label`, { prefix: "alias", removeExtension: false })}";
+import { Input } from "${formatFilePath(`components/ui/input`, { prefix: "alias", removeExtension: false })}";
+import { Button } from "${formatFilePath(`components/ui/button`, { prefix: "alias", removeExtension: false })}";
+import AuthFormError from "${formatFilePath(`components/auth/AuthFormError`, { prefix: "alias", removeExtension: false })}";
+
+
+export default function SignUpPage() {
+  const [state, formAction] = useFormState(signUpAction, {
+    error: "",
+  });
+
   return (
     <main className="max-w-lg mx-auto my-4 bg-popover p-10">
       <h1 className="text-2xl font-bold text-center">Create an account</h1>
-      <AuthForm action="/api/sign-up">
-        <Label htmlFor="username" className="text-muted-foreground">
-          Username
+      <AuthFormError state={state} />
+      <form action={formAction}>
+        <Label htmlFor="email" className="text-muted-foreground">
+          Email
         </Label>
-        <Input name="username" id="username" />
+        <Input name="email" type="email" id="email" required />
         <br />
         <Label htmlFor="password" className="text-muted-foreground">
           Password
         </Label>
-        <Input type="password" name="password" id="password" />
+        <Input type="password" name="password" id="password" required />
         <br />
-      </AuthForm>
+        <SubmitButton />
+      </form>
       <div className="mt-4 text-muted-foreground text-center text-sm">
         Already have an account?{" "}
         <Link href="/sign-in" className="text-secondary-foreground underline">
@@ -87,37 +114,56 @@ const Page = async () => {
       </div>
     </main>
   );
-};
+}
 
-export default Page;
+const SubmitButton = () => {
+  const { pending } = useFormStatus();
+  return (
+    <Button className="w-full" type="submit" disabled={pending}>
+      Sign{pending ? "ing" : ""} up
+    </Button>
+  );
+};
 `;
   } else {
-    return `import AuthForm from "${formatFilePath(lucia.authFormComponent, {
-      removeExtension: true,
-      prefix: "alias",
-    })}";
-import Link from "next/link";
+    return `
+"use client";
 
-const Page = async () => {
+import Link from "next/link";
+import { useFormState } from "react-dom";
+import { useFormStatus } from "react-dom";
+
+import { signUpAction } from "${formatFilePath(lucia.usersActions, { prefix: "alias", removeExtension: true })}";
+
+import AuthFormError from "${formatFilePath(lucia.formErrorComponent, { prefix: "alias", removeExtension: true })}";
+
+export default function SignUpPage() {
+  const [state, formAction] = useFormState(signUpAction, {
+    error: "",
+  });
+
   return (
-    <main className="max-w-lg mx-auto my-4 bg-white p-10">
+    <main className="max-w-lg mx-auto my-4 bg-popover p-10">
       <h1 className="text-2xl font-bold text-center">Create an account</h1>
-      <AuthForm action="/api/sign-up">
+      <AuthFormError state={state} />
+      <form action={formAction}>
         <label
-          htmlFor="username"
-          className="block font-medium text-sm text-neutral-500"
+          htmlFor="email"
+          className="block font-medium text-sm text-muted-foreground"
         >
-          Username
+          Email
         </label>
         <input
-          name="username"
-          id="username"
-          className="block w-full px-3 py-2 rounded-md border border-neutral-200 focus:outline-neutral-700"
+          name="email"
+          type="email"
+          id="email"
+          required
+          className="block w-full px-3 py-2 rounded-md border border-border focus:outline-primary"
         />
         <br />
         <label
           htmlFor="password"
-          className="block font-medium text-sm text-neutral-500"
+          className="block font-medium text-sm text-muted-foreground"
         >
           Password
         </label>
@@ -125,55 +171,79 @@ const Page = async () => {
           type="password"
           name="password"
           id="password"
-          className="block w-full px-3 py-2 rounded-md border border-neutral-200 focus:outline-neutral-700"
+          required
+          className="block w-full px-3 py-2 rounded-md border border-border focus:outline-primary"
         />
         <br />
-      </AuthForm>
-      <div className="mt-4 text-neutral-500 text-center text-sm">
+        <SubmitButton />
+      </form>
+      <div className="mt-4 text-muted-foreground text-center text-sm">
         Already have an account?{" "}
-        <Link href="/sign-in" className="text-black underline hover:opacity-70">
+        <Link href="/sign-in" className="text-secondary-foreground underline">
           Sign in
         </Link>
       </div>
     </main>
   );
+}
+
+const SubmitButton = () => {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      className="bg-primary w-full p-2.5 rounded-md font-medium text-primary-foreground text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+      type="submit"
+      disabled={pending}
+    >
+      Sign{pending ? "ing" : ""} up
+    </button>
+  );
 };
 
-export default Page;
 `;
   }
 };
 
 const generateSignInPage = (withShadCn: boolean) => {
-  const { lucia, shared } = getFilePaths();
-  const { alias } = readConfigFile();
+  const { lucia } = getFilePaths();
   if (withShadCn) {
-    return `import AuthForm from "${formatFilePath(lucia.authFormComponent, {
-      removeExtension: true,
-      prefix: "alias",
-    })}";
-import { Input } from "${alias}/components/ui/input";
-import { Label } from "${alias}/components/ui/label";
-import Link from "next/link";
+    return `"use client";
 
-const Page = async () => {
+import Link from "next/link";
+import { useFormState } from "react-dom";
+import { useFormStatus } from "react-dom";
+
+import { signInAction } from "${formatFilePath(lucia.usersActions, { prefix: "alias", removeExtension: true })}";
+
+import { Label } from "${formatFilePath(`components/ui/label`, { prefix: "alias", removeExtension: false })}";
+import { Input } from "${formatFilePath(`components/ui/input`, { prefix: "alias", removeExtension: false })}";
+import { Button } from "${formatFilePath(`components/ui/button`, { prefix: "alias", removeExtension: false })}";
+import AuthFormError from "${formatFilePath(`components/auth/AuthFormError`, { prefix: "alias", removeExtension: false })}";
+
+export default function SignInPage() {
+  const [state, formAction] = useFormState(signInAction, {
+    error: "",
+  });
+
   return (
     <main className="max-w-lg mx-auto my-4 bg-popover p-10">
       <h1 className="text-2xl font-bold text-center">
         Sign in to your account
       </h1>
-      <AuthForm action="/api/sign-in">
-        <Label htmlFor="username" className="text-muted-foreground">
-          Username
+      <AuthFormError state={state} />
+      <form action={formAction}>
+        <Label htmlFor="email" className="text-muted-foreground">
+          Email
         </Label>
-        <Input name="username" id="username" />
+        <Input name="email" id="email" type="email" required />
         <br />
         <Label htmlFor="password" className="text-muted-foreground">
           Password
         </Label>
-        <Input type="password" name="password" id="password" />
+        <Input type="password" name="password" id="password" required />
         <br />
-      </AuthForm>
+        <SubmitButton />
+      </form>
       <div className="mt-4 text-sm text-center text-muted-foreground">
         Don&apos;t have an account yet?{" "}
         <Link
@@ -185,39 +255,56 @@ const Page = async () => {
       </div>
     </main>
   );
-};
+}
 
-export default Page;
-`;
-  } else {
-    return `import AuthForm from "${formatFilePath(lucia.authFormComponent, {
-      removeExtension: true,
-      prefix: "alias",
-    })}";
-import Link from "next/link";
-
-const Page = async () => {
+const SubmitButton = () => {
+  const { pending } = useFormStatus();
   return (
-    <main className="max-w-lg mx-auto my-4 bg-white p-10">
+    <Button className="w-full" type="submit" disabled={pending}>
+      Sign{pending ? "ing" : ""} in
+    </Button>
+  );
+};`;
+  } else {
+    return `"use client";
+
+import Link from "next/link";
+import { useFormState } from "react-dom";
+import { useFormStatus } from "react-dom";
+
+import { signInAction } from "${formatFilePath(lucia.usersActions, { prefix: "alias", removeExtension: true })}";
+
+import AuthFormError from "${formatFilePath(lucia.formErrorComponent, { prefix: "alias", removeExtension: true })}";
+
+export default function SignInPage() {
+  const [state, formAction] = useFormState(signInAction, {
+    error: "",
+  });
+
+  return (
+    <main className="max-w-lg mx-auto my-4 bg-popover p-10">
       <h1 className="text-2xl font-bold text-center">
         Sign in to your account
       </h1>
-      <AuthForm action="/api/sign-in">
+      <AuthFormError state={state} />
+      <form action={formAction} className="flex flex-col">
         <label
-          htmlFor="username"
-          className="block font-medium text-sm text-neutral-500"
+          htmlFor="email"
+          className="block font-medium text-sm text-muted-foreground"
         >
-          Username
+          Email
         </label>
         <input
-          name="username"
-          id="username"
-          className="block w-full px-3 py-2 rounded-md border border-neutral-200 focus:outline-neutral-700"
+          name="email"
+          id="email"
+          type="email"
+          required
+          className="block w-full px-3 py-2 rounded-md border border-border focus:outline-primary"
         />
         <br />
         <label
           htmlFor="password"
-          className="block font-medium text-sm text-neutral-500"
+          className="block font-medium text-sm text-muted-foreground"
         >
           Password
         </label>
@@ -225,201 +312,34 @@ const Page = async () => {
           type="password"
           name="password"
           id="password"
-          className="block w-full px-3 py-2 rounded-md border border-neutral-200 focus:outline-neutral-700"
+          required
+          className="block w-full px-3 py-2 rounded-md border border-border focus:outline-primary"
         />
         <br />
-      </AuthForm>
-      <div className="mt-4 text-sm text-center text-neutral-500">
+        <SubmitButton />
+      </form>
+      <div className="mt-4 text-sm text-center text-muted-foreground">
         Don&apos;t have an account yet?{" "}
-        <Link href="/sign-up" className="text-black underline hover:opacity-70">
+        <Link
+          href="/sign-up"
+          className="text-accent-foreground underline hover:text-primary"
+        >
           Create an account
         </Link>
       </div>
     </main>
   );
-};
+}
 
-export default Page;
-`;
-  }
-};
-
-const generateAuthFormComponent = (withShadCn: boolean) => {
-  const { alias } = readConfigFile();
-  if (withShadCn) {
-    return `"use client";
-
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Button } from "${alias}/components/ui/button";
-
-type Action = "/api/sign-in" | "/api/sign-up" | "/api/sign-out";
-
-const AuthForm = ({
-  children,
-  action,
-}: {
-  children?: React.ReactNode;
-  action: Action;
-}) => {
-  const router = useRouter();
-  const [errors, setErrors] = useState<{ error: string } | null>(null);
-  const [loading, setLoading] = useState(false);
-  return (
-    <form
-      action={action}
-      method="post"
-      className="mt-4"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setErrors(null);
-        const formData = new FormData(e.currentTarget);
-        const response = await fetch(action, {
-          method: "POST",
-          body: formData,
-          redirect: "manual",
-        });
-
-        if (response.status === 0) {
-          // redirected
-          // when using \`redirect: "manual"\`, response status 0 is returned
-          return router.refresh();
-        }
-        setErrors(await response.json());
-        setLoading(false);
-      }}
-    >
-      {errors ? (
-        <div className="bg-red-100 p-3 my-4">
-          <h3 className="font-bold text-md">Error!</h3>
-          <p className="text-sm">{errors.error}</p>
-        </div>
-      ) : null}
-      {children}
-      <SubmitButton action={action} loading={loading} />
-    </form>
-  );
-};
-
-export default AuthForm;
-
-const SubmitButton = ({
-  action,
-  loading,
-}: {
-  action: Action;
-  loading: boolean;
-}) => {
-  let buttonSuffix = "";
-  switch (action) {
-    case "/api/sign-in":
-      buttonSuffix = "in";
-      break;
-    case "/api/sign-out":
-      buttonSuffix = "out";
-      break;
-    case "/api/sign-up":
-      buttonSuffix = "up";
-      break;
-  }
-  return (
-    <Button
-      type="submit"
-      className={action === "/api/sign-out" ? "" : "w-full"}
-      disabled={loading}
-      variant={action === "/api/sign-out" ? "destructive" : "default"}
-    >
-      Sign{loading ? "ing" : ""} {buttonSuffix}
-    </Button>
-  );
-};
-`;
-  } else {
-    return `"use client";
-
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-type Action = "/api/sign-in" | "/api/sign-up" | "/api/sign-out";
-
-const AuthForm = ({
-  children,
-  action,
-}: {
-  children?: React.ReactNode;
-  action: Action;
-}) => {
-  const router = useRouter();
-  const [errors, setErrors] = useState<{ error: string } | null>(null);
-  const [loading, setLoading] = useState(false);
-  return (
-    <form
-      action={action}
-      method="post"
-      className="mt-4"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setErrors(null);
-        const formData = new FormData(e.currentTarget);
-        const response = await fetch(action, {
-          method: "POST",
-          body: formData,
-          redirect: "manual",
-        });
-
-        if (response.status === 0) {
-          // redirected
-          // when using \`redirect: "manual"\`, response status 0 is returned
-          return router.refresh();
-        }
-        setErrors(await response.json());
-        setLoading(false);
-      }}
-    >
-      {errors ? (
-        <div className="bg-red-100 p-3 my-4">
-          <h3 className="font-bold text-md">Error!</h3>
-          <p className="text-sm">{errors.error}</p>
-        </div>
-      ) : null}
-      {children}
-      <SubmitButton action={action} loading={loading} />
-    </form>
-  );
-};
-
-export default AuthForm;
-
-const SubmitButton = ({
-  action,
-  loading,
-}: {
-  action: Action;
-  loading: boolean;
-}) => {
-  let buttonSuffix = "";
-  switch (action) {
-    case "/api/sign-in":
-      buttonSuffix = "in";
-      break;
-    case "/api/sign-out":
-      buttonSuffix = "out";
-      break;
-    case "/api/sign-up":
-      buttonSuffix = "up";
-      break;
-  }
+const SubmitButton = () => {
+  const { pending } = useFormStatus();
   return (
     <button
+      className="bg-primary w-full p-2.5 rounded-md font-medium text-primary-foreground text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
       type="submit"
-      className={\`p-2.5 rounded-md font-medium text-white text-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed \${
-        action === "/api/sign-out" ? "bg-red-500" : "bg-neutral-900 w-full"
-      }\`}
-      disabled={loading}
+      disabled={pending}
     >
-      Sign{loading ? "ing" : ""} {buttonSuffix}
+      Sign{pending ? "ing" : ""} in
     </button>
   );
 };
@@ -427,13 +347,30 @@ const SubmitButton = ({
   }
 };
 
+const generateAuthFormErrorComponent = () => {
+  return `export default function AuthFormError({ state }: { state: { error: string } }) {
+  if (state.error)
+    return (
+      <div className="w-full p-4 bg-destructive my-4 text-destructive-foreground text-xs">
+        <h3 className="font-bold">Error</h3>
+        <p>{state.error}</p>
+      </div>
+    );
+  return null;
+}
+`;
+};
+
 const generateHomePage = () => {
   const { lucia, shared } = getFilePaths();
   const { componentLib } = readConfigFile();
-  return `import AuthForm from "${formatFilePath(lucia.authFormComponent, {
-    removeExtension: true,
-    prefix: "alias",
-  })}";
+  return `import SignOutBtn from "${formatFilePath(
+    lucia.signOutButtonComponent,
+    {
+      removeExtension: true,
+      prefix: "alias",
+    }
+  )}";
 import { getUserAuth } from "${formatFilePath(shared.auth.authUtils, {
     prefix: "alias",
     removeExtension: true,
@@ -451,244 +388,293 @@ export default async function Home() {
       } p-4 rounded-lg my-2">
         {JSON.stringify(session, null, 2)}
       </pre>
-      <AuthForm action="/api/sign-out" />
+      <SignOutBtn />
     </main>
   );
 }
 `;
 };
 
-const generateApiRoutes = () => {
-  const { lucia } = getFilePaths();
-  const signUpRoute = `import { auth } from "${formatFilePath(
-    lucia.libAuthLucia,
-    { prefix: "alias", removeExtension: true }
-  )}";
-import { LuciaError } from "lucia";
-import * as context from "next/headers";
-import { NextResponse } from "next/server";
+const generateUserServerActions = () => {
+  const { orm } = readConfigFile();
 
-import type { NextRequest } from "next/server";
+  const dbIndexPath = getDbIndexPath();
 
-export const POST = async (request: NextRequest) => {
-  const formData = await request.formData();
-  const username = formData.get("username");
-  const password = formData.get("password");
-  // basic check
-  if (
-    typeof username !== "string" ||
-    username.length < 4 ||
-    username.length > 31
-  ) {
-    return NextResponse.json(
-      {
-        error: "Invalid username",
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-  if (
-    typeof password !== "string" ||
-    password.length < 6 ||
-    password.length > 255
-  ) {
-    return NextResponse.json(
-      {
-        error: "Invalid password",
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-  try {
-    const user = await auth.createUser({
-      key: {
-        providerId: "username", // auth method
-        providerUserId: username.toLowerCase(), // unique id when using "username" auth method
-        password, // hashed by Lucia
-      },
-      attributes: {
-        username,
-        name: "",
-        email: "",
-      },
-    });
-    const session = await auth.createSession({
-      userId: user.userId,
-      attributes: {},
-    });
-    const authRequest = auth.handleRequest(request.method, context);
-    authRequest.setSession(session);
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: "/dashboard", // redirect to profile page
-      },
-    });
-  } catch (e) {
-    // this part depends on the database you're using
-    // check for unique constraint error in user table
-    console.log(e);
-    if (e instanceof LuciaError && e.message === "AUTH_DUPLICATE_KEY_ID") {
-      return NextResponse.json(
-        {
-          error: "Username already taken",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
+  if (orm === "prisma") {
+    return `'use server'
 
-    return NextResponse.json(
-      {
-        error: "An unknown error occurred",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
-};
-`;
-  const signInRoute = `import { auth } from "${formatFilePath(
-    lucia.libAuthLucia,
-    { prefix: "alias", removeExtension: true }
-  )}";
-import * as context from "next/headers";
-import { NextResponse } from "next/server";
-import { LuciaError } from "lucia";
+import { revalidatePath } from "next/cache";
+import { redirect } from 'next/navigation'
 
-import type { NextRequest } from "next/server";
+import { db } from "${formatFilePath(dbIndexPath, { removeExtension: true, prefix: "alias" })}";
 
-export const POST = async (request: NextRequest) => {
-  const formData = await request.formData();
-  const username = formData.get("username");
-  const password = formData.get("password");
-  // basic check
-  if (
-    typeof username !== "string" ||
-    username.length < 1 ||
-    username.length > 31
-  ) {
-    return NextResponse.json(
-      {
-        error: "Invalid username",
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-  if (
-    typeof password !== "string" ||
-    password.length < 1 ||
-    password.length > 255
-  ) {
-    return NextResponse.json(
-      {
-        error: "Invalid password",
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-  try {
-    // find user by key
-    // and validate password
-    const key = await auth.useKey("username", username.toLowerCase(), password);
-    const session = await auth.createSession({
-      userId: key.userId,
-      attributes: {},
-    });
-    const authRequest = auth.handleRequest(request.method, context);
-    authRequest.setSession(session);
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: "/dashboard", // redirect to profile page
-      },
-    });
-  } catch (e) {
-    if (
-      e instanceof LuciaError &&
-      (e.message === "AUTH_INVALID_KEY_ID" ||
-        e.message === "AUTH_INVALID_PASSWORD")
-    ) {
-      // user does not exist or invalid password
-      return NextResponse.json(
-        {
-          error: "Incorrect username or password",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-    return NextResponse.json(
-      {
-        error: "An unknown error occurred",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
-};
-`;
-  const signOutRoute = `import { auth } from "${formatFilePath(
-    lucia.libAuthLucia,
-    { prefix: "alias", removeExtension: true }
-  )}";
-import * as context from "next/headers";
+import { Argon2id } from 'oslo/password'
+import { generateId } from 'lucia'
+import { lucia, validateRequest } from '../auth/lucia'
+import {
+  genericError,
+  setAuthCookie,
+  validateAuthFormData,
+  getUserAuth,
+} from '../auth/utils'
 
-import type { NextRequest } from "next/server";
+import { updateUserSchema } from "../db/schema/auth";
 
-export const POST = async (request: NextRequest) => {
-  const authRequest = auth.handleRequest(request.method, context);
-  // check if user is authenticated
-  const session = await authRequest.validate();
-  if (!session) {
-    return new Response(null, {
-      status: 401,
-    });
-  }
-  // make sure to invalidate the current session!
-  await auth.invalidateSession(session.sessionId);
-  // delete session cookie
-  authRequest.setSession(null);
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: "/sign-in", // redirect to login page
-    },
-  });
-};
-`;
-  return { signInRoute, signUpRoute, signOutRoute };
-};
-
-const generateAppDTs = () => {
-  const { lucia } = getFilePaths();
-  return `// app.d.ts
-/// <reference types="lucia" />
-declare namespace Lucia {
-  type Auth = import("${formatFilePath(lucia.libAuthLucia, {
-    prefix: "alias",
-    removeExtension: true,
-  })}").Auth;
-  type DatabaseUserAttributes = {
-    username: string;
-    name: string;
-    email: string;
-  };
-  type DatabaseSessionAttributes = {};
+interface ActionResult {
+  error: string
 }
+
+export async function signInAction(
+  _: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const { data, error } = validateAuthFormData(formData)
+  if (error !== null) return { error }
+
+  try {
+    const existingUser = await db.user.findUnique({
+      where: { email: data.email.toLowerCase() },
+    })
+    if (!existingUser) {
+      return {
+        error: 'Incorrect username or password',
+      }
+    }
+
+    const validPassword = await new Argon2id().verify(
+      existingUser.hashedPassword,
+      data.password
+    )
+    if (!validPassword) {
+      return {
+        error: 'Incorrect username or password',
+      }
+    }
+
+    const session = await lucia.createSession(existingUser.id, {})
+    const sessionCookie = lucia.createSessionCookie(session.id)
+    setAuthCookie(sessionCookie);
+
+    return redirect('/dashboard')
+  } catch (e) {
+    return genericError
+  }
+}
+
+export async function signUpAction(
+  _: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const { data, error } = validateAuthFormData(formData)
+
+  if (error !== null) return { error }
+
+  const hashedPassword = await new Argon2id().hash(data.password)
+  const userId = generateId(15)
+
+  try {
+    await db.user.create({
+      data: {
+        id: userId,
+        email: data.email,
+        hashedPassword,
+      },
+    })
+  } catch (e) {
+    return genericError
+  }
+
+  const session = await lucia.createSession(userId, {})
+  const sessionCookie = lucia.createSessionCookie(session.id)
+  setAuthCookie(sessionCookie)
+  return redirect('/dashboard')
+}
+
+export async function signOutAction(): Promise<ActionResult> {
+  const { session } = await validateRequest()
+  if (!session) {
+    return {
+      error: 'Unauthorized',
+    }
+  }
+
+  await lucia.invalidateSession(session.id)
+
+  const sessionCookie = lucia.createBlankSessionCookie()
+  setAuthCookie(sessionCookie)
+  redirect('/sign-in')
+}
+
+export async function updateUser(
+  _: any,
+  formData: FormData,
+): Promise<ActionResult & { success?: boolean }> {
+  const { session } = await getUserAuth();
+  if (!session) return { error: "Unauthorised" };
+
+  const name = formData.get("name") ?? undefined;
+  const email = formData.get("email") ?? undefined;
+
+  const result = updateUserSchema.safeParse({ name, email });
+
+  if (!result.success) {
+    const error = result.error.flatten().fieldErrors;
+    if (error.name) return { error: "Invalid name - " + error.name[0] };
+    if (error.email) return { error: "Invalid email - " + error.email[0] };
+    return genericError;
+  }
+
+  try {
+    await db.user.update({
+      data: { ...result.data },
+      where: { id: session.user.id },
+    });
+    revalidatePath("/account");
+    return { success: true, error: "" };
+  } catch (e) {
+    return genericError;
+  }
+}
+
 `;
+  }
+  if (orm === "drizzle") {
+    return `"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+import { Argon2id } from "oslo/password";
+import { lucia, validateRequest } from "../auth/lucia";
+import { generateId } from "lucia";
+import { eq } from "drizzle-orm";
+import { db } from "${formatFilePath(dbIndexPath, { removeExtension: true, prefix: "alias" })}";
+
+import {
+  genericError,
+  setAuthCookie,
+  validateAuthFormData,
+  getUserAuth,
+} from "../auth/utils";
+import { users, updateUserSchema } from "../db/schema/auth";
+
+interface ActionResult {
+  error: string;
+}
+
+export async function signInAction(
+  _: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { data, error } = validateAuthFormData(formData);
+  if (error !== null) return { error };
+
+  try {
+    const [existingUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, data.email.toLowerCase()));
+    if (!existingUser) {
+      return {
+        error: "Incorrect username or password",
+      };
+    }
+
+    const validPassword = await new Argon2id().verify(
+      existingUser.hashedPassword,
+      data.password,
+    );
+    if (!validPassword) {
+      return {
+        error: "Incorrect username or password",
+      };
+    }
+
+    const session = await lucia.createSession(existingUser.id, {});
+    const sessionCookie = lucia.createSessionCookie(session.id);
+    setAuthCookie(sessionCookie);
+
+    return redirect("/dashboard");
+  } catch (e) {
+    return genericError;
+  }
+}
+
+export async function signUpAction(
+  _: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { data, error } = validateAuthFormData(formData);
+
+  if (error !== null) return { error };
+
+  const hashedPassword = await new Argon2id().hash(data.password);
+  const userId = generateId(15);
+
+  try {
+    await db.insert(users).values({
+      id: userId,
+      email: data.email,
+      hashedPassword,
+    });
+  } catch (e) {
+    return genericError;
+  }
+
+  const session = await lucia.createSession(userId, {});
+  const sessionCookie = lucia.createSessionCookie(session.id);
+  setAuthCookie(sessionCookie);
+  return redirect("/dashboard");
+}
+
+export async function signOutAction(): Promise<ActionResult> {
+  const { session } = await validateRequest();
+  if (!session) {
+    return {
+      error: "Unauthorized",
+    };
+  }
+
+  await lucia.invalidateSession(session.id);
+
+  const sessionCookie = lucia.createBlankSessionCookie();
+  setAuthCookie(sessionCookie);
+  redirect("/sign-in");
+}
+
+export async function updateUser(
+  _: any,
+  formData: FormData,
+): Promise<ActionResult & { success?: boolean }> {
+  const { session } = await getUserAuth();
+  if (!session) return { error: "Unauthorised" };
+
+  const name = formData.get("name") ?? undefined;
+  const email = formData.get("email") ?? undefined;
+
+  const result = updateUserSchema.safeParse({ name, email });
+
+  if (!result.success) {
+    const error = result.error.flatten().fieldErrors;
+    if (error.name) return { error: "Invalid name - " + error.name[0] };
+    if (error.email) return { error: "Invalid email - " + error.email[0] };
+    return genericError;
+  }
+
+  try {
+    await db
+      .update(users)
+      .set({ ...result.data })
+      .where(eq(users.id, session.user.id));
+    revalidatePath("/account");
+    return { success: true, error: "" };
+  } catch (e) {
+    return genericError;
+  }
+}
+
+`;
+  }
 };
 
 const generateAuthDirFiles = (
@@ -696,7 +682,7 @@ const generateAuthDirFiles = (
   dbType: DBType,
   provider: DBProvider
 ) => {
-  const { lucia } = getFilePaths();
+  const dbIndexPath = getDbIndexPath();
   let mappings: LuciaAdapterInfo;
   const DrizzleAdapterDriverMappings = generateDrizzleAdapterDriverMappings();
   const PrismaAdapterDriverMappings = generatePrismaAdapterDriverMappings();
@@ -705,77 +691,212 @@ const generateAuthDirFiles = (
     mappings = DrizzleAdapterDriverMappings[dbType][provider];
   if (orm === "prisma") mappings = PrismaAdapterDriverMappings;
 
-  const utilsTs = `import { redirect } from "next/navigation";
-import { getPageSession } from "${formatFilePath(lucia.libAuthLucia, {
-    removeExtension: true,
-    prefix: "alias",
-  })}";
+  const utilsTs = `import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
+
+import { type Cookie } from 'lucia'
+
+import { validateRequest } from './lucia'
+import { UsernameAndPassword, authenticationSchema } from '../db/schema/auth'
 
 export type AuthSession = {
   session: {
     user: {
-      id: string;
-      name?: string;
-      email?: string;
-      username?: string;
-    };
-  } | null;
-};
+      id: string
+      name?: string
+      email?: string
+      username?: string
+    }
+  } | null
+}
 export const getUserAuth = async (): Promise<AuthSession> => {
-  const session = await getPageSession();
-  if (!session) return { session: null };
+  const { session, user } = await validateRequest()
+  if (!session) return { session: null }
   return {
     session: {
       user: {
-        id: session.user?.userId,
-        name: session.user?.name,
-        email: session.user?.email,
-        username: session.user?.username,
+        id: user.id,
+        email: user.email,
+        name: user.name,
       },
     },
-  };
-};
+  }
+}
 
 export const checkAuth = async () => {
-  const session = await getPageSession();
-  if (!session) redirect("/sign-in");
-};
+  const { session } = await validateRequest()
+  if (!session) redirect('/sign-in')
+}
+
+export const genericError = { error: 'Error, please try again.' }
+
+export const setAuthCookie = (cookie: Cookie) => {
+  // cookies().set(cookie.name, cookie.value, cookie.attributes); // <- suggested approach from the docs, but does not work with \`next build\` locally
+  cookies().set(cookie);
+}
+
+const getErrorMessage = (errors: any): string => {
+  if (errors.email) return 'Invalid Email'
+  if (errors.password) return 'Invalid Password - ' + errors.password[0]
+  return '' // return a default error message or an empty string
+}
+
+export const validateAuthFormData = (
+  formData: FormData
+):
+  | { data: UsernameAndPassword; error: null }
+  | { data: null; error: string } => {
+  const email = formData.get('email')
+  const password = formData.get('password')
+  const result = authenticationSchema.safeParse({ email, password })
+
+  if (!result.success) {
+    return {
+      data: null,
+      error: getErrorMessage(result.error.flatten().fieldErrors),
+    }
+  }
+
+  return { data: result.data, error: null }
+}
+
 `;
-  const luciaTs = `import { lucia } from "lucia";
-import { nextjs_future } from "lucia/middleware";
-import { cache } from "react";
-import * as context from "next/headers";
+  const luciaTs = `import { cookies } from 'next/headers'
+import { cache } from 'react'
+
+import { type Session, type User, Lucia } from 'lucia'
+import { db } from "${formatFilePath(dbIndexPath, { prefix: "alias", removeExtension: true })}";
+
 ${mappings.import}
 
-export const auth = lucia({
-  ${mappings.adapter},
-  env: "DEV",
-  middleware: nextjs_future(),
-  sessionCookie: { expires: false },
-  getUserAttributes: (data) => {
-    return {
-      username: data.username,
-      email: data.email,
-      name: data.name,
-    };
+${mappings.adapter}
+
+export const lucia = new Lucia(adapter, {
+  sessionCookie: {
+    expires: false,
+    attributes: {
+      secure: process.env.NODE_ENV === 'production',
+    },
   },
-});
+  getUserAttributes: (attributes) => {
+    return {
+      // attributes has the type of DatabaseUserAttributes
+      email: attributes.email,
+      name: attributes.name,
+    }
+  },
+})
 
-export type Auth = typeof auth;
+declare module 'lucia' {
+  interface Register {
+    Lucia: typeof lucia
+    DatabaseUserAttributes: DatabaseUserAttributes
+  }
+}
 
-export const getPageSession = cache(() => {
-  const authRequest = auth.handleRequest("GET", context);
-  return authRequest.validate();
-});
+interface DatabaseUserAttributes {
+  email: string
+  name: string;
+}
 
+export const validateRequest = cache(
+  async (): Promise<
+    { user: User; session: Session } | { user: null; session: null }
+  > => {
+    const sessionId = cookies().get(lucia.sessionCookieName)?.value ?? null
+    if (!sessionId) {
+      return {
+        user: null,
+        session: null,
+      }
+    }
+
+    const result = await lucia.validateSession(sessionId)
+    // next.js throws when you attempt to set cookie when rendering page
+    try {
+      if (result.session && result.session.fresh) {
+        const sessionCookie = lucia.createSessionCookie(result.session.id)
+        cookies().set(
+          sessionCookie.name,
+          sessionCookie.value,
+          sessionCookie.attributes
+        )
+      }
+      if (!result.session) {
+        const sessionCookie = lucia.createBlankSessionCookie()
+        cookies().set(
+          sessionCookie.name,
+          sessionCookie.value,
+          sessionCookie.attributes
+        )
+      }
+    } catch {}
+    return result
+  }
+)
 `;
 
   return { utilsTs, luciaTs };
 };
 
+const generateUpdatedSignoutButton = (withShadcn: boolean) => {
+  const { lucia } = getFilePaths();
+  if (withShadcn) {
+    return `"use client";
+
+import { Button } from "../ui/button";
+import { useFormStatus } from "react-dom";
+import { signOutAction } from "${formatFilePath(lucia.usersActions, { prefix: "alias", removeExtension: true })}";
+
+export default function SignOutBtn() {
+  return (
+    <form action={signOutAction} className="w-full text-left">
+      <Btn />
+    </form>
+  );
+}
+
+const Btn = () => {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending} variant={"destructive"}>
+      Sign{pending ? "ing" : ""} out
+    </Button>
+  );
+};
+`;
+  } else {
+    return `"use client";
+
+import { useFormStatus } from "react-dom";
+import { signOutAction } from "${formatFilePath(lucia.usersActions, { prefix: "alias", removeExtension: true })}";
+
+export default function SignOutBtn() {
+  return (
+    <form action={signOutAction} className="w-full text-left">
+      <Btn />
+    </form>
+  );
+}
+
+const Btn = () => {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="bg-destructive text-destructive-foreground px-2.5 py-1.5 text-sm rounded-md hover:opacity-90 disabled:opacity-50"
+    >
+      Sign{pending ? "ing" : ""} out
+    </button>
+  );
+};
+`;
+  }
+};
+
 export const luciaGenerators = {
   generateViewsAndComponents,
-  generateApiRoutes,
-  generateAppDTs,
   generateAuthDirFiles,
+  generateUserServerActions,
 };

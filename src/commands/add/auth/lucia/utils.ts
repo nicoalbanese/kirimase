@@ -29,284 +29,146 @@ export type LuciaAdapterInfo = {
 
 export const generateDrizzleAdapterDriverMappings = () => {
   const dbIndex = getDbIndexPath();
+  const pgAdapter = {
+    adapter: `export const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users);`,
+    adapterPackage: "@lucia-auth/adapter-drizzle",
+    import: `import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
+import { sessions, users } from "../db/schema/auth";
+`,
+  };
+
+  const mySqlAdapter = {
+    adapter: `export const adapter = new DrizzleMySQLAdapter(db, sessions, users);`,
+    adapterPackage: "@lucia-auth/adapter-drizzle",
+    import: `import { DrizzleMySQLAdapter } from "@lucia-auth/adapter-drizzle";
+import { sessions, users } from "../db/schema/auth";
+`,
+  };
+
+  const sqliteAdapter = {
+    adapter: `export const adapter = new DrizzleSQLiteAdapter(db, sessions, users);`,
+    adapterPackage: "@lucia-auth/adapter-drizzle",
+    import: `import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
+import { sessions, users } from "../db/schema/auth";
+`,
+  };
+
   const DrizzleAdapterDriverMappings: {
     [k in DBType]: Partial<{
       [k in DBProvider]: LuciaAdapterInfo;
     }>;
   } = {
     pg: {
-      neon: {
-        adapter: `adapter: pg(pool, {
-		user: "auth_user",
-		key: "user_key",
-		session: "user_session"
-	})`,
-        adapterPackage: "@lucia-auth/adapter-postgresql@2.0.2",
-        import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
-          dbIndex,
-          { removeExtension: true, prefix: "alias" }
-        )}"`,
-      },
-      supabase: {
-        adapter: `adapter: pg(pool, {
-		user: "auth_user",
-		key: "user_key",
-		session: "user_session"
-	})`,
-        adapterPackage: "@lucia-auth/adapter-postgresql@2.0.2",
-        import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
-          dbIndex,
-          { removeExtension: true, prefix: "alias" }
-        )}"`,
-      },
-      postgresjs: {
-        adapter: `adapter: postgresAdapter(client, {
-		user: "auth_user",
-		key: "user_key",
-		session: "user_session"
-	})`,
-        adapterPackage: "@lucia-auth/adapter-postgresql@2.0.2",
-        import: `import { postgres as postgresAdapter } from "@lucia-auth/adapter-postgresql";\nimport { client } from "${formatFilePath(
-          dbIndex,
-          { removeExtension: true, prefix: "alias" }
-        )}"`,
-      },
-      "node-postgres": {
-        adapter: `adapter: pg(pool, {
-		user: "auth_user",
-		key: "user_key",
-		session: "user_session"
-	})`,
-        adapterPackage: "@lucia-auth/adapter-postgresql@2.0.2",
-        import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { pool } from "${formatFilePath(
-          dbIndex,
-          { removeExtension: true, prefix: "alias" }
-        )}"`,
-      },
-      "vercel-pg": {
-        adapter: `adapter: pg(db, {
-		user: "auth_user",
-		key: "user_key",
-		session: "user_session"
-	})`,
-        adapterPackage: "@lucia-auth/adapter-postgresql@2.0.2",
-        import: `import { pg } from "@lucia-auth/adapter-postgresql";\nimport { db } from "@vercel/postgres";
-`,
-      },
+      neon: pgAdapter,
+      supabase: pgAdapter,
+      postgresjs: pgAdapter,
+      "node-postgres": pgAdapter,
+      "vercel-pg": pgAdapter,
     },
     mysql: {
-      "mysql-2": {
-        adapter: `adapter: mysql2(poolConnection, {
-		user: "user",
-		key: "user_key",
-		session: "user_session"
-	})`,
-        adapterPackage: "@lucia-auth/adapter-mysql@2.1.0",
-        import: `import { mysql2 } from "@lucia-auth/adapter-mysql";\nimport { poolConnection } from "${formatFilePath(
-          dbIndex,
-          { removeExtension: true, prefix: "alias" }
-        )}"`,
-      },
-      planetscale: {
-        import: `import { planetscale } from "@lucia-auth/adapter-mysql";\nimport { connection } from "${formatFilePath(
-          dbIndex,
-          { removeExtension: true, prefix: "alias" }
-        )}"`,
-        adapterPackage: "@lucia-auth/adapter-mysql@2.1.0",
-        adapter: `adapter: planetscale(connection, {
-		user: "auth_user",
-		key: "user_key",
-		session: "user_session"
-	})`,
-      },
+      "mysql-2": mySqlAdapter,
+      planetscale: mySqlAdapter,
     },
     sqlite: {
-      "better-sqlite3": {
-        adapter: `adapter: betterSqlite3(sqlite, {
-		user: "user",
-		key: "user_key",
-		session: "user_session"
-	})`,
-        adapterPackage: "@lucia-auth/adapter-sqlite@2.0.1",
-        import: `import { betterSqlite3 } from "@lucia-auth/adapter-sqlite";\nimport { sqlite } from "${formatFilePath(
-          dbIndex,
-          { removeExtension: true, prefix: "alias" }
-        )}"`,
-      },
-      turso: {
-        adapter: `adapter: libsql(sqlite, {
-		user: "user",
-		key: "user_key",
-		session: "user_session"
-	})`,
-        adapterPackage: "@lucia-auth/adapter-sqlite@2.0.1",
-        import: `import { libsql } from "@lucia-auth/adapter-sqlite";\nimport { sqlite } from "${formatFilePath(
-          dbIndex,
-          { removeExtension: true, prefix: "alias" }
-        )}"`,
-      },
+      "better-sqlite3": sqliteAdapter,
+      turso: sqliteAdapter,
     },
   };
   return DrizzleAdapterDriverMappings;
 };
 
 export const DrizzleLuciaSchema: { [k in DBType]: string } = {
-  pg: `import { pgTable, bigint, varchar } from "drizzle-orm/pg-core";
+  pg: `import { z } from "zod";  
+import { pgTable, timestamp, text } from "drizzle-orm/pg-core";
 
-export const users = pgTable("auth_user", {
-	id: varchar("id", {
-		length: 15 // change this when using custom user ids
-	}).primaryKey(),
-	// other user attributes
-	name: varchar("name", { length: 255 }),
-	email: varchar("email", { length: 255 }),
-	username: varchar("username", { length: 255 }),
+export const users = pgTable("user", {
+	id: text("id").primaryKey(),
+        email: text("email").notNull().unique(),
+        hashedPassword: text("hashed_password").notNull(),
+        name: text("name"),
 });
 
-export const sessions = pgTable("user_session", {
+export const sessions = pgTable("session", {
+	id: text("id").primaryKey(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => users.id),
+	expiresAt: timestamp("expires_at", {
+		withTimezone: true,
+		mode: "date"
+	}).notNull()
+});
+`,
+  mysql: `import { z } from "zod";
+import { mysqlTable, varchar, datetime } from "drizzle-orm/mysql-core";
+
+export const users = mysqlTable("user", {
 	id: varchar("id", {
-		length: 128
+		length: 255
+	}).primaryKey(),
+	email: varchar("email", {
+		length: 255
+	}).notNull(),
+	hashedPassword: varchar("hashed_password", {
+		length: 255
+	}).notNull(),
+	name: varchar("name", {
+		length: 255
+	})
+});
+
+export const sessions = mysqlTable("session", {
+	id: varchar("id", {
+		length: 255
 	}).primaryKey(),
 	userId: varchar("user_id", {
-		length: 15
+		length: 255
 	})
 		.notNull()
 		.references(() => users.id),
-	activeExpires: bigint("active_expires", {
-		mode: "number"
-	}).notNull(),
-	idleExpires: bigint("idle_expires", {
-		mode: "number"
-	}).notNull()
-});
-
-export const keys = pgTable("user_key", {
-	id: varchar("id", {
-		length: 255
-	}).primaryKey(),
-	userId: varchar("user_id", {
-		length: 15
-	})
-		.notNull()
-		.references(() => users.id),
-	hashedPassword: varchar("hashed_password", {
-		length: 255
-	})
+	expiresAt: datetime("expires_at").notNull()
 });`,
-  mysql: `import { mysqlTable, bigint, varchar } from "drizzle-orm/mysql-core";
-
-export const users = mysqlTable("auth_user", {
-	id: varchar("id", {
-		length: 15 // change this when using custom user ids
-	}).primaryKey(),
-	// other user attributes
-	name: varchar("name", { length: 255 }),
-	email: varchar("email", { length: 255 }),
-	username: varchar("username", { length: 255 }),
-});
-
-export const keys = mysqlTable("user_key", {
-	id: varchar("id", {
-		length: 255
-	}).primaryKey(),
-	userId: varchar("user_id", {
-		length: 15
-	})
-		.notNull(),
-		// .references(() => users.id),
-	hashedPassword: varchar("hashed_password", {
-		length: 255
-	})
-});
-
-export const sessions = mysqlTable("user_session", {
-	id: varchar("id", {
-		length: 128
-	}).primaryKey(),
-	userId: varchar("user_id", {
-		length: 15
-	})
-		.notNull(),
-		// .references(() => users.id),
-	activeExpires: bigint("active_expires", {
-		mode: "number"
-	}).notNull(),
-	idleExpires: bigint("idle_expires", {
-		mode: "number"
-	}).notNull()
-});`,
-  sqlite: `import { sqliteTable, text, blob } from "drizzle-orm/sqlite-core";
+  sqlite: `import { z } from "zod";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("user", {
-	id: text("id").primaryKey(),
-	// other user attributes
-	name: text("name"),
-	email: text("email"),
-	username: text("username"),
+        id: text("id").notNull().primaryKey(),
+        email: text("email").notNull().unique(),
+        hashedPassword: text("hashed_password").notNull(),
+        name: text("name"),
 });
 
-export const sessions = sqliteTable("user_session", {
-	id: text("id").primaryKey(),
-	userId: text("user_id")
-		.notNull()
-		.references(() => users.id),
-	activeExpires: blob("active_expires", {
-		mode: "bigint"
-	}).notNull(),
-	idleExpires: blob("idle_expires", {
-		mode: "bigint"
-	}).notNull()
+export const sessions = sqliteTable("session", {
+        id: text("id").notNull().primaryKey(),
+        userId: text("user_id")
+        .notNull()
+        .references(() => users.id),
+        expiresAt: integer("expires_at").notNull(),
 });
-
-export const keys = sqliteTable("user_key", {
-	id: text("id").primaryKey(),
-	userId: text("user_id")
-		.notNull()
-		.references(() => users.id),
-	hashedPassword: text("hashed_password")
-});`,
+`,
 };
 
 export const PrismaLuciaSchema = `model User {
-  id           String    @id @unique
-
-  username String
-  name     String?
-  email    String?
-
-
-  auth_session Session[]
-  key          Key[]
+  id             String    @id
+  email          String    @unique
+  hashedPassword String
+  name           String?
+  sessions       Session[]
 }
 
 model Session {
-  id             String @id @unique
-  user_id        String
-  active_expires BigInt
-  idle_expires   BigInt
-  user           User   @relation(references: [id], fields: [user_id], onDelete: Cascade)
-
-  @@index([user_id])
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
 }
-
-model Key {
-  id              String  @id @unique
-  hashed_password String?
-  user_id         String
-  user            User    @relation(references: [id], fields: [user_id], onDelete: Cascade)
-
-  @@index([user_id])
-}`;
+`;
 
 export const generatePrismaAdapterDriverMappings = () => {
-  const dbIndex = getDbIndexPath();
   const PrismaAdapterDriverMappings: LuciaAdapterInfo = {
-    import: `import { prisma } from "@lucia-auth/adapter-prisma";\nimport { db } from "${formatFilePath(
-      dbIndex,
-      { removeExtension: true, prefix: "alias" }
-    )}";`,
-    adapter: `adapter: prisma(db)`,
-    adapterPackage: `@lucia-auth/adapter-prisma@3.0.2`,
+    import: `import { PrismaAdapter } from "@lucia-auth/adapter-prisma";;`,
+    adapter: `const adapter = new PrismaAdapter(db.session, db.user)`,
+    adapterPackage: `@lucia-auth/adapter-prisma`,
   };
   return PrismaAdapterDriverMappings;
 };
@@ -355,4 +217,24 @@ export const db = drizzle(connection, { schema });
   }
   // TODO: NOW
   updateRootSchema("auth", true, "lucia");
+};
+
+export const addNodeRsFlagsToNextConfig = () => {
+  const searchQuery = "const nextConfig = {};";
+  const replacementText = `const nextConfig = {
+  webpack: (config) => {
+    config.externals.push("@node-rs/argon2", "@node-rs/bcrypt");
+    return config;
+  },
+};
+`;
+  const path = "next.config.mjs";
+  const ncExists = existsSync(path);
+  if (!ncExists) {
+    console.log("Could not find `next.config.mjs`. Please update it manually.");
+  }
+
+  const ncContents = readFileSync(path, "utf-8");
+  const ncUpdated = ncContents.replace(searchQuery, replacementText);
+  replaceFile(path, ncUpdated);
 };

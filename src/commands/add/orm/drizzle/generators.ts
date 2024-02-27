@@ -107,7 +107,7 @@ export const pool = new Pool({
 export const db = drizzle(pool);`;
       break;
     case "neon":
-      indexTS = `import { neon, neonConfig } from '@neondatabase/serverless';
+      indexTS = `import { neon, neonConfig, NeonQueryFunction } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { env } from "${formatFilePath(envMjs, {
         removeExtension: false,
@@ -116,7 +116,7 @@ import { env } from "${formatFilePath(envMjs, {
 
 neonConfig.fetchConnectionCache = true;
  
-export const sql = neon(env.DATABASE_URL);
+export const sql: NeonQueryFunction<boolean, boolean> = neon(env.DATABASE_URL);
 export const db = drizzle(sql);
 `;
       break;
@@ -283,12 +283,12 @@ const db = drizzle(client);
       imports = `
 import { drizzle } from "drizzle-orm/neon-http";
 import { migrate } from "drizzle-orm/neon-http/migrator";
-import { neon, neonConfig } from '@neondatabase/serverless';
+import { neon, neonConfig, NeonQueryFunction } from '@neondatabase/serverless';
 `;
       connectionLogic = `
 neonConfig.fetchConnectionCache = true;
  
-const sql = neon(env.DATABASE_URL);
+const sql: NeonQueryFunction<boolean, boolean> = neon(env.DATABASE_URL);
 const db = drizzle(sql);
 `;
       break;
