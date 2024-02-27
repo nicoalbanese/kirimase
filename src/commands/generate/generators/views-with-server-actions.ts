@@ -87,7 +87,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
         `app/(app)/${tableNameKebabCase}/columns.tsx`,
         { prefix: "rootPath", removeExtension: false }
       ),
-      eta.render('DataTable/columns.eta', { fields: schema.fields, baseRoute: tableNameKebabCase })
+      eta.render('DataTable/columns.eta', { fields: schema.fields, tableNameKebabCase })
     );
 
     // create components/tableName/TableNameForm.tsx

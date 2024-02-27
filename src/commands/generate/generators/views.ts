@@ -15,6 +15,7 @@ import {
   toCamelCase,
   toNormalEnglish,
 } from "../utils.js";
+import fs from 'fs';
 import { addToShadcnComponentList } from "../../add/utils.js";
 import eta from "../../../eta.js";
 
@@ -23,6 +24,7 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
   const {
     tableNameCamelCase,
     tableNameSingularCapitalised,
+    tableNameSingular,
     tableNameKebabCase,
   } = formatTableName(schema.tableName);
   // require trpc for these views
@@ -33,13 +35,22 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
       rootPath.concat(`app/(app)/${tableNameKebabCase}/page.tsx`),
       generateView(schema)
     );
+
+    // create tableName/[id]/page.tsx
+    createFile(
+      formatFilePath(
+        `app/(app)/${tableNameKebabCase}/[${tableNameSingular}Id]/page.tsx`,
+        { removeExtension: false, prefix: "rootPath" }
+      ),
+      createShowPage(schema)
+    );
     // create components/tableName/TableNameList.tsx
     createFile(
       rootPath.concat(
         `components/${tableNameCamelCase}/${tableNameSingularCapitalised}List.tsx`
-      ),
+        ),
       createListComponent(schema)
-    );
+      );
     // create components/tableName/TableNameForm.tsx
     createFile(
       rootPath.concat(
@@ -50,7 +61,7 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
     // create components/tableName/columns.tsx
     createFile(
       rootPath.concat(`components/${tableNameCamelCase}/columns.tsx`),
-      eta.render('DataTable/columns.eta', { fields: schema.fields, baseRoute: tableNameKebabCase })
+      eta.render('DataTable/columns.eta', { fields: schema.fields, tableNameKebabCase })
     );
     // create components/tableName/TableNameModal.tsx
     createFile(
@@ -107,8 +118,8 @@ import { api } from "${formatFilePath(trpc.trpcApiTs, {
         })}";`
       : ""
   }
-import { DataTable } from "${alias}/components/ui/dataTable";
-import { columns } from "./columns";
+import { DataTable } from "${alias}/components/ui/DataTable";
+import { columns } from "${alias}/components/${tableNameCamelCase}/columns";
 
 export default async function ${tableNameCapitalised}() {
   ${
@@ -122,12 +133,47 @@ export default async function ${tableNameCapitalised}() {
         <New${tableNameSingularCapitalised}Modal />
       </div>
       <DataTable data={${tableNameCamelCase}} columns={columns} />
-      <${tableNameSingularCapitalised}List ${tableNameCamelCase}={${tableNameCamelCase}} />
     </main>
   );
 }
 `;
 };
+
+const createShowPage = (schema: Schema) => {
+  const {
+    tableNameCamelCase,
+    tableNameSingularCapitalised,
+    tableNameKebabCase,
+    tableNameSingular,
+    tableNameNormalEnglishCapitalised,
+  } = formatTableName(schema.tableName);
+  const { trpc } = getFilePaths();
+  const { alias } = readConfigFile();
+  const trpcRoute = formatFilePath(trpc.trpcApiTs, {
+    prefix: "alias",
+    removeExtension: true,
+  })
+  const { fields } = schema;
+  if (!fs.existsSync(`src/compononents/ui/breadcrumbs.tsx`)) {
+    createFile(
+      `src/components/ui/breadcrumbs.tsx`,
+      eta.render('components/ui/breadcrumbs.eta', {})
+    )
+  }
+
+  return eta.render(
+    'resources/show.eta', { 
+      fields, 
+      tableNameSingular, 
+      tableNameSingularCapitalised,
+      tableNameCamelCase,
+      tableNameKebabCase,
+      tableNameNormalEnglishCapitalised,
+      alias,
+      trpcRoute
+    }
+  )
+}
 
 const queryHasJoins = (tableName: string) => {
   // const { hasSrc } = readConfigFile();

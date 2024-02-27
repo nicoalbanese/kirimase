@@ -15,19 +15,19 @@ import Link from 'next/link'
 
 export const columns: ColumnDef<TData, TValue>[] = [
   <% it.fields.map(function (field) { %>
-    {
-      accessorKey: "<%_ = field.name _%>",
-      header: "<%_ = field.name _%>",
-      enableHiding: false,
-      cell: ({ row }) => {
-        const resource = row.original
-        return (
-          <Link href={`/<%= it.baseRoute %>/${resource.id}`}>
-            {resource.<%_ = field.name _%>}
-          </Link>
-        )
-      },
+  {
+    accessorKey: "<%_ = field.name _%>",
+    header: "<%_ = field.name _%>",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const resource = row.original
+      return (
+        <Link href={`/<%= it.tableNameKebabCase %>/${resource.id}`}>
+          {resource.<%_ = field.name _%>}
+        </Link>
+      )
     },
+  },
   <% }) %>
   {
     id: "actions",
