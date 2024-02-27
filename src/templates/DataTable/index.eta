@@ -48,19 +48,19 @@ export function DataTable<TData, TValue>({
     },
   })
 
+  const hideableColumns = table.getAllColumns().filter((column) => column.getCanHide())
+
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
-        <DropdownMenu>
+        {hideableColumns.length > 0 && <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
               Columns <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
+            {hideableColumns
               .map((column) => {
                 return (
                   <DropdownMenuCheckboxItem
@@ -76,7 +76,7 @@ export function DataTable<TData, TValue>({
                 )
               })}
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu>}
       </div>
       <div className="rounded-md border">
         <Table>

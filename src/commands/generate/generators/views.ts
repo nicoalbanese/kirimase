@@ -50,7 +50,7 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
     // create components/tableName/columns.tsx
     createFile(
       rootPath.concat(`components/${tableNameCamelCase}/columns.tsx`),
-      eta.render('DataTable/columns.eta', { fields: schema.fields });
+      eta.render('DataTable/columns.eta', { fields: schema.fields, baseRoute: tableNameKebabCase })
     );
     // create components/tableName/TableNameModal.tsx
     createFile(

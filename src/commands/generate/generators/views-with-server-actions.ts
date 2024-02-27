@@ -87,7 +87,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
         `app/(app)/${tableNameKebabCase}/columns.tsx`,
         { prefix: "rootPath", removeExtension: false }
       ),
-      eta.render('DataTable/columns.eta', { fields: schema.fields })
+      eta.render('DataTable/columns.eta', { fields: schema.fields, baseRoute: tableNameKebabCase })
     );
 
     // create components/tableName/TableNameForm.tsx
@@ -481,19 +481,6 @@ export default function ${tableNameSingularCapitalised}List({
           +
         </Button>
       </div>
-      {optimistic${tableNamePluralCapitalised}.length === 0 ? (
-        <EmptyState openModal={openModal} />
-      ) : (
-        <ul>
-          {optimistic${tableNamePluralCapitalised}.map((${tableNameSingular}) => (
-            <${tableNameSingularCapitalised}
-              ${tableNameSingular}={${tableNameSingular}}
-              key={${entityName}.id}
-              openModal={openModal}
-            />
-          ))}
-        </ul>
-      )}
     </div>
   );
 }

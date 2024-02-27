@@ -10,6 +10,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc && rm -rf dist/templates && cp -r src/templates dist/templates",
+    "reinstall": "bun run build && npm i -g .",
+    "createTesterApp": "rm -rf tester/ && bunx create-next-app tester && cd tester/ && kirimase init",
     "dev2": "node dist/index.js",
     "dev": "tsc -w"
   },
