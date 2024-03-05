@@ -524,3 +524,74 @@ export const validateSchemas = (schemas: Schema[]) => {
 
   return validationSchema.array().parse(schemas);
 };
+
+// Pull only relevant field based on a given Zod issue path
+function getInvalidSchemaFieldFromIssuePath(path: (string | number)[]) {
+  let fieldNamePath = [];
+
+  const lastPart = path[path.length - 1];
+  const fieldProperties: (keyof DBField)[] = [
+    "name",
+    "type",
+    "references",
+    "notNull",
+    "cascade",
+  ];
+  // If the invalid field is from the "fields" property, we want to also log
+  // the "fields" property and the index.
+  // For example "fields.0.name"
+  if (
+    typeof lastPart === "string" &&
+    fieldProperties.includes(lastPart as keyof DBField)
+  ) {
+    fieldNamePath.push("fields");
+    fieldNamePath.push(path[path.length - 2]); // field property index
+  }
+  fieldNamePath.push(lastPart);
+
+  return fieldNamePath.join(".");
+}
+
+// Build schema tableName path based on a given Zod issue path
+function getSchemaTableNamePathFromIssuePath(
+  schemas: Schema[],
+  path: (string | number)[]
+) {
+  let currentSchema: Schema;
+  let currentSchemas: Schema[] = schemas;
+  let tableNamePath = [];
+
+  for (let i = 0; i < path.length; i++) {
+    const part = path[i];
+    const isIndex = !isNaN(Number(part));
+
+    if (isIndex) {
+      const index = Number(part);
+      currentSchema = currentSchemas[index];
+    } else {
+      const fieldName = part;
+      tableNamePath.push(currentSchema.tableName);
+      if (fieldName === "children") {
+        currentSchemas = currentSchema.children;
+      } else {
+        break;
+      }
+    }
+  }
+
+  return tableNamePath.join(".");
+}
+
+export const formatSchemaValidationError = (
+  error: z.ZodError,
+  schemas: Schema[]
+) => {
+  const formattedError = error.issues.map((issue) => {
+    return {
+      message: issue.message,
+      field: getInvalidSchemaFieldFromIssuePath(issue.path),
+      tableName: getSchemaTableNamePathFromIssuePath(schemas, issue.path),
+    };
+  });
+  return JSON.stringify(formattedError, null, 2);
+};
