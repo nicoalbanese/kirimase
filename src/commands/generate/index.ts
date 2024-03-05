@@ -1,6 +1,7 @@
 import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { consola } from "consola";
 import pluralize from "pluralize";
+import { z } from "zod";
 import {
   Config,
   DBField,
@@ -25,10 +26,12 @@ import { ExtendedSchema, Schema } from "./types.js";
 import { scaffoldViewsAndComponents } from "./generators/views.js";
 import {
   camelCaseToSnakeCase,
+  formatSchemaValidationError,
   formatTableName,
   getCurrentSchemas,
   printGenerateNextSteps,
   toCamelCase,
+  validateSchemas,
 } from "./utils.js";
 import { scaffoldModel } from "./generators/model/index.js";
 import { scaffoldServerActions } from "./generators/serverActions.js";
@@ -494,6 +497,29 @@ async function generateResources(
   if (resourceType.includes("views_and_components_server_actions"))
     scaffoldViewsAndComponentsWithServerActions(schema);
   await installShadcnComponentList();
+}
+
+function parseSchemaFile(jsonString: string): Schema[] | null {
+  let schemas: Schema[] = [];
+  try {
+    schemas = JSON.parse(jsonString);
+    const validatedSchemas = validateSchemas(schemas);
+    return validatedSchemas;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      consola.error(
+        `Error parsing schema file:\n${formatSchemaValidationError(
+          error,
+          schemas
+        )}`
+      );
+    } else if (error instanceof SyntaxError) {
+      consola.error(`Failed to parse JSON: ${error.message}`);
+    } else {
+      consola.error(`Unexpected error: ${error}`);
+    }
+    return null;
+  }
 }
 
 export async function buildSchema(options: GenerateOptions) {
