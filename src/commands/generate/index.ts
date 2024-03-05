@@ -556,7 +556,7 @@ export async function buildSchema(options: GenerateOptions) {
     for (let schema of formattedSchemas) {
       await generateResources(schema, resourceType);
     }
-    printGenerateNextSteps(schema, resourceType);
+    printGenerateNextSteps(schemas, resourceType);
   } else {
     consola.warn(
       "You need to have an ORM installed in order to use the scaffold command."
