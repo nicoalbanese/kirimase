@@ -36,7 +36,7 @@ Here's a sample of a valid `schema.json`
 ```json
 [
   {
-    "tableName": "menu",
+    "tableName": "products",
     "fields": [
       { "name": "name", "type": "varchar", "notNull": true },
       { "name": "price", "type": "number", "notNull": true }
@@ -54,16 +54,17 @@ Another example with children
 ```json
 [
   {
-    "tableName": "menu_discount",
+    "tableName": "product_discounts",
     "fields": [
-      { "name": "code", "type": "number", "notNull": true }
+      { "name": "code", "type": "number", "notNull": true },
+      { "name": "amount", "type": "number", "notNull": true }
     ],
     "index": null,
     "belongsToUser": false,
     "includeTimestamps": false,
     "children": [
       {
-        "tableName": "menu_discount_analytics",
+        "tableName": "product_discount_analytics",
         "fields": [{ "name": "used_count", "type": "number", "notNull": true }],
         "index": null,
         "belongsToUser": false,
