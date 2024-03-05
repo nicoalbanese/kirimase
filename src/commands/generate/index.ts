@@ -1,5 +1,6 @@
 import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { consola } from "consola";
+import fs from "fs";
 import pluralize from "pluralize";
 import { z } from "zod";
 import {
@@ -531,20 +532,28 @@ export async function buildSchema(options: GenerateOptions) {
   if (config.orm !== null) {
     provideInstructions();
     const resourceType = await askForResourceType();
-    const schema = await getSchema(config, resourceType);
+    const schemas = options.fromFile
+      ? parseSchemaFile(fs.readFileSync(options.fromFile, "utf8"))
+      : [await getSchema(config, resourceType)];
+
     // would want to have something that formatted the schema object into:
     // an array of items that needed to be created using code commented below
     // would also need extra stuff like urls
     // TODO
 
-    const schemas = formatSchemaForGeneration(schema);
+    // Stop generate if schema parsing failed
+    if (!schemas) return;
+
+    const formattedSchemas = schemas.flatMap((schema) =>
+      formatSchemaForGeneration(schema)
+    );
 
     await sendEvent("generate", {
-      schemas: JSON.stringify(anonymiseSchemas(schemas)),
+      schemas: JSON.stringify(anonymiseSchemas(formattedSchemas)),
       resources: resourceType,
     });
 
-    for (let schema of schemas) {
+    for (let schema of formattedSchemas) {
       await generateResources(schema, resourceType);
     }
     printGenerateNextSteps(schema, resourceType);
