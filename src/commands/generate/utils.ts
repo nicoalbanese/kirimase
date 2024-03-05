@@ -1,12 +1,20 @@
 import path from "path";
 import pluralize from "pluralize";
+import { z } from "zod";
 import {
   DBField,
   DBType,
   DrizzleColumnType,
   PrismaColumnType,
 } from "../../types.js";
-import { readConfigFile, replaceFile } from "../../utils.js";
+import {
+  mysqlColumns,
+  pgColumns,
+  prismaColumns,
+  readConfigFile,
+  replaceFile,
+  sqliteColumns,
+} from "../../utils.js";
 import fs, { existsSync, readFileSync } from "fs";
 import { consola } from "consola";
 import { formatFilePath, getFilePaths } from "../filePaths/index.js";
@@ -477,4 +485,42 @@ ${createNotesList([
   "If you run into any issues, please create an issue on GitHub\n  (https://github.com/nicoalbanese/kirimase/issues)",
   "Documentation (https://kirimase.dev/commands/generate)",
 ])}`);
+};
+
+export const validateSchemas = (schemas: Schema[]) => {
+  const validationSchema: z.ZodSchema<any> = z.lazy(() =>
+    z.object({
+      tableName: z
+        .string()
+        .regex(
+          /^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/,
+          "Table name must be in snake_case if more than one word, and plural."
+        ),
+      fields: z.array(
+        z.object({
+          name: z
+            .string()
+            .regex(
+              /^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/,
+              "Field name must be in snake_case if more than one word."
+            ),
+          type: z.enum([
+            ...new Set([
+              ...pgColumns,
+              ...mysqlColumns,
+              ...sqliteColumns,
+              ...prismaColumns,
+            ]),
+          ] as [string, ...string[]]),
+          notNull: z.boolean(),
+        })
+      ),
+      index: z.union([z.string(), z.null()]),
+      belongsToUser: z.boolean(),
+      includeTimestamps: z.boolean(),
+      children: z.array(validationSchema),
+    })
+  );
+
+  return validationSchema.array().parse(schemas);
 };
