@@ -118,6 +118,10 @@ export type InitOptions = {
   includeExample?: boolean;
 };
 
+export type GenerateOptions = {
+  fromFile?: string | null;
+};
+
 // export type BuildOptions = {
 //   resources?: ("model" | "api_route" | "trpc_route" | "views_and_components")[];
 //   table?: string;

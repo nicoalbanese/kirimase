@@ -6,6 +6,7 @@ import {
   DBField,
   DBType,
   DrizzleColumnType,
+  GenerateOptions,
   ORMType,
   PrismaColumnType,
 } from "../../types.js";
@@ -175,8 +176,8 @@ async function askForResourceType() {
           disabled: !packages.includes("trpc")
             ? "[You need to have tRPC installed. Run 'kirimase add']"
             : viewRequested === "views_and_components_trpc"
-              ? "[Already generated with your selected view]"
-              : false,
+            ? "[Already generated with your selected view]"
+            : false,
         },
       ].filter((item) =>
         viewRequested ? !viewRequested.includes(item.value.split("_")[0]) : item
@@ -495,7 +496,7 @@ async function generateResources(
   await installShadcnComponentList();
 }
 
-export async function buildSchema() {
+export async function buildSchema(options: GenerateOptions) {
   const ready = preBuild();
   if (!ready) return;
 
