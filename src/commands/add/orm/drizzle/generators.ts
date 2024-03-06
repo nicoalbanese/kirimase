@@ -540,7 +540,7 @@ export const addScriptsToPackageJson = (
     "db:migrate": `tsx ${libPath}/db/migrate.ts`,
     "db:drop": "drizzle-kit drop",
     "db:pull": `drizzle-kit introspect:${driver}`,
-    ...(driver !== "pg" ? { "db:push": `drizzle-kit push:${driver}` } : {}),
+    "db:push": `drizzle-kit push:${driver}`,
     "db:studio": "drizzle-kit studio",
     "db:check": `drizzle-kit check:${driver}`,
   };

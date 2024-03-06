@@ -69,7 +69,6 @@ ${nanoidContent.split("\n")[1].trim()}
     replaceFile(utilsPath, newContent);
   }
 };
-
 export const checkTimestampsInUtils = () => {
   const timestampsContent = `export const timestamps: { createdAt: true; updatedAt: true } = {
   createdAt: true,

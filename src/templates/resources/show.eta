@@ -1,0 +1,39 @@
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from "<%_ = it.alias _%>/components/ui/breadcrumbs"
+import { api } from "<%_ = it.trpcRoute _%>"
+import <%= it.tableNameSingularCapitalised _%>Modal from "<%_ = it.alias _%>/components/<%_ = it.tableNameCamelCase _%>/<%_ = it.tableNameSingularCapitalised _%>Modal"
+
+export default async function Page({params} : {params: { <% = it.tableNameSingular _%>Id: string}}) {
+  const { <% = it.tableNameSingular %> } = await api.<%_ = it.tableNameCamelCase _%>.get<%_ = it.tableNameSingularCapitalised _%>ById.query({ id: params.<%_ = it.tableNameSingular _%>Id })
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="flex flex-col gap-2 items-start">
+        <Breadcrumb separator="/">
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard">Home</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/<%_ = it.tableNameKebabCase _%>"><%_ = it.tableNameNormalEnglishCapitalised _%></BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem isCurrentPage>
+            <BreadcrumbLink href="/<%_ = it.tableNameKebabCase _%>/{params.<% = it.tableNameSingular _%>Id}">
+              {params.<% = it.tableNameSingular _%>Id}
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        </Breadcrumb>
+        <span className="flex justify-between w-full">
+          <h1 className="text-3xl font-bold text-left"><%_ = it.tableNameSingularCapitalised _%>: {params.<% = it.tableNameSingular _%>Id}</h1>
+          <<%_ = it.tableNameSingularCapitalised _%>Modal <% = it.tableNameSingular _%>={<%_ = it.tableNameSingular _%>} />
+        </span>
+        <div className="grid md:grid-cols-2 gap-2 w-full">
+          <% it.fields.map(function (field) { %>
+          <div>
+            <h2 className="text-lg font-semibold capitalize"><%_ = field.name _%></h2>
+            <p>{<%_ = it.tableNameSingular _%>.<%_ = field.name _%>}</p>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+  )
+}
+
