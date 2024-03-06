@@ -1,10 +1,8 @@
-import { confirm, select } from "@inquirer/prompts";
 import { DBType, InitOptions } from "../../../../types.js";
 import {
   addPackageToConfig,
   createFile,
   createFolder,
-  installPackages,
   readConfigFile,
   updateConfigFile,
 } from "../../../../utils.js";
