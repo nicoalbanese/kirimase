@@ -165,15 +165,17 @@ export const db = drizzle(rdsClient, {
       break;
     case "planetscale":
       indexTS = `import { drizzle } from "drizzle-orm/planetscale-serverless";
-import { connect } from "@planetscale/database";
+import { Client } from "@planetscale/database";
 import { env } from "${formatFilePath(envMjs, {
         removeExtension: false,
         prefix: "alias",
       })}";
  
 // create the connection
-export const connection = connect({
-  url: env.DATABASE_URL
+export const connection = new Client({
+  host: env.DATABASE_HOST,
+  username: env.DATABASE_USERNAME,
+  password: env.DATABASE_PASSWORD,
 });
  
 export const db = drizzle(connection);
@@ -608,7 +610,6 @@ export const createDotEnv = (
   orm: ORMType,
   preferredPackageManager: PMType,
   databaseUrl?: string,
-  usingPlanetscale: boolean = false,
   rootPathOld: string = ""
 ) => {
   const {
@@ -624,11 +625,7 @@ export const createDotEnv = (
   if (!envExists)
     createFile(
       ".env",
-      `${
-        orm === "drizzle" && usingPlanetscale
-          ? `# When using the PlanetScale driver with Drizzle, your connection string must end with ?ssl={"rejectUnauthorized":true} instead of ?sslaccept=strict.\n`
-          : ""
-      }DATABASE_URL=${dburl}`
+      `DATABASE_URL=${dburl}`
     );
 
   const envmjsfilePath = formatFilePath(envMjs, {

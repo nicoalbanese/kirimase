@@ -66,9 +66,17 @@ export const addDrizzle = async (
     "drizzle",
     preferredPackageManager,
     databaseUrl,
-    dbProvider === "planetscale",
     hasSrc ? "src/" : ""
   );
+  if (dbProvider === "planetscale")
+    addToDotEnv(
+      [
+        { key: "DATABASE_HOST", value: "" },
+        { key: "DATABASE_USERNAME", value: "" },
+        { key: "DATABASE_PASSWORD", value : "" },
+      ],
+      rootPath
+    );
   if (dbProvider === "vercel-pg")
     addToDotEnv(
       [
