@@ -58,9 +58,9 @@ const manualInstallShadCn = async (
   });
 
   // add tailwind.config.ts
-  createFile("tailwind.config.ts", generateTailwindConfig(rootPath));
+  await createFile("tailwind.config.ts", generateTailwindConfig(rootPath));
   // update globals.css
-  replaceFile(
+  await replaceFile(
     formatFilePath(shared.init.globalCss, {
       prefix: "rootPath",
       removeExtension: false,
@@ -68,25 +68,25 @@ const manualInstallShadCn = async (
     generateGlobalsCss()
   );
   // add cn helper (lib/utils.ts)
-  createFile(rootPath.concat("lib/utils.ts"), generateLibUtilsTs());
+  await createFile(rootPath.concat("lib/utils.ts"), generateLibUtilsTs());
   // create components.json
-  createFile("components.json", generateComponentsJson(rootPath));
+  await createFile("components.json", generateComponentsJson(rootPath));
 
-  createFile(rootPath.concat("app/loading.tsx"), generateLoadingPage());
+  await createFile(rootPath.concat("app/loading.tsx"), generateLoadingPage());
 
   // todo: install theme switcher
   // create theme provider
-  createFile(
+  await createFile(
     rootPath.concat("components/ThemeProvider.tsx"),
     generateThemeProvider()
   );
   //generate theme toggler
-  createFile(
+  await createFile(
     rootPath.concat("components/ui/ThemeToggle.tsx"),
     generateThemeToggler()
   );
   // add context provider to layout
-  addContextProviderToRootLayout("ThemeProvider");
+  await addContextProviderToRootLayout("ThemeProvider");
 };
 
 export const installShadcnUI = async (
@@ -107,8 +107,8 @@ export const installShadcnUI = async (
 
   if (existsSync(filePath)) {
     consola.info("Shadcn is already installed. Adding Shadcn UI to config...");
-    addPackageToConfig("shadcn-ui");
-    updateConfigFile({ componentLib: "shadcn-ui" });
+    await addPackageToConfig("shadcn-ui");
+    await updateConfigFile({ componentLib: "shadcn-ui" });
   } else {
     try {
       // await execa(pmInstallCommand[preferredPackageManager], installArgs, {
@@ -116,8 +116,8 @@ export const installShadcnUI = async (
       // });
       await manualInstallShadCn(preferredPackageManager, rootPath);
       // consola.success("Shadcn initialized successfully.");
-      addPackageToConfig("shadcn-ui");
-      updateConfigFile({ componentLib: "shadcn-ui" });
+      await addPackageToConfig("shadcn-ui");
+      await updateConfigFile({ componentLib: "shadcn-ui" });
     } catch (error) {
       consola.error(`Failed to initialize Shadcn: ${error.message}`);
     }
@@ -139,12 +139,12 @@ export const installShadcnUI = async (
     "dropdown-menu",
   ]);
 
-  addContextProviderToAppLayout("ShadcnToast");
+  await addContextProviderToAppLayout("ShadcnToast");
 
   // if (packages.includes("next-auth")) updateSignInComponentWithShadcnUI();
 };
 
-export const updateSignInComponentWithShadcnUI = () => {
+export const updateSignInComponentWithShadcnUI = async () => {
   const { hasSrc, alias } = readConfigFile();
   const filepath = "components/auth/SignIn.tsx";
   const updatedContent = `"use client";
@@ -171,5 +171,5 @@ export default function SignIn() {
     </>
   );
 }`;
-  replaceFile(`${hasSrc ? "src/" : ""}${filepath}`, updatedContent);
+  await replaceFile(`${hasSrc ? "src/" : ""}${filepath}`, updatedContent);
 };

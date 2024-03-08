@@ -23,6 +23,7 @@ export type Paths = {
       schemaDir?: string;
     };
     auth: {
+      authActions: string;
       authUtils: string;
       signInComponent: string;
       accountApiRoute: string;
@@ -53,6 +54,15 @@ export type Paths = {
     libAuthLucia: string;
     signOutButtonComponent: string;
     formErrorComponent: string;
+  };
+  supabase: {
+    signInPage: string;
+    signUpPage: string;
+    authFormComponent: string;
+    callbackApiRoute: string;
+    libSupabaseAuthHelpers: string;
+    signOutButtonComponent: string;
+    middleware: string;
   };
   kinde: {
     routeHandler: string;

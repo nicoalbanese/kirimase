@@ -3,7 +3,7 @@ import { formatFilePath } from "../../../filePaths/index.js";
 import { formatTableName } from "../../utils.js";
 import { replaceFile } from "../../../../utils.js";
 
-export const addLinkToSidebar = (tableName: string) => {
+export const addLinkToSidebar = async (tableName: string) => {
   const { tableNameKebabCase, tableNameNormalEnglishCapitalised } =
     formatTableName(tableName);
   const sidebarConfigPath = formatFilePath("config/nav.ts", {
@@ -48,5 +48,5 @@ export const addLinkToSidebar = (tableName: string) => {
 `;
     newContent = configContents.replace(searchQuery, replacement);
   }
-  replaceFile(sidebarConfigPath, newContent);
+  await replaceFile(sidebarConfigPath, newContent);
 };

@@ -1,8 +1,6 @@
-import { consola } from "consola";
 import {
   addPackageToConfig,
   createFile,
-  installPackages,
   readConfigFile,
   replaceFile,
   updateConfigFile,
@@ -17,7 +15,7 @@ import {
   libAuthProviderTsx,
   libAuthUtilsTs,
 } from "./generators.js";
-import { AuthDriver, AuthProvider, AuthProviders } from "./utils.js";
+import { AuthDriver, AuthProvider } from "./utils.js";
 import {
   addContextProviderToAppLayout,
   // addContextProviderToAuthLayout,
@@ -39,17 +37,15 @@ export const addNextAuth = async (
     hasSrc,
     preferredPackageManager,
     driver,
-    packages,
     orm,
     componentLib,
     provider: dbProvider,
     t3,
   } = readConfigFile();
-  const rootPath = `${hasSrc ? "src/" : ""}`;
   const { "next-auth": nextAuth, shared } = getFilePaths();
 
   // 1. Create app/api/auth/[...nextauth].ts
-  createFile(
+  await createFile(
     formatFilePath(nextAuth.nextAuthApiRoute, {
       removeExtension: false,
       prefix: "rootPath",
@@ -58,7 +54,7 @@ export const addNextAuth = async (
   );
 
   // 2. create lib/auth/Provider.tsx
-  createFile(
+  await createFile(
     formatFilePath(nextAuth.authProviderComponent, {
       removeExtension: false,
       prefix: "rootPath",
@@ -67,7 +63,7 @@ export const addNextAuth = async (
   );
 
   // 3. create lib/auth/utils.ts
-  createFile(
+  await createFile(
     formatFilePath(shared.auth.authUtils, {
       removeExtension: false,
       prefix: "rootPath",
@@ -78,7 +74,7 @@ export const addNextAuth = async (
   // 4. create lib/db/schema/auth.ts
   if (orm !== null) {
     if (orm === "drizzle") {
-      createFile(
+      await createFile(
         formatFilePath(shared.auth.authSchema, {
           removeExtension: false,
           prefix: "rootPath",
@@ -86,11 +82,11 @@ export const addNextAuth = async (
         createDrizzleAuthSchema(driver)
       );
       if (t3) {
-        updateRootSchema("auth", true, "next-auth");
+        await updateRootSchema("auth", true, "next-auth");
       }
     }
     if (orm === "prisma") {
-      addToPrismaSchema(
+      await addToPrismaSchema(
         createPrismaAuthSchema(
           driver,
           dbProvider === "planetscale",
@@ -102,7 +98,7 @@ export const addNextAuth = async (
   }
 
   // 5. create components/auth/SignIn.tsx - TODO - may be causing problems
-  createFile(
+  await createFile(
     formatFilePath(shared.auth.signInComponent, {
       removeExtension: false,
       prefix: "rootPath",
@@ -111,9 +107,9 @@ export const addNextAuth = async (
   );
 
   // 6. If trpc installed, add protectedProcedure // this wont run because it is installed before trpc
-  updateTrpcWithSessionIfInstalled();
+  await updateTrpcWithSessionIfInstalled();
 
-  replaceFile(
+  await replaceFile(
     formatFilePath(shared.init.dashboardRoute, {
       removeExtension: false,
       prefix: "rootPath",
@@ -122,7 +118,7 @@ export const addNextAuth = async (
   );
 
   // generate sign in page
-  createFile(
+  await createFile(
     formatFilePath(nextAuth.signInPage, {
       removeExtension: false,
       prefix: "rootPath",
@@ -131,7 +127,7 @@ export const addNextAuth = async (
   );
 
   // add to env
-  addToDotEnv(
+  await addToDotEnv(
     [
       {
         key: "NEXTAUTH_SECRET",
@@ -182,11 +178,11 @@ export const addNextAuth = async (
   if (orm !== null)
     addToInstallList({ regular: [AuthDriver[orm].package], dev: [] });
 
-  addPackageToConfig("next-auth");
-  updateConfigFile({ auth: "next-auth" });
+  await addPackageToConfig("next-auth");
+  await updateConfigFile({ auth: "next-auth" });
   // 9. Instruct user to add the <Provider /> to their root layout.
-  // addContextProviderToAuthLayout("NextAuthProvider");
-  addContextProviderToAppLayout("NextAuthProvider");
+  // await addContextProviderToAuthLayout("NextAuthProvider");
+  await addContextProviderToAppLayout("NextAuthProvider");
   // if (orm === "prisma") await prismaGenerate(preferredPackageManager);
   // consola.success("Successfully added Next Auth to your project!");
 };

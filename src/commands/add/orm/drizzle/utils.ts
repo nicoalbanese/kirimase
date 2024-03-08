@@ -3,7 +3,7 @@ import { createFile, readConfigFile, replaceFile } from "../../../../utils.js";
 import { consola } from "consola";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
-export function addToDrizzleModel(
+export async function addToDrizzleModel(
   modelName: string,
   attributesToAdd: string,
   additionalImports?: string[]
@@ -31,7 +31,7 @@ export function addToDrizzleModel(
       '} from "drizzle-orm',
       `${additionalImports.map((i) => `, ${i}`)} } from "drizzle-orm`
     );
-    replaceFile(pathToModel, newSchemaWithUpdatedImports);
+    await replaceFile(pathToModel, newSchemaWithUpdatedImports);
     consola.info("Updated Drizzle schema");
   }
 }
@@ -49,7 +49,7 @@ const getDrizzleModelStartAndEnd = (schema: string, modelName: string) => {
   return { modelStart, modelEnd, modelExists };
 };
 
-export const addNanoidToUtils = () => {
+export const addNanoidToUtils = async () => {
   const nanoidContent = `import { customAlphabet } from "nanoid";
 export const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789");`;
   const { shared } = getFilePaths();
@@ -59,18 +59,18 @@ export const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789");`;
   });
   const utilsExists = existsSync(utilsPath);
   if (!utilsExists) {
-    createFile(utilsPath, nanoidContent);
+    await createFile(utilsPath, nanoidContent);
   } else {
     const utilsContent = readFileSync(utilsPath, "utf-8");
     const newContent = `${nanoidContent.split("\n")[0].trim()}
 ${utilsContent}
 ${nanoidContent.split("\n")[1].trim()}
 `;
-    replaceFile(utilsPath, newContent);
+    await replaceFile(utilsPath, newContent);
   }
 };
 
-export const checkTimestampsInUtils = () => {
+export const checkTimestampsInUtils = async () => {
   const timestampsContent = `export const timestamps: { createdAt: true; updatedAt: true } = {
   createdAt: true,
   updatedAt: true,
@@ -83,14 +83,14 @@ export const checkTimestampsInUtils = () => {
   });
   const utilsExists = existsSync(utilsPath);
   if (!utilsExists) {
-    createFile(utilsPath, timestampsContent);
+    await createFile(utilsPath, timestampsContent);
   } else {
     const utilsContent = readFileSync(utilsPath, "utf-8");
     if (utilsContent.indexOf(timestampsContent) === -1) {
       const newContent = `${utilsContent}
-${timestampsContent}
-`;
-      replaceFile(utilsPath, newContent);
+  ${timestampsContent}
+  `;
+      await replaceFile(utilsPath, newContent);
     }
   }
 };

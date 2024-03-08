@@ -1,5 +1,5 @@
 import fs from "fs";
-import { createFile, replaceFile } from "../../../../utils.js";
+import { replaceFile } from "../../../../utils.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 // export const updateClerkMiddlewareForStripe = (rootPath: string) => {
@@ -14,13 +14,14 @@ import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 //   if (mwExists) {
 //     const mwContent = fs.readFileSync(mwPath, "utf-8");
 //     const newUtilsContent = mwContent.replace(initMWContent, updatedMWContent);
-//     replaceFile(mwPath, newUtilsContent);
+//     await replaceFile(mwPath, newUtilsContent);
 //   } else {
 //     console.error("Middleware does not exist");
 //   }
 // };
 
-export const addToClerkIgnoredRoutes = (newPath: string) => {
+// TODO: Shouldn't this be "matcher" instead of "ignoredRoutes"?
+export const addToClerkIgnoredRoutes = async (newPath: string) => {
   const { clerk } = getFilePaths();
   const initMWContent = "ignoredRoutes: [";
   const updatedMWContent = "ignoredRoutes: [" + ` "${newPath}", `;
@@ -32,7 +33,7 @@ export const addToClerkIgnoredRoutes = (newPath: string) => {
   if (mwExists) {
     const mwContent = fs.readFileSync(mwPath, "utf-8");
     const newUtilsContent = mwContent.replace(initMWContent, updatedMWContent);
-    replaceFile(mwPath, newUtilsContent);
+    await replaceFile(mwPath, newUtilsContent);
   } else {
     console.error("Middleware does not exist");
   }

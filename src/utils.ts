@@ -4,11 +4,16 @@ import { consola } from "consola";
 import { AvailablePackage, Config, PMType, UpdateConfig } from "./types.js";
 import { execa } from "execa";
 import { spinner } from "./commands/add/index.js";
+import { formatFileContentWithPrettier } from "./commands/init/utils.js";
 
 export const delay = (ms = 2000) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
-export function createFile(filePath: string, content: string) {
+export async function createFile(
+  filePath: string,
+  content: string,
+  skipPrettier = false
+) {
   const resolvedPath = path.resolve(filePath);
   const dirName = path.dirname(resolvedPath);
 
@@ -19,12 +24,20 @@ export function createFile(filePath: string, content: string) {
     // consola.success(`Directory ${dirName} created.`);
   }
 
-  fs.writeFileSync(resolvedPath, content);
+  fs.writeFileSync(
+    resolvedPath,
+    await formatFileContentWithPrettier(content, filePath, skipPrettier)
+  );
   // TODO - add flag for verbose
   // consola.success(`File created at ${filePath}`);
 }
 
-export function replaceFile(filePath: string, content: string, log = true) {
+export async function replaceFile(
+  filePath: string,
+  content: string,
+  log = true,
+  skipPrettier = false
+) {
   const resolvedPath = path.resolve(filePath);
   const dirName = path.dirname(resolvedPath);
 
@@ -35,7 +48,10 @@ export function replaceFile(filePath: string, content: string, log = true) {
     // consola.success(`Directory ${dirName} created.`);
   }
 
-  fs.writeFileSync(resolvedPath, content);
+  fs.writeFileSync(
+    resolvedPath,
+    await formatFileContentWithPrettier(content, filePath, skipPrettier)
+  );
   if (log === true) {
     // TODO as above
     // consola.success(`File replaced at ${filePath}`);
@@ -103,14 +119,14 @@ export async function installPackages(
   }
 }
 
-export const createConfigFile = (options: Config) => {
-  createFile("./kirimase.config.json", JSON.stringify(options, null, 2));
+export const createConfigFile = async (options: Config) => {
+  await createFile("./kirimase.config.json", JSON.stringify(options, null, 2));
 };
 
-export const updateConfigFile = (options: UpdateConfig) => {
+export const updateConfigFile = async (options: UpdateConfig) => {
   const config = readConfigFile();
   const newConfig = { ...config, ...options };
-  replaceFile(
+  await replaceFile(
     "./kirimase.config.json",
     JSON.stringify(newConfig, null, 2),
     false
@@ -134,9 +150,9 @@ export const readConfigFile = (): (Config & { rootPath: string }) | null => {
   return { ...config, rootPath };
 };
 
-export const addPackageToConfig = (packageName: AvailablePackage) => {
+export const addPackageToConfig = async (packageName: AvailablePackage) => {
   const config = readConfigFile();
-  updateConfigFile({ packages: [...config?.packages, packageName] });
+  await updateConfigFile({ packages: [...config?.packages, packageName] });
 };
 
 export const wrapInParenthesis = (string: string) => {
@@ -202,12 +218,12 @@ export const getFileContents = (filePath: string) => {
   return fileContents;
 };
 
-export const updateConfigFileAfterUpdate = () => {
+export const updateConfigFileAfterUpdate = async () => {
   const { packages, orm, auth } = readConfigFile();
   if (orm === undefined || auth === undefined) {
     const updatedOrm = packages.includes("drizzle") ? "drizzle" : null;
     const updatedAuth = packages.includes("next-auth") ? "next-auth" : null;
-    updateConfigFile({ orm: updatedOrm, auth: updatedAuth });
+    await updateConfigFile({ orm: updatedOrm, auth: updatedAuth });
     consola.info("Config file updated.");
   } else {
     consola.info("Config file already up to date.");

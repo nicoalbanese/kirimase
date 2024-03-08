@@ -72,6 +72,6 @@ export async function updateTsConfigPrismaTypeAlias() {
   const updatedContent = JSON.stringify(tsConfig, null, 2); // 2 spaces indentation
 
   // Write the updated content back to the file
-  replaceFile(tsConfigPath, updatedContent);
+  await replaceFile(tsConfigPath, updatedContent);
   // consola.success("Updated tsconfig.json to support zod-prisma type alias.");
 }

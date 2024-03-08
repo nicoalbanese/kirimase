@@ -16,8 +16,6 @@ import path from "path";
 import {
   addPackageToConfig,
   createFile,
-  getFileLocations,
-  installPackages,
   readConfigFile,
   replaceFile,
   updateConfigFile,
@@ -52,11 +50,11 @@ import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import { libAuthUtilsTsWithoutAuthOptions } from "../../auth/next-auth/generators.js";
 import { updateRootSchema } from "../../../generate/generators/model/utils.js";
 import { AuthSubTypeMapping, addToInstallList } from "../../utils.js";
+import { addToSupabaseIgnoredRoutes } from "../../auth/supabase/utils.js";
 
 export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   const {
     componentLib,
-    preferredPackageManager,
     rootPath,
     orm,
     driver,
@@ -71,7 +69,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
 
   if (orm === null || orm === undefined || driver === undefined) {
     consola.warn("You cannot install Stripe without an ORM installed.");
-    updateConfigFile({ orm: undefined });
+    await updateConfigFile({ orm: undefined });
     await addPackage();
     return;
   }
@@ -83,7 +81,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
 
     const authUtilsExist = existsSync(authUtilsPath);
     if (!authUtilsExist) {
-      createFile(authUtilsPath, libAuthUtilsTsWithoutAuthOptions());
+      await createFile(authUtilsPath, libAuthUtilsTsWithoutAuthOptions());
     }
   }
 
@@ -91,9 +89,14 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     addToClerkIgnoredRoutes("/api/webhooks/stripe");
   }
 
+  // TODO: Find out if this is actually necessary for Supabase
+  if (auth === "supabase") {
+    addToSupabaseIgnoredRoutes("/api/webhooks/stripe");
+  }
+
   // add attributes to usermodel
   if (orm === "prisma") {
-    addToPrismaSchema(
+    await addToPrismaSchema(
       `model Subscription {
   userId                 String    @unique${
     authSubtype !== "managed"
@@ -115,7 +118,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     }
   }
   if (orm === "drizzle") {
-    createFile(
+    await createFile(
       formatFilePath(stripe.subscriptionSchema, {
         prefix: "rootPath",
         removeExtension: false,
@@ -123,12 +126,12 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
       generateSubscriptionsDrizzleSchema(driver, auth)
     );
     if (t3) {
-      updateRootSchema("subscriptions");
+      await updateRootSchema("subscriptions");
     }
   }
 
   // create stripe/index file
-  createFile(
+  await createFile(
     formatFilePath(stripe.stripeIndex, {
       prefix: "rootPath",
       removeExtension: false,
@@ -136,7 +139,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     generateStripeIndexTs()
   );
   // create stripe/subscription file
-  createFile(
+  await createFile(
     formatFilePath(stripe.stripeSubscription, {
       prefix: "rootPath",
       removeExtension: false,
@@ -144,7 +147,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     generateStripeSubscriptionTs()
   );
   // create config/subscriptions.ts
-  createFile(
+  await createFile(
     formatFilePath(stripe.configSubscription, {
       prefix: "rootPath",
       removeExtension: false,
@@ -152,7 +155,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     generateConfigSubscriptionsTs()
   );
   // components: create billing card
-  createFile(
+  await createFile(
     formatFilePath(stripe.accountPlanSettingsComponent, {
       prefix: "rootPath",
       removeExtension: false,
@@ -160,7 +163,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     generateBillingCard()
   );
   // components: create manage subscription button
-  createFile(
+  await createFile(
     formatFilePath(stripe.billingManageSubscriptionComponent, {
       prefix: "rootPath",
       removeExtension: false,
@@ -169,7 +172,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   );
   // components: create success toast
   if (componentLib === "shadcn-ui")
-    createFile(
+    await createFile(
       formatFilePath(stripe.billingSuccessToast, {
         prefix: "rootPath",
         removeExtension: false,
@@ -178,7 +181,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     );
 
   // add billingcard to accountpage with billing card TODO
-  replaceFile(
+  await replaceFile(
     formatFilePath(shared.auth.accountPage, {
       prefix: "rootPath",
       removeExtension: false,
@@ -186,7 +189,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     createAccountPage(true)
   );
   // create account/billing/page.tsx
-  createFile(
+  await createFile(
     formatFilePath(stripe.accountBillingPage, {
       prefix: "rootPath",
       removeExtension: false,
@@ -194,7 +197,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     generateBillingPage()
   );
   // create api/webhooks/route.ts
-  createFile(
+  await createFile(
     formatFilePath(stripe.stripeWebhooksApiRoute, {
       prefix: "rootPath",
       removeExtension: false,
@@ -202,7 +205,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     generateStripeWebhook()
   );
   // create api/billing/manage-subscription/route.ts
-  createFile(
+  await createFile(
     formatFilePath(stripe.manageSubscriptionApiRoute, {
       prefix: "rootPath",
       removeExtension: false,
@@ -213,7 +216,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   addUtilToUtilsTs(rootPath);
 
   // add to dotenv
-  addToDotEnv(
+  await addToDotEnv(
     [
       { key: "STRIPE_SECRET_KEY", value: "" },
       { key: "STRIPE_WEBHOOK_SECRET", value: "" },
@@ -226,7 +229,7 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
   );
 
   // misc script updates
-  addListenScriptToPackageJson();
+  await addListenScriptToPackageJson();
   // install packages
   // await installPackages(
   //   { dev: "", regular: "stripe @stripe/stripe-js lucide-react" },
@@ -238,10 +241,10 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
     dev: [],
   });
 
-  addPackageToConfig("stripe");
+  await addPackageToConfig("stripe");
 
   if (packages.includes("trpc")) {
-    createFile(
+    await createFile(
       formatFilePath(stripe.accountRouterTrpc, {
         removeExtension: false,
         prefix: "rootPath",
@@ -249,11 +252,11 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
       createAccountTRPCRouter()
     );
     // add to main trpc router
-    updateTRPCRouter("account");
+    await updateTRPCRouter("account");
   }
 };
 
-const addListenScriptToPackageJson = () => {
+const addListenScriptToPackageJson = async () => {
   // Define the path to package.json
   const packageJsonPath = path.resolve("package.json");
 
@@ -276,12 +279,12 @@ const addListenScriptToPackageJson = () => {
   const updatedPackageJsonData = JSON.stringify(packageJson, null, 2);
 
   // Write the updated content back to package.json
-  replaceFile(packageJsonPath, updatedPackageJsonData);
+  await replaceFile(packageJsonPath, updatedPackageJsonData);
 
   // consola.success("Stripe listen script added to package.json");
 };
 
-const addUtilToUtilsTs = (rootPath: string) => {
+const addUtilToUtilsTs = async (rootPath: string) => {
   const { shared } = getFilePaths();
   const utilContentToAdd = `export function absoluteUrl(path: string) {
   return \`\${
@@ -297,9 +300,9 @@ const addUtilToUtilsTs = (rootPath: string) => {
     const utilsContent = fs.readFileSync(utilsPath, "utf-8");
     if (!utilsContent.includes(utilContentToAdd)) {
       const newUtilsContent = utilsContent.concat(`\n${utilContentToAdd}`);
-      replaceFile(utilsPath, newUtilsContent);
+      await replaceFile(utilsPath, newUtilsContent);
     } else return;
   } else {
-    createFile(utilsPath, utilContentToAdd);
+    await createFile(utilsPath, utilContentToAdd);
   }
 };

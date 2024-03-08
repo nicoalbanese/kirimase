@@ -15,6 +15,7 @@ export const paths: { t3: Paths; normal: Paths } = {
         schemaDir: "lib/db/schema",
       },
       auth: {
+        authActions: "lib/auth/actions.ts",
         authUtils: "lib/auth/utils.ts",
         accountPage: "app/(app)/account/page.tsx",
         authSchema: "lib/db/schema/auth.ts",
@@ -61,6 +62,15 @@ export const paths: { t3: Paths; normal: Paths } = {
       libAuthLucia: "lib/auth/lucia.ts",
       formErrorComponent: "components/auth/AuthFormError.tsx",
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
+    },
+    supabase: {
+      authFormComponent: "components/auth/Form.tsx",
+      signInPage: "app/(auth)/sign-in/page.tsx",
+      signUpPage: "app/(auth)/sign-up/page.tsx",
+      signOutButtonComponent: "components/auth/SignOutBtn.tsx",
+      callbackApiRoute: "app/api/auth/callback/route.ts",
+      libSupabaseAuthHelpers: "lib/supabase/auth/helper.ts",
+      middleware: "middleware.ts",
     },
     kinde: {
       routeHandler: "app/api/auth/[kindeAuth]/route.ts",
@@ -109,6 +119,7 @@ export const paths: { t3: Paths; normal: Paths } = {
         schemaDir: "server/db/schema",
       },
       auth: {
+        authActions: "lib/auth/actions.ts",
         authUtils: "lib/auth/utils.ts",
         accountPage: "app/(app)/account/page.tsx",
         authSchema: "server/db/schema/auth.ts",
@@ -155,6 +166,15 @@ export const paths: { t3: Paths; normal: Paths } = {
       usersActions: "lib/actions/users.ts",
       formErrorComponent: "components/auth/AuthFormError.tsx",
       signOutButtonComponent: "components/auth/SignOutBtn.tsx",
+    },
+    supabase: {
+      authFormComponent: "components/auth/Form.tsx",
+      signInPage: "app/(auth)/sign-in/page.tsx",
+      signUpPage: "app/(auth)/sign-up/page.tsx",
+      signOutButtonComponent: "components/auth/SignOutBtn.tsx",
+      callbackApiRoute: "app/api/auth/callback/route.ts",
+      libSupabaseAuthHelpers: "lib/supabase/auth/helper.ts",
+      middleware: "middleware.ts",
     },
     kinde: {
       routeHandler: "app/api/auth/[kindeAuth]/route.ts",

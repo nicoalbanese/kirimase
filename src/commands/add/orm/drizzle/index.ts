@@ -48,21 +48,21 @@ export const addDrizzle = async (
   // create all the files here
 
   if (includeExampleModel) {
-    createInitSchema(libPath, dbType);
-    createQueriesAndMutationsFolders(libPath, dbType);
+    await createInitSchema(libPath, dbType);
+    await createQueriesAndMutationsFolders(libPath, dbType);
   } else {
     createFolder(`${hasSrc ? "src/" : ""}lib/db/schema`);
     createFolder(`${hasSrc ? "src/" : ""}lib/api`);
   }
 
   // dependent on dbtype and driver, create
-  createIndexTs(dbProvider);
-  createMigrateTs(libPath, dbType, dbProvider);
-  createDrizzleConfig(libPath, dbProvider);
+  await createIndexTs(dbProvider);
+  await createMigrateTs(libPath, dbType, dbProvider);
+  await createDrizzleConfig(libPath, dbProvider);
 
   // perhaps using push rather than migrate for sqlite?
   addScriptsToPackageJson(libPath, dbType, preferredPackageManager);
-  createDotEnv(
+  await createDotEnv(
     "drizzle",
     preferredPackageManager,
     databaseUrl,
@@ -70,7 +70,7 @@ export const addDrizzle = async (
     hasSrc ? "src/" : ""
   );
   if (dbProvider === "vercel-pg")
-    addToDotEnv(
+    await addToDotEnv(
       [
         { key: "POSTGRES_URL", value: "" },
         { key: "POSTGRES_URL_NON_POOLING", value: "" },
@@ -82,13 +82,17 @@ export const addDrizzle = async (
       rootPath
     );
   if (dbProvider === "turso")
-    addToDotEnv([{ key: "DATABASE_AUTH_TOKEN", value: "" }], rootPath);
+    await addToDotEnv([{ key: "DATABASE_AUTH_TOKEN", value: "" }], rootPath);
 
   await updateTsConfigTarget();
 
-  addNanoidToUtils();
+  await addNanoidToUtils();
 
-  updateConfigFile({ driver: dbType, provider: dbProvider, orm: "drizzle" });
+  await updateConfigFile({
+    driver: dbType,
+    provider: dbProvider,
+    orm: "drizzle",
+  });
   await installDependencies(dbProvider, preferredPackageManager);
-  addPackageToConfig("drizzle");
+  await addPackageToConfig("drizzle");
 };
