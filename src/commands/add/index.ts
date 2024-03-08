@@ -94,17 +94,19 @@ const promptUser = async (options?: InitOptions): Promise<InitOptions> => {
     if (usePscale) dbProvider = "planetscale";
   }
 
-  const auth = config.auth || !orm ? undefined : await askAuth(options);
+  // prompt auth
+  const hasOrm = !!config.orm || !!orm;
+  const auth = !hasOrm ? undefined : !config.auth ? await askAuth(options) : undefined;
 
+  // prompt auth provider
   const authProviders =
     auth === "next-auth"
       ? options?.authProviders || (await askAuthProvider())
       : undefined;
 
-  const hasOrmAndAuth = !!(
-    config.auth ||
-    (auth && auth !== null && (config.orm || (orm && orm !== null)))
-  );
+  // prompt misc packages
+  const hasAuth = !!config.auth || !!auth;
+  const hasOrmAndAuth = hasOrm && hasAuth;
   const packagesToInstall =
     options.miscPackages ||
     (await askMiscPackages(config.packages, hasOrmAndAuth));
@@ -198,9 +200,13 @@ export const addPackage = async (
       }
       if (promptResponse === null)
         updateConfigFile({ orm: null, driver: null, provider: null });
+    } else {
+      promptResponse.orm = config.orm;
+      promptResponse.db = config.driver;
+      promptResponse.dbProvider = config.provider;
     }
     // check if auth
-    if (config.auth === undefined) {
+    if (!config.auth) {
       if (promptResponse.auth && promptResponse.auth !== null)
         spinner.text =
           "Configuring " +
