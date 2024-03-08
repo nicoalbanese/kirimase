@@ -136,7 +136,7 @@ export const addLucia = async () => {
       `import { z } from "zod";
 
 export const authenticationSchema = z.object({
-  email: z.string().email().min(5).max(31),
+  email: z.string().email().min(5).max(64),
   password: z
     .string()
     .min(4, { message: "must be at least 4 characters long" })
@@ -157,7 +157,7 @@ export type UsernameAndPassword = z.infer<typeof authenticationSchema>;
     const schemaWithZodSchemas =
       schema +
       `\n\nexport const authenticationSchema = z.object({
-  email: z.string().email().min(5).max(31),
+  email: z.string().email().min(5).max(64),
   password: z
     .string()
     .min(4, { message: "must be at least 4 characters long" })
