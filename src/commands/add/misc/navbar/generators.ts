@@ -212,10 +212,14 @@ import { usePathname } from "next/navigation";
 
 import { LucideIcon } from "lucide-react";
 
-import { cn } from "${formatFilePath(shared.init.libUtils, {
-    prefix: "alias",
-    removeExtension: true,
-  })}";
+${
+  componentLib === "shadcn-ui"
+    ? `import { cn } from "${formatFilePath(shared.init.libUtils, {
+        prefix: "alias",
+        removeExtension: true,
+      })}";`
+    : ""
+}
 import { defaultLinks, additionalLinks } from "${formatFilePath("config/nav", {
     removeExtension: false,
     prefix: "alias",

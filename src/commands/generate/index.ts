@@ -9,7 +9,6 @@ import {
   ORMType,
   PrismaColumnType,
 } from "../../types.js";
-import { Choice } from "@inquirer/checkbox";
 import { createOrmMappings } from "./generators/model/utils.js";
 import { scaffoldAPIRoute } from "./generators/apiRoute.js";
 import {
@@ -34,6 +33,14 @@ import { scaffoldServerActions } from "./generators/serverActions.js";
 import { scaffoldViewsAndComponentsWithServerActions } from "./generators/views-with-server-actions.js";
 import { addLinkToSidebar } from "./generators/model/views-shared.js";
 import { installShadcnComponentList } from "../add/utils.js";
+
+type Choice<Value> = {
+  name?: string;
+  value: Value;
+  disabled?: boolean | string;
+  checked?: boolean;
+  type?: never;
+};
 
 function provideInstructions() {
   consola.info(
@@ -175,8 +182,8 @@ async function askForResourceType() {
           disabled: !packages.includes("trpc")
             ? "[You need to have tRPC installed. Run 'kirimase add']"
             : viewRequested === "views_and_components_trpc"
-              ? "[Already generated with your selected view]"
-              : false,
+            ? "[Already generated with your selected view]"
+            : false,
         },
       ].filter((item) =>
         viewRequested ? !viewRequested.includes(item.value.split("_")[0]) : item

@@ -255,6 +255,7 @@ export const addPackage = async (
       await checkAndAddAuthUtils();
     }
 
+    spinner.text = "Finishing configuration";
     if (init === true) {
       await sendEvent("init_config", {});
     } else {

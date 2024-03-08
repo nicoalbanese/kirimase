@@ -20,6 +20,8 @@ export const addScriptsToPackageJsonForPrisma = async (driver: DBType) => {
   let packageJson = JSON.parse(packageJsonData);
 
   const newItems = {
+    dev: "prisma generate && next dev",
+    build: "prisma generate && next build",
     "db:generate": `prisma generate`,
     "db:migrate": `prisma migrate dev`,
     ...(driver !== "pg" ? { "db:push": `prisma db push` } : {}),

@@ -86,7 +86,7 @@ const generateImportStatement = (
       .join(", ")
       .concat(
         `, ${mappings.tableFunc}`
-      )} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
+      )}${schema.index ? ", uniqueIndex" : ""} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
       referenceImports.length > 0 ? referenceImports.join("\n") : ""
     }${
       belongsToUser && provider !== "planetscale" && authSubType !== "managed"
@@ -139,13 +139,14 @@ const generateFieldsForSchema = (fields: DBField[], mappings: TypeMap) => {
 
 const generateIndex = (schema: Schema) => {
   const { tableName, index } = schema;
-  const { tableNameCamelCase } = formatTableName(tableName);
+  const { tableNameCamelCase, tableNameSingularSnake } =
+    formatTableName(tableName);
   return index
     ? `, (${tableNameCamelCase}) => {
   return {
     ${toCamelCase(
       index
-    )}Index: uniqueIndex('${index}_idx').on(${tableNameCamelCase}.${toCamelCase(
+    )}Index: uniqueIndex('${tableNameSingularSnake}_${index}_idx').on(${tableNameCamelCase}.${toCamelCase(
       index
     )}),
   }

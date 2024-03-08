@@ -643,7 +643,7 @@ const generateAuthDirFiles = () => {
                 session: {
                     user: {
                         id: user.id,
-                        name: user.user_metadata?.name ?? '', // user.user_metadata.name is only populated after the user has updated their name once. Supabase doesn't store the user's name by default.
+                        name: user.user_metadata?.name ?? '', // user.user_metadata.name is only populated after the user has updated their name once. Supabase doesn't store the users name by default.
                         email: user.email,
                     },
                 },

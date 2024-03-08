@@ -391,7 +391,7 @@ const ${tableNameSingularCapitalised}Form = ({
   const editing = !!${tableNameSingular}?.id;
 
   const router = useRouter();
-  const utils = trpc.useContext();
+  const utils = trpc.useUtils();
 
   const form = useForm<z.infer<typeof insert${tableNameSingularCapitalised}Params>>({
     // latest Zod release has introduced a TS error with zodResolver

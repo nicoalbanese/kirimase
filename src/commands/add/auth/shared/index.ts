@@ -23,7 +23,7 @@ export const createAccountSettingsPage = async () => {
   const withShadCn = componentLib === "shadcn-ui" ? true : false;
 
   // create account api - clerk has managed components so no need - supabase has its own client to update user details
-  if (auth !== "supabase" && auth !== "clerk") {
+  if (auth !== "supabase" && auth !== "clerk" && auth !== "lucia") {
     await createFile(
       formatFilePath(shared.auth.accountApiRoute, {
         prefix: "rootPath",
@@ -67,7 +67,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUpdateNameCard(withShadCn, auth !== "lucia")
+    createUpdateNameCard(withShadCn, auth !== "lucia", auth === "lucia")
   );
 
   // create updatenamecard
@@ -76,7 +76,7 @@ export const scaffoldAccountSettingsUI = async (
       prefix: "rootPath",
       removeExtension: false,
     }),
-    createUpdateEmailCard(withShadCn, auth !== "lucia")
+    createUpdateEmailCard(withShadCn, auth !== "lucia", auth === "lucia")
   );
 
   // create accountcard components
@@ -97,7 +97,8 @@ export const scaffoldAccountSettingsUI = async (
   //   createNavbar(withShadCn, auth === "clerk", auth)
   // );
 
-  if (withShadCn && auth !== "supabase") {
+  // TODO FIX THIS
+  if (withShadCn && auth !== "lucia" && auth !== "supabase") {
     await createFile(
       formatFilePath(lucia.signOutButtonComponent, {
         prefix: "rootPath",
