@@ -62,10 +62,10 @@ export default {
         ? `url: env.DATABASE_URL,
     authToken: env.DATABASE_AUTH_TOKEN`
         : provider === "better-sqlite3"
-          ? "url: env.DATABASE_URL"
-          : provider === "mysql-2" || provider === "planetscale"
-            ? "uri: env.DATABASE_URL"
-            : "connectionString: env.DATABASE_URL"
+        ? "url: env.DATABASE_URL"
+        : provider === "mysql-2" || provider === "planetscale"
+        ? "uri: env.DATABASE_URL"
+        : "connectionString: env.DATABASE_URL"
     }${provider === "vercel-pg" ? '.concat("?sslmode=require")' : ""},
   }
 } satisfies Config;`
@@ -107,15 +107,12 @@ export const pool = new Pool({
 export const db = drizzle(pool);`;
       break;
     case "neon":
-      indexTS = `import { neon, neonConfig, NeonQueryFunction } from '@neondatabase/serverless';
+      indexTS = `import { neon, NeonQueryFunction } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import { env } from "${formatFilePath(envMjs, {
         removeExtension: false,
         prefix: "alias",
       })}";
-
-neonConfig.fetchConnectionCache = true;
- 
 export const sql: NeonQueryFunction<boolean, boolean> = neon(env.DATABASE_URL);
 export const db = drizzle(sql);
 `;
@@ -283,11 +280,9 @@ const db = drizzle(client);
       imports = `
 import { drizzle } from "drizzle-orm/neon-http";
 import { migrate } from "drizzle-orm/neon-http/migrator";
-import { neon, neonConfig, NeonQueryFunction } from '@neondatabase/serverless';
+import { neon, NeonQueryFunction } from '@neondatabase/serverless';
 `;
       connectionLogic = `
-neonConfig.fetchConnectionCache = true;
- 
 const sql: NeonQueryFunction<boolean, boolean> = neon(env.DATABASE_URL);
 const db = drizzle(sql);
 `;
@@ -791,10 +786,10 @@ export const createComputer = async (computer: NewComputer) => {
     ${
       driver === "mysql" ? "" : "const [c] = "
     } await db.insert(computers).values(newComputer)${
-      driver === "mysql"
-        ? "\n    return { success: true }"
-        : ".returning();\n    return { computer: c }"
-    }
+    driver === "mysql"
+      ? "\n    return { success: true }"
+      : ".returning();\n    return { computer: c }"
+  }
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
     console.error(message);
@@ -827,10 +822,10 @@ export const deleteComputer = async (id: ComputerId) => {
     ${
       driver === "mysql" ? "" : "const [c] = "
     }await db.delete(computers).where(eq(computers.id, computerId!))${
-      driver === "mysql"
-        ? "\n    return { success: true };"
-        : ".returning();\n    return { computer: c };"
-    }
+    driver === "mysql"
+      ? "\n    return { success: true };"
+      : ".returning();\n    return { computer: c };"
+  }
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again"
     console.error(message);
