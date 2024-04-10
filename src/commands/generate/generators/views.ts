@@ -349,7 +349,7 @@ import { ${t3 ? "api as " : ""}trpc } from "${formatFilePath(trpc.trpcClient, {
     removeExtension: true,
   })}";
 import { Button } from "${alias}/components/ui/button";
-import { z } from "zod";${
+import type { z } from "zod";${
     schema.fields.filter((field) => field.type.toLowerCase() === "boolean")
       .length > 0
       ? `\nimport { Checkbox } from "${alias}/components/ui/checkbox";`
@@ -422,7 +422,9 @@ const ${tableNameSingularCapitalised}Form = ({
   }    data?: { error?: string },
   ) => {
         if (data?.error) {
-      toast.error(data.error)
+      toast.error(\`Failed to \${action}\`, {
+        description: data?.error ?? "Error",
+      })
       return;
     }
 
@@ -433,6 +435,21 @@ const ${tableNameSingularCapitalised}Form = ({
         ? `\n        toast.success(\`${tableNameNormalEnglishSingular} \${action}d!\`);`
         : null
     }
+  };
+
+  const onError = async (${
+    packages.includes("shadcn-ui")
+      ? 'action: "create" | "update" | "delete",\n'
+      : ""
+  }    data?: { error?: string },
+  ) => {
+        if (data?.error) {
+      toast.error(\`Failed to \${action}\`, {
+        description: data?.error ?? "Error",
+      })
+      return;
+    }
+    return;
   };
 
   const { mutate: create${tableNameSingularCapitalised}, isLoading: isCreating } =

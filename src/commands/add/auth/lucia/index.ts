@@ -133,7 +133,7 @@ export const addLucia = async () => {
         removeExtension: false,
         prefix: "rootPath",
       }),
-      `import { z } from "zod";
+      `import type { z } from "zod";
 
 export const authenticationSchema = z.object({
   email: z.string().email().min(5).max(31),

@@ -801,7 +801,7 @@ const createFormComponent = (schema: Schema) => {
     ...new Set(schema.fields.map((field) => field.type)),
   ] as ColumnType[];
 
-  return `import { z } from "zod";
+  return `import type { z } from "zod";
 
 import { useState, useTransition } from "react";
 import { useFormStatus } from "react-dom";
@@ -931,6 +931,20 @@ const ${tableNameSingularCapitalised}Form = ({${
       toast.success(\`${tableNameSingularCapitalised} \${action}d!\`);
       if (action === "delete") router.push(backpath);
     }
+  };
+
+  const onError = (
+    action: Action,
+    data?: { error: string; values: ${tableNameSingularCapitalised} },
+  ) => {
+    const failed = Boolean(data?.error);
+    if (failed) {
+      openModal && openModal(data?.values);
+      toast.error(\`Failed to \${action}\`, {
+        description: data?.error ?? "Error",
+      });
+    }
+    return
   };
 
   const handleSubmit = async (data: FormData) => {
