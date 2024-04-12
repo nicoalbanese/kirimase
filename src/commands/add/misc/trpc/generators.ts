@@ -52,7 +52,7 @@ export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 `;
   const { trpc } = getFilePaths();
   return `import { initTRPC, TRPCError } from "@trpc/server";
-import { Context } from "${formatFilePath(trpc.trpcContext, {
+import type { Context } from "${formatFilePath(trpc.trpcContext, {
     prefix: "alias",
     removeExtension: true,
   })}";
@@ -121,7 +121,7 @@ export const apiTrpcRouteTs = () => {
   const { trpc, shared } = getFilePaths();
   return `import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { appRouter } from "${formatFilePath(trpc.rootRouter, {
     prefix: "alias",
     removeExtension: true,
@@ -166,7 +166,7 @@ export const libTrpcClientTs = () => {
   const { trpc } = getFilePaths();
   return `import { createTRPCReact } from "@trpc/react-query";
 
-import { type AppRouter } from "${formatFilePath(trpc.rootRouter, {
+import type { AppRouter } from "${formatFilePath(trpc.rootRouter, {
     prefix: "alias",
     removeExtension: true,
   })}";
@@ -180,7 +180,8 @@ export const libTrpcProviderTsx = () => {
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 
 import { trpc } from "./client";
 import { getUrl } from "./utils";
@@ -273,7 +274,7 @@ import {
   TRPCClientError,
 } from "@trpc/client";
 import { callProcedure } from "@trpc/server";
-import { type TRPCErrorResponse } from "@trpc/server/rpc";
+import type { TRPCErrorResponse } from "@trpc/server/rpc";
 import { observable } from "@trpc/server/observable";
 
 import { cache } from "react";
@@ -386,7 +387,7 @@ export const libTrpcUtilsTs = () => {
 }
 
 export function getUrl() {
-  return getBaseUrl() + "/api/trpc";
+  return \`\${getBaseUrl()}/api/trpc\`;
 }`;
 };
 
@@ -394,7 +395,7 @@ export const libTrpcApiTsBatchLink = () => {
   const { trpc } = getFilePaths();
 
   return `import { cookies } from "next/headers";
-import { type AppRouter } from "${formatFilePath(trpc.rootRouter, {
+import type { AppRouter } from "${formatFilePath(trpc.rootRouter, {
     prefix: "alias",
     removeExtension: true,
   })}";

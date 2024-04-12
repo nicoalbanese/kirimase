@@ -200,6 +200,7 @@ const landingPage = `/**
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
 import Link from "next/link";
+import type { JSX,SVGProps } from "react"
 
 export default function LandingPage() {
   return (
@@ -359,7 +360,7 @@ export default function LandingPage() {
   );
 }
 
-function MountainIcon(props: any) {
+function MountainIcon(props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

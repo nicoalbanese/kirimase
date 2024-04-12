@@ -172,7 +172,7 @@ export default function Page() {
 
 const generateNavConfig = () => {
   const { componentLib, auth } = readConfigFile();
-  return `import { SidebarLink } from "${formatFilePath(
+  return `import type { SidebarLink } from "${formatFilePath(
     "components/SidebarItems",
     {
       prefix: "alias",
@@ -210,7 +210,7 @@ const generateSidebarItemsTsx = () => {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 ${
   componentLib === "shadcn-ui"
@@ -260,7 +260,7 @@ const SidebarLinkGroup = ({
   border?: boolean;
 }) => {
   const fullPathname = usePathname();
-  const pathname = "/" + fullPathname.split("/")[1];
+  const pathname = \`/\${fullPathname.split("/")[1]}\`;
 
   return (
     <div className={border ? "border-border border-t my-8 pt-4" : ""}>
@@ -347,7 +347,7 @@ import SidebarItems from "./SidebarItems";${
           : null
     }
 
-import { AuthSession, getUserAuth } from "${formatFilePath(
+import { type AuthSession, getUserAuth } from "${formatFilePath(
       shared.auth.authUtils,
       {
         prefix: "alias",
@@ -378,7 +378,7 @@ const UserDetails = ({ session }: { session: AuthSession }) => {
   if (session.session === null) return null;
   const { user } = session.session;
 
-  if (!user?.name || user.name.length == 0) return null;
+  if (!user?.name || user.name.length === 0) return null;
 
   return (
     <Link href="/account">

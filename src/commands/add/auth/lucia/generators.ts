@@ -519,8 +519,8 @@ export async function updateUser(
 
   if (!result.success) {
     const error = result.error.flatten().fieldErrors;
-    if (error.name) return { error: "Invalid name - " + error.name[0] };
-    if (error.email) return { error: "Invalid email - " + error.email[0] };
+    if (error.name) return { error: \`Invalid name - \${error.name[0]}\` };
+    if (error.email) return { error: \`Invalid email - \${error.email[0]}\` };
     return genericError;
   }
 
@@ -694,10 +694,10 @@ const generateAuthDirFiles = (
   const utilsTs = `import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 
-import { type Cookie } from 'lucia'
+import type { Cookie } from 'lucia'
 
 import { validateRequest } from './lucia'
-import { UsernameAndPassword, authenticationSchema } from '../db/schema/auth'
+import { type UsernameAndPassword, authenticationSchema } from '../db/schema/auth'
 
 export type AuthSession = {
   session: {
@@ -735,9 +735,9 @@ export const setAuthCookie = (cookie: Cookie) => {
   cookies().set(cookie);
 }
 
-const getErrorMessage = (errors: any): string => {
+const getErrorMessage = (errors: { email?: string[] | undefined; password?: string[] | undefined }): string => {
   if (errors.email) return 'Invalid Email'
-  if (errors.password) return 'Invalid Password - ' + errors.password[0]
+  if (errors.password) return \`Invalid Password - \${errors.password[0]}\`
   return '' // return a default error message or an empty string
 }
 
@@ -814,7 +814,7 @@ export const validateRequest = cache(
     const result = await lucia.validateSession(sessionId)
     // next.js throws when you attempt to set cookie when rendering page
     try {
-      if (result.session && result.session.fresh) {
+      if (result.session?.fresh) {
         const sessionCookie = lucia.createSessionCookie(result.session.id)
         cookies().set(
           sessionCookie.name,
