@@ -10,7 +10,7 @@ import figlet from "figlet";
 import chalk from "chalk";
 
 export async function initProject(options?: InitOptions) {
-  const nextjsProjectExists = existsSync("package.json");
+  const nextjsProjectExists = existsSync("next.config.mjs");
   if (!nextjsProjectExists) {
     consola.fatal(
       "No Next.js project detected. Please create a Next.js project and then run `kirimase init` within that directory."
