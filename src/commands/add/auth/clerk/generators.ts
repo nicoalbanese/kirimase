@@ -2,12 +2,16 @@ import { ComponentLibType } from "../../../../types.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 const generateMiddlewareTs = () => {
-  return `import { authMiddleware } from "@clerk/nextjs";
+  return `import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 // This example protects all routes including api/trpc routes
 // Please edit this to allow other routes to be public as needed.
-// See https://clerk.com/docs/references/nextjs/auth-middleware for more information about configuring your middleware
-export default authMiddleware({ ignoredRoutes: ["/"] });
+// See https://clerk.com/docs/references/nextjs/clerk-middleware for more information about configuring your middleware
+const isProtectedRoute = createRouteMatcher([]);
+
+export default clerkMiddleware((auth, req) => {
+  if (isProtectedRoute(req)) auth().protect();
+});
 
 export const config = {
   matcher: ['/((?!.+\\\\\.[\\\\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
@@ -19,7 +23,7 @@ const generateSignInPageTs = () => {
 export default function Page() {
   return (
     <main className="grid place-items-center pt-4">
-      <SignIn redirectUrl={"/dashboard"} />
+      <SignIn fallbackRedirectUrl={"/dashboard"} />
     </main>
   );
 }`;
@@ -30,7 +34,7 @@ const generateSignUpPageTs = () => {
 export default function Page() {
   return (
     <main className="grid place-items-center pt-4">
-      <SignUp redirectUrl={"/dashboard"} />
+      <SignUp fallbackRedirectUrl={"/dashboard"} />
     </main>
   );
 }`;
