@@ -182,7 +182,7 @@ To run locally:
 
 ```sh
 pnpm i
-pnpm run dev
+pnpm run build
 
 npm install -g . (in a second terminal - this will then make kirimase available across your machine using "kirimase *command*")
 ```

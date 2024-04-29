@@ -269,3 +269,11 @@ export const sendEvent = async (
     return;
   }
 };
+
+export const humanize = (input: string) => {
+  return input
+    .replace(/([A-Z])/g, (match) => ` ${match}`)
+    .replace(/_|-/g, " ")
+    .toLowerCase()
+    .replace(/(?:^|\s)\S/g, (str) => str.toUpperCase());
+};
