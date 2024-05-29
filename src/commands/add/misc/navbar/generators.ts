@@ -179,7 +179,7 @@ const generateNavConfig = () => {
       removeExtension: false,
     }
   )}";
-import { Cog, Globe, HomeIcon } from "lucide-react";
+import { Cog, Globe, User, HomeIcon } from "lucide-react";
 
 type AdditionalLinks = {
   title: string;
@@ -189,7 +189,7 @@ type AdditionalLinks = {
 export const defaultLinks: SidebarLink[] = [
   { href: "/dashboard", title: "Home", icon: HomeIcon },${
     auth !== null
-      ? `\n  { href: "/account", title: "Account", icon: Cog },`
+      ? `\n  { href: "/account", title: "Account", icon: User },`
       : ""
   }${
     componentLib === "shadcn-ui"
