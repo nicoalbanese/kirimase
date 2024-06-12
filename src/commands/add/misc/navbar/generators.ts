@@ -189,7 +189,7 @@ type AdditionalLinks = {
 export const defaultLinks: SidebarLink[] = [
   { href: "/dashboard", title: "Home", icon: HomeIcon },${
     auth !== null
-      ? `\n  { href: "/account", title: "Account", icon: Cog },`
+      ? `\n  { href: "/account", title: "Account", icon: Globe },`
       : ""
   }${
     componentLib === "shadcn-ui"
