@@ -23,14 +23,16 @@ import {
 import stripJsonComments from "strip-json-comments";
 import { addToInstallList } from "../../utils.js";
 
-const configDriverDialect = {
+type DBDialectType = Exclude<DBType, "pg"> | "postgresql";
+
+const configDriverDialect: Record<DBProvider, DBDialectType> = {
   turso: "sqlite",
-  postgresjs: "pg",
-  "node-postgres": "pg",
-  neon: "pg",
-  "vercel-pg": "pg",
-  supabase: "pg",
-  aws: "pg",
+  postgresjs: "postgresql",
+  "node-postgres": "postgresql",
+  neon: "postgresql",
+  "vercel-pg": "postgresql",
+  supabase: "postgresql",
+  aws: "postgresql",
   planetscale: "mysql",
   "mysql-2": "mysql",
   "better-sqlite3": "sqlite",
@@ -53,17 +55,13 @@ import { env } from "${formatFilePath(envMjs, {
 export default {
   schema: "./${libPath}/db/schema",
   dialect: "${configDriverDialect[provider]}",
-  out: "./${libPath}/db/migrations",
+  out: "./${libPath}/db/migrations",${provider === "turso" ? `\n  driver: "turso",` : ""}
   dbCredentials: {
     ${
       provider === "turso"
         ? `url: env.DATABASE_URL,
     authToken: env.DATABASE_AUTH_TOKEN`
-        : provider === "better-sqlite3"
-        ? "url: env.DATABASE_URL"
-        : provider === "mysql-2" || provider === "planetscale"
-        ? "uri: env.DATABASE_URL"
-        : "connectionString: env.DATABASE_URL"
+        : "url: env.DATABASE_URL"
     }${provider === "vercel-pg" ? '.concat("?sslmode=require")' : ""},
   }
 } satisfies Config;`
@@ -533,15 +531,6 @@ export const addScriptsToPackageJson = (
   // Parse package.json content
   const packageJson = JSON.parse(packageJsonData);
 
-  // const newItems = {
-  //   "db:generate": `drizzle-kit generate:${driver}`,
-  //   "db:migrate": `tsx ${libPath}/db/migrate.ts`,
-  //   "db:drop": "drizzle-kit drop",
-  //   "db:pull": `drizzle-kit introspect:${driver}`,
-  //   ...(driver !== "pg" ? { "db:push": `drizzle-kit push:${driver}` } : {}),
-  //   "db:studio": "drizzle-kit studio",
-  //   "db:check": `drizzle-kit check:${driver}`,
-  // };
   const newItems = {
     "db:generate": `drizzle-kit generate`,
     "db:migrate": `tsx ${libPath}/db/migrate.ts`,
@@ -798,10 +787,10 @@ export const createComputer = async (computer: NewComputer) => {
     ${
       driver === "mysql" ? "" : "const [c] = "
     } await db.insert(computers).values(newComputer)${
-    driver === "mysql"
-      ? "\n    return { success: true }"
-      : ".returning();\n    return { computer: c }"
-  }
+      driver === "mysql"
+        ? "\n    return { success: true }"
+        : ".returning();\n    return { computer: c }"
+    }
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again";
     console.error(message);
@@ -834,10 +823,10 @@ export const deleteComputer = async (id: ComputerId) => {
     ${
       driver === "mysql" ? "" : "const [c] = "
     }await db.delete(computers).where(eq(computers.id, computerId!))${
-    driver === "mysql"
-      ? "\n    return { success: true };"
-      : ".returning();\n    return { computer: c };"
-  }
+      driver === "mysql"
+        ? "\n    return { success: true };"
+        : ".returning();\n    return { computer: c };"
+    }
   } catch (err) {
     const message = (err as Error).message ?? "Error, please try again"
     console.error(message);
