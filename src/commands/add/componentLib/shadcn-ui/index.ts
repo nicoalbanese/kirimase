@@ -11,7 +11,7 @@ import {
   replaceFile,
   updateConfigFile,
 } from "../../../../utils.js";
-import { AvailablePackage, PMType } from "../../../../types.js";
+import { AvailablePackage, InitOptions, PMType } from "../../../../types.js";
 import {
   addContextProviderToAppLayout,
   addContextProviderToRootLayout,
@@ -90,7 +90,8 @@ const manualInstallShadCn = async (
 };
 
 export const installShadcnUI = async (
-  packagesBeingInstalled: AvailablePackage[]
+  packagesBeingInstalled: AvailablePackage[],
+  options?: InitOptions
 ) => {
   const {
     packages: installedPackages,
@@ -139,7 +140,10 @@ export const installShadcnUI = async (
     "dropdown-menu",
   ]);
 
-  addContextProviderToAppLayout("ShadcnToast");
+  console.log(options.headless);
+  if (options.headless === undefined) {
+    addContextProviderToAppLayout("ShadcnToast");
+  }
 
   // if (packages.includes("next-auth")) updateSignInComponentWithShadcnUI();
 };

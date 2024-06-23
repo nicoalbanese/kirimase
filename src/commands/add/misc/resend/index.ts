@@ -5,13 +5,16 @@ import {
   installPackages,
   readConfigFile,
 } from "../../../../utils.js";
-import { AvailablePackage } from "../../../../types.js";
+import { AvailablePackage, InitOptions } from "../../../../types.js";
 import { resendGenerators } from "./generators.js";
 import { addToDotEnv } from "../../orm/drizzle/generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import { addToInstallList } from "../../utils.js";
 
-export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
+export const addResend = async (
+  packagesBeingInstalled: AvailablePackage[],
+  options?: InitOptions
+) => {
   const {
     // packages: installedPackages,
     orm,
@@ -30,14 +33,16 @@ export const addResend = async (packagesBeingInstalled: AvailablePackage[]) => {
     generateEmailTemplateComponent,
   } = resendGenerators;
 
-  // 1. Add page at app/resend/page.tsx
-  createFile(
-    formatFilePath(resend.resendPage, {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    generateResendPage()
-  );
+  if (options.headless === undefined) {
+    // 1. Add page at app/resend/page.tsx
+    createFile(
+      formatFilePath(resend.resendPage, {
+        prefix: "rootPath",
+        removeExtension: false,
+      }),
+      generateResendPage()
+    );
+  }
 
   // 2. Add component at components/emails/FirstEmailTemplate.tsx
   createFile(

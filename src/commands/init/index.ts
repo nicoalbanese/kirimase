@@ -25,6 +25,7 @@ export async function initProject(options?: InitOptions) {
   }
 
   console.clear();
+
   console.log("\n");
   console.log(chalk(figlet.textSync("Kirimase", { font: "ANSI Shadow" })));
   const srcExists =

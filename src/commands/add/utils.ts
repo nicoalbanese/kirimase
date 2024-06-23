@@ -337,7 +337,8 @@ export const installShadcnComponentList = async () => {
 
 export const printNextSteps = (
   promptResponses: InitOptions,
-  duration: number
+  duration: number,
+  options?: InitOptions
 ) => {
   const config = readConfigFile();
   const ppm = config?.preferredPackageManager ?? "npm";
@@ -401,7 +402,7 @@ export const printNextSteps = (
 
   const dbMigration = [
     ...(config.t3 === true ? [] : [`Run \`${ppm} run db:generate\``]),
-    `Run \`${ppm} run db:${promptResponses.db === "pg" ? "migrate" : "push"}\``,
+    `Run \`${ppm} run db:push`,
     `Run \`${ppm} run dev\``,
     "Open http://localhost:3000 in your browser",
   ];
@@ -440,11 +441,18 @@ export const printNextSteps = (
     "Create Stripe product (https://dashboard.stripe.com/products)",
   ];
 
+  const headless = options.headless ?? false;
+
   const notes = [
     ...authProviderInstructions,
     ...(promptResponses.miscPackages &&
     promptResponses.miscPackages.includes("stripe")
       ? stripe
+      : []),
+    ...(headless
+      ? [
+          `**Important**: remember to add Providers for ${promptResponses.miscPackages.push(promptResponses.auth)} (where relevant) to your root layout!`,
+        ]
       : []),
     "If you have any issues, please open an issue on GitHub\n  (https://github.com/nicoalbanese/kirimase/issues)",
   ];
