@@ -46,7 +46,6 @@ export const addPrisma = async (
       "prisma",
       preferredPackageManager,
       generateDbUrl(dbType),
-      true,
       hasSrc ? "src/" : ""
     );
   } else {
@@ -56,7 +55,6 @@ export const addPrisma = async (
       "prisma",
       preferredPackageManager,
       generateDbUrl(dbType),
-      false,
       hasSrc ? "src/" : ""
     );
   }
