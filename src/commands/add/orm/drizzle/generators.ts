@@ -23,19 +23,19 @@ import {
 import stripJsonComments from "strip-json-comments";
 import { addToInstallList } from "../../utils.js";
 
-type ConfigDriver = "pg" | "turso" | "libsql" | "mysql" | "better-sqlite";
+type DBDialectType = Exclude<DBType, "pg"> | "postgresql";
 
-const configDriverMappings = {
-  postgresjs: "pg",
-  "node-postgres": "pg",
-  "vercel-pg": "pg",
-  neon: "pg",
-  supabase: "pg",
-  aws: "pg",
-  planetscale: "mysql2",
-  "mysql-2": "mysql2",
-  "better-sqlite3": "better-sqlite",
-  turso: "turso",
+const configDriverDialect: Record<DBProvider, DBDialectType> = {
+  turso: "sqlite",
+  postgresjs: "postgresql",
+  "node-postgres": "postgresql",
+  neon: "postgresql",
+  "vercel-pg": "postgresql",
+  supabase: "postgresql",
+  aws: "postgresql",
+  planetscale: "mysql",
+  "mysql-2": "mysql",
+  "better-sqlite3": "sqlite",
 };
 
 export const createDrizzleConfig = (libPath: string, provider: DBProvider) => {
@@ -54,18 +54,14 @@ import { env } from "${formatFilePath(envMjs, {
 
 export default {
   schema: "./${libPath}/db/schema",
-  out: "./${libPath}/db/migrations",
-  driver: "${configDriverMappings[provider]}",
+  dialect: "${configDriverDialect[provider]}",
+  out: "./${libPath}/db/migrations",${provider === "turso" ? `\n  driver: "turso",` : ""}
   dbCredentials: {
     ${
       provider === "turso"
         ? `url: env.DATABASE_URL,
     authToken: env.DATABASE_AUTH_TOKEN`
-        : provider === "better-sqlite3"
-          ? "url: env.DATABASE_URL"
-          : provider === "mysql-2" || provider === "planetscale"
-            ? "uri: env.DATABASE_URL"
-            : "connectionString: env.DATABASE_URL"
+        : "url: env.DATABASE_URL"
     }${provider === "vercel-pg" ? '.concat("?sslmode=require")' : ""},
   }
 } satisfies Config;`
@@ -127,7 +123,7 @@ import { env } from "${formatFilePath(envMjs, {
         removeExtension: false,
         prefix: "alias",
       })}";
- 
+  
 export const db = drizzle(sql)
 `;
       break;
@@ -536,13 +532,13 @@ export const addScriptsToPackageJson = (
   const packageJson = JSON.parse(packageJsonData);
 
   const newItems = {
-    "db:generate": `drizzle-kit generate:${driver}`,
+    "db:generate": `drizzle-kit generate`,
     "db:migrate": `tsx ${libPath}/db/migrate.ts`,
     "db:drop": "drizzle-kit drop",
-    "db:pull": `drizzle-kit introspect:${driver}`,
-    ...(driver !== "pg" ? { "db:push": `drizzle-kit push:${driver}` } : {}),
+    "db:pull": `drizzle-kit introspect`,
+    "db:push": `drizzle-kit push`,
     "db:studio": "drizzle-kit studio",
-    "db:check": `drizzle-kit check:${driver}`,
+    "db:check": `drizzle-kit check`,
   };
   packageJson.scripts = {
     ...packageJson.scripts,
