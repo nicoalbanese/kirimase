@@ -508,7 +508,9 @@ const ${tableNameSingularCapitalised}Form = ({
           <Button
             type="button"
             variant={"destructive"}
-            onClick={() => delete${tableNameSingularCapitalised}({ id: ${tableNameSingular}.id })}
+            onClick={() => if (typeof window !== 'undefined' && window.confirm('Are you sure you want to delete this?')) {
+              delete${tableNameSingularCapitalised}({ id: ${tableNameSingular}.id })}
+            }
           >
             Delet{isDeleting ? "ing..." : "e"}
           </Button>
