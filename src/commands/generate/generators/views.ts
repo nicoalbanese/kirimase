@@ -173,10 +173,10 @@ export default function ${tableNameSingularCapitalised}List({ ${tableNameCamelCa
     <ul>
       {${tableNameFirstChar}.${tableNameCamelCase}.map((${tableNameSingular}) => (
         <${tableNameSingularCapitalised} ${tableNameSingular}={${tableNameSingular}} key={${
-          relations.length > 0
-            ? `${tableNameSingular}.${tableNameSingular}`
-            : tableNameSingular
-        }.id} />
+    relations.length > 0
+      ? `${tableNameSingular}.${tableNameSingular}`
+      : tableNameSingular
+  }.id} />
       ))}
     </ul>
   );
@@ -191,18 +191,18 @@ const ${tableNameSingularCapitalised} = ({ ${tableNameSingular} }: { ${tableName
             ? `${tableNameSingular}.${tableNameSingular}`
             : tableNameSingular
         }.${toCamelCase(schema.fields[0].name)}${
-          schema.fields[0].type === "date" ||
-          schema.fields[0].type === "timestamp" ||
-          schema.fields[0].type === "DateTime"
-            ? ".toString()"
-            : ""
-        }}</div>
+    schema.fields[0].type === "date" ||
+    schema.fields[0].type === "timestamp" ||
+    schema.fields[0].type === "DateTime"
+      ? ".toString()"
+      : ""
+  }}</div>
       </div>
       <${tableNameSingularCapitalised}Modal ${tableNameSingular}={${
-        relations.length > 0
-          ? `${tableNameSingular}.${tableNameSingular}`
-          : tableNameSingular
-      }} />
+    relations.length > 0
+      ? `${tableNameSingular}.${tableNameSingular}`
+      : tableNameSingular
+  }} />
     </li>
   );
 };
@@ -301,7 +301,7 @@ const createformInputComponent = (field: DBField): string => {
               </Popover>
 `;
   return `<FormControl>
-            <Input {...field} />
+            <Input {...field} value={field.value || ''}/>
           </FormControl>
 `;
 };
@@ -349,7 +349,7 @@ import { ${t3 ? "api as " : ""}trpc } from "${formatFilePath(trpc.trpcClient, {
     removeExtension: true,
   })}";
 import { Button } from "${alias}/components/ui/button";
-import { z } from "zod";${
+import type { z } from "zod";${
     schema.fields.filter((field) => field.type.toLowerCase() === "boolean")
       .length > 0
       ? `\nimport { Checkbox } from "${alias}/components/ui/checkbox";`
@@ -403,13 +403,13 @@ const ${tableNameSingularCapitalised}Form = ({
     // open issue: https://github.com/colinhacks/zod/issues/2663
     // errors locally but not in production
     resolver: zodResolver(insert${tableNameSingularCapitalised}Params),
-    defaultValues: ${tableNameSingular} ?? {
+    defaultValues: {
       ${schema.fields
         .map(
           (field) =>
-            `${toCamelCase(field.name)}: ${
-              defaultValueMappings[driver][field.type]
-            }`
+            `${toCamelCase(field.name)}: ${tableNameSingular}.${toCamelCase(
+              field.name
+            )} || ${defaultValueMappings[driver][field.type]}`
         )
         .join(",\n     ")}
     },
@@ -422,7 +422,9 @@ const ${tableNameSingularCapitalised}Form = ({
   }    data?: { error?: string },
   ) => {
         if (data?.error) {
-      toast.error(data.error)
+      toast.error(\`Failed to \${action}\`, {
+        description: data?.error ?? "Error",
+      })
       return;
     }
 
@@ -433,6 +435,21 @@ const ${tableNameSingularCapitalised}Form = ({
         ? `\n        toast.success(\`${tableNameNormalEnglishSingular} \${action}d!\`);`
         : null
     }
+  };
+
+  const onError = async (${
+    packages.includes("shadcn-ui")
+      ? 'action: "create" | "update" | "delete",\n'
+      : ""
+  }    data?: { error?: string },
+  ) => {
+        if (data?.error) {
+      toast.error(\`Failed to \${action}\`, {
+        description: data?.error ?? "Error",
+      })
+      return;
+    }
+    return;
   };
 
   const { mutate: create${tableNameSingularCapitalised}, isLoading: isCreating } =
