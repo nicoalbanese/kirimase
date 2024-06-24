@@ -1,11 +1,14 @@
 import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { consola } from "consola";
+import fs from "fs";
 import pluralize from "pluralize";
+import { z } from "zod";
 import {
   Config,
   DBField,
   DBType,
   DrizzleColumnType,
+  GenerateOptions,
   ORMType,
   PrismaColumnType,
 } from "../../types.js";
@@ -23,10 +26,12 @@ import { ExtendedSchema, Schema } from "./types.js";
 import { scaffoldViewsAndComponents } from "./generators/views.js";
 import {
   camelCaseToSnakeCase,
+  formatSchemaValidationError,
   formatTableName,
   getCurrentSchemas,
   printGenerateNextSteps,
   toCamelCase,
+  validateSchemas,
 } from "./utils.js";
 import { scaffoldModel } from "./generators/model/index.js";
 import { scaffoldServerActions } from "./generators/serverActions.js";
@@ -502,7 +507,30 @@ async function generateResources(
   await installShadcnComponentList();
 }
 
-export async function buildSchema() {
+function parseSchemaFile(jsonString: string): Schema[] | null {
+  let schemas: Schema[] = [];
+  try {
+    schemas = JSON.parse(jsonString);
+    const validatedSchemas = validateSchemas(schemas);
+    return validatedSchemas;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      consola.error(
+        `Error parsing schema file:\n${formatSchemaValidationError(
+          error,
+          schemas
+        )}`
+      );
+    } else if (error instanceof SyntaxError) {
+      consola.error(`Failed to parse JSON: ${error.message}`);
+    } else {
+      consola.error(`Unexpected error: ${error}`);
+    }
+    return null;
+  }
+}
+
+export async function buildSchema(options: GenerateOptions) {
   const ready = preBuild();
   if (!ready) return;
 
@@ -511,23 +539,31 @@ export async function buildSchema() {
   if (config.orm !== null) {
     provideInstructions();
     const resourceType = await askForResourceType();
-    const schema = await getSchema(config, resourceType);
+    const schemas = options.fromFile
+      ? parseSchemaFile(fs.readFileSync(options.fromFile, "utf8"))
+      : [await getSchema(config, resourceType)];
+
     // would want to have something that formatted the schema object into:
     // an array of items that needed to be created using code commented below
     // would also need extra stuff like urls
     // TODO
 
-    const schemas = formatSchemaForGeneration(schema);
+    // Stop generate if schema parsing failed
+    if (!schemas) return;
+
+    const formattedSchemas = schemas.flatMap((schema) =>
+      formatSchemaForGeneration(schema)
+    );
 
     await sendEvent("generate", {
-      schemas: JSON.stringify(anonymiseSchemas(schemas)),
+      schemas: JSON.stringify(anonymiseSchemas(formattedSchemas)),
       resources: resourceType,
     });
 
-    for (let schema of schemas) {
+    for (let schema of formattedSchemas) {
       await generateResources(schema, resourceType);
     }
-    printGenerateNextSteps(schema, resourceType);
+    printGenerateNextSteps(schemas, resourceType);
   } else {
     consola.warn(
       "You need to have an ORM installed in order to use the scaffold command."
