@@ -39,7 +39,6 @@ export async function initProject(options?: InitOptions) {
       ],
     }));
 
-  // console.log(options);
   const preferredPackageManager =
     checkForPackageManager() ||
     options?.packageManager ||

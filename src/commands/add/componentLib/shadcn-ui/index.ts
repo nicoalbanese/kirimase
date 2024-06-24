@@ -24,7 +24,8 @@ import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 const manualInstallShadCn = async (
   preferredPackageManager: PMType,
-  rootPath: string
+  rootPath: string,
+  options: InitOptions
 ) => {
   const {
     generateComponentsJson,
@@ -72,7 +73,9 @@ const manualInstallShadCn = async (
   // create components.json
   createFile("components.json", generateComponentsJson(rootPath));
 
-  createFile(rootPath.concat("app/loading.tsx"), generateLoadingPage());
+  if (options.headless === undefined) {
+    createFile(rootPath.concat("app/loading.tsx"), generateLoadingPage());
+  }
 
   // todo: install theme switcher
   // create theme provider
@@ -115,7 +118,7 @@ export const installShadcnUI = async (
       // await execa(pmInstallCommand[preferredPackageManager], installArgs, {
       //   stdio: "inherit",
       // });
-      await manualInstallShadCn(preferredPackageManager, rootPath);
+      await manualInstallShadCn(preferredPackageManager, rootPath, options);
       // consola.success("Shadcn initialized successfully.");
       addPackageToConfig("shadcn-ui");
       updateConfigFile({ componentLib: "shadcn-ui" });
@@ -140,7 +143,6 @@ export const installShadcnUI = async (
     "dropdown-menu",
   ]);
 
-  console.log(options.headless);
   if (options.headless === undefined) {
     addContextProviderToAppLayout("ShadcnToast");
   }

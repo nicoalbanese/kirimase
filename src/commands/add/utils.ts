@@ -449,9 +449,9 @@ export const printNextSteps = (
     promptResponses.miscPackages.includes("stripe")
       ? stripe
       : []),
-    ...(headless
+    ...((headless && promptResponses.miscPackages) || promptResponses.auth
       ? [
-          `**Important**: remember to add Providers for ${promptResponses.miscPackages.push(promptResponses.auth)} (where relevant) to your root layout!`,
+          `**Important**: remember to add Providers for packages (where relevant ie. if you installed trpc, shadcn, or clerk) to your root layout!`,
         ]
       : []),
     "If you have any issues, please open an issue on GitHub\n  (https://github.com/nicoalbanese/kirimase/issues)",
