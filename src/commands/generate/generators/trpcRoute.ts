@@ -20,9 +20,9 @@ export const scaffoldTRPCRoute = async (schema: Schema) => {
     prefix: "rootPath",
     removeExtension: false,
   })}/${tableNameCamelCase}.ts`;
-  createFile(path, generateRouteContent(schema));
+  await createFile(path, generateRouteContent(schema));
 
-  updateTRPCRouter(tableNameCamelCase);
+  await updateTRPCRouter(tableNameCamelCase);
 };
 
 // function updateTRPCRouterOld(routerName: string): void {
@@ -46,13 +46,13 @@ export const scaffoldTRPCRoute = async (schema: Schema) => {
 //   const beforeRouter = modifiedImportContent.slice(0, beforeRouterBlockEnd);
 //   const afterRouter = modifiedImportContent.slice(beforeRouterBlockEnd);
 //   const modifiedRouterContent = `${beforeRouter}\n  ${routerName}: ${routerName}Router,${afterRouter}`;
-//   replaceFile(filePath, modifiedRouterContent);
+//   await replaceFile(filePath, modifiedRouterContent);
 //
 //   consola.success(`Added ${routerName} router to root router successfully.`);
 // }
 
-export function updateTRPCRouter(routerName: string): void {
-  const { hasSrc, t3, rootPath } = readConfigFile();
+export async function updateTRPCRouter(routerName: string) {
+  const { t3, rootPath } = readConfigFile();
   const { trpcRootDir, rootRouterRelativePath } = getFileLocations();
   const filePath = rootPath.concat(`${trpcRootDir}${rootRouterRelativePath}`);
 
@@ -98,18 +98,19 @@ export function updateTRPCRouter(routerName: string): void {
       modifiedRouterContent = withNewImport.replace(oldRouter, newRouter);
     } else {
       // Regular multi-line router
-      const routerBlockEnd = withNewImport.indexOf("});");
+      const routerBlockEnd = withNewImport.indexOf("})");
       const beforeRouterBlockEnd = withNewImport.lastIndexOf(
         "\n",
         routerBlockEnd
       );
       const beforeRouter = withNewImport.slice(0, beforeRouterBlockEnd);
+      const hasCommaBefore = beforeRouter.endsWith(",");
       const afterRouter = withNewImport.slice(beforeRouterBlockEnd);
       const newRouterStatement = `\n  ${routerName}: ${routerName}Router,`;
-      modifiedRouterContent = `${beforeRouter}${newRouterStatement}${afterRouter}`;
+      modifiedRouterContent = `${beforeRouter}${hasCommaBefore ? "" : ","}${newRouterStatement}${afterRouter}`;
     }
 
-    replaceFile(filePath, modifiedRouterContent);
+    await replaceFile(filePath, modifiedRouterContent);
 
     // consola.success(
     //   `Added '${routerName}' router to the root tRPC router successfully.`

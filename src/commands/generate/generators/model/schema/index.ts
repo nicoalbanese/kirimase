@@ -301,7 +301,7 @@ const generateIndexFields = (
     .join("\n  ")}`;
 };
 
-const generatePrismaSchema = (
+const generatePrismaSchema = async (
   schema: Schema,
   mappings: TypeMap,
   zodSchemas: string,
@@ -333,22 +333,23 @@ const generatePrismaSchema = (
     schema.includeTimestamps ? generateTimestampFieldsPrisma() : ""
   }
 }`;
-  addToPrismaSchema(prismaSchemaContent, tableNameSingularCapitalised);
+  await addToPrismaSchema(prismaSchemaContent, tableNameSingularCapitalised);
   if (schema.belongsToUser && authSubtype === "self-hosted")
-    addToPrismaModel(
+    await addToPrismaModel(
       "User",
       `${tableNameCamelCase} ${tableNameSingularCapitalised}[]`
     );
 
-  relations.forEach((relation) => {
+  relations.forEach(async (relation) => {
     const { references } = relation;
     const { tableNameSingularCapitalised: singularCapitalised } =
       formatTableName(references);
-    addToPrismaModel(
+    await addToPrismaModel(
       singularCapitalised,
       `${tableNameCamelCase} ${tableNameSingularCapitalised}[]`
     );
   });
+
   const importStatement = generateImportStatement(
     "prisma",
     schema,
@@ -359,11 +360,11 @@ const generatePrismaSchema = (
   return `${importStatement}\n\n${zodSchemas}`;
 };
 
-export function generateModelContent(schema: Schema, dbType: DBType) {
+export async function generateModelContent(schema: Schema, dbType: DBType) {
   const { provider, orm, auth } = readConfigFile();
   const mappings = createOrmMappings()[orm][dbType];
   const zodSchemas = createZodSchemas(schema, orm);
-  if (schema.includeTimestamps) checkTimestampsInUtils();
+  if (schema.includeTimestamps) await checkTimestampsInUtils();
 
   if (orm === "drizzle") {
     return generateDrizzleSchema(
@@ -376,7 +377,7 @@ export function generateModelContent(schema: Schema, dbType: DBType) {
     );
   }
   if (orm === "prisma") {
-    return generatePrismaSchema(
+    return await generatePrismaSchema(
       schema,
       mappings,
       zodSchemas,

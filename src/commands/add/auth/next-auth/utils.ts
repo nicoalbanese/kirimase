@@ -58,7 +58,7 @@ export const AuthDriver: {
   },
 };
 
-export const checkAndAddAuthUtils = () => {
+export const checkAndAddAuthUtils = async () => {
   const { shared } = getFilePaths();
   const authUtilsPath = formatFilePath(shared.auth.authUtils, {
     removeExtension: false,
@@ -93,5 +93,5 @@ export const checkAuth = async () => {
   if (!session) redirect("/api/auth/signin");
 };
 `;
-  createFile(authUtilsPath, t3AuthUtilsContent);
+  await createFile(authUtilsPath, t3AuthUtilsContent);
 };

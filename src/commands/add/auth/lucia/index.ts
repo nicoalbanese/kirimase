@@ -56,40 +56,39 @@ export const addLucia = async () => {
   } else {
     viewsAndComponents = generateViewsAndComponents(false);
   }
-  createFile(
+  await createFile(
     formatFilePath(lucia.signInPage, {
       removeExtension: false,
       prefix: "rootPath",
     }),
     viewsAndComponents.signInPage
   );
-  createFile(
+  await createFile(
     formatFilePath(lucia.signUpPage, {
       removeExtension: false,
       prefix: "rootPath",
     }),
     viewsAndComponents.signUpPage
   );
-  createFile(
+  await createFile(
     formatFilePath(lucia.formErrorComponent, {
       removeExtension: false,
       prefix: "rootPath",
     }),
     viewsAndComponents.authFormErrorComponent
   );
-  replaceFile(
+  await replaceFile(
     formatFilePath(shared.init.dashboardRoute, {
       removeExtension: false,
       prefix: "rootPath",
     }),
     viewsAndComponents.homePage
   );
-  createFile(
+  await createFile(
     rootPath.concat("app/loading.tsx"),
     viewsAndComponents.loadingPage
   );
-
-  createFile(
+  await createFile(
     formatFilePath(lucia.signOutButtonComponent, {
       removeExtension: false,
       prefix: "rootPath",
@@ -98,7 +97,7 @@ export const addLucia = async () => {
   );
 
   // add server actions
-  createFile(
+  await createFile(
     formatFilePath(lucia.usersActions, {
       removeExtension: false,
       prefix: "rootPath",
@@ -108,7 +107,7 @@ export const addLucia = async () => {
 
   const authDirFiles = generateAuthDirFiles(orm, driver, provider);
   // create auth/utils.ts
-  createFile(
+  await createFile(
     formatFilePath(shared.auth.authUtils, {
       removeExtension: false,
       prefix: "rootPath",
@@ -117,7 +116,7 @@ export const addLucia = async () => {
   );
 
   // create auth/lucia.ts
-  createFile(
+  await createFile(
     formatFilePath(lucia.libAuthLucia, {
       removeExtension: false,
       prefix: "rootPath",
@@ -176,7 +175,7 @@ export type UsernameAndPassword = z.infer<typeof authenticationSchema>;
         /\.references\(\(\) => user\.id\)/g,
         ""
       );
-      createFile(
+      await createFile(
         formatFilePath(shared.auth.authSchema, {
           removeExtension: false,
           prefix: "rootPath",
@@ -184,7 +183,7 @@ export type UsernameAndPassword = z.infer<typeof authenticationSchema>;
         schemaWithoutReferences
       );
     } else {
-      createFile(
+      await createFile(
         formatFilePath(shared.auth.authSchema, {
           removeExtension: false,
           prefix: "rootPath",
@@ -213,7 +212,7 @@ export type UsernameAndPassword = z.infer<typeof authenticationSchema>;
     const contentsWithPool = contentsImportsUpdated.concat(
       "\nexport const pool = new Pool({ connectionString: env.DATABASE_URL });"
     );
-    replaceFile(dbTsPath, contentsWithPool);
+    await replaceFile(dbTsPath, contentsWithPool);
   }
 
   // install packages (lucia, and adapter) will have to pull in specific package
@@ -226,12 +225,12 @@ export type UsernameAndPassword = z.infer<typeof authenticationSchema>;
 
   if (t3 && orm === "drizzle") {
     // replace server/db/index.ts to have connection exported
-    updateDrizzleDbIndex(provider);
+    await updateDrizzleDbIndex(provider);
     // updates to make sure shcmea is included in dbindex  too
   }
 
   // If trpc installed, add protectedProcedure
-  updateTrpcWithSessionIfInstalled();
+  await updateTrpcWithSessionIfInstalled();
 
   // update next config mjs
   addNodeRsFlagsToNextConfig();
@@ -248,7 +247,7 @@ export type UsernameAndPassword = z.infer<typeof authenticationSchema>;
   });
 
   // add package to config
-  addPackageToConfig("lucia");
-  updateConfigFile({ auth: "lucia" });
+  await addPackageToConfig("lucia");
+  await updateConfigFile({ auth: "lucia" });
   // consola.success("Successfully installed Lucia!");
 };

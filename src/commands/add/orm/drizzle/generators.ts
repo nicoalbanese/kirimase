@@ -1,12 +1,6 @@
-import { consola } from "consola";
 import fs from "fs";
 import path from "path";
-import {
-  createFile,
-  installPackages,
-  readConfigFile,
-  replaceFile,
-} from "../../../../utils.js";
+import { createFile, readConfigFile, replaceFile } from "../../../../utils.js";
 import {
   DBProvider,
   DBType,
@@ -18,10 +12,11 @@ import {
   formatFilePath,
   getDbIndexPath,
   getFilePaths,
-  removeFileExtension,
 } from "../../../filePaths/index.js";
 import stripJsonComments from "strip-json-comments";
 import { addToInstallList } from "../../utils.js";
+import { formatFileContentWithPrettier } from "../../../init/utils.js";
+// import consola from "consola";
 
 type DBDialectType = Exclude<DBType, "pg"> | "postgresql";
 
@@ -38,13 +33,16 @@ const configDriverDialect: Record<DBProvider, DBDialectType> = {
   "better-sqlite3": "sqlite",
 };
 
-export const createDrizzleConfig = (libPath: string, provider: DBProvider) => {
+export const createDrizzleConfig = async (
+  libPath: string,
+  provider: DBProvider
+) => {
   const {
     shared: {
       init: { envMjs },
     },
   } = getFilePaths();
-  createFile(
+  await createFile(
     "drizzle.config.ts",
     `import type { Config } from "drizzle-kit";
 import { env } from "${formatFilePath(envMjs, {
@@ -68,12 +66,11 @@ export default {
   );
 };
 
-export const createIndexTs = (dbProvider: DBProvider) => {
+export const createIndexTs = async (dbProvider: DBProvider) => {
   const {
     shared: {
       init: { envMjs },
     },
-    drizzle,
   } = getFilePaths();
   const dbIndex = getDbIndexPath("drizzle");
   let indexTS = "";
@@ -224,13 +221,13 @@ export const db = drizzle(sqlite);
       break;
   }
 
-  createFile(
+  await createFile(
     formatFilePath(dbIndex, { prefix: "rootPath", removeExtension: false }),
     indexTS
   );
 };
 
-export const createMigrateTs = (
+export const createMigrateTs = async (
   libPath: string,
   dbType: DBType,
   dbProvider: DBProvider
@@ -420,13 +417,13 @@ runMigrate().catch((err) => {
   process.exit(1);
 });`;
 
-  createFile(
+  await createFile(
     formatFilePath(dbMigrate, { prefix: "rootPath", removeExtension: false }),
     template
   );
 };
 
-export const createInitSchema = (libPath?: string, dbType?: DBType) => {
+export const createInitSchema = async (libPath?: string, dbType?: DBType) => {
   const { packages, driver, rootPath } = readConfigFile();
   const {
     shared: {
@@ -514,10 +511,10 @@ export type NewComputer = z.infer<typeof insertComputerSchema>;
 export type ComputerId = z.infer<typeof computerIdSchema>["id"];`;
 
   const finalDoc = `${sharedImports}\n${initModel}\n${sharedSchemas}`;
-  createFile(path, finalDoc);
+  await createFile(path, finalDoc);
 };
 
-export const addScriptsToPackageJson = (
+export const addScriptsToPackageJson = async (
   libPath: string,
   driver: DBType,
   preferredPackageManager: PMType
@@ -549,7 +546,10 @@ export const addScriptsToPackageJson = (
   const updatedPackageJsonData = JSON.stringify(packageJson, null, 2);
 
   // Write the updated content back to package.json
-  fs.writeFileSync(packageJsonPath, updatedPackageJsonData);
+  fs.writeFileSync(
+    packageJsonPath,
+    await formatFileContentWithPrettier(updatedPackageJsonData, packageJsonPath)
+  );
 
   // consola.success("Scripts added to package.json");
 };
@@ -600,7 +600,7 @@ export const installDependencies = async (
   }
 };
 
-export const createDotEnv = (
+export const createDotEnv = async (
   orm: ORMType,
   preferredPackageManager: PMType,
   databaseUrl?: string,
@@ -618,25 +618,32 @@ export const createDotEnv = (
   const envPath = path.resolve(".env");
   const envExists = fs.existsSync(envPath);
   if (!envExists)
-    createFile(
+    await createFile(
       ".env",
       `${
         orm === "drizzle" && usingPlanetscale
           ? `# When using the PlanetScale driver with Drizzle, your connection string must end with ?ssl={"rejectUnauthorized":true} instead of ?sslaccept=strict.\n`
           : ""
-      }DATABASE_URL=${dburl}`
+      }DATABASE_URL=${dburl}`,
+      true
     );
 
   const envmjsfilePath = formatFilePath(envMjs, {
     prefix: "rootPath",
     removeExtension: false,
   });
+
   const envMjsExists = fs.existsSync(envmjsfilePath);
+
   if (!envMjsExists)
-    createFile(envmjsfilePath, generateEnvMjs(preferredPackageManager, orm));
+    await createFile(
+      envmjsfilePath,
+      generateEnvMjs(preferredPackageManager, orm),
+      false
+    );
 };
 
-export const addToDotEnv = (
+export const addToDotEnv = async (
   items: DotEnvItem[],
   rootPathOld?: string,
   excludeDbUrlIfBlank = false
@@ -647,17 +654,23 @@ export const addToDotEnv = (
       init: { envMjs },
     },
   } = getFilePaths();
+
   // handling dotenv
   const envPath = path.resolve(".env");
   const envExists = fs.existsSync(envPath);
   const newData = items.map((item) => `${item.key}=${item.value}`).join("\n");
+  let content = newData;
+
   if (envExists) {
     const envData = fs.readFileSync(envPath, "utf-8");
-    const updatedEnvData = `${envData}\n${newData}`;
-    fs.writeFileSync(envPath, updatedEnvData);
-  } else {
-    fs.writeFileSync(envPath, newData);
+    content = `${envData}\n${newData}`;
   }
+
+  fs.writeFileSync(
+    envPath,
+    await formatFileContentWithPrettier(content, envPath, true)
+  );
+
   // handling env.mjs
   const envmjsfilePath = formatFilePath(envMjs, {
     removeExtension: false,
@@ -668,10 +681,11 @@ export const addToDotEnv = (
     return;
   }
   if (!envMjsExists)
-    createFile(
+    await createFile(
       envmjsfilePath,
       generateEnvMjs(preferredPackageManager, orm, excludeDbUrlIfBlank)
     );
+
   let envmjsfileContents = fs.readFileSync(envmjsfilePath, "utf-8");
 
   const formatItemForDotEnvMjs = (item: DotEnvItem) =>
@@ -696,20 +710,33 @@ export const addToDotEnv = (
     .map(formatPublicItemForRuntimeEnv)
     .join("\n    ");
 
+  const regex = /\s*},\n\s*client:\s*{\n/;
+
+  const endofClientIndex = envmjsfileContents.match(regex);
+  const beforeClientBlockEnd = envmjsfileContents.lastIndexOf(
+    "\n",
+    endofClientIndex.index
+  );
+  const endOfClientBlock = envmjsfileContents.slice(0, beforeClientBlockEnd);
+  const hasCommaBeforeClient = endOfClientBlock.endsWith(",");
+
   // Construct the replacement string for both server and client sections
-  const replacementStr = `    ${serverItems}\n  },\n  client: {\n    ${clientItems}`;
+  const replacementStr = `${hasCommaBeforeClient ? "" : ","}\n    ${serverItems}\n  },\n  client: {\n    ${clientItems}\n`;
 
   // Replace content using the known pattern
-  const regex = /  },\n  client: {\n/s;
   envmjsfileContents = envmjsfileContents.replace(regex, replacementStr);
 
   const runtimeEnvRegex = /experimental__runtimeEnv: {\n/s;
   envmjsfileContents = envmjsfileContents.replace(
     runtimeEnvRegex,
-    `experimental__runtimeEnv: {\n    ${runtimeEnvItems}`
+    `experimental__runtimeEnv: {\n    ${runtimeEnvItems}\n`
   );
+
   // Write the updated contents back to the file
-  fs.writeFileSync(envmjsfilePath, envmjsfileContents);
+  fs.writeFileSync(
+    envmjsfilePath,
+    await formatFileContentWithPrettier(envmjsfileContents, envmjsfilePath)
+  );
 };
 
 export async function updateTsConfigTarget() {
@@ -717,7 +744,7 @@ export async function updateTsConfigTarget() {
   const tsConfigPath = path.join(process.cwd(), "tsconfig.json");
 
   // Read the file
-  fs.readFile(tsConfigPath, "utf8", (err, data) => {
+  fs.readFile(tsConfigPath, "utf8", async (err, data) => {
     if (err) {
       console.error(
         `An error occurred while reading the tsconfig.json file: ${err}`
@@ -736,14 +763,14 @@ export async function updateTsConfigTarget() {
     const updatedContent = JSON.stringify(tsConfig, null, 2); // 2 spaces indentation
 
     // Write the updated content back to the file
-    replaceFile(tsConfigPath, updatedContent);
+    await replaceFile(tsConfigPath, updatedContent);
     // consola.success(
     //   "Updated tsconfig.json target to esnext to support Drizzle-Kit."
     // );
   });
 }
 
-export function createQueriesAndMutationsFolders(
+export async function createQueriesAndMutationsFolders(
   libPath: string,
   driver: DBType
 ) {
@@ -833,14 +860,14 @@ export const deleteComputer = async (id: ComputerId) => {
     throw { error: message };
   }
 };`;
-  createFile(
+  await createFile(
     formatFilePath("lib/api/computers/queries.ts", {
       removeExtension: false,
       prefix: "rootPath",
     }),
     query
   );
-  createFile(
+  await createFile(
     formatFilePath("lib/api/computers/mutations.ts", {
       prefix: "rootPath",
       removeExtension: false,
@@ -866,20 +893,19 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
-    ${blank ? "// " : ""}DATABASE_URL: z.string().min(1),
-    
+    ${blank ? "// " : ""}DATABASE_URL: z.string().min(1)
   },
   client: {
-    // NEXT_PUBLIC_PUBLISHABLE_KEY: z.string().min(1),
+    // NEXT_PUBLIC_PUBLISHABLE_KEY: z.string().min(1)
   },
   // If you're using Next.js < 13.4.4, you'll need to specify the runtimeEnv manually
   // runtimeEnv: {
   //   DATABASE_URL: process.env.DATABASE_URL,
-  //   NEXT_PUBLIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_PUBLISHABLE_KEY,
+  //   NEXT_PUBLIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_PUBLISHABLE_KEY
   // },
   // For Next.js >= 13.4.4, you only need to destructure client variables:
   experimental__runtimeEnv: {
-    // NEXT_PUBLIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_PUBLISHABLE_KEY,
+    // NEXT_PUBLIC_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_PUBLISHABLE_KEY
   },
 });
 `;

@@ -51,19 +51,19 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
   // require trpc for these views
   if (packages.includes("shadcn-ui")) {
     // check if utils correct
-    checkUtils();
+    await checkUtils();
 
     // check if modal exists components/shared/Modal.tsx
-    checkModalExists();
+    await checkModalExists();
 
     // check if modal exists components/shared/BackButton.tsx
-    checkBackButtonExists();
+    await checkBackButtonExists();
 
     // check if vfh exists
-    checkValidatedForm();
+    await checkValidatedForm();
 
     // create view - tableName/page.tsx
-    createFile(
+    await createFile(
       formatFilePath(`app/(app)/${tableNameKebabCase}/page.tsx`, {
         prefix: "rootPath",
         removeExtension: false,
@@ -72,7 +72,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     );
 
     // create components/tableName/TableNameList.tsx
-    createFile(
+    await createFile(
       formatFilePath(
         `components/${tableNameCamelCase}/${tableNameSingularCapitalised}List.tsx`,
         { removeExtension: false, prefix: "rootPath" }
@@ -81,7 +81,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     );
 
     // create components/tableName/TableNameForm.tsx
-    createFile(
+    await createFile(
       formatFilePath(
         `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Form.tsx`,
         { prefix: "rootPath", removeExtension: false }
@@ -90,7 +90,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     );
 
     // create optimisticEntity
-    createFile(
+    await createFile(
       formatFilePath(
         `app/(app)/${tableNameKebabCase}/useOptimistic${tableNameCapitalised}.tsx`,
         {
@@ -102,7 +102,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     );
 
     // create tableName/[id]/page.tsx
-    createFile(
+    await createFile(
       formatFilePath(
         `app/(app)/${tableNameKebabCase}/[${tableNameSingular}Id]/page.tsx`,
         { removeExtension: false, prefix: "rootPath" }
@@ -118,7 +118,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
           return `${parent.tableNameKebabCase}/[${parent.tableNameSingular}Id]/`;
         })
         .join("");
-      createFile(
+      await createFile(
         formatFilePath(
           `app/(app)/${baseUrl}${tableNameKebabCase}/[${tableNameSingular}Id]/page.tsx`,
           { removeExtension: false, prefix: "rootPath" }
@@ -127,7 +127,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
       );
     }
     // create tableName/[id]/OptimisticEntity.tsx
-    createFile(
+    await createFile(
       formatFilePath(
         `app/(app)/${tableNameKebabCase}/[${tableNameSingular}Id]/Optimistic${tableNameSingularCapitalised}.tsx`,
         { removeExtension: false, prefix: "rootPath" }
@@ -157,7 +157,7 @@ export const scaffoldViewsAndComponentsWithServerActions = async (
     // await installShadcnUIComponents(baseComponents);
     addToShadcnComponentList(baseComponents);
   } else {
-    addPackage();
+    await addPackage();
   }
 };
 
@@ -1068,7 +1068,7 @@ const SaveButton = ({
 `;
 };
 
-const checkUtils = () => {
+const checkUtils = async () => {
   const utilTsPath = formatFilePath("lib/utils.ts", {
     removeExtension: false,
     prefix: "rootPath",
@@ -1085,15 +1085,13 @@ export type OptimisticAction<T> = {
   data: T;
 };
 `;
-  if (utilTsContent.includes(contentToQuery)) {
-    return;
-  } else {
-    const newUtilTs = utilTsContent.concat("\n\n".concat(contentToQuery));
-    replaceFile(utilTsPath, newUtilTs);
-  }
+  if (utilTsContent.includes(contentToQuery)) return;
+
+  const newUtilTs = utilTsContent.concat("\n\n".concat(contentToQuery));
+  await replaceFile(utilTsPath, newUtilTs);
 };
 
-const checkModalExists = () => {
+const checkModalExists = async () => {
   const modalPath = formatFilePath("components/shared/Modal.tsx", {
     removeExtension: false,
     prefix: "rootPath",
@@ -1134,11 +1132,11 @@ export default function Modal({
   );
 }
 `;
-    createFile(modalPath, modalContents);
+    await createFile(modalPath, modalContents);
   }
 };
 
-const checkBackButtonExists = () => {
+const checkBackButtonExists = async () => {
   const bbPath = formatFilePath("components/shared/BackButton.tsx", {
     removeExtension: false,
     prefix: "rootPath",
@@ -1184,7 +1182,7 @@ export function BackButton({
   );
 }
 `;
-    createFile(bbPath, bbContents);
+    await createFile(bbPath, bbContents);
   }
 };
 
@@ -1309,7 +1307,7 @@ export const useOptimistic${tableNamePluralCapitalised} = (
 `;
 };
 
-const checkValidatedForm = () => {
+const checkValidatedForm = async () => {
   const vfhPath = formatFilePath("lib/hooks/useValidatedForm.tsx", {
     prefix: "rootPath",
     removeExtension: false,
@@ -1356,8 +1354,9 @@ export function useValidatedForm<Entity>(insertEntityZodSchema: ZodSchema) {
 `;
 
   const vfhExists = existsSync(vfhPath);
+
   if (!vfhExists) {
-    createFile(vfhPath, vfhContent);
+    await createFile(vfhPath, vfhContent);
   }
 };
 

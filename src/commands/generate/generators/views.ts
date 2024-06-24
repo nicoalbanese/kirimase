@@ -1,11 +1,6 @@
 import { DBField } from "../../../types.js";
 import pluralize from "pluralize";
-import {
-  createFile,
-  getFileContents,
-  installShadcnUIComponents,
-  readConfigFile,
-} from "../../../utils.js";
+import { createFile, getFileContents, readConfigFile } from "../../../utils.js";
 import { addPackage } from "../../add/index.js";
 import { formatFilePath, getFilePaths } from "../../filePaths/index.js";
 import { Schema } from "../types.js";
@@ -28,26 +23,26 @@ export const scaffoldViewsAndComponents = async (schema: Schema) => {
   if (packages.includes("trpc") && packages.includes("shadcn-ui")) {
     // create view - tableName/page.tsx
     const rootPath = hasSrc ? "src/" : "";
-    createFile(
+    await createFile(
       rootPath.concat(`app/(app)/${tableNameKebabCase}/page.tsx`),
       generateView(schema)
     );
     // create components/tableName/TableNameList.tsx
-    createFile(
+    await createFile(
       rootPath.concat(
         `components/${tableNameCamelCase}/${tableNameSingularCapitalised}List.tsx`
       ),
       createListComponent(schema)
     );
     // create components/tableName/TableNameForm.tsx
-    createFile(
+    await createFile(
       rootPath.concat(
         `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Form.tsx`
       ),
       createFormComponent(schema)
     );
     // create components/tableName/TableNameModal.tsx
-    createFile(
+    await createFile(
       rootPath.concat(
         `components/${tableNameCamelCase}/${tableNameSingularCapitalised}Modal.tsx`
       ),

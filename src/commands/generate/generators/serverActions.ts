@@ -3,14 +3,14 @@ import { formatFilePath } from "../../filePaths/index.js";
 import { Schema } from "../types.js";
 import { formatTableName } from "../utils.js";
 
-export const scaffoldServerActions = (schema: Schema) => {
+export const scaffoldServerActions = async (schema: Schema) => {
   const { tableName } = schema;
   const { tableNameCamelCase } = formatTableName(tableName);
   const path = formatFilePath(`lib/actions/${tableNameCamelCase}.ts`, {
     prefix: "rootPath",
     removeExtension: false,
   });
-  createFile(path, generateRouteContent(schema));
+  await createFile(path, generateRouteContent(schema));
 };
 
 const generateRouteContent = (schema: Schema) => {
