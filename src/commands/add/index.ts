@@ -140,37 +140,42 @@ export const addPackage = async (
     spinner.start();
     spinner.text = "Beginning Configuration Process";
 
-    createAppLayoutFile();
-    createLandingPage();
+    if (options.headless === undefined) {
+      createAppLayoutFile();
+      createLandingPage();
+    }
 
     if (config.componentLib === undefined) {
       if (promptResponse.componentLib === "shadcn-ui") {
         spinner.text = "Configuring Shadcn-UI";
-        await installShadcnUI([]);
+        await installShadcnUI([], options);
       }
       if (promptResponse.componentLib === null) {
         // consola.info("Installing Lucide React for icons.");
-        spinner.text = "Configuring Base Styles";
-
-        addToInstallList({ regular: ["lucide-react"], dev: [] });
         // await installPackages(
         //   { regular: "lucide-react", dev: "" },
         //   config.preferredPackageManager
         // );
         // add to tailwindconfig
-        replaceFile("tailwind.config.ts", generateUpdatedTWConfig());
+        if (options.headless === undefined) {
+          spinner.text = "Configuring Base Styles";
 
-        // add to globalcss colors
-        replaceFile(
-          formatFilePath(shared.init.globalCss, {
-            removeExtension: false,
-            prefix: "rootPath",
-          }),
-          generateGlobalsCss()
-        );
+          addToInstallList({ regular: ["lucide-react"], dev: [] });
+
+          replaceFile("tailwind.config.ts", generateUpdatedTWConfig());
+          // add to globalcss colors
+          replaceFile(
+            formatFilePath(shared.init.globalCss, {
+              removeExtension: false,
+              prefix: "rootPath",
+            }),
+            generateGlobalsCss()
+          );
+        }
+
         updateConfigFile({ componentLib: null });
       }
-      if (!config.t3) {
+      if (!config.t3 && options.headless === undefined) {
         addContextProviderToAppLayout("Navbar");
       }
     }
@@ -207,46 +212,56 @@ export const addPackage = async (
           promptResponse.auth[0].toUpperCase() +
           promptResponse.orm.slice(1);
 
-      if (promptResponse.auth !== null && promptResponse.auth !== undefined)
+      if (
+        promptResponse.auth !== null &&
+        promptResponse.auth !== undefined &&
+        options.headless === undefined
+      )
         createAuthLayoutFile();
 
       if (promptResponse.auth === "next-auth")
         await addNextAuth(promptResponse.authProviders, options);
-      if (promptResponse.auth === "clerk") await addClerk();
-      if (promptResponse.auth === "lucia") await addLucia();
-      if (promptResponse.auth === "kinde") await addKinde();
+      if (promptResponse.auth === "clerk") await addClerk(options);
+      if (promptResponse.auth === "lucia") await addLucia(options);
+      if (promptResponse.auth === "kinde") await addKinde(options);
       if (promptResponse.auth === null || promptResponse.auth === undefined) {
-        replaceFile(
-          formatFilePath(shared.init.dashboardRoute, {
-            prefix: "rootPath",
-            removeExtension: false,
-          }),
-          generateGenericHomepage()
-        );
+        if (options.headless === undefined) {
+          replaceFile(
+            formatFilePath(shared.init.dashboardRoute, {
+              prefix: "rootPath",
+              removeExtension: false,
+            }),
+            generateGenericHomepage()
+          );
+        }
         updateConfigFile({ auth: null });
       } else {
         // add account page
-        await createAccountSettingsPage();
-        addAuthCheckToAppLayout();
+        if (options.headless === undefined) {
+          await createAccountSettingsPage();
+          addAuthCheckToAppLayout();
+        }
       }
-      addNavbarAndSettings();
+      if (options.headless === undefined) {
+        addNavbarAndSettings();
+      }
     }
 
     // check if misc
 
     if (promptResponse.miscPackages.includes("trpc")) {
       spinner.text = "Configuring tRPC";
-      await addTrpc();
+      await addTrpc(options);
     }
     if (promptResponse.miscPackages.includes("shadcn-ui"))
-      await installShadcnUI(promptResponse.miscPackages);
+      await installShadcnUI(promptResponse.miscPackages, options);
     if (promptResponse.miscPackages.includes("resend")) {
       spinner.text = "Configuring Resend";
-      await addResend(promptResponse.miscPackages);
+      await addResend(promptResponse.miscPackages, options);
     }
     if (promptResponse.miscPackages.includes("stripe")) {
       spinner.text = "Configuring Stripe";
-      await addStripe(promptResponse.miscPackages);
+      await addStripe(promptResponse.miscPackages, options);
     }
 
     if (config.t3 && config.auth === "next-auth") {
@@ -270,7 +285,7 @@ export const addPackage = async (
     const end = Date.now();
     const duration = end - start;
 
-    printNextSteps(promptResponse, duration);
+    printNextSteps(promptResponse, duration, options);
   } else {
     consola.warn("No config file found, initializing project...");
     initProject(options);

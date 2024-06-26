@@ -19,8 +19,9 @@ import {
   addToInstallList,
 } from "../../utils.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
+import { InitOptions } from "../../../../types.js";
 
-export const addTrpc = async () => {
+export const addTrpc = async (options?: InitOptions) => {
   const { orm } = readConfigFile();
   const { trpc } = getFilePaths();
   // 1. Create lib/server/index.ts
@@ -129,7 +130,10 @@ export const addTrpc = async () => {
 
   addPackageToConfig("trpc");
   // 9. Instruct user to add the <Provider /> to their root layout.
-  addContextProviderToAppLayout("TrpcProvider");
+  if (options.headless === undefined) {
+    addContextProviderToAppLayout("TrpcProvider");
+  } else {
+  }
   // addToDotEnv(
   //   [
   //     {

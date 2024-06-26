@@ -45,7 +45,7 @@ import {
 } from "./generators.js";
 import { addPackage } from "../../index.js";
 import { addToClerkIgnoredRoutes } from "../../auth/clerk/utils.js";
-import { AvailablePackage } from "../../../../types.js";
+import { AvailablePackage, InitOptions } from "../../../../types.js";
 import { updateTRPCRouter } from "../../../generate/generators/trpcRoute.js";
 import { createAccountPage } from "../../auth/shared/generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
@@ -53,7 +53,10 @@ import { libAuthUtilsTsWithoutAuthOptions } from "../../auth/next-auth/generator
 import { updateRootSchema } from "../../../generate/generators/model/utils.js";
 import { AuthSubTypeMapping, addToInstallList } from "../../utils.js";
 
-export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
+export const addStripe = async (
+  packagesBeingInstalled: AvailablePackage[],
+  options?: InitOptions
+) => {
   const {
     componentLib,
     preferredPackageManager,
@@ -177,22 +180,24 @@ export const addStripe = async (packagesBeingInstalled: AvailablePackage[]) => {
       generateSuccessToast()
     );
 
-  // add billingcard to accountpage with billing card TODO
-  replaceFile(
-    formatFilePath(shared.auth.accountPage, {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    createAccountPage(true)
-  );
-  // create account/billing/page.tsx
-  createFile(
-    formatFilePath(stripe.accountBillingPage, {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    generateBillingPage()
-  );
+  if (options.headless === undefined) {
+    // add billingcard to accountpage with billing card TODO
+    replaceFile(
+      formatFilePath(shared.auth.accountPage, {
+        prefix: "rootPath",
+        removeExtension: false,
+      }),
+      createAccountPage(true)
+    );
+    // create account/billing/page.tsx
+    createFile(
+      formatFilePath(stripe.accountBillingPage, {
+        prefix: "rootPath",
+        removeExtension: false,
+      }),
+      generateBillingPage()
+    );
+  }
   // create api/webhooks/route.ts
   createFile(
     formatFilePath(stripe.stripeWebhooksApiRoute, {

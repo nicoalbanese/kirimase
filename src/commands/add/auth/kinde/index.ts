@@ -17,8 +17,9 @@ import {
 } from "./generators.js";
 import { updateTrpcWithSessionIfInstalled } from "../shared/index.js";
 import { addToInstallList } from "../../utils.js";
+import { InitOptions } from "../../../../types.js";
 
-export const addKinde = async () => {
+export const addKinde = async (options: InitOptions) => {
   const { kinde, shared } = getFilePaths();
   const { preferredPackageManager } = readConfigFile();
   // add api route
@@ -46,22 +47,24 @@ export const addKinde = async () => {
     generateAuthUtils()
   );
   // update root page
-  createFile(
-    formatFilePath(shared.init.dashboardRoute, {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    generateUpdatedRootRoute()
-  );
+  if (options.headless === undefined) {
+    createFile(
+      formatFilePath(shared.init.dashboardRoute, {
+        prefix: "rootPath",
+        removeExtension: false,
+      }),
+      generateUpdatedRootRoute()
+    );
 
-  // generate sign in page
-  createFile(
-    formatFilePath(kinde.signInPage, {
-      prefix: "rootPath",
-      removeExtension: false,
-    }),
-    generateSignInPage()
-  );
+    // generate sign in page
+    createFile(
+      formatFilePath(kinde.signInPage, {
+        prefix: "rootPath",
+        removeExtension: false,
+      }),
+      generateSignInPage()
+    );
+  }
 
   // If trpc installed, add protectedProcedure
   updateTrpcWithSessionIfInstalled();
