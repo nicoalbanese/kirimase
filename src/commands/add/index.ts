@@ -152,15 +152,16 @@ export const addPackage = async (
       }
       if (promptResponse.componentLib === null) {
         // consola.info("Installing Lucide React for icons.");
-        spinner.text = "Configuring Base Styles";
-
-        addToInstallList({ regular: ["lucide-react"], dev: [] });
         // await installPackages(
         //   { regular: "lucide-react", dev: "" },
         //   config.preferredPackageManager
         // );
         // add to tailwindconfig
         if (options.headless === undefined) {
+          spinner.text = "Configuring Base Styles";
+
+          addToInstallList({ regular: ["lucide-react"], dev: [] });
+
           replaceFile("tailwind.config.ts", generateUpdatedTWConfig());
           // add to globalcss colors
           replaceFile(

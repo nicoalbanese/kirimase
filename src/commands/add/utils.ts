@@ -451,7 +451,7 @@ export const printNextSteps = (
       : []),
     ...((headless && promptResponses.miscPackages) || promptResponses.auth
       ? [
-          `**Important**: remember to add Providers for packages (where relevant ie. if you installed trpc, shadcn, or clerk) to your root layout!`,
+          `Remember to add Providers for packages (if you installed trpc, shadcn, or clerk) to your root layout!`,
         ]
       : []),
     "If you have any issues, please open an issue on GitHub\n  (https://github.com/nicoalbanese/kirimase/issues)",
