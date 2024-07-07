@@ -241,7 +241,9 @@ const generatePrismaUpdateMutation = (schema: Schema) => {
       : `${tableNameSingular}`
   });
   try {
-    const ${tableNameFirstChar} = await db.${tableNameSingular}.updateMany({ where: { id: ${tableNameSingular}Id${authForWhereClausePrisma(
+    const ${tableNameFirstChar} = await db.${tableNameSingular}.${
+      belongsToUser ? "updateMany" : "update"
+    }({ where: { id: ${tableNameSingular}Id${authForWhereClausePrisma(
       belongsToUser
     )} }, data: new${tableNameSingularCapitalised}})
     return { ${tableNameSingular}: ${tableNameFirstChar} };
@@ -264,7 +266,9 @@ const generatePrismaDeleteMutation = (schema: Schema) => {
   return `export const delete${tableNameSingularCapitalised} = async (id: ${tableNameSingularCapitalised}Id) => {${getAuth}
   const { id: ${tableNameSingular}Id } = ${tableNameSingular}IdSchema.parse({ id });
   try {
-    const ${tableNameFirstChar} = await db.${tableNameSingular}.deleteMany({ where: { id: ${tableNameSingular}Id${authForWhereClausePrisma(
+    const ${tableNameFirstChar} = await db.${tableNameSingular}.${
+    belongsToUser ? "deleteMany" : "delete"
+    }({ where: { id: ${tableNameSingular}Id${authForWhereClausePrisma(
       belongsToUser
     )} }})
     return { ${tableNameSingular}: ${tableNameFirstChar} };
