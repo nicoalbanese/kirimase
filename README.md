@@ -1,5 +1,5 @@
 > [!NOTE]  
-> Note: Kirimase is still actively maintained. However, only critical bugs are being addressed right now as we are planning a complete rewrite in the very near future!
+> Note: Only critical bugs are being addressed right now as we are planning a complete rewrite in the very near future!
 
 <p align="center">
   <picture>
