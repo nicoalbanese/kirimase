@@ -1,3 +1,6 @@
+> [!NOTE]  
+> Note: Kirimase is still actively maintained. However, only critical bugs are being addressed right now as we are planning a complete rewrite in the very near future!
+
 <p align="center">
   <picture>
   <img src="https://github.com/nicoalbanese/gifs_for_demos/blob/main/samurai-helmet.png?raw=true" width="130" alt="Logo for Kirimase">
