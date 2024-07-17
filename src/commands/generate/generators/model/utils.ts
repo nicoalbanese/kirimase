@@ -144,7 +144,7 @@ export const authForWhereClausePrisma = (belongsToUser: boolean) => {
   return belongsToUser ? ", userId: session?.user.id!" : "";
 };
 
-export const updateRootSchema = (
+export const updateRootSchema = async (
   tableName: string,
   usingAuth?: boolean,
   auth?: AuthType
@@ -164,6 +164,8 @@ export const updateRootSchema = (
     case "clerk":
       break;
     case "kinde":
+      break;
+    case "supabase":
       break;
     case "lucia":
       tableNames = "keys, users, sessions";
@@ -194,10 +196,10 @@ export const updateRootSchema = (
     const afterImport = rootSchemaWithNewExport.slice(nextLineAfterLastImport);
 
     const withNewImport = `${beforeImport}${newImportStatement}${afterImport}`;
-    replaceFile(rootSchemaPath, withNewImport);
+    await replaceFile(rootSchemaPath, withNewImport);
   } else {
     // if not create schema/_root.ts -> then do same import as above
-    createFile(
+    await createFile(
       rootSchemaPath,
       `${newImportStatement}
 
@@ -218,7 +220,7 @@ import * as extended from "~/server/db/schema/_root";`
       `{ schema }`,
       `{ schema: { ...schema, ...extended } }`
     );
-    replaceFile(indexDbPath, updatedContentsFinal);
+    await replaceFile(indexDbPath, updatedContentsFinal);
 
     // update drizzle config file to add all in server/db/*
     const drizzleConfigPath = "drizzle.config.ts";
@@ -227,6 +229,6 @@ import * as extended from "~/server/db/schema/_root";`
       `schema: "./src/server/db/schema.ts",`,
       `schema: "./src/server/db/*",`
     );
-    replaceFile(drizzleConfigPath, updatedContents);
+    await replaceFile(drizzleConfigPath, updatedContents);
   }
 };

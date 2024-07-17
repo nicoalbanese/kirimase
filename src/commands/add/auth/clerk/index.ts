@@ -6,11 +6,9 @@
 // 6. Add lib/auth/utils.ts
 // 7. install package - @clerk/nextjs
 
-import { consola } from "consola";
 import {
   addPackageToConfig,
   createFile,
-  installPackages,
   readConfigFile,
   replaceFile,
   updateConfigFile,
@@ -23,11 +21,10 @@ import {
 } from "../../utils.js";
 import { clerkGenerators } from "./generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
-import { libAuthUtilsTs } from "../next-auth/generators.js";
 import { updateTrpcWithSessionIfInstalled } from "../shared/index.js";
 
 export const addClerk = async () => {
-  const { rootPath, preferredPackageManager, componentLib } = readConfigFile();
+  const { rootPath, componentLib } = readConfigFile();
   const {
     clerk: { middleware, signInPage, signUpPage },
     shared: {
@@ -35,6 +32,7 @@ export const addClerk = async () => {
       init,
     },
   } = getFilePaths();
+
   const {
     generateAuthUtilsTs,
     generateMiddlewareTs,
@@ -42,9 +40,11 @@ export const addClerk = async () => {
     generateSignUpPageTs,
     homePageWithUserButton,
   } = clerkGenerators;
-  addContextProviderToAuthLayout("ClerkProvider");
-  addContextProviderToAppLayout("ClerkProvider");
-  addToDotEnv(
+
+  await addContextProviderToAuthLayout("ClerkProvider");
+  await addContextProviderToAppLayout("ClerkProvider");
+
+  await addToDotEnv(
     [
       { key: "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", value: "", public: true },
       { key: "CLERK_SECRET_KEY", value: "" },
@@ -55,21 +55,21 @@ export const addClerk = async () => {
     ],
     rootPath
   );
-  createFile(
+  await createFile(
     formatFilePath(middleware, { prefix: "rootPath", removeExtension: false }),
     generateMiddlewareTs()
   );
 
-  createFile(
+  await createFile(
     formatFilePath(signInPage, { removeExtension: false, prefix: "rootPath" }),
     generateSignInPageTs()
   );
-  createFile(
+  await createFile(
     formatFilePath(signUpPage, { removeExtension: false, prefix: "rootPath" }),
     generateSignUpPageTs()
   );
 
-  replaceFile(
+  await replaceFile(
     formatFilePath(init.dashboardRoute, {
       removeExtension: false,
       prefix: "rootPath",
@@ -77,7 +77,7 @@ export const addClerk = async () => {
     homePageWithUserButton(componentLib)
   );
 
-  createFile(
+  await createFile(
     formatFilePath(authUtils, {
       prefix: "rootPath",
       removeExtension: false,
@@ -86,15 +86,15 @@ export const addClerk = async () => {
   );
 
   // If trpc installed, add protectedProcedure
-  updateTrpcWithSessionIfInstalled();
+  await updateTrpcWithSessionIfInstalled();
 
   addToInstallList({ regular: ["@clerk/nextjs"], dev: [] });
   // await installPackages(
   //   { regular: "@clerk/nextjs", dev: "" },
   //   preferredPackageManager,
   // );
-  addPackageToConfig("clerk");
-  updateConfigFile({ auth: "clerk" });
+  await addPackageToConfig("clerk");
+  await updateConfigFile({ auth: "clerk" });
   // consola.success("Successfully added Clerk to your project!");
   // consola.info(
   //   "Head over to https://dashboard.clerk.com/apps/new to create a new Clerk app"

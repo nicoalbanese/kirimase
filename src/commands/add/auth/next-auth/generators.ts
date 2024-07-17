@@ -13,6 +13,7 @@ import {
   getDbIndexPath,
   getFilePaths,
 } from "../../../filePaths/index.js";
+import { formatFileContentWithPrettier } from "../../../init/utils.js";
 
 // 1. Create app/api/auth/[...nextauth].ts
 export const apiAuthNextAuthTsOld = (
@@ -512,7 +513,7 @@ export default function SignIn() {
 };
 
 // 6. updateTrpcTs
-export const updateTrpcTs = () => {
+export const updateTrpcTs = async () => {
   const { trpc } = getFilePaths();
   const filePath = formatFilePath(trpc.serverTrpc, {
     removeExtension: false,
@@ -547,14 +548,17 @@ export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
 `;
   const modifiedRouterContent = fileContent.concat(protectedProcedureContent);
 
-  fs.writeFileSync(filePath, modifiedRouterContent);
+  fs.writeFileSync(
+    filePath,
+    await formatFileContentWithPrettier(modifiedRouterContent,filePath)
+  );
 
   // consola.success(
   //   "TRPC Router updated successfully to add protectedProcedure."
   // );
 };
 
-export const enableSessionInContext = () => {
+export const enableSessionInContext = async () => {
   const { trpc } = getFilePaths();
   const filePath = formatFilePath(trpc.trpcContext, {
     prefix: "rootPath",
@@ -564,13 +568,16 @@ export const enableSessionInContext = () => {
   const fileContent = fs.readFileSync(filePath, "utf-8");
   const updatedContent = fileContent.replace(/\/\//g, "");
 
-  fs.writeFileSync(filePath, updatedContent);
+  fs.writeFileSync(
+    filePath,
+    await formatFileContentWithPrettier(updatedContent,filePath)
+  );
 
   // consola.success("TRPC Context updated successfully to add Session data.");
 };
 
 // no longer necessary
-export const enableSessionInTRPCApi_DEPRECATED = () => {
+export const enableSessionInTRPCApi_DEPRECATED = async () => {
   const { trpc } = getFilePaths();
   const filePath = formatFilePath(trpc.trpcApiTs, {
     prefix: "rootPath",
@@ -580,7 +587,10 @@ export const enableSessionInTRPCApi_DEPRECATED = () => {
   const fileContent = fs.readFileSync(filePath, "utf-8");
   const updatedContent = fileContent.replace(/\/\//g, "");
 
-  fs.writeFileSync(filePath, updatedContent);
+  fs.writeFileSync(
+    filePath,
+    await formatFileContentWithPrettier(updatedContent,filePath)
+  );
 
   // consola.success("TRPC Server API updated successfully to add Session data.");
 };

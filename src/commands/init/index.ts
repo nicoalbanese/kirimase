@@ -5,7 +5,11 @@ import { consola } from "consola";
 import { addPackage } from "../add/index.js";
 import { existsSync, readFileSync } from "fs";
 import path from "path";
-import { checkForPackageManager } from "./utils.js";
+import {
+  // checkAndCreatIfNotExistPrettierConfig,
+  checkForPackageManager,
+  createPrettierConfigFileIfNotExist,
+} from "./utils.js";
 import figlet from "figlet";
 import chalk from "chalk";
 
@@ -64,7 +68,9 @@ export async function initProject(options?: InitOptions) {
   if (tsConfigString.includes("@/*")) alias = "@";
   if (tsConfigString.includes("~/*")) alias = "~";
 
-  createConfigFile({
+  await createPrettierConfigFileIfNotExist();
+
+  await createConfigFile({
     driver: undefined,
     hasSrc: srcExists,
     provider: undefined,

@@ -6,11 +6,11 @@
 import { createFile, readConfigFile } from "../../../../utils.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
-export const addNavbarAndSettings = () => {
+export const addNavbarAndSettings = async () => {
   const { componentLib } = readConfigFile();
 
   // create navbar
-  createFile(
+  await createFile(
     formatFilePath("components/Navbar.tsx", {
       removeExtension: false,
       prefix: "rootPath",
@@ -19,7 +19,7 @@ export const addNavbarAndSettings = () => {
   );
 
   // create sidebar
-  createFile(
+  await createFile(
     formatFilePath("components/Sidebar.tsx", {
       removeExtension: false,
       prefix: "rootPath",
@@ -28,7 +28,7 @@ export const addNavbarAndSettings = () => {
   );
 
   // create sidebaritems
-  createFile(
+  await createFile(
     formatFilePath("components/SidebarItems.tsx", {
       removeExtension: false,
       prefix: "rootPath",
@@ -37,7 +37,7 @@ export const addNavbarAndSettings = () => {
   );
 
   // create sidebaritems
-  createFile(
+  await createFile(
     formatFilePath("config/nav.ts", {
       removeExtension: false,
       prefix: "rootPath",
@@ -48,7 +48,7 @@ export const addNavbarAndSettings = () => {
   // create settings page
 
   if (componentLib === "shadcn-ui")
-    createFile(
+    await createFile(
       formatFilePath("app/(app)/settings/page.tsx", {
         removeExtension: false,
         prefix: "rootPath",
