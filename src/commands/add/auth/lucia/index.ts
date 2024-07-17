@@ -207,8 +207,8 @@ export type UsernameAndPassword = z.infer<typeof authenticationSchema>;
       encoding: "utf-8",
     });
     const contentsImportsUpdated = dbTsContents.replace(
-      "{ neon, neonConfig }",
-      "{ neon, neonConfig, Pool }"
+      "{ neon, neonConfig, NeonQueryFunction }",
+      "{ neon, neonConfig, NeonQueryFunction, Pool }"
     );
     const contentsWithPool = contentsImportsUpdated.concat(
       "\nexport const pool = new Pool({ connectionString: env.DATABASE_URL });"
