@@ -110,8 +110,8 @@ import { env } from "${formatFilePath(envMjs, {
         prefix: "alias",
       })}";
 
-neonConfig.fetchConnectionCache = true;
- 
+
+
 export const sql: NeonQueryFunction<boolean, boolean> = neon(env.DATABASE_URL);
 export const db = drizzle(sql);
 `;
@@ -282,8 +282,7 @@ import { migrate } from "drizzle-orm/neon-http/migrator";
 import { neon, neonConfig, NeonQueryFunction } from '@neondatabase/serverless';
 `;
       connectionLogic = `
-neonConfig.fetchConnectionCache = true;
- 
+
 const sql: NeonQueryFunction<boolean, boolean> = neon(env.DATABASE_URL);
 const db = drizzle(sql);
 `;
