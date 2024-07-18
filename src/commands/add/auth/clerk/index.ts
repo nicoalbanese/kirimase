@@ -25,8 +25,9 @@ import { clerkGenerators } from "./generators.js";
 import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 import { libAuthUtilsTs } from "../next-auth/generators.js";
 import { updateTrpcWithSessionIfInstalled } from "../shared/index.js";
+import { InitOptions } from "../../../../types.js";
 
-export const addClerk = async () => {
+export const addClerk = async (options: InitOptions) => {
   const { rootPath, preferredPackageManager, componentLib } = readConfigFile();
   const {
     clerk: { middleware, signInPage, signUpPage },
@@ -42,8 +43,10 @@ export const addClerk = async () => {
     generateSignUpPageTs,
     homePageWithUserButton,
   } = clerkGenerators;
-  addContextProviderToAuthLayout("ClerkProvider");
-  addContextProviderToAppLayout("ClerkProvider");
+  if (options.headless === undefined) {
+    addContextProviderToAuthLayout("ClerkProvider");
+    addContextProviderToAppLayout("ClerkProvider");
+  }
   addToDotEnv(
     [
       { key: "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY", value: "", public: true },
@@ -60,22 +63,30 @@ export const addClerk = async () => {
     generateMiddlewareTs()
   );
 
-  createFile(
-    formatFilePath(signInPage, { removeExtension: false, prefix: "rootPath" }),
-    generateSignInPageTs()
-  );
-  createFile(
-    formatFilePath(signUpPage, { removeExtension: false, prefix: "rootPath" }),
-    generateSignUpPageTs()
-  );
+  if (options.headless === undefined) {
+    createFile(
+      formatFilePath(signInPage, {
+        removeExtension: false,
+        prefix: "rootPath",
+      }),
+      generateSignInPageTs()
+    );
+    createFile(
+      formatFilePath(signUpPage, {
+        removeExtension: false,
+        prefix: "rootPath",
+      }),
+      generateSignUpPageTs()
+    );
 
-  replaceFile(
-    formatFilePath(init.dashboardRoute, {
-      removeExtension: false,
-      prefix: "rootPath",
-    }),
-    homePageWithUserButton(componentLib)
-  );
+    replaceFile(
+      formatFilePath(init.dashboardRoute, {
+        removeExtension: false,
+        prefix: "rootPath",
+      }),
+      homePageWithUserButton(componentLib)
+    );
+  }
 
   createFile(
     formatFilePath(authUtils, {

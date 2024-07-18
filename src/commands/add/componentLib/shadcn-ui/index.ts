@@ -11,7 +11,7 @@ import {
   replaceFile,
   updateConfigFile,
 } from "../../../../utils.js";
-import { AvailablePackage, PMType } from "../../../../types.js";
+import { AvailablePackage, InitOptions, PMType } from "../../../../types.js";
 import {
   addContextProviderToAppLayout,
   addContextProviderToRootLayout,
@@ -24,7 +24,8 @@ import { formatFilePath, getFilePaths } from "../../../filePaths/index.js";
 
 const manualInstallShadCn = async (
   preferredPackageManager: PMType,
-  rootPath: string
+  rootPath: string,
+  options: InitOptions
 ) => {
   const {
     generateComponentsJson,
@@ -72,7 +73,9 @@ const manualInstallShadCn = async (
   // create components.json
   createFile("components.json", generateComponentsJson(rootPath));
 
-  createFile(rootPath.concat("app/loading.tsx"), generateLoadingPage());
+  if (options.headless === undefined) {
+    createFile(rootPath.concat("app/loading.tsx"), generateLoadingPage());
+  }
 
   // todo: install theme switcher
   // create theme provider
@@ -90,7 +93,8 @@ const manualInstallShadCn = async (
 };
 
 export const installShadcnUI = async (
-  packagesBeingInstalled: AvailablePackage[]
+  packagesBeingInstalled: AvailablePackage[],
+  options?: InitOptions
 ) => {
   const {
     packages: installedPackages,
@@ -114,7 +118,7 @@ export const installShadcnUI = async (
       // await execa(pmInstallCommand[preferredPackageManager], installArgs, {
       //   stdio: "inherit",
       // });
-      await manualInstallShadCn(preferredPackageManager, rootPath);
+      await manualInstallShadCn(preferredPackageManager, rootPath, options);
       // consola.success("Shadcn initialized successfully.");
       addPackageToConfig("shadcn-ui");
       updateConfigFile({ componentLib: "shadcn-ui" });
@@ -139,7 +143,9 @@ export const installShadcnUI = async (
     "dropdown-menu",
   ]);
 
-  addContextProviderToAppLayout("ShadcnToast");
+  if (options.headless === undefined) {
+    addContextProviderToAppLayout("ShadcnToast");
+  }
 
   // if (packages.includes("next-auth")) updateSignInComponentWithShadcnUI();
 };

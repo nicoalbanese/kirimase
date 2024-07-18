@@ -7,7 +7,7 @@ import { addPackage } from "./commands/add/index.js";
 import { toggleAnalytics } from "./commands/init/utils.js";
 
 const program = new Command();
-program.name("kirimase").description("Kirimase CLI").version("0.0.58");
+program.name("kirimase").description("Kirimase CLI").version("0.0.59");
 
 program
   .command("analytics")
@@ -31,6 +31,7 @@ program.parse(process.argv);
 
 function addCommonOptions(command: Command) {
   return command
+    .option("-h, --headless", "generate without any ui")
     .option("-sf, --has-src-folder", "has a src folder")
     .option(
       "-pm, --package-manager <pm>",

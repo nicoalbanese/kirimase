@@ -113,22 +113,26 @@ export const addNextAuth = async (
   // 6. If trpc installed, add protectedProcedure // this wont run because it is installed before trpc
   updateTrpcWithSessionIfInstalled();
 
-  replaceFile(
-    formatFilePath(shared.init.dashboardRoute, {
-      removeExtension: false,
-      prefix: "rootPath",
-    }),
-    generateUpdatedRootRoute()
-  );
+  if (options.headless === undefined) {
+    replaceFile(
+      formatFilePath(shared.init.dashboardRoute, {
+        removeExtension: false,
+        prefix: "rootPath",
+      }),
+      generateUpdatedRootRoute()
+    );
+  }
 
   // generate sign in page
-  createFile(
-    formatFilePath(nextAuth.signInPage, {
-      removeExtension: false,
-      prefix: "rootPath",
-    }),
-    generateSignInPage()
-  );
+  if (options.headless === undefined) {
+    createFile(
+      formatFilePath(nextAuth.signInPage, {
+        removeExtension: false,
+        prefix: "rootPath",
+      }),
+      generateSignInPage()
+    );
+  }
 
   // add to env
   addToDotEnv(
@@ -184,9 +188,11 @@ export const addNextAuth = async (
 
   addPackageToConfig("next-auth");
   updateConfigFile({ auth: "next-auth" });
-  // 9. Instruct user to add the <Provider /> to their root layout.
+  // TODO: 9. Instruct user to add the <Provider /> to their root layout.
   // addContextProviderToAuthLayout("NextAuthProvider");
-  addContextProviderToAppLayout("NextAuthProvider");
+  if (options.headless === undefined) {
+    addContextProviderToAppLayout("NextAuthProvider");
+  }
   // if (orm === "prisma") await prismaGenerate(preferredPackageManager);
   // consola.success("Successfully added Next Auth to your project!");
 };

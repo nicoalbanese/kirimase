@@ -23,8 +23,9 @@ import {
 } from "../../../filePaths/index.js";
 import { updateTrpcWithSessionIfInstalled } from "../shared/index.js";
 import { addToInstallList } from "../../utils.js";
+import { InitOptions } from "../../../../types.js";
 
-export const addLucia = async () => {
+export const addLucia = async (options: InitOptions) => {
   // get dbtype and provider
   const { orm, provider, rootPath, driver, componentLib, t3 } =
     readConfigFile();
@@ -56,37 +57,39 @@ export const addLucia = async () => {
   } else {
     viewsAndComponents = generateViewsAndComponents(false);
   }
-  createFile(
-    formatFilePath(lucia.signInPage, {
-      removeExtension: false,
-      prefix: "rootPath",
-    }),
-    viewsAndComponents.signInPage
-  );
-  createFile(
-    formatFilePath(lucia.signUpPage, {
-      removeExtension: false,
-      prefix: "rootPath",
-    }),
-    viewsAndComponents.signUpPage
-  );
+  if (options.headless === undefined) {
+    createFile(
+      formatFilePath(lucia.signInPage, {
+        removeExtension: false,
+        prefix: "rootPath",
+      }),
+      viewsAndComponents.signInPage
+    );
+    createFile(
+      formatFilePath(lucia.signUpPage, {
+        removeExtension: false,
+        prefix: "rootPath",
+      }),
+      viewsAndComponents.signUpPage
+    );
+    replaceFile(
+      formatFilePath(shared.init.dashboardRoute, {
+        removeExtension: false,
+        prefix: "rootPath",
+      }),
+      viewsAndComponents.homePage
+    );
+    createFile(
+      rootPath.concat("app/loading.tsx"),
+      viewsAndComponents.loadingPage
+    );
+  }
   createFile(
     formatFilePath(lucia.formErrorComponent, {
       removeExtension: false,
       prefix: "rootPath",
     }),
     viewsAndComponents.authFormErrorComponent
-  );
-  replaceFile(
-    formatFilePath(shared.init.dashboardRoute, {
-      removeExtension: false,
-      prefix: "rootPath",
-    }),
-    viewsAndComponents.homePage
-  );
-  createFile(
-    rootPath.concat("app/loading.tsx"),
-    viewsAndComponents.loadingPage
   );
 
   createFile(

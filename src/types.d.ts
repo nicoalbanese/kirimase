@@ -100,6 +100,7 @@ export type Config = {
 export type UpdateConfig = Partial<Config>;
 
 export type InitOptions = {
+  headless?: boolean;
   hasSrcFolder?: boolean;
   packageManager?: PMType;
   orm?: ORMType | null;
