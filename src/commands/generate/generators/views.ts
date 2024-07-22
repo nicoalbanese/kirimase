@@ -415,6 +415,13 @@ const ${tableNameSingularCapitalised}Form = ({
     },
   });
 
+  ${packages.includes("shadcn-ui") && `
+  const onError = async (action: 'create' | 'update' | 'delete', data?: { error?: string }) => {
+    if (data?.error) {
+      toast.error(data.error);
+    }
+  };
+`}
   const onSuccess = async (${
     packages.includes("shadcn-ui")
       ? 'action: "create" | "update" | "delete",\n'
