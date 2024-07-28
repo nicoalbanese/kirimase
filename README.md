@@ -155,6 +155,16 @@ Kirimase generates:
 - Scaffolds views using Shadcn-UI to enable immediate CRUD operations (including select fields for adding relations and datepickers for dates).
 - Option to use either React Hook Form with tRPC or plain React (useOptimistic and useValidated Form hooks)
 
+### Generate schemas from JSON file
+
+You can also import and generate schemas from a JSON file via the command
+
+```sh
+kirimase generate -f <path-to-schema.json>
+```
+
+More info [here](commands/generate/generate-schema-from-file.md)
+
 ## Run in non-interactive mode
 
 As of v0.0.23, you can run `kirimase init` and `kirimase add` entirely via the command line as follows:

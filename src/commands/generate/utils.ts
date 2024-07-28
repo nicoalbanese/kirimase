@@ -1,12 +1,20 @@
 import path from "path";
 import pluralize from "pluralize";
+import { z } from "zod";
 import {
   DBField,
   DBType,
   DrizzleColumnType,
   PrismaColumnType,
 } from "../../types.js";
-import { readConfigFile, replaceFile } from "../../utils.js";
+import {
+  mysqlColumns,
+  pgColumns,
+  prismaColumns,
+  readConfigFile,
+  replaceFile,
+  sqliteColumns,
+} from "../../utils.js";
 import fs, { existsSync, readFileSync } from "fs";
 import { consola } from "consola";
 import { formatFilePath, getFilePaths } from "../filePaths/index.js";
@@ -443,12 +451,20 @@ const resourceMapping: Record<TResource, string> = {
 };
 
 export const printGenerateNextSteps = (
-  schema: Schema,
+  schemas: Schema[],
   resources: TResource[]
 ) => {
   const config = readConfigFile();
-  const { tableNameNormalEnglishSingular, tableNameKebabCase } =
-    formatTableName(schema.tableName);
+  const { resourceNames, resourceEndpoints } = schemas.reduce(
+    (acc, schema) => {
+      const { tableNameNormalEnglishSingular, tableNameKebabCase } =
+        formatTableName(schema.tableName);
+      acc.resourceNames.push(tableNameNormalEnglishSingular);
+      acc.resourceEndpoints.push(tableNameKebabCase);
+      return acc;
+    },
+    { resourceNames: [], resourceEndpoints: [] }
+  );
 
   const ppm = config?.preferredPackageManager ?? "npm";
   const dbMigration = [
@@ -458,7 +474,9 @@ export const printGenerateNextSteps = (
 
   const viewInBrowser = [
     `Run \`${ppm} run dev\``,
-    `Open http://localhost:3000/${tableNameKebabCase} in your browser`,
+    `Open the following URLs in your browser:\n${resourceEndpoints
+      .map((endpoint) => `👉 http://localhost:3000/${endpoint}`)
+      .join("\n")}`,
   ];
 
   const nextStepsList = [
@@ -471,7 +489,7 @@ export const printGenerateNextSteps = (
 
   consola.box(`🎉 Success! 
 
-Kirimase generated the following resources for \`${tableNameNormalEnglishSingular}\`:
+Kirimase generated the following resources for \`${resourceNames.join(",")}\`:
 ${resources.map((r) => `- ${resourceMapping[r]}`).join("\n")}
 
 ${createNextStepsList(nextStepsList)}
@@ -480,4 +498,113 @@ ${createNotesList([
   "If you run into any issues, please create an issue on GitHub\n  (https://github.com/nicoalbanese/kirimase/issues)",
   "Documentation (https://kirimase.dev/commands/generate)",
 ])}`);
+};
+
+export const validateSchemas = (schemas: Schema[]) => {
+  const validationSchema: z.ZodSchema<any> = z.lazy(() =>
+    z.object({
+      tableName: z
+        .string()
+        .regex(
+          /^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/,
+          "Table name must be in snake_case if more than one word, and plural."
+        ),
+      fields: z.array(
+        z.object({
+          name: z
+            .string()
+            .regex(
+              /^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$/,
+              "Field name must be in snake_case if more than one word."
+            ),
+          type: z.enum([
+            ...new Set([
+              ...pgColumns,
+              ...mysqlColumns,
+              ...sqliteColumns,
+              ...prismaColumns,
+            ]),
+          ] as [string, ...string[]]),
+          notNull: z.boolean(),
+        })
+      ),
+      index: z.union([z.string(), z.null()]),
+      belongsToUser: z.boolean(),
+      includeTimestamps: z.boolean(),
+      children: z.array(validationSchema),
+    })
+  );
+
+  return validationSchema.array().parse(schemas);
+};
+
+// Pull only relevant field based on a given Zod issue path
+function getInvalidSchemaFieldFromIssuePath(path: (string | number)[]) {
+  let fieldNamePath = [];
+
+  const lastPart = path[path.length - 1];
+  const fieldProperties: (keyof DBField)[] = [
+    "name",
+    "type",
+    "references",
+    "notNull",
+    "cascade",
+  ];
+  // If the invalid field is from the "fields" property, we want to also log
+  // the "fields" property and the index.
+  // For example "fields.0.name"
+  if (
+    typeof lastPart === "string" &&
+    fieldProperties.includes(lastPart as keyof DBField)
+  ) {
+    fieldNamePath.push("fields");
+    fieldNamePath.push(path[path.length - 2]); // field property index
+  }
+  fieldNamePath.push(lastPart);
+
+  return fieldNamePath.join(".");
+}
+
+// Build schema tableName path based on a given Zod issue path
+function getSchemaTableNamePathFromIssuePath(
+  schemas: Schema[],
+  path: (string | number)[]
+) {
+  let currentSchema: Schema;
+  let currentSchemas: Schema[] = schemas;
+  let tableNamePath = [];
+
+  for (let i = 0; i < path.length; i++) {
+    const part = path[i];
+    const isIndex = !isNaN(Number(part));
+
+    if (isIndex) {
+      const index = Number(part);
+      currentSchema = currentSchemas[index];
+    } else {
+      const fieldName = part;
+      tableNamePath.push(currentSchema.tableName);
+      if (fieldName === "children") {
+        currentSchemas = currentSchema.children;
+      } else {
+        break;
+      }
+    }
+  }
+
+  return tableNamePath.join(".");
+}
+
+export const formatSchemaValidationError = (
+  error: z.ZodError,
+  schemas: Schema[]
+) => {
+  const formattedError = error.issues.map((issue) => {
+    return {
+      message: issue.message,
+      field: getInvalidSchemaFieldFromIssuePath(issue.path),
+      tableName: getSchemaTableNamePathFromIssuePath(schemas, issue.path),
+    };
+  });
+  return JSON.stringify(formattedError, null, 2);
 };

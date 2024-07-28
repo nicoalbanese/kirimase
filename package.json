@@ -33,7 +33,8 @@
     "figlet": "^1.7.0",
     "ora": "^8.0.1",
     "pluralize": "^8.0.0",
-    "strip-json-comments": "^5.0.1"
+    "strip-json-comments": "^5.0.1",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.4.5",

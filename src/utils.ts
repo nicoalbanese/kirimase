@@ -269,3 +269,50 @@ export const sendEvent = async (
     return;
   }
 };
+
+export const pgColumns = [
+  "varchar",
+  "text",
+  "number",
+  "float",
+  "boolean",
+  "references",
+  "timestamp",
+  "date",
+  // "json",
+] as const;
+
+export const mysqlColumns = [
+  "varchar",
+  "text",
+  "number",
+  "float",
+  "boolean",
+  "references",
+  "date",
+  "timestamp",
+  // "json",
+] as const;
+
+export const sqliteColumns = [
+  "string",
+  "number",
+  "boolean",
+  "date",
+  "timestamp",
+  "references",
+  // "blob",
+] as const;
+
+export const prismaColumns = [
+  "String",
+  "Boolean",
+  "Int",
+  "BigInt",
+  "Float",
+  "Decimal",
+  "Boolean",
+  "DateTime",
+  "References",
+  // "Json",
+] as const;
