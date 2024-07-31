@@ -24,7 +24,7 @@ const generateRouteContent = (schema: Schema, driver: DBType) => {
 
   const template = `import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
+import type { z } from "zod";
 
 import {
   create${tableNameSingularCapitalised},

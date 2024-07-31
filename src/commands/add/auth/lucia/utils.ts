@@ -78,7 +78,7 @@ import { sessions, users } from "../db/schema/auth";
 };
 
 export const DrizzleLuciaSchema: { [k in DBType]: string } = {
-  pg: `import { z } from "zod";  
+  pg: `import type { z } from "zod";  
 import { pgTable, timestamp, text } from "drizzle-orm/pg-core";
 
 export const users = pgTable("user", {
@@ -99,7 +99,7 @@ export const sessions = pgTable("session", {
 	}).notNull()
 });
 `,
-  mysql: `import { z } from "zod";
+  mysql: `import type { z } from "zod";
 import { mysqlTable, varchar, datetime } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("user", {
@@ -128,7 +128,7 @@ export const sessions = mysqlTable("session", {
 		.references(() => users.id),
 	expiresAt: datetime("expires_at").notNull()
 });`,
-  sqlite: `import { z } from "zod";
+  sqlite: `import type { z } from "zod";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("user", {

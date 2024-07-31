@@ -15,7 +15,7 @@ import { emailSchema } from "${formatFilePath(resend.emailUtils, {
     removeExtension: true,
   })}";
 import { useRef, useState } from "react";
-import { z } from "zod";
+import type { z } from "zod";
 
 type FormInput = z.infer<typeof emailSchema>;
 type Errors = { [K in keyof FormInput]: string[] };
@@ -220,7 +220,7 @@ export const resend = new Resend(env.RESEND_API_KEY);
 };
 
 const generateEmailUtilsTs = () => {
-  return `import { z } from "zod";
+  return `import type { z } from "zod";
 
 export const emailSchema = z.object({
   name: z.string().min(3),
