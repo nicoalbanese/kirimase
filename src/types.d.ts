@@ -1,4 +1,10 @@
 import { AuthProvider } from "./commands/add/auth/next-auth/utils.ts";
+import {
+  pgColumns,
+  mysqlColumns,
+  sqliteColumns,
+  prismaColumns,
+} from "./utils.ts";
 
 export type DBType = "pg" | "mysql" | "sqlite";
 export type DBProviderItem = {
@@ -113,6 +119,10 @@ export type InitOptions = {
   includeExample?: boolean;
 };
 
+export type GenerateOptions = {
+  fromFile?: string | null;
+};
+
 // export type BuildOptions = {
 //   resources?: ("model" | "api_route" | "trpc_route" | "views_and_components")[];
 //   table?: string;
@@ -128,48 +138,10 @@ export type ScaffoldSchema = {
   index?: string;
 };
 
-export type pgColumnType =
-  | "varchar"
-  | "text"
-  | "number"
-  | "float"
-  | "boolean"
-  | "references"
-  | "timestamp"
-  | "date";
-// | "json";
-
-export type mysqlColumnType =
-  | "varchar"
-  | "text"
-  | "number"
-  | "float"
-  | "boolean"
-  | "references"
-  | "date"
-  | "timestamp";
-// | "json";
-
-export type sqliteColumnType =
-  | "string"
-  | "number"
-  | "boolean"
-  | "date"
-  | "timestamp"
-  | "references";
-// | "blob";
-
-export type PrismaColumnType =
-  | "String"
-  | "Boolean"
-  | "Int"
-  | "BigInt"
-  | "Float"
-  | "Decimal"
-  | "Boolean"
-  | "DateTime"
-  | "References";
-// | "Json";
+export type pgColumnType = (typeof pgColumns)[number];
+export type mysqlColumnType = (typeof mysqlColumns)[number];
+export type sqliteColumnType = (typeof sqliteColumns)[number];
+export type PrismaColumnType = (typeof prismaColumns)[number];
 
 export type DotEnvItem = {
   key: string;
