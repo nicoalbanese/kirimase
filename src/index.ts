@@ -7,7 +7,7 @@ import { addPackage } from "./commands/add/index.js";
 import { toggleAnalytics } from "./commands/init/utils.js";
 
 const program = new Command();
-program.name("kirimase").description("Kirimase CLI").version("0.0.59");
+program.name("kirimase").description("Kirimase CLI").version("0.0.60");
 
 program
   .command("analytics")
