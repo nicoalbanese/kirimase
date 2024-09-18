@@ -167,7 +167,7 @@ export async function installShadcnUIComponents(
       componentsToInstall.push(component);
     }
   }
-  const baseArgs = ["shadcn-ui@latest", "add", ...componentsToInstall];
+  const baseArgs = ["shadcn@latest", "add", ...componentsToInstall];
   const installArgs =
     preferredPackageManager === "pnpm" ? ["dlx", ...baseArgs] : baseArgs;
 
