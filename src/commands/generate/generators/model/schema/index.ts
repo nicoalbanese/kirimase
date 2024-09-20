@@ -86,7 +86,7 @@ const generateImportStatement = (
       .join(", ")
       .concat(
         `, ${mappings.tableFunc}`
-      )}${schema.index ? ", uniqueIndex" : ""} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport { z } from "zod";\n${
+      )}${schema.index ? ", uniqueIndex" : ""} } from "drizzle-orm/${dbType}-core";\nimport { createInsertSchema, createSelectSchema } from "drizzle-zod";\nimport type { z } from "zod";\n${
       referenceImports.length > 0 ? referenceImports.join("\n") : ""
     }${
       belongsToUser && provider !== "planetscale" && authSubType !== "managed"
@@ -96,7 +96,7 @@ const generateImportStatement = (
           })}";`
         : ""
     }
-import { type get${tableNameCapitalised} } from "${formatFilePath(
+import type { get${tableNameCapitalised} } from "${formatFilePath(
       shared.orm.servicesDir,
       { prefix: "alias", removeExtension: false }
     )}/${tableNameCamelCase}/queries";
@@ -111,7 +111,7 @@ import { nanoid${
   }
   if (orm === "prisma")
     return `import { ${tableNameSingular}Schema } from "${alias}/zodAutoGenSchemas";
-import { z } from "zod";${
+import type { z } from "zod";${
       schema.includeTimestamps
         ? `\nimport { timestamps } from "${formatFilePath("lib/utils", {
             prefix: "alias",

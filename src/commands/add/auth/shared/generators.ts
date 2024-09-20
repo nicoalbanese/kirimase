@@ -11,7 +11,7 @@ export const createUserSettingsComponent = () => {
   return `"use client";
 import UpdateNameCard from "./UpdateNameCard";
 import UpdateEmailCard from "./UpdateEmailCard";
-import { AuthSession } from "${formatFilePath(shared.auth.authUtils, {
+import type { AuthSession } from "${formatFilePath(shared.auth.authUtils, {
     prefix: "alias",
     removeExtension: true,
   })}";
@@ -58,7 +58,7 @@ export default function UpdateNameCard({ name }: { name: string }) {
   });
 
   useEffect(() => {
-    if (state.success == true) toast.success("Updated User");
+    if (state.success === true) toast.success("Updated User");
     if (state.error) toast.error("Error", { description: state.error });
   }, [state]);
 
@@ -161,7 +161,7 @@ export default function UpdateNameCard({ name }: { name: string }) {
   });
 
   useEffect(() => {
-    if (state.success == true) alert("Updated User");
+    if (state.success === true) alert("Updated User");
     if (state.error) alert("Error");
   }, [state]);
 
@@ -288,7 +288,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
   });
 
   useEffect(() => {
-    if (state.success == true) toast.success("Updated Email");
+    if (state.success === true) toast.success("Updated Email");
     if (state.error) toast.error("Error", { description: state.error });
   }, [state]);
 
@@ -393,7 +393,7 @@ export default function UpdateEmailCard({ email }: { email: string }) {
   });
 
   useEffect(() => {
-    if (state.success == true) alert("Updated User");
+    if (state.success === true) alert("Updated User");
     if (state.error) alert("Error");
   }, [state]);
 
