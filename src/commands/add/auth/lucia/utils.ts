@@ -228,10 +228,20 @@ export const addNodeRsFlagsToNextConfig = () => {
   },
 };
 `;
-  const path = "next.config.mjs";
-  const ncExists = existsSync(path);
-  if (!ncExists) {
-    console.log("Could not find `next.config.mjs`. Please update it manually.");
+  let path = "next.config.mjs";
+  const pathTs = "next.config.ts";
+  const ncExistsMjs = existsSync(path);
+  const ncExistsTs = existsSync(pathTs);
+
+  if (!ncExistsMjs && !ncExistsTs) {
+    console.log(
+      "Could not find `next.config.mjs` or `next.config.ts`. Please update it manually."
+    );
+  } else if (!ncExistsMjs) {
+    console.log(
+      "Could not find `next.config.mjs`. Using `next.config.ts` instead."
+    );
+    path = pathTs;
   }
 
   const ncContents = readFileSync(path, "utf-8");
