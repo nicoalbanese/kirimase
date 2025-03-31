@@ -7,8 +7,8 @@
     "kirimase": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "start": "node dist/index.js"
   },
   "keywords": [
@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.8.2",
+    "tsup": "^8.4.0",
     "typescript": "^5.2.2"
   }
 }

@@ -3,13 +3,13 @@
 import { Command } from "commander";
 import { intro, outro, select, spinner, group, cancel } from "@clack/prompts";
 import { setTimeout } from "node:timers/promises";
-import { drizzle } from "./prompts/drizzle.js";
-import { prisma } from "./prompts/prisma.js";
+import { drizzle } from "@/prompts/drizzle";
+import { prisma } from "@/prompts/prisma";
 
 const program = new Command();
 
 async function init() {
-  intro("Welcome to Kirimase CLI");
+  intro("Welcome to Kirimase!");
 
   const userResults = await group(
     {
