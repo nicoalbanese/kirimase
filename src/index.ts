@@ -3,7 +3,7 @@
 import { Command } from "commander";
 import { intro, outro, select, spinner, isCancel } from "@clack/prompts";
 import { setTimeout } from "node:timers/promises";
-import { drizzlePrompts } from "@/extensions/drizzle/drizzle";
+import { drizzle } from "@/extensions/drizzle/prompts";
 import { prisma } from "@/prompts/prisma";
 import { exit } from "./utils/clack";
 import { compileTemplates } from "./utils";
@@ -22,18 +22,18 @@ export const getUserResults = async () => {
 
   isCancel(orm) && exit();
 
-  let drizzle = undefined;
+  let drizzleResults = undefined;
   let prismaResult = undefined;
 
   if (orm === "drizzle") {
-    drizzle = await drizzlePrompts();
+    drizzleResults = await drizzle();
   } else if (orm === "prisma") {
     prismaResult = await prisma();
   }
 
   return {
     orm,
-    drizzle: drizzle,
+    drizzle: drizzleResults,
     prisma: prismaResult,
   };
 };

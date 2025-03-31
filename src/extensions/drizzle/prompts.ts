@@ -2,7 +2,7 @@ import { DBType, Provider } from "@/extensions/drizzle/config";
 import { exit, TypeSelectOptions } from "@/utils/clack";
 import { group, isCancel, select } from "@clack/prompts";
 
-export const drizzlePrompts = async () => {
+export const drizzle = async () => {
   const dbType = await select<TypeSelectOptions<DBType>, DBType>({
     message: "Select your database type",
     options: [
