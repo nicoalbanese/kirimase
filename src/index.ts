@@ -1,49 +1,59 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
-import { intro, outro, select, spinner, group, cancel } from "@clack/prompts";
+import { intro, outro, select, spinner, isCancel } from "@clack/prompts";
 import { setTimeout } from "node:timers/promises";
-import { drizzle } from "@/prompts/drizzle";
+import { drizzlePrompts } from "@/extensions/drizzle/drizzle";
 import { prisma } from "@/prompts/prisma";
+import { exit } from "./utils/clack";
+import { compileTemplates } from "./utils";
 
 const program = new Command();
+
+export const getUserResults = async () => {
+  const orm = await select<any, "drizzle" | "prisma">({
+    message: "Select an ORM",
+    options: [
+      { value: "drizzle", label: "Drizzle ORM" },
+      { value: "prisma", label: "Prisma ORM" },
+    ],
+    initialValue: "drizzle",
+  });
+
+  isCancel(orm) && exit();
+
+  let drizzle = undefined;
+  let prismaResult = undefined;
+
+  if (orm === "drizzle") {
+    drizzle = await drizzlePrompts();
+  } else if (orm === "prisma") {
+    prismaResult = await prisma();
+  }
+
+  return {
+    orm,
+    drizzle: drizzle,
+    prisma: prismaResult,
+  };
+};
 
 async function init() {
   intro("Welcome to Kirimase!");
 
-  const userResults = await group(
-    {
-      orm: () =>
-        select({
-          message: "Select an ORM",
-          options: [
-            { value: "drizzle", label: "Drizzle ORM" },
-            { value: "prisma", label: "Prisma ORM" },
-          ],
-          initialValue: "drizzle",
-        }),
-      drizzle: ({ results: { orm } }) =>
-        orm === "drizzle" ? drizzle() : undefined,
-      prisma: ({ results: { orm } }) =>
-        orm === "prisma" ? prisma() : undefined,
-    },
-    {
-      onCancel: () => {
-        cancel("Initialization cancelled.");
-        process.exit(0);
-      },
-    },
-  );
+  const userResults = await getUserResults();
 
   const s = spinner();
   s.start("Creating your project");
 
   await setTimeout(2000); // Simulate work
 
+  console.log();
+  compileTemplates(userResults);
+
   s.stop("Project created successfully!");
 
   outro(`✨ Project is ready! Happy coding!`);
-  console.log(userResults);
 }
 
 async function add(packageName: string) {

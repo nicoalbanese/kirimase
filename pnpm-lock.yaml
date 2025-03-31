@@ -14,6 +14,12 @@ dependencies:
   commander:
     specifier: ^13.1.0
     version: 13.1.0
+  karozu:
+    specifier: ^0.0.6
+    version: 0.0.6
+  zod:
+    specifier: ^3.24.2
+    version: 3.24.2
 
 devDependencies:
   '@types/node':
@@ -700,6 +706,12 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
+  /karozu@0.0.6:
+    resolution: {integrity: sha512-IE2hOJm3RyqhcnbhF/09hss4q/yOom6Jliz0vd0sUjAQqBotZhXt7OSBvbUitXnrj/aqU1doUNJOVlWl0VTtSw==}
+    dependencies:
+      zod: 3.24.2
+    dev: false
+
   /lilconfig@3.1.3:
     resolution: {integrity: sha512-/vlFKAoH5Cgt3Ie+JLhRbwOsCQePABiU3tJ1egGvyQ+33R/vcwM2Zl2QR/LzjsBeItPt3oSVXapn+m4nQDvpzw==}
     engines: {node: '>=14'}
@@ -1051,3 +1063,7 @@ packages:
       string-width: 5.1.2
       strip-ansi: 7.1.0
     dev: true
+
+  /zod@3.24.2:
+    resolution: {integrity: sha512-lY7CDW43ECgW9u1TcT3IoXHflywfVqDYze4waEz812jR/bZ8FHDsl7pFQoSZTz5N+2NqRXs8GBwnAwo3ZNxqhQ==}
+    dev: false

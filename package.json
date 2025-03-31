@@ -25,7 +25,9 @@
   "dependencies": {
     "@clack/core": "^0.3.3",
     "@clack/prompts": "^0.7.0",
-    "commander": "^13.1.0"
+    "commander": "^13.1.0",
+    "karozu": "^0.0.6",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/node": "^20.8.2",
