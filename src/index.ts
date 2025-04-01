@@ -47,11 +47,11 @@ async function init() {
   s.start("Creating your project");
 
   await setTimeout(2000); // Simulate work
+  s.stop("Cooking your project!");
 
   console.log();
-  compileTemplates(userResults);
+  await compileTemplates(userResults);
 
-  s.stop("Project created successfully!");
 
   outro(`✨ Project is ready! Happy coding!`);
 }

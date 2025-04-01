@@ -25,8 +25,10 @@
   "dependencies": {
     "@clack/core": "^0.3.3",
     "@clack/prompts": "^0.7.0",
+    "chalk": "^5.4.1",
     "commander": "^13.1.0",
-    "karozu": "^0.0.6",
+    "consola": "^3.4.2",
+    "karozu": "^0.0.8",
     "zod": "^3.24.2"
   },
   "devDependencies": {
