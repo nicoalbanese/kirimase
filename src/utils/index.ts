@@ -10,6 +10,7 @@ export const compileTemplates = async (
     const compiled = drizzle.compile(templates, input.drizzle);
     for (const template of compiled.templates) {
       const proceed = await confirmOperation(template);
+      console.log(`Proceeding with ${template.path}`);
     }
   }
 };
