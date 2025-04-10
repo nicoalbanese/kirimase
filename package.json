@@ -9,7 +9,9 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "test:watch": "vitest watch"
   },
   "keywords": [
     "cli",
@@ -34,6 +36,7 @@
   "devDependencies": {
     "@types/node": "^20.8.2",
     "tsup": "^8.4.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vitest": "^3.1.1"
   }
 }
