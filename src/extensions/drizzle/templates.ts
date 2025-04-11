@@ -10,7 +10,7 @@ export const drizzleConfig = new Template(drizzle, ({ props, utilities }) => ({
   template: `import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
-  dialect: "${utilities.capitalize(props.dbType)}",
+  dialect: "${props.dbType}",
   provider: "${props.provider}",
   schema: "./src/schema.ts",
   out: "./drizzle",
