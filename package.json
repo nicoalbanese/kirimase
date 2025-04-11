@@ -31,6 +31,7 @@
     "commander": "^13.1.0",
     "consola": "^3.4.2",
     "karozu": "^0.0.8",
+    "prettier": "^3.2.5",
     "zod": "^3.24.2"
   },
   "devDependencies": {
