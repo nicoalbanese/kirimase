@@ -17,6 +17,12 @@ export const drizzle = new Extension({
   author: "@nicoalbanese10",
   props: propSchema,
   postInstallScripts: (props) => [],
+  commands: (props) => [
+    { command: "db:generate", name: `drizzle-kit generate:${props.dbType}` },
+    { command: "db:push", name: `drizzle-kit push:${props.dbType}` },
+    { command: "db:studio", name: "drizzle-kit studio" },
+    { command: "db:migrate", name: "tsx src/lib/db/migrate.ts" },
+  ],
   dependencies: (props) => ({
     default: [
       {

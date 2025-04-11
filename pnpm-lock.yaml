@@ -24,8 +24,8 @@ importers:
         specifier: ^3.4.2
         version: 3.4.2
       karozu:
-        specifier: ^0.0.8
-        version: 0.0.8
+        specifier: ^0.0.10
+        version: 0.0.10
       prettier:
         specifier: ^3.2.5
         version: 3.5.3
@@ -517,8 +517,8 @@ packages:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
 
-  karozu@0.0.8:
-    resolution: {integrity: sha512-DlxvY1pTQI+UUFA+MQPUaVtVYOhUEMyzGZR3DjAhccz2/UvxFNAfUol9M0jpOY8yxb7D0Sok3Zttk3ZQeJ1QEA==}
+  karozu@0.0.10:
+    resolution: {integrity: sha512-kjWc94oXC7SWUVWMj4jzhHsiW8Re2y/8IilnPOjkrhJxZ0tsZFFYGWOkCSXFyp4MY7LP4tnSwF98KHESRvJd3A==}
 
   lilconfig@3.1.3:
     resolution: {integrity: sha512-/vlFKAoH5Cgt3Ie+JLhRbwOsCQePABiU3tJ1egGvyQ+33R/vcwM2Zl2QR/LzjsBeItPt3oSVXapn+m4nQDvpzw==}
@@ -1223,7 +1223,7 @@ snapshots:
 
   joycon@3.1.1: {}
 
-  karozu@0.0.8:
+  karozu@0.0.10:
     dependencies:
       zod: 3.24.2
 
