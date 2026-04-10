@@ -27,6 +27,7 @@ export const AuthProviders: ProviderConfig = {
     code: `GithubProvider({
       clientId: env.GITHUB_CLIENT_ID,
       clientSecret: env.GITHUB_CLIENT_SECRET,
+      issuer: "https://github.com/login/oauth",
     })`,
     website: "https://github.com/settings/apps",
   },
